@@ -313,8 +313,8 @@ var Mold = (function(config){
 * @namespace Mold
 * @methode log
 * @desc Logs an entry
-* @param (String) type - Expects the entry type of the logmessage, predefined are "Error", "Info" and "Debug", but you can define your own if necessary
-* @param (String|Object) message  - Expects the message to be logged, if the type is "Error" the parameter expects an object with the property .code. This property contains the errorcode.
+* @param (String) type - Expects the entry type of the logmessage. Predefined values are "Error", "Info" and "Debug", but you can define your own, if necessary.
+* @param (String|Object) message  - Expects the message that will be logged, when the type is "Error" the parameter expects an object with the property "code". This property contains the errorcode.
 * @fires Mold#onlog
 **/
 		log : function(type, message){
@@ -349,15 +349,15 @@ var Mold = (function(config){
 
 /**
 * @methode addLoadingProperty
-* @desc Tells Mold.js what propertiess, of a Seed, are "loading properties", that means: this properties include a reference to other seeds. This Methods will be used to build new DNA 
-* @param (String) propertyName - The name of the property will be added, it must me a Mold.js seed chain
+* @desc Tells Mold.js which properties of a Seed are "loading properties". These properties include a reference to other seeds. This method will be used to build new DNA.
+* @param (String) propertyName - The name of the property to be added.
 **/
 		addLoadingProperty : function(propertyName){
 			Mold.cue.add("loadingproperty", propertyName, propertyName);
 		},
 /**
 * @methode getLoadingPropertys
-* @desc Returns a list with all "loading properties"
+* @desc Returns a list of all "loading properties"
 * @return (Array) - A list of all "loading properties"
 **/
 		getLoadingPropertys : function(){
@@ -366,7 +366,7 @@ var Mold = (function(config){
 /**
 * @methode getSeed
 * @desc Returns a seed specified by name
-* @param (String) - name Expects the name of the seed (seed chain)
+* @param (String) name - Expects the name of the seed (seed chain)
 * @return (Object) - The seed
 **/
 		getSeed : function(name){
@@ -396,7 +396,7 @@ var Mold = (function(config){
 		},
 /**
 * @methode createChain
-* @desc Creats a seed object chain in Mold.js scope, if an object allready exists it will not be overwritten. For not existing object an empty namespace will created.
+* @desc Creats a seed object chain in Mold.js scope. If an object allready exists it will not overwritten. For nonexistent objects an empty namespace will created.
 * @param (String) targets - Expects an String with the seed chain
 * @return (Object) - An Object with the created Chain
 **/
@@ -405,10 +405,11 @@ var Mold = (function(config){
 		},
 /**
 * @methode checkSeedCue
-* @desc Checks the seedcue to new entrys, if a new entry was found it will be added to Mold.js
+* @desc Checks the seedcue for new entrys. If a new entry was found it will be added to Mold.js
 **/
 		checkSeedCue : function(){
 			var seedCue = Mold.cue.getType("seed");
+			//console.log("seedCue", seedCue)
 			for(var seedName in seedCue){
 				Mold.addSeed(Mold.cue.get("seed", seedName));
 			}
@@ -531,7 +532,7 @@ var Mold = (function(config){
 					//console.log("cue add",seed.name, seed);
 					Mold.cue.add("seed", seed.name, seed);
 					//For NodeJS 
-					Mold.checkSeedCue();
+					//Mold.checkSeedCue();
 				}
 			}
 		},
@@ -969,6 +970,5 @@ Mold.addDNA({
 
 
 Mold.onlog(function(type, test){
-	console.log("onlog");
 	console.log(type, test);
 });

@@ -1,7 +1,10 @@
 Seed(
 	{ 
 		name : "Mold.Main",
-		dna : "action"
+		dna : "action",
+		include : [
+			"Mold.Misc.Class"
+		]
 	},
 	function(){
 		// Will be executed when Mold is ready 

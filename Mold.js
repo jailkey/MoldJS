@@ -38,13 +38,12 @@ var Mold = (function(config){
 	var _createTarget = function(targets){
 		var path = targets;
 		var chain = _getRootObject();
-		for( var i = 0; i < path.length; i++ ){
-			if( typeof chain[path[i]] === "undefined" ){
-				chain[path[i]] = {}
+		Mold.each(path, function(element){
+			if( typeof chain[element] === "undefined" ){
+				chain[element] = {}
 			}
-			chain = chain[path[i]];
-		}
-		
+			chain = chain[element];
+		});
 		return chain;
 	};
 	
@@ -56,15 +55,13 @@ var Mold = (function(config){
 		
 		var path = target.split(".");
 		var chain = _getRootObject();
-		for( var i = 0; i < path.length; i++ ){
-			
-			if( typeof chain[path[i]] === "undefined" ){
+		Mold.each(path, function(element){
+			if( typeof chain[element] === "undefined" ){
 				return false;
 			}else{
-				chain = chain[path[i]];
+				chain = chain[element];
 			}
-		}
-	
+		});	
 		return chain;
 	};
 	
@@ -79,12 +76,13 @@ var Mold = (function(config){
 	
 	var _areSeedsAdded = function(included){
 		var output = true;
-		for(var i = 0; i < included.length; i++){
-			var seedName = (included[i].indexOf("#") !== -1) ? included[i].split("#")[1] : included[i];
+		Mold.each(included, function(value){
+			var seedName = (value.indexOf("#") !== -1) ? value.split("#")[1] : value;
 			if(! _isSeedAdded(seedName)){
 				output =  false;
 			}
-		}
+		});
+
 		return output;
 	};
 	
@@ -105,13 +103,15 @@ var Mold = (function(config){
 		this.loaded = function(){
 			var newactions = [],
 				i = 0;
-			for(; i < _actions.length; i++){
-				if( typeof _actions[i] === "function" ){
-					_actions[i](name);
+
+			Mold.each(_actions, function(element){
+				if( typeof element === "function" ){
+					element(name);
 				}else{
-					newactions.push(actions[i]);
+					newactions.push(element);
 				}
-			}
+			})
+			
 			_actions = newactions;
 			_isLoaded = true;
 		}
@@ -142,7 +142,7 @@ var Mold = (function(config){
 			var output = false;
 			process.argv.forEach(function (val, index, array) {
 				if(index >= 2){
-					//console.log("mold", Mold);
+					
 					output = val;
 					//Mold.load({name : val});
 				}
@@ -153,20 +153,21 @@ var Mold = (function(config){
 				mainScript = false,
 				repositiory = false,
 				scripts = document.getElementsByTagName("script");
-				
-			for(; i < scripts.length; i++){
-				mainScript = scripts[i].getAttribute("data-mold-main");
-				
-				//
-				
-				if(mainScript){
-					_config.repositoryName  = scripts[i].getAttribute("data-mold-repository-name") || "Mold";
-					_config.externalRepository =  scripts[i].getAttribute("data-mold-external-repository");
-					_config.localRepository = scripts[i].getAttribute("data-mold-repository");
-					_config.cacheOff = (scripts[i].getAttribute("data-mold-cache") === "off") ? true : false;
-					return mainScript;
+			
+			if((mainScript = Mold.find(scripts, function(script){
+				if(script.getAttribute("data-mold-main")){
+					_config.repositoryName  = script.getAttribute("data-mold-repository-name") || "Mold";
+					_config.externalRepository =  script.getAttribute("data-mold-external-repository");
+					_config.localRepository = script.getAttribute("data-mold-repository");
+					_config.cacheOff = (script.getAttribute("data-mold-cache") === "off") ? true : false;
+					return true;
+				}else{
+					return false;
 				}
-			}
+			}))){
+				return mainScript.getAttribute("data-mold-main");
+			};
+			
 		}
 		return false;
 	}
@@ -187,6 +188,109 @@ var Mold = (function(config){
 	}
 	
 	return {
+
+/**
+* @namespace Mold
+* @methode each
+* @desc iterates through an List (Object, Array)
+* @public
+* @return (Boolean) 
+* @param (Object) collection - the list
+* @param (function) iterator - a callback function
+* @param (object) context - optional context Object
+**/
+		each : function(collection, iterator, context){
+			var i = 0,
+				len = collection.length;
+			
+			if(collection == null) { return false; }
+	
+			if(Array.prototype.forEach && collection.forEach){
+				collection.forEach(iterator, context);
+			}else if(Mold.isArray(collection)){
+	
+				 for (; i < len; i++) {
+				 	if(iterator.call(context, collection[i], i, collection) === "break") {
+				 		return true;
+				 	};
+				 }
+			}else {
+				var keys = Mold.keys(collection);
+				var len = keys.length;
+				for(; i < len; i++){
+					if(collection[keys[i]] && iterator.call(context, collection[keys[i]], keys[i], collection) === "break"){
+						return true;
+					}
+				}
+			}
+			return true;
+		},
+
+		find : function(collection, iterator, context){
+			var result;
+			Mold.some(collection, function(value, index, list) {
+				if (iterator.call(context, value, index, list)) {
+					result = value;
+					return true;
+				}
+			});
+			return result;
+		},
+
+		some : function(collection, iterator, context){
+			var result = false;
+			if (collection == null) {
+				return result;
+			}
+			if (Array.prototype.some && collection.some){
+				return collection.some(iterator, context);
+			}
+			Mold.each(collection, function(value, index, list) {
+				if (result || (result = iterator.call(context, value, index, list))) { 
+					return "break";
+				}
+			});
+
+			return result;
+		},
+
+
+/**
+* @namespace Mold
+* @methode isArray
+* @desc checks if the give value is an array
+* @public
+* @return (Boolean) 
+* @param (Object) collection - the value
+**/
+		isArray : function(collection){
+			if(Array.isArray){
+				return Array.isArray(collection);
+			}
+			if(Object.prototype.toString.call(collection) === "[object Array]"){
+				return true;
+			}
+			return false;
+		},
+/**
+* @namespace Mold
+* @methode keys
+* @desc returns an Array with the key of an object
+* @public
+* @return (Array)
+* @param (Object) collection - Expects an object 
+**/
+		keys :  function(collection){
+			if(Object.keys){
+				return Object.keys(collection);
+			}else{
+				var keys = [];
+				for(var key in collection){
+					keys.push(key);
+				}
+				return keys
+			}
+		},
 		
 		getMainScript : _getMainScript,
 /**
@@ -263,7 +367,7 @@ var Mold = (function(config){
 * @param (Mixing) value Expects the value
 **/
 			add : function(type, name, value){
-				_cue[type] = (_cue[type]) ? _cue[type] : [];
+				_cue[type] = (_cue[type]) ? _cue[type] : {};
 				_cue[type][name] = value;
 			},
 			
@@ -322,10 +426,11 @@ var Mold = (function(config){
 			var onlog = Mold.cue.getType("onlog");
 			var isAction = false;
 			
-			for(var logaction in onlog){
-				onlog[logaction](type, message);
+			Mold.each(onlog, function(logaction){
+				logaction(type, message);
 				isAction = true;
-			}
+			});
+		
 			if(isAction){
 				Mold.cue.removeType("logmessages");
 			}
@@ -409,20 +514,20 @@ var Mold = (function(config){
 **/
 		checkSeedCue : function(){
 			var seedCue = Mold.cue.getType("seed");
-			//console.log("seedCue", seedCue)
-			for(var seedName in seedCue){
-				Mold.addSeed(Mold.cue.get("seed", seedName));
-			}
+			Mold.each(seedCue, function(seed){
+				Mold.addSeed(seed);
+			});
+			
 		},
 		checkLoadedNames : function(name){
 			var seeds = Mold.cue.getType("loadedseeds");
-			for(var seed in _Mold){
-				
+			
+			Mold.each(_Mold, function(seed){
 				var seedPath = seed.substring(0, seed.lastIndexOf("."));
 				if(seed === seedPath+"."+name){
 					return seed;
 				}
-			}
+			});
 			return false;
 		},
 /**
@@ -442,29 +547,27 @@ var Mold = (function(config){
 
 			if(seed){
 				//Checks if all dependencies will be loaded
-				
 				var loadingPropertys = Mold.getLoadingPropertys();
 				var startCreating = true;
-				for(var property in  loadingPropertys){
+				Mold.each(loadingPropertys, function(property){
 					if(seed[property]){
 						if(typeof seed[property] === "object"){
 							startCreating = _areSeedsAdded(seed[property]);
 							if(!startCreating){
-								for(var i = 0; i < seed[property].length; i++){
-									if( !_Mold[seed[property][i]] ){
-										Mold.load({ name : seed[property][i], isExternal : _externalSeeds[seed.name] || false });
+								Mold.each(seed[property], function(element){
+									if( !_Mold[element] ){
+										Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false });
 									}
-								}
+								});
 							}
 						}else{
-
 							startCreating = _isSeedAdded(seed[property]);
 							if(!startCreating){
 								Mold.load({ name : seed[property]});
 							}
 						}
 					}
-				}
+				});
 				//If the seed has to wait for the DNA a callback will be added
 				if(startCreating){
 					if(typeof Mold.getDNA(seed.dna).wait === "function"){
@@ -532,7 +635,9 @@ var Mold = (function(config){
 					//console.log("cue add",seed.name, seed);
 					Mold.cue.add("seed", seed.name, seed);
 					//For NodeJS 
-					//Mold.checkSeedCue();
+					if(Mold.isNodeJs){
+						Mold.checkSeedCue();
+					}
 				}
 			}
 		},
@@ -566,8 +671,6 @@ var Mold = (function(config){
 						path += "&cachoff="+Math.random();
 					}
 				}
-				
-			
 				
 				if(_config.localRepository !== null){
 					path = _config.localRepository + path;

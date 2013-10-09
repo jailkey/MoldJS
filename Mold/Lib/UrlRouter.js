@@ -7,7 +7,7 @@ Seed({
 		]
 	},
 	function(seed){
-		var _path, _params, _hashes, _seed, _loadedSeeds = {};
+		var _path, _params, _hashes, _seed, _loadedSeeds = {}, _request = false, _response = false;
 		var _seed = seed;
 		
 		var _location =  {
@@ -23,6 +23,10 @@ Seed({
 		this.publics =  {
 			setLocation : function(location){
 				_location = location;
+			},
+			setServerParameter : function(request, response){
+				_request = request;
+				_response = response;
 			},
 			markSeedAsLoaded : function(seedName){
 				_loadedSeeds[seedName] = true;
@@ -167,7 +171,6 @@ Seed({
 			},
 			
 			loadSeed : function(route, parameter){
-				console.log("loadseed", parameter);
 				Mold.load({ name : route }).bind(function(seedName){
 					if(!that.isSeedLoaded(seedName)){
 						that.markSeedAsLoaded(seedName);
@@ -217,7 +220,7 @@ Seed({
 							}else{
 								Mold.ready(function(){
 									
-									Mold.Lib.GlobalEvents.trigger(route.replace("@", ""), { urlparameter : parameter }, { saveTrigger : true });
+									Mold.Lib.GlobalEvents.trigger(route.replace("@", ""), { urlparameter : parameter, request : _request, response : _response }, { saveTrigger : true });
 								});
 							}
 						}else if(route.substring(0,4) === "Mold"){

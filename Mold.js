@@ -200,20 +200,18 @@ var Mold = (function(config){
 * @param (object) context - optional context Object
 **/
 		each : function(collection, iterator, context){
-			var i = 0,
-				len = collection.length;
-			
+			var i = 0;
 			if(collection == null) { return false; }
 	
 			if(Array.prototype.forEach && collection.forEach){
 				collection.forEach(iterator, context);
 			}else if(Mold.isArray(collection)){
-	
-				 for (; i < len; i++) {
+				var len = collection.length;
+				for (; i < len; i++) {
 				 	if(iterator.call(context, collection[i], i, collection) === "break") {
 				 		return true;
 				 	};
-				 }
+				}
 			}else {
 				var keys = Mold.keys(collection);
 				var len = keys.length;
@@ -632,10 +630,9 @@ var Mold = (function(config){
 						
 					}
 				}else{
-					//console.log("cue add",seed.name, seed);
 					Mold.cue.add("seed", seed.name, seed);
 					//For NodeJS 
-					if(Mold.isNodeJs){
+					if(Mold.isNodeJS){
 						Mold.checkSeedCue();
 					}
 				}

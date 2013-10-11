@@ -77,7 +77,8 @@ var Mold = (function(config){
 	var _areSeedsAdded = function(included){
 		var output = true;
 		Mold.each(included, function(value){
-			var seedName = (value.indexOf("#") !== -1) ? value.split("#")[1] : value;
+			var seedName = (value.indexOf("->") !== -1) ? value.split("->")[1] : value;
+
 			if(! _isSeedAdded(seedName)){
 				output =  false;
 			}
@@ -173,7 +174,7 @@ var Mold = (function(config){
 	}
 
 	var _isExternal = function(path){
-		return (path.indexOf("#") !== -1) ? true : false;
+		return (path.indexOf("->") !== -1) ? true : false;
 	}
 	
 	if(!_isNodeJS){
@@ -266,6 +267,21 @@ var Mold = (function(config){
 				return Array.isArray(collection);
 			}
 			if(Object.prototype.toString.call(collection) === "[object Array]"){
+				return true;
+			}
+			return false;
+		},
+
+/**
+* @namespace Mold
+* @methode isNodeList
+* @desc checks if the give value is a NodeListe
+* @public
+* @return (Boolean) 
+* @param (Object) collection - the value
+**/
+		isNodeList : function(collection){
+			if(Object.prototype.toString.call(collection) === "[object NodeList]"){
 				return true;
 			}
 			return false;
@@ -548,12 +564,16 @@ var Mold = (function(config){
 				var loadingPropertys = Mold.getLoadingPropertys();
 				var startCreating = true;
 				Mold.each(loadingPropertys, function(property){
+
 					if(seed[property]){
 						if(typeof seed[property] === "object"){
 							startCreating = _areSeedsAdded(seed[property]);
+
 							if(!startCreating){
 								Mold.each(seed[property], function(element){
+
 									if( !_Mold[element] ){
+
 										Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false });
 									}
 								});
@@ -588,7 +608,7 @@ var Mold = (function(config){
 					Mold.onlog(seed.onlog);
 				}
 				
-				//console.log("startCreating", startCreating);
+				
 
 				if(startCreating){
 					
@@ -720,21 +740,24 @@ var Mold = (function(config){
 * @return (Object) A loader Object it offers a "loaded" eventlistener 
 **/
 	load : function(seed){
-
 		if(_isExternal(seed.name) || seed.isExternal){
 			var urlName = seed.name;
-			if(seed.name.indexOf("#") !== -1){
-				seedName = seed.name = seed.name.split("#")[1];
+			if(seed.name.indexOf("->") !== -1){
+				seedName = seed.name = seed.name.split("->")[1];
 			}
-			if(seed.isExternal){
-				_externalSeeds[seed.name]  = seed.isExternal;
+			if(urlName.indexOf("lib->") !== -1){
+				_externalSeeds[seed.name] = "lib";
 			}else{
-				if(urlName.indexOf("external#") !== -1){
-				
-					_externalSeeds[seed.name] = _config.externalRepository;
+				if(seed.isExternal){
+					_externalSeeds[seed.name]  = seed.isExternal;
 				}else{
-					_externalSeeds[seed.name] = urlName.split("#")[0];
+					if(urlName.indexOf("external->") !== -1){
+					
+						_externalSeeds[seed.name] = _config.externalRepository;
+					}else{
+						_externalSeeds[seed.name] = urlName.split("->")[0];
 
+					}
 				}
 			}
 			seed.isExternal = _externalSeeds[seed.name];
@@ -756,8 +779,9 @@ var Mold = (function(config){
 
 				if(_externalSeeds[seed.name]){
 					if(_externalSeeds[seed.name] === "external"){
-
 						filePath = _config.externalRepository + filePath;
+					}else if(_externalSeeds[seed.name] === "lib"){
+						filePath = seed.name;
 					}else{
 						filePath = _externalSeeds[seed.name] + filePath;
 					}
@@ -774,7 +798,11 @@ var Mold = (function(config){
 
 				Mold.loadScript(filePath, 
 					function(element){
-						Mold.cue.add("loadedseeds", seedName, true);
+						if(_externalSeeds[seed.name] === "lib"){
+							_createdMold[seedName] = seedName;
+						}else{
+							Mold.cue.add("loadedseeds", seedName, true);
+						}
 						Mold.checkSeedCue();
 					},
 					false,
@@ -913,6 +941,53 @@ var Mold = (function(config){
 			}
 			wrapperClass.prototype = targetClass.prototype;
 			return wrapperClass;
+		},
+
+		watch : function(obj, property, callback){
+
+			if(Object.prototype.watch){
+				obj.watch(property, callback);
+			}else{
+
+				var oldval = obj[property];
+				var newval = oldval;
+
+				var getter = function () {
+					return newval;
+				}
+				var setter = function (val) {
+					oldval = newval;
+					
+					return newval = callback.call(obj, property, oldval, val);
+				}
+				
+				
+				if (delete obj[property]) { 
+					Object.defineProperty(obj, property, {
+						  get: getter, 
+						  set: setter,
+						  enumerable: true,
+						  configurable: true
+					});
+				}
+			}
+		},
+
+		unwatch : function(obj, property, callback){
+			if(Object.prototype.unwatch) {
+
+			}else{
+				Object.defineProperty(obj, "unwatch", {
+					enumerable: false,
+					configurable: true,
+					writable: false,
+					value: function (prop) {
+						var val = obj[property];
+						delete obj[property];
+						obj[property] = val;
+					}
+				});
+			}
 		}
 	};
 

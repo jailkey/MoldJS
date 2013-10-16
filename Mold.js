@@ -883,6 +883,9 @@ var Mold = (function(config){
 			superClass.prototype.constructor = function() { superClass.apply(this, arguments); };
 			return subClass;
 		},
+
+
+
 /**
 * @methode mixing
 * @desc Adds Methods from one Object to another
@@ -943,6 +946,17 @@ var Mold = (function(config){
 			return wrapperClass;
 		},
 
+		clone : function(target) {
+		    if(!target || typeof(target) != 'object'){
+		        return target;
+		    }
+		    var newObj = target.constructor();
+		    Mold.each(target, function(element, key, obj){
+				newObj[key] = Mold.clone(obj[key]);
+		    });
+		    return newObj;
+		},
+
 		watch : function(obj, property, callback){
 
 			if(Object.prototype.watch){
@@ -957,7 +971,6 @@ var Mold = (function(config){
 				}
 				var setter = function (val) {
 					oldval = newval;
-					
 					return newval = callback.call(obj, property, oldval, val);
 				}
 				

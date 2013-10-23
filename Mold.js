@@ -15,6 +15,7 @@ var Mold = (function(config){
 	var _localRepository = false;
 	var _externalSeeds = {};
 	var _isDom = false;
+	var _features = {};
 	
 	try {
 		var _isNodeJS = (!!window) ? false : true ;
@@ -29,6 +30,30 @@ var Mold = (function(config){
 	var _isTitanium = (typeof Titanium !== "undefined") ? true : false;
 	var _isNodeJS = (_isTitanium) ? false : _isNodeJS;
 	
+
+	var _detectFeatures = function(){
+		var checker = false;
+		_features["history"] = !!(window.history && history.pushState);
+		_features["geolocation"] = 'geolocation' in navigator;
+		_features["indexedDB"] = !!window.indexedDB;
+		_features["postMessage"] = !!window.postMessage;
+		_features["websql"] = !!window.openDatabase;
+		_features["webGL"] =  !!window.WebGLRenderingContext;
+		_features["webworkers"] = !!window.Worker;
+		_features["applicationcache"] = !!window.applicationCache;
+		_features["canvas"] = !!((checker = document.createElement('canvas')) 
+									&& checker.getContext 
+									&& checker.getContext('2d')
+								); checker = false;
+		_features["defineProperty"] = !!Object.defineProperty;
+		_features["querySelector"] = !!document.querySelectorAll;
+		_features["querySelectorAll"] = !!document.querySelectorAll;
+		_features["sessionStorage"] = !!window.sessionStorage;
+		_features["localStorage"] = !!window.localStorage;
+	}
+
+	_detectFeatures();
+
 	var _getRootObject = function(){
 		
 		var rootObject = (_isNodeJS) ? global : (_isTitanium) ? GLOBAL : window;
@@ -155,8 +180,9 @@ var Mold = (function(config){
 				repositiory = false,
 				scripts = document.getElementsByTagName("script");
 			
+
 			if((mainScript = Mold.find(scripts, function(script){
-				if(script.getAttribute("data-mold-main")){
+				if(script.getAttribute("data-mold-main") || script.getAttribute("src").indexOf("Mold.js") > -1){
 					_config.repositoryName  = script.getAttribute("data-mold-repository-name") || "Mold";
 					_config.externalRepository =  script.getAttribute("data-mold-external-repository");
 					_config.localRepository = script.getAttribute("data-mold-repository");
@@ -256,6 +282,27 @@ var Mold = (function(config){
 
 /**
 * @namespace Mold
+* @methode keys
+* @desc returns an Array with the key of an object
+* @public
+* @return (Array)
+* @param (Object) collection - Expects an object 
+**/
+		keys :  function(collection){
+			if(Object.keys){
+				return Object.keys(collection);
+			}else{
+				var keys = [];
+				for(var key in collection){
+					keys.push(key);
+				}
+				return keys
+			}
+		},
+		
+
+/**
+* @namespace Mold
 * @methode isArray
 * @desc checks if the give value is an array
 * @public
@@ -267,6 +314,21 @@ var Mold = (function(config){
 				return Array.isArray(collection);
 			}
 			if(Object.prototype.toString.call(collection) === "[object Array]"){
+				return true;
+			}
+			return false;
+		},
+
+/**
+* @namespace Mold
+* @methode isObject
+* @desc checks if the give value is an object
+* @public
+* @return (Boolean) 
+* @param (Object) collection - the value
+**/
+		isObject : function(collection){
+			if(Object.prototype.toString.call(collection) === "[object Object]"){
 				return true;
 			}
 			return false;
@@ -286,26 +348,7 @@ var Mold = (function(config){
 			}
 			return false;
 		},
-/**
-* @namespace Mold
-* @methode keys
-* @desc returns an Array with the key of an object
-* @public
-* @return (Array)
-* @param (Object) collection - Expects an object 
-**/
-		keys :  function(collection){
-			if(Object.keys){
-				return Object.keys(collection);
-			}else{
-				var keys = [];
-				for(var key in collection){
-					keys.push(key);
-				}
-				return keys
-			}
-		},
-		
+
 		getMainScript : _getMainScript,
 /**
 * @namespace Mold
@@ -536,10 +579,11 @@ var Mold = (function(config){
 		checkLoadedNames : function(name){
 			var seeds = Mold.cue.getType("loadedseeds");
 			
-			Mold.each(_Mold, function(seed){
-				var seedPath = seed.substring(0, seed.lastIndexOf("."));
-				if(seed === seedPath+"."+name){
-					return seed;
+			Mold.each(_Mold, function(seedValue, seedName){
+				//console.log("checkLoadedNames seed->", seedName);
+				var seedPath = seedName.substring(0, seedName.lastIndexOf("."));
+				if(seedName === seedPath+"."+name){
+					return seedName;
 				}
 			});
 			return false;
@@ -815,6 +859,31 @@ var Mold = (function(config){
 		
 	},
 
+
+/**
+* @methode isSupported
+* @desc Test if the Browser has native suppport for the given property/methode
+* @param (String) name - Expects the method-/propertyname
+* @return (Boolen) - if test is successfull it returns true, else if it returns false
+**/
+	isSupported : function(name){
+		if(_features[name]){
+			return _features[name];
+		}else{
+			throw "There is no feature detection for "+name;
+		}
+	},
+
+/**
+* @methode addFeatureTest
+* @desc Test if the Browser has native suppport for the given feature
+* @param (String) name - Expects the method-/propertyname
+* @return (Boolen) - if test is successfull it returns true, else if it returns false
+**/
+	addFeatureTest : function(name, test){
+		_features[name] = test();
+	},
+
 /**
 * @methode addMethod
 * @desc Add a method to Mold.js, methodes with equal names will overwriten
@@ -988,7 +1057,7 @@ var Mold = (function(config){
 
 		unwatch : function(obj, property, callback){
 			if(Object.prototype.unwatch) {
-
+				obj.unwatch(property);
 			}else{
 				Object.defineProperty(obj, "unwatch", {
 					enumerable: false,

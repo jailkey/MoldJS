@@ -519,16 +519,36 @@ Seed({
 				if(data[element.name]){
 					if(element.type === "value"){
 						element.value = data[element.name];
+						console.log("intemplate", element.name, element.value, data, bind);
+						if(bind){
+							data.on("property.change."+element.name, function(e){
+								console.log("template property change", element.name, e.data);
+								element.value = e.data.value;
+							});
+						}
 					}
 					if(element.type === "block"){
 						if(Mold.isArray(data[element.name])){
 							var index = 0;
 							Mold.each(data[element.name], function(subElement, index){
 								element.add();
-								_addData(element.childs[index], subElement);
+								_addData(element.childs[index], subElement, bind);
 							});
 							while(data[element.name].length < element.childs.length){
 								element.remove(element.childs.length - 1)
+							}
+							if(bind){
+								data[element.name].on("list.item.add", function(e){
+									console.log("template item added", e.data)
+									element.add();
+									_addData(element.childs[e.data.index], e.data.value, bind);
+								}).on("list.item.change", function(e){
+									console.log("template list Item Change", e.data)
+									_addData(element.childs[e.data.index], e.data.value, bind)
+								}).on("list.item.remove", function(e){
+									console.log("remove", e.data.index)
+									element.remove(e.data.index);
+								});
 							}
 						}else{
 							if(!element.childsPointer[0]){

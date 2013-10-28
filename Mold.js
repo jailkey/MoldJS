@@ -1,5 +1,6 @@
 /**
  * @author Jan Kaufmann <jan@moldjs.de>
+ * @version 0.1.0;
  */
 
 if(typeof Titanium !== undefined) { var GLOBAL = this };
@@ -40,7 +41,7 @@ var Mold = (function(config){
 		_features["websql"] = !!window.openDatabase;
 		_features["webGL"] =  !!window.WebGLRenderingContext;
 		_features["webworkers"] = !!window.Worker;
-		_features["applicationcache"] = !!window.applicationCache;
+		_features["applicationCache"] = !!window.applicationCache;
 		_features["canvas"] = !!((checker = document.createElement('canvas')) 
 									&& checker.getContext 
 									&& checker.getContext('2d')
@@ -50,6 +51,7 @@ var Mold = (function(config){
 		_features["querySelectorAll"] = !!document.querySelectorAll;
 		_features["sessionStorage"] = !!window.sessionStorage;
 		_features["localStorage"] = !!window.localStorage;
+		_features["proxy"] = !!window.Proxy;
 	}
 
 	_detectFeatures();
@@ -867,10 +869,10 @@ var Mold = (function(config){
 * @return (Boolen) - if test is successfull it returns true, else if it returns false
 **/
 	isSupported : function(name){
-		if(_features[name]){
+		if(typeof _features[name] !== "undefined"){
 			return _features[name];
 		}else{
-			throw "There is no feature detection for "+name;
+			throw "There is no feature detection for '"+name+"'' implemented!";
 		}
 	},
 

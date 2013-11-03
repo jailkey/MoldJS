@@ -13,7 +13,6 @@ Seed({
 		Mold.each(_array, function(element, index){
 
 			Mold.watch(_array, index, function(property, oldValue, newValue){
-				console.log("change", property, oldValue, newValue)
 				_array.trigger("list.item.change."+property, { index : property, oldValue : oldValue, value : newValue });
 				return newValue;
 			})
@@ -29,32 +28,34 @@ Seed({
 		_array.oldConcat = _array.concat;
 
 
-		_creatListItem = function(element){
+		var _creatListItem = function(element, parent, name){
 			if(Mold.isArray(element)){
-				Mold.each(element, function(item, index){
-					Mold.watch(element, index, function(property, oldValue, newValue){
-						console.log("change", property)
-						_array.trigger("list.item.change."+property, { index : property, oldValue : oldValue, value : newValue });
-						return newValue;
-	    			});
-				});
+                var oldElement = element;
+                element = new Mold.Lib.List();
 			}else if(Mold.isObject(element)){
-				Mold.mixing(element, new Mold.Lib.Event(element));
+                Mold.each(element, function(subelement, index, value){
+                    _creatListItem(subelement, element, index);
+                })
+			
 			}
 
 			Mold.watch(_array, _array.length -1, function(property, oldValue, newValue){
-				console.log("change", property)
 				_creatListItem(newValue);
-				_array.trigger("list.item.change."+property, { list: _array, index : property, oldValue : oldValue, value : newValue });
+
+                _array.trigger("list.item.change", { list: _array, index : property, oldValue : oldValue, value : newValue, list : _array });
+				_array.trigger("list.item.change."+property, { list: _array, index : property, oldValue : oldValue, value : newValue, list : _array });
 				return newValue;
 			});
+            return element;
 		}
 
+
 		_array.push = function() {
+            
     		Mold.each(arguments, function(element){
     			_array.oldPush(element);
-    			_creatListItem(element);
-    			_array.trigger("list.item.add", { length : _array.length, index : _array.length -1, value : element});
+    			element = _creatListItem(element);
+    			_array.trigger("list.item.add", { length : _array.length, index : _array.length -1, value : element, list : _array});
     			
     		});
     	};

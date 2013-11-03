@@ -370,6 +370,8 @@ var Mold = (function(config){
 		ready : function(callback){
 			_ready(callback);
 		},
+
+		startime : new Date().getTime(),
 /**
 * @namespace Mold
 * @callback readyCallback

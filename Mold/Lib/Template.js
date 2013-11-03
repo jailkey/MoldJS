@@ -79,16 +79,20 @@ Seed({
 			return _buildTree()
 		}
 
+		var _containsCache = {}
 		var _containsVar = function(textString){
+			if(_containsCache[textString] != null){
+				return _containsCache[textString];
+			}
 			if(textString){
 				var result = textString.match(/\{\{(.*?)\}\}/gm);
 				
 				if(result && result[0]){
-				
-					return result[0].replace("{{","").replace("}}", "");
+					
+					return _containsCache[textString] = result[0].replace("{{","").replace("}}", "");
 				}
 			}
-			return false;
+			return _containsCache[textString] = false;
 		}
 
 		var _trim = function(phrase){
@@ -97,14 +101,19 @@ Seed({
 			return phrase;
 		}
 
-		var _isVar = function(phrase){
-			
-			var firstChar = phrase.substring(0,1);
-			if( firstChar !== "#" && firstChar !== "$" && firstChar != "^" && firstChar != "/" && firstChar != ""){
-				return true;
-			}
 
-			return false;
+		var _isVarCache = {}
+		var _isVar = function(phrase){
+			if(!(cache = _isVarCache[phrase])){
+				var firstChar = phrase.substring(0,1);
+				if( firstChar !== "#" && firstChar !== "$" && firstChar != "^" && firstChar != "/" && firstChar != ""){
+					return _isVarCache[phrase] = true;
+				}
+
+				return _isVarCache[phrase] = false;
+			}else{
+				return cache;
+			}
 		}
 
 		var _isBlock = function(phrase){
@@ -235,10 +244,17 @@ Seed({
 
 		}
 
-
+		var _blockStringContentCache = {}
 		var _getBlockStringContent = function(blockname, content){
-			var regExp = new RegExp('\\{\\{#'+blockname+'\\}\\}([\\s\\S]*)\\{\\{\\/'+blockname+'\\}\\}', 'gmi');
-			var result = regExp.exec(content);
+			var result = false;
+			if(!(result = _blockStringContentCache[blockname+content])){
+				var regExp = new RegExp('\\{\\{#'+blockname+'\\}\\}([\\s\\S]*)\\{\\{\\/'+blockname+'\\}\\}', 'gmi');
+				result = regExp.exec(content);
+				_blockStringContentCache[blockname+content] = result;
+			}else{
+				console.log("from blockstingocnect")
+			}
+		
 			return result[1];
 		}
 
@@ -246,11 +262,23 @@ Seed({
 			return content.substring(content.lastIndexOf(beginn), content.lastIndexOf(end));
 		}
 
+		var _cachenContentPartsResults = {}
 		var _parseStingContent = function(content, data){
 			var output = "";
-			var result = content.split(/(\{\{.*?\}\})/gm);
+			var result = "";
+			var cache = false;
+			if(!(cache = _cachenContentPartsResults[content])){
+				result = content.split(/(\{\{.*?\}\})/gm);
+				_cachenContentPartsResults[content] = { result : result };
+			}else{
+				result = cache.result; 
+			}
+				
+
 			var ignore = false;
-			Mold.each(result, function(entry){
+			var i =0; len = result.length;
+			for(; i < len; i++){
+				var entry = result[i];
 				if((varName = _containsVar(entry))){
 					var plainName = varName.replace(/[#|^|\/]/, "");
 					if(!ignore){
@@ -279,7 +307,7 @@ Seed({
 						output += entry;
 					}
 				}
-			})
+			}
 			return output;
 		}
 
@@ -493,16 +521,30 @@ Seed({
 					break;
 			}
 			if(node.hasChildNodes && node.hasChildNodes()){
-			 	Mold.each(node.childNodes, function(subnode){
-			 			var searchResult= _searchElements(subnode, parent, tree);
-						tree = searchResult[0];
-						parent = searchResult[1];
-			 	});
+				var nodeLen = node.childNodes.length,
+					i =0,
+					subnode = false,
+					attributeLen = node.attributes.length;
+				for(; i < nodeLen; i++){
+					subnode = node.childNodes[i];
+					var searchResult= _searchElements(subnode, parent, tree);
+					tree = searchResult[0];
+					parent = searchResult[1];
+				}
+				i = 0;
+				for(; i < attributeLen; i++){
+					subnode = node.attributes[i];
+					var searchResult= _searchElements(subnode, parent, tree);
+					tree = searchResult[0];
+					parent = searchResult[1];
+				/*
 			 	Mold.each(node.attributes, function(subnode){
 			 		var searchResult= _searchElements(subnode, parent, tree);
 					tree = searchResult[0];
 					parent = searchResult[1];
 			 	})
+				*/
+				}
 			}
 			return [tree, parent];
 		}
@@ -519,10 +561,10 @@ Seed({
 				if(data[element.name]){
 					if(element.type === "value"){
 						element.value = data[element.name];
-						console.log("intemplate", element.name, element.value, data, bind);
 						if(bind){
+
 							data.on("property.change."+element.name, function(e){
-								console.log("template property change", element.name, e.data);
+								//console.log("template property change", element.name, e.data);
 								element.value = e.data.value;
 							});
 						}
@@ -539,11 +581,11 @@ Seed({
 							}
 							if(bind){
 								data[element.name].on("list.item.add", function(e){
-									console.log("template item added", e.data)
+								//	console.log("template item added", e.data)
 									element.add();
 									_addData(element.childs[e.data.index], e.data.value, bind);
 								}).on("list.item.change", function(e){
-									console.log("template list Item Change", e.data)
+									//console.log("template list Item Change", e.data)
 									_addData(element.childs[e.data.index], e.data.value, bind)
 								}).on("list.item.remove", function(e){
 									console.log("remove", e.data.index)

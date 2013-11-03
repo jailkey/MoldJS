@@ -9,6 +9,7 @@ Seed (
 	function(){
 		var _elementList = [];
 		var _savedTrigger = [];
+		var _referenzList = {};
 		return {
 			addElementEvent : function(element, event, value){
 			//	Mold.cue.add("registerdEventObjects", "event-"+Mold.getId(), element);
@@ -19,6 +20,9 @@ Seed (
 						events : []
 					});
 					item = _elementList[_elementList.length -1];
+					if(element._eid){
+						_referenzList[element._eid] = item;
+					}
 					
 				}
 				item.events[event] = item.events[event] || [];
@@ -55,9 +59,14 @@ Seed (
 				return false;
 			},
 			getElement : function(element){
-				for(var selected in _elementList){
-					if(_elementList[selected].element === element){
-						return _elementList[selected];
+				if(element._eid){
+					return _referenzList[element._eid]; 
+				}
+				var i = 0, len =_elementList.length;
+				for(; i < len; i++){
+				
+					if(_elementList[i].element === element){
+						return _elementList[i];
 					}
 				}
 				return false;

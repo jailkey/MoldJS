@@ -1,5 +1,5 @@
 describe("Mold.Lib.List Tests", function () {
-	describe("Load and create List, Test Listmthodes", function(){
+	describe("Load and create List, Test Listmethodes", function(){
 		
 		var flag = false;
 		var isMoldReady = false;
@@ -177,9 +177,23 @@ describe("Mold.Lib.List Tests", function () {
 			testList.splice(3, 2, "insert");
 
 			waitsFor(function(e) {	
+				testList.off("list.item.remove");
 				return addResult;
 			}, "second list.add.add Event fired", 750);
 
+		});
+
+		it("Test List in List", function(){
+			var result = "";
+
+			testList.push({
+				"item" : "test",
+				"submlist" : [
+					{ "subitem" : "value"}
+				]
+			})
+
+			//console.log("-->", testList);
 		});
 
 		

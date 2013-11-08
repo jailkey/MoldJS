@@ -263,18 +263,19 @@ Seed({
 		}
 
 		var _cachenContentPartsResults = {}
-		var _parseStingContent = function(content, data){
-			var output = "";
-			var result = "";
-			var cache = false;
+		var _parseStringContent = function(content, data){
+
+			var output = "",
+				result = "",
+				cache = false;
+
 			if(!(cache = _cachenContentPartsResults[content])){
 				result = content.split(/(\{\{.*?\}\})/gm);
 				_cachenContentPartsResults[content] = { result : result };
+			
 			}else{
 				result = cache.result; 
 			}
-				
-
 			var ignore = false;
 			var i =0; len = result.length;
 			for(; i < len; i++){
@@ -293,7 +294,7 @@ Seed({
 								ignore = true;
 								Mold.each(data[plainName].childs, function(childElements){
 									var subContent = _getSubContent(content, "{{#"+plainName+"}}", "{{/"+plainName+"}}");
-									output += _parseStingContent(subContent, childElements)
+									output += _parseStringContent(subContent, childElements)
 								});
 							}
 						}
@@ -336,14 +337,14 @@ Seed({
 							_value : varName,
 							value : varName
 						}
-
 						Object.defineProperty(entryProperies, "value", {
 							get: function(){
 								return this._value;
 							}, 
 							set: function(value){
 								this._value = value;
-								var newContent = _parseStingContent(this.stringContent, this.mainTree)
+								
+								var newContent = _parseStringContent(this.stringContent, this.mainTree)
 								this.parentElement.nodeValue = newContent;
 								return this._value;
 							},
@@ -430,7 +431,7 @@ Seed({
 								element : node,
 								type : "value"
 							}
-
+							
 							Object.defineProperty(entryProperies, "value", {
 								get: function(){
 									return this.element.nodeValue;
@@ -520,31 +521,42 @@ Seed({
 				default:
 					break;
 			}
-			if(node.hasChildNodes && node.hasChildNodes()){
+
+			if(node.hasChildNodes && node.hasChildNodes() && node.nodeType != 2){
+
 				var nodeLen = node.childNodes.length,
 					i =0,
 					subnode = false,
-					attributeLen = node.attributes.length;
+					attributeLen = (node.attributes) ? node.attributes.length : 0;
+
 				for(; i < nodeLen; i++){
+
 					subnode = node.childNodes[i];
 					var searchResult= _searchElements(subnode, parent, tree);
 					tree = searchResult[0];
 					parent = searchResult[1];
 				}
+
 				i = 0;
+				
 				for(; i < attributeLen; i++){
 					subnode = node.attributes[i];
 					var searchResult= _searchElements(subnode, parent, tree);
 					tree = searchResult[0];
 					parent = searchResult[1];
+				}
+				
 				/*
 			 	Mold.each(node.attributes, function(subnode){
+			 
 			 		var searchResult= _searchElements(subnode, parent, tree);
 					tree = searchResult[0];
 					parent = searchResult[1];
+					
 			 	})
-				*/
-				}
+			 	*/
+				
+				
 			}
 			return [tree, parent];
 		}
@@ -560,11 +572,12 @@ Seed({
 			Mold.each(template, function(element){
 				if(data[element.name]){
 					if(element.type === "value"){
+
 						element.value = data[element.name];
 						if(bind){
 
 							data.on("property.change."+element.name, function(e){
-								//console.log("template property change", element.name, e.data);
+								//console.log("change")
 								element.value = e.data.value;
 							});
 						}
@@ -576,8 +589,9 @@ Seed({
 								element.add();
 								_addData(element.childs[index], subElement, bind);
 							});
-							while(data[element.name].length < element.childs.length){
-								element.remove(element.childs.length - 1)
+							
+							while(data[element.name].length < element.childsPointer.length){
+								element.remove(element.childsPointer.length - 1)
 							}
 							if(bind){
 								data[element.name].on("list.item.add", function(e){
@@ -588,7 +602,7 @@ Seed({
 									//console.log("template list Item Change", e.data)
 									_addData(element.childs[e.data.index], e.data.value, bind)
 								}).on("list.item.remove", function(e){
-									console.log("remove", e.data.index)
+									//console.log("remove", e.data.index)
 									element.remove(e.data.index);
 								});
 							}
@@ -631,11 +645,11 @@ Seed({
 				_addData(_compiledTemplate, model.data, true);	
 				return that;
 			},
-			append : function(data){
+			append : function(model){
 				if(!_compiledTemplate){
 					throw "Tempate not compiled!";
 				}
-				_addData(_compiledTemplate, data);
+				_addData(_compiledTemplate, model.data, false);	
 			},
 			tree : function(){
 				return _compiledTemplate;

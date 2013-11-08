@@ -55,28 +55,23 @@ Seed({
 
 		var _createList = function(element, name, data){
 			_notValid(element, data[name], "list");
+
 			if(data[name] && data[name][0]){
 				var listValue = data[name];
 			}
 			
 			data[name] = new Mold.Lib.List();
 			data[name].on("list.item.add", function(e){
-				//console.log("e", e.data)
-	
+
 				if(Mold.isObject(e.data.value)){
 					 _createListItem(element[0], e.data.index, e.data.value, e.data.list);
 				}else{
 					_createModel(element[0], e.data.value);
 				}
-				//_createItem(element, e.data.index, e.data.value, handleAsObject)
-				
-				
-				//that.trigger("change", { property: name, oldValue :  e.data.oldValue, value : e.data.value, index: e.data.index, data : _data, action : "add" });
-			
 			}).on("list.item.remove", function(e){
-				console.log("list item remove")
-				that.trigger("change", { property: name, oldValue :  e.data.oldValue, value : e.data.value, index: e.data.index, action : "remove" });
+				
 			}).on("list.item.change", function(e){
+
 				if(Mold.isObject(e.data.value) && !Mold.isArray(e.data.value)){
 					 _createListItem(element[0], e.data.index, e.data.value, e.data.list, true);
 				}else{
@@ -128,6 +123,7 @@ Seed({
 		}
 
 		var _createItem = function(element, name, data){
+
 			if(Mold.isArray(element)){
 				data = _createList(element, name, data);
 			}else if(Mold.isObject(element)){
@@ -139,25 +135,24 @@ Seed({
 		}
 
 		var _createModel = function(model, data){
-			Mold.each(model, function(element, name){
+			var name = "", element ="";
+			for(name in model){
+				element = model[name];
 				data = _createItem(element, name, data);
-			});
+			}
 		}
 
 
 		var _notValid = function(model, value, type){
 			var output = false;
 			if(_isValidation){
-				//console.log("validate-|", type, model, value);
 				switch(type){
-
 					case "property" :
 						var valids = model.split("|");
 						Mold.each(valids, function(validation){
 							var validate = Mold.Lib.Validation.get(validation);
 							if(validate){
 								if(!validate(value)){
-									//console.log("not valid", validation)
 									output =  validation;
 
 								}
@@ -176,16 +171,48 @@ Seed({
 		
 		_createModel(_propertys, _data);
 		
-	
+		var _update = function(model, data){
+			Mold.each(data, function(element, name){
+				if(Mold.isObject(element) || Mold.isArray(element) ){
+					_update(model[name], element);
+				}else{
+					if(model[name] &&  model[name] !== element){
+				
+						model[name] = element;
+					}
+				}
+			});
+		} 
 
 		this.publics = {
 			data : _data,
 			validation : function(state){
 				_isValidation = state;
 			},
+			isValid : function(){
+
+			},
 			save : function(){
 
+			},
+			load : function(){
+
+			},
+			bind : function(model){
+				
+			},
+			update : function(newData){
+				_update(_data, newData);
+			},
+			json : function(){
+				return JSON.stringify(model.data, function(key, value){
+					if(key == "_eid"){
+						return undefined;
+					}
+					return value;
+				})
 			}
+
 		}
 	}
 )

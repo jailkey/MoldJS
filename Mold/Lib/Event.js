@@ -74,8 +74,9 @@
 		}
 		
 		var _firedActions = {};
-		
+		var _eid = Mold.getId();
 		this.publics = {
+			_eid : _eid,
 			when : function(event, callback){
 				var executeOn  = function(callback){
 					_firedActions[event] = _firedActions[event] || {};
@@ -168,7 +169,7 @@
 					_element.removeEventListener(_getEventName(event), callback);
 				}
 				if(event && callback){
-					Mold.Lib.EventStore.removeElementEvent(_element,  event, callback);
+					Mold.Lib.EventStore.removeElementEvent(_element, event, callback);
 				}else{
 					Mold.Lib.EventStore.removeEvents(_element);
 				}
@@ -176,6 +177,7 @@
 				return _element;
 			},
 			trigger : function(event, data, config){
+				var output = false;
 				if(!data || !data.id || data.id !== "event"){
 					var eventData = {
 						data : data || false,
@@ -198,23 +200,21 @@
 						events = events.concat(all);
 					}
 				}
-				for(var i = 0; i < events.length; i++){
+				var i = 0, eventsLen =events.length;
+				var eventObject = false;
+				for(; i < eventsLen;  i++){
 					if(_isHTMLElement && _isElementEvent(event)){
-						var eventObject = _initEvent(event);
-						console.log(eventObject);
+						eventObject = _initEvent(event);
 						if(eventObject){
-							console.log(_element, event, _element.dispatchEvent);
+							//console.log(_element, event, _element.dispatchEvent);
 							_element.dispatchEvent(eventObject);
 						}
-					}else{	
-						events[i](eventData);
+					}else{
+						output = events[i].call(this,eventData) || output;
 					}
 				}
-				//if(config && config.saveTrigger){
-					Mold.Lib.EventStore.saveTrigger(_element, event, data);
-				//}
-				
-				return _element;
+				Mold.Lib.EventStore.saveTrigger(_element, event, data);
+				return output || _element;
 			}
 		}
 		

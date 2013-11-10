@@ -1,9 +1,9 @@
+"use strict";
 Seed({
 		name : "Mold.Lib.Template",
 		dna : "class",
-		include : [
-			"lib->../../external/mustache.js"
-		]
+		version : "0.0.2"
+
 	},
 	function(content){
 		var that = this;
@@ -19,7 +19,6 @@ Seed({
 			_shadowTemplate.id = "test";
 			_shadowTemplate.innerHTML = template;
 			_shadowTemplate.type = "text"
-			//document.getElementsByTagName("body")[0].appendChild(_shadowTemplate);
 		}
 
 /*Add some Textnodes, after this step every templatevariable exists in a single node, without other content*/
@@ -104,6 +103,7 @@ Seed({
 
 		var _isVarCache = {}
 		var _isVar = function(phrase){
+			var cache = false;
 			if(!(cache = _isVarCache[phrase])){
 				var firstChar = phrase.substring(0,1);
 				if( firstChar !== "#" && firstChar !== "$" && firstChar != "^" && firstChar != "/" && firstChar != ""){
@@ -135,6 +135,7 @@ Seed({
 		}
 
 		var _checkBlockEnd = function(phrase, needle){
+			var varName = false;
 			if(varName = _containsVar(phrase)){
 				varName = _trim(varName);
 				if(needle == varName){
@@ -252,14 +253,25 @@ Seed({
 				result = regExp.exec(content);
 				_blockStringContentCache[blockname+content] = result;
 			}else{
-				console.log("from blockstingocnect")
+				
 			}
 		
 			return result[1];
 		}
 
 		var _getSubContent = function(content, beginn, end){
-			return content.substring(content.lastIndexOf(beginn), content.lastIndexOf(end));
+			return content.substring(content.lastIndexOf(beginn) +beginn.length, content.lastIndexOf(end));
+		}
+
+		var _checkParentEqualChildAndEmpty = function(childs, name){
+			return Mold.some(childs, function(element) {
+				if(element.name === name){
+					if(!element.value){
+						return true;
+					}
+				}
+				return false;
+			});
 		}
 
 		var _cachenContentPartsResults = {}
@@ -276,8 +288,12 @@ Seed({
 			}else{
 				result = cache.result; 
 			}
-			var ignore = false;
-			var i =0; len = result.length;
+
+			var ignore = false,
+				i =0,
+				len = result.length,
+				varName = false;
+
 			for(; i < len; i++){
 				var entry = result[i];
 				if((varName = _containsVar(entry))){
@@ -285,6 +301,7 @@ Seed({
 					if(!ignore){
 						if(_isVar(varName)){
 							if(data[plainName]  && data[plainName].value != ""){
+								 
 								output += data[plainName].value;
 							}
 						}
@@ -292,9 +309,11 @@ Seed({
 							if(data[plainName]){
 
 								ignore = true;
-								Mold.each(data[plainName].childs, function(childElements){
-									var subContent = _getSubContent(content, "{{#"+plainName+"}}", "{{/"+plainName+"}}");
-									output += _parseStringContent(subContent, childElements)
+								Mold.each(data[plainName].childs, function(childElements, name){
+									if(!_checkParentEqualChildAndEmpty(childElements, plainName)){
+										var subContent = _getSubContent(content, "{{#"+plainName+"}}", "{{/"+plainName+"}}");
+										output += _parseStringContent(subContent, childElements)
+									}
 								});
 							}
 						}
@@ -314,17 +333,16 @@ Seed({
 
 
 
-		var _createDomLessTree = function(content, parent, parentElement){
+		var _createDomLessTree = function(content, parent, parentElement, stringContent, parentMainTree){
 			var tree = {};
 			var mainTree = {};
 			var result = content.split(/(\{\{.*?\}\})/gm);
 		
 			Mold.each(result, function(varName){
-			
+				
 				if((varName = _containsVar(varName))){
 					mainTree = tree;
 					if(_isVar(varName)){
-
 						var entryProperies = {
 							name : varName,
 							parent : parent,
@@ -332,10 +350,10 @@ Seed({
 							type : "value",
 							parentTree : tree,
 							mainTree : mainTree, 
-							stringContent : parentElement.nodeValue,
+							stringContent : stringContent || parentElement.nodeValue,
 							isStringContent : true,
-							_value : varName,
-							value : varName
+							_value : false,
+							value : false
 						}
 						Object.defineProperty(entryProperies, "value", {
 							get: function(){
@@ -343,37 +361,56 @@ Seed({
 							}, 
 							set: function(value){
 								this._value = value;
-								
-								var newContent = _parseStringContent(this.stringContent, this.mainTree)
+								var newContent = _parseStringContent(this.stringContent, parentMainTree || this.mainTree)
 								this.parentElement.nodeValue = newContent;
 								return this._value;
 							},
 							enumerable: true,
 							configurable: true
 						});
-						//entryProperies.value = varName;
 						tree = _appendToTree(tree, entryProperies, varName);
 						mainTree = tree;
 					}
 					if(_isBlock(varName)){
 						varName = varName.replace("#", "");
+						var blockContent = _getBlockStringContent(varName, content);
 						var entryProperies = {
 							name : varName,
 							childs : [],
+							childsPointer : [],
 							parent : parent,
 							parentElement : parentElement,
 							type : "block",
+							content : blockContent,
 							parentTree : tree,
 							mainTree : mainTree,
+							stringContent : parentElement.nodeValue,
 							isStringContent : true,
 							_value : varName,
-							value : varName
+							value : varName,
+							add : function(element, name){
+								var newContent = this.content;
+								
+								var newTree = _createDomLessTree(this.content, this.parent, this.parentElement, this.stringContent, this.mainTree);
+								if(this.childsPointer.length < 1){
+									this.childs[0] = newTree;
+								}else{
+									this.childs.push(newTree);
+								}
+								this.childsPointer.push(newTree);
+								var newContent = _parseStringContent(this.content, this.mainTree[this.name])
+								this.parentElement.nodeValue = newContent;
+								
+							},
+							remove : function(index){
+							}
 						}
 						Object.defineProperty(entryProperies, "value", {
 							get: function(){
 								return this._value;
 							}, 
 							set: function(value){
+								this._value = value;
 								return this._value;
 							},
 							enumerable: true,
@@ -413,7 +450,7 @@ Seed({
 				//Parse Attributenodes
 				case 2:
 					if((varName = _containsVar(node.nodeValue))){
-						var entryProperies = _createDomLessTree(node.nodeValue, parent, node, tree);
+						var entryProperies = _createDomLessTree(node.nodeValue, parent, node);
 						tree = _appendToTree(tree, entryProperies);
 					};
 					break;
@@ -546,16 +583,6 @@ Seed({
 					parent = searchResult[1];
 				}
 				
-				/*
-			 	Mold.each(node.attributes, function(subnode){
-			 
-			 		var searchResult= _searchElements(subnode, parent, tree);
-					tree = searchResult[0];
-					parent = searchResult[1];
-					
-			 	})
-			 	*/
-				
 				
 			}
 			return [tree, parent];
@@ -570,14 +597,11 @@ Seed({
 		var _addData = function(template, data, bind){
 			
 			Mold.each(template, function(element){
-				if(data[element.name]){
+				if(data[element.name] !== undefined){
 					if(element.type === "value"){
-
 						element.value = data[element.name];
 						if(bind){
-
 							data.on("property.change."+element.name, function(e){
-								//console.log("change")
 								element.value = e.data.value;
 							});
 						}
@@ -595,22 +619,24 @@ Seed({
 							}
 							if(bind){
 								data[element.name].on("list.item.add", function(e){
-								//	console.log("template item added", e.data)
 									element.add();
 									_addData(element.childs[e.data.index], e.data.value, bind);
 								}).on("list.item.change", function(e){
-									//console.log("template list Item Change", e.data)
 									_addData(element.childs[e.data.index], e.data.value, bind)
 								}).on("list.item.remove", function(e){
-									//console.log("remove", e.data.index)
 									element.remove(e.data.index);
 								});
 							}
 						}else{
-							if(!element.childsPointer[0]){
-								element.add();
+							if(!element.childsPointer){
+								_addData(element.childs[0], data, bind);
+							}else{
+								if(!element.childsPointer[0]){
+									element.add();
+								}
+
+								_addData(element.childs[0], data, bind);
 							}
-							_addData(element.childs[0], data[element.name]);
 						}
 					}
 				}else{
@@ -638,6 +664,14 @@ Seed({
 		_compiledTemplate = _parseTemplate(_templateContent)[0];
 
 		this.publics = {
+/**
+* @namespace Mold.Lib.Template
+* @methode bind
+* @desc  bind a Mold model to the Template
+* @public
+* @return (Object)  returns this;
+* @param (model) object - the modelt
+**/
 			bind : function(model){
 				if(!_compiledTemplate){
 					throw "Tempate not compiled!";
@@ -645,17 +679,62 @@ Seed({
 				_addData(_compiledTemplate, model.data, true);	
 				return that;
 			},
+/**
+* @namespace Mold.Lib.Template
+* @methode unbind
+* @desc  unbind a Mold model from the Template
+* @public
+* @return (Object)  returns this;
+* @param (model) object - the modelt
+**/
+			unbind : function(model){
+
+				return this;
+			},
+/**
+* @namespace Mold.Lib.Template
+* @methode append
+* @desc  append a Mold model to the Template, without bindings
+* @public
+* @return (Object)  returns this;
+* @param (model) object - the model
+**/
 			append : function(model){
 				if(!_compiledTemplate){
-					throw "Tempate not compiled!";
+					throw "Template not compiled!";
 				}
 				_addData(_compiledTemplate, model.data, false);	
+				return this;
 			},
+/**
+* @namespace Mold.Lib.Template
+* @methode tree
+* @desc  returns the template-tree
+* @public
+* @return (Object)  the template-tree;
+**/
 			tree : function(){
 				return _compiledTemplate;
 			},
+/**
+* @namespace Mold.Lib.Template
+* @methode get
+* @desc  returns the parsed templates main dom node
+* @public
+* @return (node)  returns the parsed Template
+**/
 			get : function(){
 				return _shadowTemplate;
+			},
+/**
+* @namespace Mold.Lib.Template
+* @methode getInner
+* @desc  returns the parsed template dom nodes without main node
+* @public
+* @return (node)  returns the parsed Tempalte inner nodes
+**/
+			getInner : function(){
+				return _shadowTemplate.childNodes;
 			}
 		}
 		

@@ -1,8 +1,8 @@
 /**
  * @author Jan Kaufmann <jan@moldjs.de>
- * @version 0.1.0;
+ * @version 0.1.1;
  */
-
+ "use strict";
 if(typeof Titanium !== undefined) { var GLOBAL = this };
 
 var Mold = (function(config){
@@ -253,6 +253,17 @@ var Mold = (function(config){
 			return true;
 		},
 
+
+/**
+* @namespace Mold
+* @methode find
+* @desc find a specified value in an array
+* @public
+* @return (mixed) 
+* @param (Object) collection - the list
+* @param (function) iterator - a callback function
+* @param (object) context - context Object
+**/
 		find : function(collection, iterator, context){
 			var result;
 			Mold.some(collection, function(value, index, list) {
@@ -264,6 +275,16 @@ var Mold = (function(config){
 			return result;
 		},
 
+/**
+* @namespace Mold
+* @methode some
+* @desc iterates through an array until the specified callback returns false
+* @public
+* @return (boolean) returns true if the callback function returns true for each element, otherwise it returns false; 
+* @param (Object) collection - the list
+* @param (function) iterator - a callback function
+* @param (object) context - context Object
+**/
 		some : function(collection, iterator, context){
 			var result = false;
 			if (collection == null) {
@@ -371,6 +392,13 @@ var Mold = (function(config){
 			_ready(callback);
 		},
 
+
+/**
+* @namespace Mold
+* @property startime
+* @desc	inculdes the time, when Mold is constructed, you can use it to measure Molds loadingtime
+* @public
+**/
 		startime : new Date().getTime(),
 /**
 * @namespace Mold
@@ -402,7 +430,7 @@ var Mold = (function(config){
 			if(dna){
 				return dna;
 			}else{
-				Mold.log("Error", { code : 4, dnaname: dnaName});
+				throw "DNA-handler "+dnaName+" not found!"
 				return false;
 			}
 		},
@@ -637,12 +665,9 @@ var Mold = (function(config){
 				//If the seed has to wait for the DNA a callback will be added
 				if(startCreating){
 					if(typeof Mold.getDNA(seed.dna).wait === "function"){
-						
 						startCreating = Mold.getDNA(seed.dna).wait(seed, function(){
 							Mold.checkSeedCue();
 						});
-					}else{
-						//Mold.log("Error", { code : 4, dnaname: seed.dna });
 					}
 				}
 				
@@ -995,12 +1020,12 @@ var Mold = (function(config){
 * @param (Array) arguments - Expects an array with the arguments
 * @return (Object) - Returns the instance that was called
 **/
-		callWithDynamicArguments : function(constructor, arguments){
+		callWithDynamicArguments : function(constructor, parameter){
 			var wrapper = function() {}
 			wrapper.prototype = constructor.prototype;
 			wrapperObject = new wrapper();
 			wrapperObject.constructor = constructor;	
-			return constructor.apply(wrapperObject, arguments);
+			return constructor.apply(wrapperObject, parameter);
 		},
 /**
 * @methode wrap

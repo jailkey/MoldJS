@@ -1007,6 +1007,11 @@ var Mold = (function(config){
 			return target;
 		},
 		
+/**
+* @methode getId
+* @desc returns a uinque ID
+* @return (Object) - returns the uinque ID
+**/
 		ident : 0,
 		getId : function (){
 			 Mold.ident++;

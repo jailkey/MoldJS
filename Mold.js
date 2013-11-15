@@ -230,7 +230,7 @@ var Mold = (function(config){
 **/
 		each : function(collection, iterator, context){
 			var i = 0;
-			if(collection == null) { return false; }
+			if(collection == null || collection === false) { return false; }
 	
 			if(Array.prototype.forEach && collection.forEach){
 				collection.forEach(iterator, context);
@@ -994,6 +994,7 @@ var Mold = (function(config){
 **/
 		mixing : function(target, origin, selected){
 			for(var property in origin){
+				
 				if(property != "className"){
 					if(selected && selected.length > 0){
 						if(selected.indexOf(property) > -1){
@@ -1191,8 +1192,6 @@ Mold.addDNA({
 				if(!_instance){
 					targetClass.apply(this, arguments);
 					_instance = this;
-				}else{
-					Mold.log("Info", "Ein Singelton kann nur eine Instanz haben!");
 				}
 				return _instance;
 			}

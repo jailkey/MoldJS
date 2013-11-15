@@ -1,3 +1,4 @@
+"use strict";
 Seed({
 		name : "Mold.Lib.Model",
 		dna : "class",

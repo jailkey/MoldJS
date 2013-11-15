@@ -2,6 +2,7 @@ Seed({
 		name : "Mold.DNA.View",
 		dna : "dna",
 		author : "Jan Kaufmann",
+		version : "0.0.1",
 		include : [
 			"Mold.Lib.Event"
 		]

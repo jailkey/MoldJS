@@ -1,4 +1,5 @@
-﻿Seed (
+﻿ "use strict";
+Seed (
 	{ 
 		name : "Mold.Lib.Event",
 		dna : "class",

@@ -2,8 +2,12 @@
 Seed({
 		name : "Mold.Lib.Template",
 		dna : "class",
-		version : "0.0.2"
-
+		version : "0.0.2",
+		include : [
+			"Mold.Lib.Tree",
+			"Mold.Lib.DomPointer",
+			"Mold.Lib.TreeFactory"
+		]
 	},
 	function(content){
 		var that = this;
@@ -40,11 +44,13 @@ Seed({
 					};
 					break;
 				case 3:
+
 					if((name = _containsVar(node.nodeValue))){
-						var oname = name
+
+						var oname = name;
 						name = "{{"+name+"}}";
-						expString = '([\\s\\S]*)('+name+')([\\s\\S]*)';
-						regExp  = new RegExp(expString, "gm")
+						expString = '([\\s\\S]*?)('+name.replace("^","\\^")+')([\\s\\S]*)';
+						regExp  = new RegExp(expString, "gm");
 						result = regExp.exec(node.nodeValue);
 						targetNode = document.createTextNode(result[2]);
 						afterTargetNode = document.createTextNode(result[3]);
@@ -100,6 +106,10 @@ Seed({
 			return phrase;
 		}
 
+		var _cleanVarName = function(name){
+			return name.replace("^", "").replace("#", "").replace("/", "");
+		}
+
 
 		var _isVarCache = {}
 		var _isVar = function(phrase){
@@ -124,6 +134,15 @@ Seed({
 			return false;
 		}
 
+		var _isNegativBlock = function(phrase){
+			var firstChar = phrase.substring(0,1);
+			if( firstChar === "^"){
+				return true;
+			}
+			return false;
+		}
+
+
 		var _isBlockEnd = function(phrase){
 			if(phrase){
 				var firstChar = phrase.substring(0,1);
@@ -145,10 +164,12 @@ Seed({
 			return false;
 		}
 
+
+
 		var _getBlockNodes = function(node, name){
 			var blockList = [];
 			while (node) {
-				if(_checkBlockEnd(node.nodeValue, "/"+name)){
+				if(_checkBlockEnd(node.nodeValue, "/"+name.replace("^", "").replace("#", ""))){
 					return [node, blockList]
 				}
 				node = node.nextSibling;
@@ -179,57 +200,10 @@ Seed({
 
 //Domfunction 
 		var _dom = {
-			getLastNode : function(nodeList){
-				if(Mold.isArray(nodeList)){
-					var lastNode = nodeList[nodeList.length -1];
-				}else{
-					var lastNode = nodeList;
-				}
-				if(Mold.isArray(lastNode)){
-					Mold.each(lastNode, function(element){
-						lastNode = _dom.getLastNode(element);
-					});
-				}
-				return lastNode;
-			},
 
-			getFirstNode : function(nodeList){
-				if(Mold.isArray(nodeList)){
-					var firstNode = nodeList[0];
-				}else{
-					var firstNode = nodeList;
-				}
-				if(Mold.isArray(firstNode)){
-					Mold.each(firstNode, function(element){
-						firstNode = _dom.getLastNode(element);
-					});
-				}
-				return firstNode;
-			},
 
-			append : function(parent, reference, tree){
-				var pointers = pointers || [];
-				if(Mold.isNodeList(tree)){
-					var len = tree.length;
-					for(var i = 0; i < len; i++){
-						var element = tree[0];
-						if(!reference){
-							parent.appendChild(element);
-						}else{
-							parent.insertBefore(element, reference);
-						}
-						pointers.push(element);
-					}
-				}else{
-					if(!reference){
-						parent.appendChild(tree);
-					}else{
-						parent.insertBefore(tree, reference);
-					}
-					pointers.push(tree);
-				}
-				return pointers
-			},
+
+
 
 			remove : function(pointer, dontremove){
 				Mold.each(pointer, function(element){
@@ -241,15 +215,69 @@ Seed({
 						}
 					}
 				});
+			},
+
+			clean : function(pointer, dontremove){
+				Mold.each(pointer, function(element){
+					if(Mold.isArray(element)){
+						_dom.clean(element, dontremove);
+					}else{
+						if(element !== dontremove){
+							element.nodeValue ="";
+						}
+					}
+				});
+			},
+
+			cleanBetween : function(start, end){
+				while(start !== end){
+					_dom.clean(start);
+					start = node.nextSibling();
+				}
 			}
 
 		}
 
+		var _opendBlocksCache = {};
+		var _setOpenedTree = function(name, value){
+
+			_opendBlocksCache[name] = value;
+			return value;
+		}
+
+		var _getOpenedTree = function(name){
+			var openBlock = _opendBlocksCache[name];
+			if(openBlock){
+				delete _opendBlocksCache[name];
+				return openBlock;
+			}
+			return false;
+		}
+
+		var _copyNodeBlock = function(nodes, doNotCopy){
+			var newBlock = [];
+			Mold.each(nodes, function(element){
+				
+				if(Mold.isArray(element)){
+					newBlock.push(_copyNodeBlock(element, doNotCopy));
+				}else{
+
+					if(!doNotCopy || element !== doNotCopy){
+						newBlock.push(element.cloneNode(true));
+					}
+				}
+			});
+			return newBlock;
+		}
+
 		var _blockStringContentCache = {}
-		var _getBlockStringContent = function(blockname, content){
+		var _getBlockStringContent = function(blockname, content, node){
 			var result = false;
 			if(!(result = _blockStringContentCache[blockname+content])){
-				var regExp = new RegExp('\\{\\{#'+blockname+'\\}\\}([\\s\\S]*)\\{\\{\\/'+blockname+'\\}\\}', 'gmi');
+				var startBlockname = blockname.replace("^", "\\^");
+				var endBlockname = blockname.replace("^", "").replace("#", "");
+				var regExpString = '\\{\\{'+startBlockname+'\\}\\}([\\s\\S]*?)\\{\\{\\/'+endBlockname+'\\}\\}';
+				var regExp = new RegExp(regExpString, 'gmi');
 				result = regExp.exec(content);
 				_blockStringContentCache[blockname+content] = result;
 			}else{
@@ -331,6 +359,12 @@ Seed({
 			return output;
 		}
 
+		var _createShadowBlock = function(content){
+			var shadowElement = document.createElement("div");
+			shadowElement.innerHTML = content;
+			_preParseTemplate(shadowElement);
+			return shadowElement;
+		}
 
 
 		var _createDomLessTree = function(content, parent, parentElement, stringContent, parentMainTree){
@@ -371,16 +405,17 @@ Seed({
 						tree = _appendToTree(tree, entryProperies, varName);
 						mainTree = tree;
 					}
-					if(_isBlock(varName)){
+					if(_isBlock(varName) || _isNegativBlock(varName)){
 						varName = varName.replace("#", "");
 						var blockContent = _getBlockStringContent(varName, content);
+
 						var entryProperies = {
 							name : varName,
 							childs : [],
 							childsPointer : [],
 							parent : parent,
 							parentElement : parentElement,
-							type : "block",
+							type : (_isNegativBlock(varName)) ? "negativblock" : "block",
 							content : blockContent,
 							parentTree : tree,
 							mainTree : mainTree,
@@ -441,214 +476,17 @@ Seed({
 			mainTree = tree;
 			return tree;
 		}
-
-
-		var _searchElements = function(node, parent, tree){
-			parent = parent || false;
-			var varName;
-			switch(node.nodeType){
-				//Parse Attributenodes
-				case 2:
-					if((varName = _containsVar(node.nodeValue))){
-						var entryProperies = _createDomLessTree(node.nodeValue, parent, node);
-						tree = _appendToTree(tree, entryProperies);
-					};
-					break;
-				//Parse Textnodes
-				case 3:
-					
-					
-					if((varName = _containsVar(node.nodeValue))){
-						varName = _trim(varName);
-						if(_isVar(varName)){
-							var entryProperies = {
-								name : varName,
-								parentElement : node.parentElement,
-								parent : parent,
-								element : node,
-								type : "value"
-							}
-							
-							Object.defineProperty(entryProperies, "value", {
-								get: function(){
-									return this.element.nodeValue;
-								}, 
-								set: function(value){
-									this.element.nodeValue = value;
-									return value;
-								},
-								enumerable: true,
-								configurable: true
-							});
-							
-							tree = _appendToTree(tree, entryProperies, varName);
-							node.nodeValue = "";
-							
-						}else if(_isBlock(varName)){
-							varName = _trim(varName.replace("#", ""));
-							var blockContent = _getBlockStringContent(varName, node.parentElement.innerHTML);
-							var blockNodes = _getBlockNodes(node, varName);
-							var lastNode =  _dom.getLastNode(blockNodes);
-							var entryProperies = {
-								name : varName,
-								parentElement : node.parentElement,
-								element : node,
-								parent : parent,
-								content : blockContent,
-								nodes : blockNodes[0],
-								type : "block",
-								value : node.nodeValue,
-								lastNode : lastNode,
-								childs : [],
-								childsPointer : [],
-								add : function(element, name){
-									var newContent = this.content,
-										shadowElement = document.createElement("div");
-
-									shadowElement.innerHTML = newContent;
-									_preParseTemplate(shadowElement);
-									var newTree = _searchElements(shadowElement, false, {});
-									if(this.childsPointer.length < 1){
-										this.childs[0] = newTree[0];
-									}else{
-										this.childs.push(newTree[0]);
-									}
-									
-									this.childsPointer.push(_dom.append(this.parentElement, this.lastNode, shadowElement.childNodes));
-								},
-								remove : function(index){
-									if(index == undefined){
-										return false;
-									}
-
-									if(!this.childsPointer[index]){
-										return false;
-									}
-									 
-									_dom.remove(this.childsPointer[index], this.lastNode);
-									this.childsPointer.splice(index, 1);
-									if(index !== 0){
-										this.childs.splice(index, 1);
-									}
-								}
-							}
-							node.nodeValue ="";
-							entryProperies.childsPointer.push(blockNodes);
-							tree = _appendToTree(tree, entryProperies, varName);
-							parent = tree;
-							
-							if(Mold.isArray(tree)){
-								tree = tree[0][varName].childs;
-							}else{
-								tree = tree[varName].childs;
-							}
-							
-						}else if(_isBlockEnd(varName)){
-							varName = _trim(varName.replace("/", ""));
-							tree = parent;
-							node.nodeValue ="";
-							if(Mold.isArray(tree)){
-								parent = tree[0][varName].parent
-							}else{
-								parent = tree.parent
-							}
-						}
-					}
-					break;
-				default:
-					break;
-			}
-
-			if(node.hasChildNodes && node.hasChildNodes() && node.nodeType != 2){
-
-				var nodeLen = node.childNodes.length,
-					i =0,
-					subnode = false,
-					attributeLen = (node.attributes) ? node.attributes.length : 0;
-
-				for(; i < nodeLen; i++){
-
-					subnode = node.childNodes[i];
-					var searchResult= _searchElements(subnode, parent, tree);
-					tree = searchResult[0];
-					parent = searchResult[1];
-				}
-
-				i = 0;
-				
-				for(; i < attributeLen; i++){
-					subnode = node.attributes[i];
-					var searchResult= _searchElements(subnode, parent, tree);
-					tree = searchResult[0];
-					parent = searchResult[1];
-				}
-				
-				
-			}
-			return [tree, parent];
-		}
+		
 
 		var _buildTree = function(){
-			var tree = _searchElements(_shadowTemplate, false, {});
+			var tree = Mold.Lib.TreeFactory.parseDomTree(_shadowTemplate, new Mold.Lib.Tree("root"));
 			return tree;
 		}
 
 
 		var _addData = function(template, data, bind){
 			
-			Mold.each(template, function(element){
-				if(data[element.name] !== undefined){
-					if(element.type === "value"){
-						element.value = data[element.name];
-						if(bind){
-							data.on("property.change."+element.name, function(e){
-								element.value = e.data.value;
-							});
-						}
-					}
-					if(element.type === "block"){
-						if(Mold.isArray(data[element.name])){
-							var index = 0;
-							Mold.each(data[element.name], function(subElement, index){
-								element.add();
-								_addData(element.childs[index], subElement, bind);
-							});
-							
-							while(data[element.name].length < element.childsPointer.length){
-								element.remove(element.childsPointer.length - 1)
-							}
-							if(bind){
-								data[element.name].on("list.item.add", function(e){
-									element.add();
-									_addData(element.childs[e.data.index], e.data.value, bind);
-								}).on("list.item.change", function(e){
-									_addData(element.childs[e.data.index], e.data.value, bind)
-								}).on("list.item.remove", function(e){
-									element.remove(e.data.index);
-								});
-							}
-						}else{
-							if(!element.childsPointer){
-								_addData(element.childs[0], data, bind);
-							}else{
-								if(!element.childsPointer[0]){
-									element.add();
-								}
-
-								_addData(element.childs[0], data, bind);
-							}
-						}
-					}
-				}else{
-					if(element.type === "value"){
-						element.value = "";
-					}
-					if(element.type === "block"){
-						element.remove(0);
-					}
-					
-				}
-			})
+			//binddata
 		}
 		
 
@@ -661,7 +499,7 @@ Seed({
 			});
 		}
 
-		_compiledTemplate = _parseTemplate(_templateContent)[0];
+		_compiledTemplate = _parseTemplate(_templateContent);
 
 		this.publics = {
 /**

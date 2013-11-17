@@ -217,6 +217,19 @@ var Mold = (function(config){
 	}
 	
 	return {
+/**
+* @namespace Mold
+* @methode trim
+* @public
+* @param (String) phrase - string with leading and ending whitespaces
+* @retrun (String) - returns a String without leading and ending whitespaces
+*/
+
+		trim : function(phrase){
+			phrase = phrase.replace(/\n*/gm, "");
+			phrase = phrase.replace(/^\s+|\s+$/g, "");
+			return phrase;
+		},
 
 /**
 * @namespace Mold
@@ -925,30 +938,149 @@ var Mold = (function(config){
 			}
 		},
 /**
+* @namespace Mold
+* @object 
+* @name jsparser
+* @desc Include methodes to parse jscode
+* @values splitCodeAndParameter, injectBefore, injectAfter, removeFromFunction, removeFromFunction, deleteComments, areOpendEqualClosedBrackets, parseObjectLitral
+**/
+
+		jsparser : {
+			splitCodeAndParameter : function(func){
+				func = func.toString();
+				func = func.substring(0, func.lastIndexOf("}")+1);
+				var pattern = new RegExp("function\\s*\(([\\s\\S]*?)\)\\s*\{([\\s\\S]*?)\}$", "g");
+				var matches = pattern.exec(func);
+				if(matches){
+					var parameter = matches[2];
+					parameter = parameter.replace("(", "").replace(")", "").replace("anonymous", "");
+					var code = matches[3];
+					return { parameter : parameter, code : code}
+				}
+				return false;
+			},
+/**
 * @methode injectBefore
 * @desc Injects code at the beginning of a Functionobject;
 * @param (Function) func - Expects a function object
 * @param (String) code - Expects code to be injected
 **/
-		injectBefore : function(func, code){
-			func = func.toString();
-			func = func.substring(0, func.lastIndexOf("}")+1);
-			var pattern = new RegExp("function\\s*\(([\\s\\S]*?)\)\\s*\{([\\s\\S]*?)\}$", "g");
-			var matches = pattern.exec(func);
-			if(matches){
-				var parameter = matches[2];
-				parameter = parameter.replace("(", "").replace(")", "");
-				var objectEnd = matches[3];
-				if(objectEnd){
-					var newCode = "\n"+code+"\n"+objectEnd;
-					return new Function(parameter, newCode);
-				}else{
+			injectBefore : function(func, code){
+				func = func.toString();
+				func = func.substring(0, func.lastIndexOf("}")+1);
+				var pattern = new RegExp("function\\s*\(([\\s\\S]*?)\)\\s*\{([\\s\\S]*?)\}$", "g");
+				var matches = pattern.exec(func);
+				if(matches){
+					var parameter = matches[2];
+
+					parameter = parameter.replace("(", "").replace(")", "");
+					var objectEnd = matches[3];
+					if(objectEnd){
+						var newCode = "\n"+code+"\n"+objectEnd;
+						return new Function(parameter, newCode);
+					}else{
+						Mold.log("Error", { code : 9, inject : code, func : func});
+						return false;
+					}
+				 }else{
 					Mold.log("Error", { code : 9, inject : code, func : func});
+				 }
+			},
+
+			injectAfter : function(func, code){
+				var functionValues = Mold.jsparser.splitCodeAndParameter(func);
+				if(functionValues){
+					if(functionValues.code.lastIndexOf("return") > functionValues.code.lastIndexOf("}")){
+						functionValues.code = functionValues.code.substring(0, 
+							functionValues.code.lastIndexOf("return")) 
+							+ code 
+							+ functionValues.code.substring( functionValues.code.lastIndexOf("return"), functionValues.code.length
+						);
+
+					}else{
+						functionValues.code = functionValues.code +code;
+					}
+					return new Function(functionValues.parameter, functionValues.code);
+				}else{
 					return false;
 				}
-			 }else{
-				Mold.log("Error", { code : 9, inject : code, func : func});
-			 }
+			},
+
+			removeFromFunction : function(func, codeToRemove){
+				var oldfunction = func;
+				func = func.toString();
+				func = func.replace(codeToRemove, "");
+				var functionValues = Mold.jsparser.splitCodeAndParameter(func);
+				if(functionValues){
+					return new Function(functionValues.parameter, functionValues.code);
+				}
+				return oldfunction;
+			},
+
+
+			deleteComments : function(codeString){
+				return codeString.replace(/\/\*[\s\S]*?\*\//gm, "");
+			},
+
+			areOpendEqualClosedBrackets : function(literalString){
+				var opendCurlyLen = literalString.split("{").length;
+				var closedCurlyLen = literalString.split("}").length;
+				var opendSquareLen = literalString.split("[").length;
+				var closedSquareLen = literalString.split("]").length;
+				var opendRoundeLen = literalString.split("(").length;
+				var closedRoundLen = literalString.split(")").length;
+				if(opendCurlyLen === closedCurlyLen 
+					&& opendSquareLen === closedSquareLen 
+					&& opendRoundeLen === closedRoundLen
+				){
+					return true;
+				}else{
+					return false;
+				}
+			},
+
+			parseObjectLitral : function(literalString, onelement){
+				literalString = Mold.jsparser.deleteComments(literalString);
+				var output = [];
+
+				var propertyValueStart = literalString.indexOf(":");
+				var stringStart = literalString.indexOf("{")+1;
+				if(stringStart > propertyValueStart){
+					stringStart = literalString.indexOf(",")+1;
+					if(stringStart > propertyValueStart){
+						stringStart = 0;
+					}
+				}
+				var elementName = Mold.trim(literalString.substring(stringStart, propertyValueStart));
+				literalString = literalString.substring(propertyValueStart, literalString.length);
+				propertyValueStart = literalString.indexOf(":");
+				var propertyValueEnd = literalString.indexOf(",");
+				if(propertyValueEnd == -1){
+					return false;
+				}
+				var elementValue = Mold.trim(literalString.substring(propertyValueStart+1, propertyValueEnd));
+				while(!Mold.jsparser.areOpendEqualClosedBrackets(elementValue)){
+					propertyValueEnd = literalString.indexOf(",", propertyValueEnd +1);
+					if(propertyValueEnd == -1){
+						propertyValueEnd = literalString.lastIndexOf("}") -1;
+					}
+					elementValue = Mold.trim(literalString.substring(propertyValueStart+1, propertyValueEnd));
+				}
+				
+				literalString = literalString.substring(propertyValueEnd, literalString.length);
+				var outputValue = { name : elementName, value : elementValue };
+				if(literalString){
+					output.concat(Mold.jsparser.parseObjectLitral(literalString, onelement));
+				}
+				
+				if(typeof onelement === "function"){
+					onelement.call(this, outputValue);
+				}
+
+				return output;
+
+
+			},
 		},
 
 /**
@@ -1136,13 +1268,9 @@ Mold.addDNA({
 Mold.addDNA({ 
 	name :  "static", 
 	create : function(seed) {
-		try {
+		var target = Mold.createChain(Mold.getSeedChainName(seed));
+		target[Mold.getTargetName(seed)] = seed.func();
 		
-			var target = Mold.createChain(Mold.getSeedChainName(seed));
-			target[Mold.getTargetName(seed)] = seed.func();
-		}catch(e){
-			Mold.log("Error", { code : 3, dnaname: "static", error : e});
-		}
 	}
 });
 
@@ -1153,56 +1281,83 @@ Mold.addDNA({
 		Mold.addLoadingProperty("implements");
 	},
 	create : function(seed) {
-		try {
+		
 				var target = Mold.createChain(Mold.getSeedChainName(seed));			
 				if(seed.extend){
 					var superClass = Mold.getSeed(seed.extend);
 					seed.func = Mold.extend(superClass, seed.func, { sourceURL : seed.name });
 
 				}
-				var wrapperClass = Mold.wrap(seed.func, function(that){
-					if(that.publics){
-						for(var property in that.publics){
-							that[property] = that.publics[property];
+
+				if(seed.compiler && seed.compiler.preparsePublics){
+					var result = /(this\.publics.*?=.*?)(\{[\s\S]*\})/gm.exec(seed.func.toString());
+
+					var getPublics = function(string){
+						var opend = string.split("{").length,
+							closed = string.split("}").length;
+
+						while(opend != closed){
+							string = string.substring(0, string.lastIndexOf("}"));
+							opend =  string.split("{").length;
+							closed = string.split("}").length;
 						}
+						string = string.substring(0, string.lastIndexOf("}")+1);
+						return string;
 					}
-					delete that.publics;
-					return constructor;
-				});
-			
-				wrapperClass.prototype.className = seed.name;
-				target[Mold.getTargetName(seed)] = wrapperClass;
+					if(result){
+						var publicsString = getPublics(result[2]);
+						var insertProp = "";
+						var literalRoutines = Mold.jsparser.parseObjectLitral(publicsString, function(property){
+							insertProp = insertProp + "\n this"+"."+property.name+"="+property.value+";\n\n";
+						});
+						var removeString = result[1] + publicsString;
+						seed.func = Mold.jsparser.removeFromFunction(seed.func, removeString);
+						seed.func = Mold.jsparser.injectAfter(seed.func, insertProp);
+					}
+				}
+				if(seed.compiler && (seed.compiler.disableWrapping || seed.compiler.preparsePublics)){
+					seed.func.prototype.className = seed.name;
+					target[Mold.getTargetName(seed)] = seed.func;
+				}else{
+					var wrapperClass = Mold.wrap(seed.func, function(that){
+						if(that.publics){
+							for(var property in that.publics){
+								that[property] = that.publics[property];
+							}
+						}
+						delete that.publics;
+						return constructor;
+					});
+				
+					wrapperClass.prototype.className = seed.name;
+					target[Mold.getTargetName(seed)] = wrapperClass;
+				}
 				return target[Mold.getTargetName(seed)];
-		}catch(e){
-			Mold.log("Error", { code : 3, dnaname: "class", error : e});
-		}
+		
 	}
 });
 
 Mold.addDNA({
 	name : "singelton",
 	create : function(seed){
-		try{
-			var target = Mold.createChain(Mold.getSeedChainName(seed));
-			var _instance = false;
-			
-			var targetClass = Mold.getDNA("class").create(seed);
-			var wrapperClass = function() {
+		var target = Mold.createChain(Mold.getSeedChainName(seed));
+		var _instance = false;
+		
+		var targetClass = Mold.getDNA("class").create(seed);
+		var wrapperClass = function() {
 
-				if(!_instance){
-					targetClass.apply(this, arguments);
-					_instance = this;
-				}
-				return _instance;
+			if(!_instance){
+				targetClass.apply(this, arguments);
+				_instance = this;
 			}
-			
-			wrapperClass.prototype = targetClass.prototype;
-			var target = Mold.createChain(Mold.getSeedChainName(seed));
-			target[Mold.getTargetName(seed)] = wrapperClass;
-			return target[Mold.getTargetName(seed)];
-		}catch(e){
-			Mold.log("Error", { code : 3, dnaname: "singelton", error : e});
+			return _instance;
 		}
+		
+		wrapperClass.prototype = targetClass.prototype;
+		var target = Mold.createChain(Mold.getSeedChainName(seed));
+		target[Mold.getTargetName(seed)] = wrapperClass;
+		return target[Mold.getTargetName(seed)];
+		
 	}
 });
 
@@ -1224,12 +1379,8 @@ Mold.addDNA({
 Mold.addDNA({
 	name : "action",
 	create : function(seed){
-		try{
-			if(typeof seed.func === "function"){
-				seed.func()
-			}
-		}catch(e){
-			Mold.log("Error", { code : 3, dnaname: "action", error : e});
+		if(typeof seed.func === "function"){
+			seed.func()
 		}
 	}
 });

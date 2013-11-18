@@ -1,7 +1,10 @@
 "use strict";
 Seed({
 		name : "Mold.Lib.DomPointer",
-		dna : "class"
+		dna : "class",
+		compiler : {
+			preparsePublics : true
+		}
 	},
 	function(config){
 
@@ -16,16 +19,13 @@ Seed({
 			_parentElement = config.parentElement || _node.parentElement,
 			_shadowDom = config.shadowDom || false,
 			_isVisible = false,
-			_valueStore = document.createElement("div");
+			_valueStore = false,
+			_childIndex = false;
 			//_node.nodeValue = "";
 
 			_node.nodeValue = ""
 
-			if(_parentElement !== _node.parentElement){
-				console.log("append to dom", _node)
-				//_parentElement.appendChild(_node)
-				
-			}
+		
 
 		var _cleanSubnodes = function(){
 			var i = 0, len = _subnodes.length;
@@ -52,6 +52,9 @@ Seed({
 			while(node != null){
 				nextNode = node.nextSibling;
 				if(node.parentNode && node !== dontremove){
+					if(!_valueStore){
+						_valueStore = document.createElement("div");
+					}
 					_valueStore.appendChild(node);
 				}
 				if(node === to){
@@ -128,18 +131,20 @@ Seed({
 					}
 				}
 			});
+
 			return newBlock;
 		}
 
-		var _clone = function(){
+		var _clone = function(node, subnodes, shadowDom){
+
 			var pointer = new Mold.Lib.DomPointer({
 				name : _name,
 				type : _type,
-				node : _node.cloneNode(true),
+				node : node || _node.cloneNode(true),
 				parentElement : _parentElement,
-				shadowDom : (_shadowDom) ? _copy(_shadowDom) : false,
+				shadowDom : shadowDom || (_shadowDom) ? _copy(_shadowDom) : false,
 				lastNode : _lastNode,
-				subnodes : (_subnodes) ? _copy(_subnodes) : false
+				subnodes : subnodes || (_subnodes) ? _copy(_subnodes) : false
 			});
 	
 			return pointer;
@@ -147,8 +152,15 @@ Seed({
 
 
 		this.publics = {
+			node : _node,
+			subnodes : _subnodes,
+			shadowDom : _shadowDom,
+			name : _name,
 			getNode : function(){
 				return _node;
+			},
+			setChildIndex : function(index){
+				_childIndex = index;
 			},
 			getType : function(){
 				return _type;
@@ -167,23 +179,31 @@ Seed({
 				}
 			},
 			remove : function(){
-
+				_remove(_subnodes);
+				_remove(_shadowDom);
 			},
-			clone : function(){
-				return _clone();
+			clone : function(node, subnodes, shadowDom){
+				return _clone(node, subnodes, shadowDom);
 			},
 			add : function(){
 				_add(_shadowDom);
 			},
 			show : function(value){
 				if(_type === "value"){
-					_node.nodeValue = value;
+					if(value){
+						_nodeValue = _node.nodeValue;
+						_node.nodeValue = value;
+					}else{
+						_node.nodeValue = _nodeValue;
+					}
+					
 				}else{
 					_show(_valueStore)
 				}
 			},
 			hide : function(){
 				if(_type === "value"){
+					_nodeValue = _node.nodeValue;
 					_node.nodeValue = "";
 				}else{
 					_hide(_node.nextSibling, _lastNode, _lastNode);
@@ -194,11 +214,7 @@ Seed({
 					*/
 				}
 
-			},
-			node : _node,
-			subnodes : _subnodes,
-			shadowDom : _shadowDom,
-			name : _name
+			}
 		}
 
 

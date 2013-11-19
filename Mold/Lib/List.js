@@ -4,7 +4,10 @@ Seed({
 		version : "0.1.0",
 		include : [
 			"Mold.Lib.Event"
-		]
+		],
+        compiler : {
+            disableWrapping : true
+        }
 	},
 	function(data){
 		
@@ -71,8 +74,8 @@ Seed({
     	_array.shift = function(){
     		var value = _array[0];
     		var value = _array[_array.length -1];
-    		var len = (_array.length > 0 ) ? _array.length -1 : 0;
     		_array.oldShift();
+            var len = (_array.length > 0 ) ? _array.length -1 : 0;
     		_array.trigger("list.item.remove", { length : len, index : len , value : false, oldValue : value});
     		return value;
     	}
@@ -113,10 +116,17 @@ Seed({
     		var toDelete = len - argumentsArray.length;
     		for(var i = 0; i < toDelete; i++){
     			var outLen = _array.length + toDelete -i;
-    			_array.trigger("list.item.remove", { length : _array.length, index : outLen , value : false, oldValue : _array[_array.length - (i+1)]});
+    			_array.trigger("list.item.remove", { length : _array.length, index : outLen -1, value : false, oldValue : _array[_array.length - (i+1)]});
     		}
 
     	}
+
+        _array.remove = function(){
+            while(_array.length){
+                _array.pop();
+            }
+        }
+
 	   return _array;
 	}
 );

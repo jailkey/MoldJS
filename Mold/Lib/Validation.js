@@ -11,7 +11,7 @@ Seed({
 		}
 
 		_validations["number"] = function(value){
-			console.log(value, "test number")
+			//console.log(value, "test number")
 			return !isNaN(parseFloat(value)) && isFinite(value);
 		}
 

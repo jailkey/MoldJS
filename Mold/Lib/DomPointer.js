@@ -3,7 +3,7 @@ Seed({
 		name : "Mold.Lib.DomPointer",
 		dna : "class",
 		compiler : {
-			preparsePublics : true
+			//preparsePublics : true
 		}
 	},
 	function(config){
@@ -66,23 +66,6 @@ Seed({
 			}
 		}
 
-		var _hide_bak = function(pointer, dontremove){
-			_isVisible = false;
-			if(Mold.isArray(pointer)){
-				Mold.each(pointer, function(element){
-					if(Mold.isArray(element)){
-						_hide(element, dontremove);
-					}else{
-						if(element.parentNode && element !== dontremove){
-							_valueStore.appendChild(element)
-						}
-					}
-				});
-			}else{
-				_valueStore.appendChild(pointer);
-			}
-
-		}
 
 		var _show = function(value){
 			if(value.hasChildNodes && value.hasChildNodes()){
@@ -162,6 +145,9 @@ Seed({
 			setChildIndex : function(index){
 				_childIndex = index;
 			},
+			getChildIndex : function(){
+				return _childIndex;
+			},
 			getType : function(){
 				return _type;
 			},
@@ -190,7 +176,7 @@ Seed({
 			},
 			show : function(value){
 				if(_type === "value"){
-					if(value){
+					if(value !== false && value !== ""){
 						_nodeValue = _node.nodeValue;
 						_node.nodeValue = value;
 					}else{

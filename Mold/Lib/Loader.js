@@ -7,8 +7,10 @@ Seed({
 	},
 	function(){
 
-		var _files = [];
-		var _fileLen = 0;
+		var _files = [],
+			_fileLen = 0;
+
+		Mold.mixing(this, new Mold.Lib.Event(this));
 
 		var _getFileTyp = function(file){
 			var typs = {
@@ -61,7 +63,7 @@ Seed({
 			
 		}
 
-		Mold.mixing(this, new Mold.Lib.Event(this));
+		
 
 		this.publics = {
 			append : function(file){

@@ -5,13 +5,15 @@ Seed({
 		version : "0.0.1",
 		include : [
 			"Mold.Lib.DomPointer",
-			"Mold.Lib.DomLessPointer"
+			"Mold.Lib.DomLessPointer",
+			"Mold.Lib.TemplateDirective"
 		]
 	},
 	function(){
 
 		var _shadowTemplate = false,
 			_compiledTemplate = false,
+			_directive = Mold.Lib.TemplateDirective,
 			undefined;
 
 /*Add some Textnodes, after this step every templatevariable exists in a single node, without other content*/
@@ -66,15 +68,6 @@ Seed({
 			return steps;
 
 		}
-
-/*
-		var _createShadowBlock = function(content){
-			var shadowElement = document.createElement("div");
-			shadowElement.innerHTML = content;
-			_preParseTemplate(shadowElement);
-			return shadowElement;
-		}
-*/
 
 
 		var _containsCache = {}
@@ -358,15 +351,28 @@ Seed({
 		}
 
 
-		var _parseDomTree = function(node, tree){
+		var _parseDomTree = function(node, tree, template, element, index){
 			var varName =  _containsVar(node.nodeValue);
-			
+			var directive;
+			index = index || 0;
 			switch(node.nodeType){
+				//Parse Elementnodes
+				case 1:
+					element = node;
+					if((directive = _directive.get("attribute", node.nodeName))){
+						directive.call(this, node, element, template, index);
+
+					}
+					break;
 				//Parse Attributenodes
 				case 2:
+				
+					if((directive = _directive.get("attribute", node.nodeName))){
+						directive.call(this, node, element, template, index);
+					}
+
 					if(varName){
 						var pointer = _parseDomLessTree(node, tree, tree);
-						
 					};
 					break;
 
@@ -382,10 +388,10 @@ Seed({
 								subnodes : false,
 								stringValue : node.nodeValue
 							});
-							
+							var lastPointer = pointer;
 							var valuePath = _hasValuePath(varName)
-							tree.addChild(_cleanVarName(varName), pointer, false, valuePath)
-							
+							var test = tree.addChild(_cleanVarName(varName), pointer, false, valuePath)
+			
 
 						}else if(_isBlock(varName) || _isNegativBlock(varName)){
 							var	subnodes = _getBlockNodes(node, varName),
@@ -403,9 +409,11 @@ Seed({
 								subnodes : subnodes
 							});
 
+
 							var valuePath = _hasValuePath(varName)
 							var subtree = tree.addChild(cleanName, pointer, false, valuePath);
-							
+
+							//subtree.hide();
 
 							tree = _setOpenedTree(_cleanVarName(varName), subtree);
 							node.nodeValue = "";
@@ -424,23 +432,26 @@ Seed({
 					break;
 			}
 
-			if(node.hasChildNodes && node.hasChildNodes() && node.nodeType != 2){
+			var i =0,
+				subnode = false,
+				attributeLen = (node.attributes) ? node.attributes.length : 0;
 
-				var nodeLen = node.childNodes.length,
-					i =0,
-					subnode = false,
-					attributeLen = (node.attributes) ? node.attributes.length : 0;
+			if(node.hasChildNodes && node.hasChildNodes() && node.nodeType != 2){
+				var nodeLen = node.childNodes.length
+			
 			
 				for(; i < nodeLen; i++){
 					subnode = node.childNodes[i];
-					tree = _parseDomTree(subnode, tree);	
-				}
-				i = 0;
-				for(; i < attributeLen; i++){
-					subnode = node.attributes[i];
-					_parseDomTree(subnode, tree);
+					tree = _parseDomTree(subnode, tree, template, element, index);	
 				}
 			}
+
+			i = 0;
+			for(; i < attributeLen; i++){
+				subnode = node.attributes[i];
+				_parseDomTree(subnode, tree, template, element, index);
+			}
+			
 			
 			return tree;
 		}
@@ -505,7 +516,7 @@ Seed({
 		var _parseFromTo = function(fromNode, toNode, tree){
 			var nextNode = fromNode;
 			while(nextNode != null){
-				_parseDomTree(nextNode, tree);
+				_parseDomTree(nextNode, tree, this);
 				if(nextNode === toNode){
 					nextNode = null;
 					break;
@@ -515,15 +526,15 @@ Seed({
 
 		}
 
-		var _parseCollection = function(collection, tree){
+		var _parseCollection = function(collection, tree, template, index){
 			var i = 0,
 				len = collection.length;
 			
 			for(; i < len; i++){
 				if(Mold.isArray(collection[i])){
-					_parseCollection(collection[i], tree)
+					_parseCollection(collection[i], tree, template, index)
 				}else{
-					_parseDomTree(collection[i], tree);
+					_parseDomTree(collection[i], tree, template, false, index);
 					
 				}
 			}

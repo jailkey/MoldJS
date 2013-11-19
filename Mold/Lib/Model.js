@@ -44,8 +44,6 @@ Seed({
 					that.trigger("validation.error", { error : validationError, value : arguments[2], oldValue : arguments[1], name : name, element : data});
 
 					if(!Mold.isObject(result)){
-						console.log("result", result)
-						//arguments[2]
 						arguments[2] = result;
 					}
 				}

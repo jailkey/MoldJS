@@ -6,10 +6,10 @@ Seed({
 			"Mold.Lib.Event"
 		],
 		compiler : {
-			preparsePublics : true
+			//preparsePublics : true
 		}
 	},
-	function(name, parent, valuePath, index){
+	function(name, parent, valuePath, index, template){
 
 		var _childs = [],
 			_name = name,
@@ -21,7 +21,9 @@ Seed({
 			_valuePath = valuePath || false,
 			that = this,
 			_index = index || false,
-			undefiend;
+			_template = template || false;
+			undefined;
+
 
 	
 
@@ -90,7 +92,6 @@ Seed({
 		}
 
 		var _showPointerValue = function(pointerList, value){
-
 			var len = pointerList.length,
 				pointerUpdates = [],
 				i = 0;
@@ -162,25 +163,30 @@ Seed({
 
 		var _clone = function(){
 			
-			var newTree = new Mold.Lib.Tree(_name, _parent, _valuePath),
+			var newTree = new Mold.Lib.Tree(_name, _parent, _valuePath, 0, _template),
 				selfPointerClone = _pointer[0].clone();
-
-				Mold.Lib.TreeFactory.parseCollection(selfPointerClone.shadowDom, newTree);
+				_index = _childs.length;
+				Mold.Lib.TreeFactory.parseCollection(selfPointerClone.shadowDom, newTree, template, _index);
 				_childs.push(newTree.childs[0])
 				_pointer.push(selfPointerClone);
+				
 				selfPointerClone.add();
-
 			return newTree;
 		}
 
+		_hidePointerValue(_pointer);
+
 		this.publics = {
 
-			isHidden : _isHidden,
+			
 			childs : _childs,
 			pointer : _pointer,
 			name : _name,
 			valuePath : _valuePath,
 
+			isHidden : function(){
+				return _isHidden;
+			},
 			parent : function(){
 				return _parent;
 			},
@@ -195,8 +201,8 @@ Seed({
 				_onValue(callback)
 			},
 			setValue : function(value){
-				_value = value;		
-				if(value != "" && value != false && value !== undefiend){
+				_value = value;
+				if(value != "" && value !== false && value !== undefined){
 					_showPointerValue(_pointer, value);
 				}else{
 					_hidePointerValue(_pointer, value);
@@ -219,17 +225,17 @@ Seed({
 			},
 
 			remove : function(index){
-				if(!index)  { throw "Index is not defined!" }
-				
+				if(index === null || index === undefined)  { throw "Index is not defined!" }
 				if(index === 0){
 					this.hide(0);
 				}else{
-					var i = 1,
-						len = _pointer.length -1;
-					_pointer[index].remove();
-					delete _pointer[index];
-					delete _childs[index];
-					
+					if(_pointer && _pointer[index]){
+						_pointer[index].remove();
+						_pointer.splice(index, 1);
+					}
+					if(_childs[index]){
+						_childs.splice(index);
+					}
 				}
 			},
 
@@ -250,7 +256,7 @@ Seed({
 				var index = index || 0;
 				_childs[index] = _childs[index] || {};
 				if(!_childs[index][name]){
-					_childs[index][name] = new Mold.Lib.Tree(name, this, valuePath, index);
+					_childs[index][name] = new Mold.Lib.Tree(name, this, valuePath, index, _template);
 				}
 				_childs[index][name].addPointer(value);
 				_childs[index][name].setIndex(index);
@@ -274,7 +280,12 @@ Seed({
 			setIndex : function(value){
 				_index = value;
 				_setValuePath();
-				
+			},
+			getIndex : function(value){
+				return _index;
+			},
+			getChildIndex : function(){
+				return _childs.length -1;
 			},
 			clone : function(notrecusiv){
 				return _clone(notrecusiv);

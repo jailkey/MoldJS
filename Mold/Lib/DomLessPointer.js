@@ -60,20 +60,8 @@ Seed({
 			setChildIndex : function(index){
 				_childIndex = index;
 			},
-			setValue : function(){
-
-			},
 			getValue : function(){
 				return _value;
-			},
-			remove : function(){
-
-			},
-			add : function(){
-
-			},
-			clone : function(){
-
 			},
 			show : function(value){
 				_value = value;
@@ -82,8 +70,13 @@ Seed({
 			hide : function(value){
 				_value = value;
 				_setChildValues();
+			},
+			_test : function(){
+				if(irgendwas){
+					
+				}
 			}
 		}
-		
+
 	}
 )

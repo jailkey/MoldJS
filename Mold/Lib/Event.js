@@ -8,6 +8,9 @@ Seed (
 		include : [
 			"Mold.Lib.EventStore"
 		],
+		compiler : {
+			preparsePublics : true
+		},
 		version : 0.1
 	},
 	function(element){
@@ -18,7 +21,7 @@ Seed (
 			"blur", "change", "contextmenu", "copy", "cut", "dblclick", "error",
 			"focus", "focusin", "focusout", "hashchange", "keydown", "keypress", "keyup", 
 			"load",  "paste", "reset", "resize", "scroll",
-			"select", "submit", "textinput", "transitionend", "unload"
+			"select", "submit", "textinput", "transitionend", "unload", "DOMAttrModified"
 		];
 		
 		var _mouseEvents = [
@@ -28,7 +31,7 @@ Seed (
 		
 		var _translateEvents = {
 			"transitionend" : [ "msTransitionEnd", "webkitTransitionEnd", "oTransitionEnd" ]
-		}
+		};
 		
 		_elementEvents = _elementEvents.concat(_mouseEvents);
 		
@@ -76,6 +79,8 @@ Seed (
 		
 		var _firedActions = {};
 		var _eid = Mold.getId();
+
+
 		this.publics = {
 			_eid : _eid,
 			when : function(event, callback){
@@ -90,10 +95,10 @@ Seed (
 						var delayedCall = function(){
 							callback();
 							that.off(event, delayedCall);
-						}
+						};
 						that.on(event, delayedCall);
 					}
-				}
+				};
 
 				if(callback){
 					executeOn(callback);
@@ -102,20 +107,21 @@ Seed (
 				_element.then = function(callback){
 					executeOn(callback);
 					return _element;
-				}
+				};
 				
 				return _element;
 			},
+			
 			at : function(event, callback, config){
 				var trigger = Mold.Lib.EventStore.getElementTrigger(_element, event);
 				_firedActions[event] = _firedActions[event] || {};
 				if(!_firedActions[event][callback]){
-				//	console.log("trigger", trigger)
+				
 					for(var i = 0; i < trigger.length; i++){
 						if(config && config.triggerElement){
 							config.triggerElement.trigger(trigger[i].event, trigger[i].data);
 						}else{
-						//	console.log("trigger", event);
+					
 							this.trigger(trigger[i].event, trigger[i].data);
 						}
 						
@@ -130,17 +136,16 @@ Seed (
 				return {
 					to : function(triggerElement){
 						that.on(event, function(e){
-							console.log("delegate", event, triggerElement);
 							triggerElement.trigger(event, e.data || false);
-						})
+						});
 					}
-				}
+				};
 			},
 			bubble : function(event, data){
 				if(_element.hasParents && _element.hasParents()){
 					_element.eachParent(function(parent){
 						parent.trigger(event, data);
-					})
+					});
 				}
 			},
 			on : function(event, callback, config){
@@ -151,7 +156,7 @@ Seed (
 					Mold.Lib.EventStore.addElementEvent(_element,  event, callback);
 					
 					_firedActions[event] = true;
-				}
+				};
 				
 				if(callback){
 					executeOn(callback);
@@ -160,7 +165,7 @@ Seed (
 				_element.then = function(callback){
 					executeOn(callback);
 					return _element;
-				}
+				};
 				
 				
 				return _element;
@@ -185,7 +190,7 @@ Seed (
 						event : event,
 						id : "event",
 						config : config || false
-					}
+					};
 				}else{
 					var eventData = data;
 				}
@@ -193,7 +198,7 @@ Seed (
 				var events = [];
 			
 				if(config && config.exclude && config.exclude.indexOf(event) > -1){
-					//console.log("Exclude Event:", event);
+					
 				}else{
 					events = Mold.Lib.EventStore.getElementEvent(_element,  event) || [];
 					var all = Mold.Lib.EventStore.getElementEvent(_element, "all");
@@ -207,7 +212,7 @@ Seed (
 					if(_isHTMLElement && _isElementEvent(event)){
 						eventObject = _initEvent(event);
 						if(eventObject){
-							//console.log(_element, event, _element.dispatchEvent);
+							
 							_element.dispatchEvent(eventObject);
 						}
 					}else{
@@ -217,6 +222,7 @@ Seed (
 				Mold.Lib.EventStore.saveTrigger(_element, event, data);
 				return output || _element;
 			}
+
 		}
 		
 		

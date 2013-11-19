@@ -17,7 +17,7 @@ Seed({
 		create : function(seed) {
 			var target = Mold.createChain(Mold.getSeedChainName(seed));
 			target[Mold.getTargetName(seed)] = function(){
-				var model = new Mold.Lib.Model({ propertys : seed.func });
+				var model = new Mold.Lib.Model({ properties : seed.func });
 					
 				return model;
 			}

@@ -29,7 +29,7 @@ describe("Test Mold.Lib.Model", function(){
 
 		it("create Seed", function(){
 			 testModel = new Mold.Lib.Model({
-			 	propertys : {
+			 	properties : {
 			 		"name" : "string|notempty",
 			 		"vorname" : "string",
 

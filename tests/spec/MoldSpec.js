@@ -88,7 +88,7 @@ describe("Mold Core Lib", function () {
 		
 	});
 
-	describe("Mold.getLoadingPropertys", function(){
+	describe("Mold.getLoadingproperties", function(){
 		
 	});
 

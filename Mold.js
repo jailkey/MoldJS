@@ -1,6 +1,6 @@
 /**
  * @author Jan Kaufmann <jan@moldjs.de>
- * @version 0.1.1;
+ * @version 0.1.2;
  */
  "use strict";
 if(typeof Titanium !== undefined) { var GLOBAL = this };
@@ -563,11 +563,11 @@ var Mold = (function(config){
 			Mold.cue.add("loadingproperty", propertyName, propertyName);
 		},
 /**
-* @methode getLoadingPropertys
+* @methode getLoadingproperties
 * @desc Returns a list of all "loading properties"
 * @return (Array) - A list of all "loading properties"
 **/
-		getLoadingPropertys : function(){
+		getLoadingproperties : function(){
 			return Mold.cue.getType("loadingproperty");
 		},
 /**
@@ -625,7 +625,6 @@ var Mold = (function(config){
 			var seeds = Mold.cue.getType("loadedseeds");
 			
 			Mold.each(_Mold, function(seedValue, seedName){
-				//console.log("checkLoadedNames seed->", seedName);
 				var seedPath = seedName.substring(0, seedName.lastIndexOf("."));
 				if(seedName === seedPath+"."+name){
 					return seedName;
@@ -650,9 +649,9 @@ var Mold = (function(config){
 
 			if(seed){
 				//Checks if all dependencies will be loaded
-				var loadingPropertys = Mold.getLoadingPropertys();
+				var loadingproperties = Mold.getLoadingproperties();
 				var startCreating = true;
-				Mold.each(loadingPropertys, function(property){
+				Mold.each(loadingproperties, function(property){
 
 					if(seed[property]){
 						if(typeof seed[property] === "object"){
@@ -758,7 +757,6 @@ var Mold = (function(config){
 				path = "./"+path;
 				if(nodePath.existsSync(path)){
 					var testMold = require(path);
-					console.log("require", path);
 				}else{
 					
 					Mold.log("Error", { code : 1, filename : path} );
@@ -1066,11 +1064,11 @@ var Mold = (function(config){
 					}
 					elementValue = Mold.trim(literalString.substring(propertyValueStart+1, propertyValueEnd));
 				}
-				
 				literalString = literalString.substring(propertyValueEnd, literalString.length);
 				var outputValue = { name : elementName, value : elementValue };
 				if(literalString){
-					output.concat(Mold.jsparser.parseObjectLitral(literalString, onelement));
+					output.push(outputValue)
+					output = output.concat(Mold.jsparser.parseObjectLitral(literalString, onelement));
 				}
 				
 				if(typeof onelement === "function"){
@@ -1078,7 +1076,6 @@ var Mold = (function(config){
 				}
 
 				return output;
-
 
 			},
 		},
@@ -1122,7 +1119,7 @@ var Mold = (function(config){
 * @param (Object) target - Expects the target object
 * @param (Object) origin - Expects the origin object
 * @param (Array) selected - Expects an array with the property- and methodenames that will be copied, the parameter is optional, if it is not given, all methodes an parametes will be copied
-* @return (Object) - returns the target object with the new methodes an propertys
+* @return (Object) - returns the target object with the new methodes an properties
 **/
 		mixing : function(target, origin, selected){
 			for(var property in origin){
@@ -1410,6 +1407,3 @@ Mold.addDNA({
 }());
 
 
-Mold.onlog(function(type, test){
-	console.log(type, test);
-});

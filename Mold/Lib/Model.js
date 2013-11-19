@@ -12,7 +12,7 @@ Seed({
 
 		
 
-		var _propertys = config.propertys;
+		var _properties = config.properties;
 		var _data = {};
 		var that = this;
 		var _isValidation = false;
@@ -168,7 +168,7 @@ Seed({
 		}
 
 		
-		_createModel(_propertys, _data);
+		_createModel(_properties, _data);
 		
 		var _update = function(model, data){
 			Mold.each(data, function(element, name){

@@ -22,10 +22,26 @@ Seed({
 		Mold.mixing(this, new Mold.Lib.Event(this));
 			
 		
+
+
+		var _hideTemplate = function(element){
+		
+				Mold.each(element, function(element){
+					if(element.childs && element.childs[0]){
+						_hideTemplate(element.childs[0]);
+					}
+					element.hide()
+				
+				});
+			
+		}
+
 		var _parseTemplate = function(templateContent){
 			_applyToDom(templateContent);
 			Mold.Lib.TreeFactory.preParseTemplate(_shadowTemplate);
-			return _buildTree()
+			var tree = _buildTree();
+			_hideTemplate(tree.childs[0]);
+			return tree;
 		}
 
 

@@ -13,7 +13,8 @@ Seed({
 		var _location =  {
 			pathname : "",
 			search : "",
-			hash : ""
+			hash : "",
+			methode : ""
 		};
 		
 		var _location = (Mold.isNodeJS) ? _location : document.location;
@@ -126,33 +127,67 @@ Seed({
 					return parameterNames;
 				}
 			},
+
+			removeMethod : function(route){
+				if(route.substring(0,3) === "GET"){
+					route = route.substring(3, route.length);
+				}
+				if(route.substring(0,3) === "PUT"){
+					route = route.substring(3, route.length);
+				}
+				if(route.substring(0,4) === "POST"){
+					route = route.substring(4, route.length);
+				}
+				if(route.substring(0,6) === "DELETE"){
+					route = route.substring(6, route.length);
+				}
+				return route;
+			},
+
+
+			getMethod : function(route){
+				if(route.substring(0,3) === "GET"){
+					return "GET";
+				}
+				if(route.substring(0,3) === "PUT"){
+					return "PUT"
+				}
+				if(route.substring(0,4) === "POST"){
+					return "POST";
+				}
+				if(route.substring(0,6) === "DELETE"){
+					return "DELETE"
+				}
+				return false;
+			},
 			
 			parseRoutes : function (routes, path, output){
 				var output = output || [],
 					path = path || "";
 				
 				for(var route in routes){
-					var first = route.substring(0,1);
+					//clean route from method if it is set
+					var cleanRoute = this.removeMethod(route);
+					var first = cleanRoute.substring(0,1);
 					switch(first){
 						case "/":
-							if(that.isUrl(route, _path)){
+							if(that.isUrl(cleanRoute, _path)){
 								path += first;
 								output = that.getNextRoute(routes, route, path, output, "path");
 							}
 							break;
 						case "?":
-							if(that.isParameter(route, first, _params)){
+							if(that.isParameter(cleanRoute, first, _params)){
 								output = that.getNextRoute(routes, route, path, output, "param");
 							}
 							break;
 						case "#":
 						
-							if(that.isHash(route, _hashes)){
+							if(that.isHash(cleanRoute, _hashes)){
 								output = that.getNextRoute(routes, route, path, output, "hash");
 							}
 							break;
 					}
-
 				}
 				return output;
 			},
@@ -161,22 +196,36 @@ Seed({
 				if( typeof routes[route] === "object"){
 					that.parseRoutes(routes[route], path, output);
 				}else{
-					var parameter = that.getParameter(route, _hashes, _path, type);
-					output.push({
-						route : routes[route],
-						parameter : parameter
-					});
+					var parameter = that.getParameter(route, _hashes, _path, type),
+						method = that.getMethod(route),
+						addRoute = true;
+
+					if(Mold.isNodeJS && method){
+						if(method !== _request.method){
+							addRoute = false;
+						}
+					}
+					if(addRoute){
+						output.push({
+							method : method,
+							route : routes[route],
+							parameter : parameter
+						});
+					}
 				}
 				return output;
 			},
 			
 			loadSeed : function(route, parameter){
+
 				Mold.load({ name : route }).bind(function(seedName){
+
 					if(!that.isSeedLoaded(seedName)){
 						that.markSeedAsLoaded(seedName);
 						var selectedSeed = Mold.getSeed(seedName);
 						var dna = Mold.getDNABySeedName(seedName)
 						if(dna.createBy){
+
 							switch(dna.createBy){
 								case "new":
 									if(parameter){
@@ -219,7 +268,6 @@ Seed({
 								});
 							}else{
 								Mold.ready(function(){
-									
 									Mold.Lib.GlobalEvents.trigger(route.replace("@", ""), { urlparameter : parameter, request : _request, response : _response }, { saveTrigger : true });
 								});
 							}

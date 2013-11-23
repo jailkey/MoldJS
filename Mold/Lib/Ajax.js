@@ -71,27 +71,28 @@
 							events.trigger("ajax.get.success", { xhr : xhr, json : jsonData });
 						}else if(config.method === "POST"){
 							events.trigger("ajax.post.success", { xhr : xhr, json : jsonData });
+						}else if(config.method === "DELETE"){
+							events.trigger("ajax.delete.success", { xhr : xhr, json : jsonData });
+						}else if(config.method === "PUT"){
+							events.trigger("ajax.put.success", { xhr : xhr, json : jsonData });
 						}
 					}  
 				} 
 				
-				if(config && config.method === "POST"){
-					console.log("POST");
-					xhr.open('POST', url, true);
-				}else{
-					xhr.open('GET', url, true);
-				}
+				xhr.open(config.method, url, true);
 					
 				if(config && config.isFile){
-					console.log("data", data);
+					
 					xhr.upload.addEventListener("progress", function (e){
 						events.trigger("ajax.progress", { xhr : xhr, status : e });
 					});
 					xhr.send(data);  
 					
 				}else{
+
 					xhr.setRequestHeader ('Content-Type', 'application/x-www-form-urlencoded');
 					xhr.send("data="+data);  
+				
 				}
 			} 
 		}

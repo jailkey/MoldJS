@@ -10,12 +10,11 @@ Seed({
 	},
 	function(config){
 
-		
-
-		var _properties = config.properties;
-		var _data = {};
-		var that = this;
-		var _isValidation = false;
+		var _properties = config.properties,
+			_data = {},
+			that = this,
+			_adapter = config.adapter,
+			_isValidation = false;
 
 		Mold.mixing(this, new Mold.Lib.Event(this));
 		Mold.mixing(_data, new Mold.Lib.Event(_data));
@@ -23,25 +22,57 @@ Seed({
 		var _createProperty = function(element, name, data){
 			var validationError = _notValid(element, data[name], "property");
 			if(validationError){
-				
 				if(data.on){
 
-					var result = data.trigger("validation.error", { error : validationError, value : data[name], oldValue : data[name], name : name, element : data});
+					var result = data.trigger("validation.error", { 
+									error : validationError,
+									value : data[name],
+									oldValue : data[name],
+									name : name,
+									element : data
+								});
 
 				}
-				that.trigger("validation.error", { error : validationError, value : data[name], oldValue : data[name], name : name, element : data})
+				that.trigger("validation.error", { 
+					error : validationError,
+					value : data[name],
+					oldValue : data[name],
+					name : name,
+					element : data
+				});
 			}
 			data[name] = data[name] || "";
+
 			Mold.watch(data, name, function(){
-				data.trigger("property.change."+name, { value : arguments[2], name : name });
-				data.trigger("property.change", { value : arguments[2], name : name });
+				data.trigger("property.change."+name, {
+					value : arguments[2],
+					name : name
+				});
+
+				data.trigger("property.change", {
+					value : arguments[2],
+					name : name 
+				});
+
 				var validationError = _notValid(element, arguments[2], "property");
-				
 				if(validationError){
-					var result = data.trigger("validation.error", { error : validationError, value : arguments[2], oldValue : arguments[1], name : name, element : data})
+					
+					var result = data.trigger("validation.error", { 
+						error : validationError,
+						value : arguments[2],
+						oldValue : arguments[1],
+						name : name,
+						element : data
+					});
 					
 
-					that.trigger("validation.error", { error : validationError, value : arguments[2], oldValue : arguments[1], name : name, element : data});
+					that.trigger("validation.error", {
+						error : validationError,
+						value : arguments[2],
+						oldValue : arguments[1],
+						name : name,
+						element : data
+					});
 
 					if(!Mold.isObject(result)){
 						arguments[2] = result;
@@ -67,8 +98,7 @@ Seed({
 				}else{
 					_createModel(element[0], e.data.value);
 				}
-			}).on("list.item.remove", function(e){
-				
+
 			}).on("list.item.change", function(e){
 
 				if(Mold.isObject(e.data.value) && !Mold.isArray(e.data.value)){
@@ -79,11 +109,13 @@ Seed({
 				_createModel(element[0], e.data.value);
 				
 			});
+
 			if(listValue){
 				Mold.each(listValue, function(element){
 					data[name].push(element);
 				});
 			}
+
 			return data;
 		}
 
@@ -103,9 +135,10 @@ Seed({
 		}
 
 		var _createObject = function(element, name, data){
+
 			_notValid(element, data[name], "object");
 			if(!data[name]){
-				data[name] = {}
+				data[name] = {};
 			}
 			Mold.mixing(data[name] , new Mold.Lib.Event(data[name]));
 			Mold.watch(data, name, function(e){
@@ -134,7 +167,10 @@ Seed({
 		}
 
 		var _createModel = function(model, data){
-			var name = "", element ="";
+
+			var name = "",
+				element ="";
+
 			for(name in model){
 				element = model[name];
 				data = _createItem(element, name, data);
@@ -153,7 +189,6 @@ Seed({
 							if(validate){
 								if(!validate(value)){
 									output =  validation;
-
 								}
 							}
 						});
@@ -176,7 +211,6 @@ Seed({
 					_update(model[name], element);
 				}else{
 					if(model[name] &&  model[name] !== element){
-				
 						model[name] = element;
 					}
 				}
@@ -192,7 +226,7 @@ Seed({
 
 			},
 			save : function(){
-
+				_adapter.save(this.json())
 			},
 			load : function(){
 

@@ -16,8 +16,10 @@ Seed({
 			_node = config.node,
 			_stringValue = config.stringValue,
 			_parent = config.parent,
+			_filter = config.filter,
 			_value = "",
-			_childIndex = false;
+			_childIndex = false,
+			_isVisible = true;
 
 
 		var _getChildData = function(childs, data){
@@ -51,6 +53,7 @@ Seed({
 
 		this.publics = {
 			name : _name,
+			filter : _filter,
 			getType : function(){
 				return _type;
 			},
@@ -70,6 +73,10 @@ Seed({
 			hide : function(value){
 				_value = value;
 				_setChildValues();
+			},
+			
+			isVisible : function(){
+				return _isVisible;
 			},
 			_test : function(){
 				if(irgendwas){

@@ -40,7 +40,8 @@ Seed({
 
 						var oname = name;
 						name = "{{"+name+"}}";
-						expString = '([\\s\\S]*?)('+name.replace("^","\\^")+')([\\s\\S]*)';
+						name = name.replace("^","\\^").replace(/\|/gm, "\\|");
+						expString = '([\\s\\S]*?)('+name+')([\\s\\S]*)';
 						regExp  = new RegExp(expString, "gm");
 						result = regExp.exec(node.nodeValue);
 						targetNode = document.createTextNode(result[2]);
@@ -104,6 +105,7 @@ Seed({
 			if((cache = _cleanNameCache[name])){
 				return cache;
 			}
+			name = name.split("|")[0];
 			_cleanNameCache[name] = name.replace("^", "").replace("#", "").replace("./", "").replace("/", "");
 			return _cleanNameCache[name];
 		}
@@ -113,6 +115,7 @@ Seed({
 		var _isVar = function(phrase){
 			var cache = false;
 			if(!(cache = _isVarCache[phrase])){
+				phrase = phrase.split("|")[0];
 				var firstChar = phrase.substring(0,1);
 				if( firstChar !== "#" 
 					&& firstChar !== "$" 
@@ -216,7 +219,7 @@ Seed({
 
 		var _getBlockNodes = function(node, name){
 			var blockList = [];
-
+			name = name.split("|")[0];
 			while (node) {
 				if(_checkBlockEnd(node.nodeValue, "/"+name.replace("^", "").replace("#", ""))){
 					return [node, blockList]
@@ -350,24 +353,29 @@ Seed({
 			}
 		}
 
-
+		
 		var _parseDomTree = function(node, tree, template, element, index){
+
 			var varName =  _containsVar(node.nodeValue);
 			var directive;
+			var nodeName = node.nodeName;
+			var nodeType = node.nodeType;
+			var nodeValue =  node.nodeValue;
+
 			index = index || 0;
-			switch(node.nodeType){
+
+			switch(nodeType){
 				//Parse Elementnodes
 				case 1:
 					element = node;
-					if((directive = _directive.get("attribute", node.nodeName))){
+					if((directive = _directive.get("attribute", nodeName))){
 						directive.call(this, node, element, template, index);
-
 					}
 					break;
 				//Parse Attributenodes
 				case 2:
 				
-					if((directive = _directive.get("attribute", node.nodeName))){
+					if((directive = _directive.get("attribute", nodeName))){
 						directive.call(this, node, element, template, index);
 					}
 
@@ -378,7 +386,13 @@ Seed({
 
 				//Parse Textnodes and add them to the tree
 				case 3:
+					
 					if(varName){
+						
+						var cleanName = _cleanVarName(varName),
+							filter = varName.split("|");
+							filter.shift();
+
 						if(_isVar(varName)){
 						
 							var pointer = new Mold.Lib.DomPointer({
@@ -386,37 +400,35 @@ Seed({
 								type : "value",
 								node : node,
 								subnodes : false,
-								stringValue : node.nodeValue
+								stringValue : nodeValue
 							});
-							var lastPointer = pointer;
-							var valuePath = _hasValuePath(varName)
-							var test = tree.addChild(_cleanVarName(varName), pointer, false, valuePath)
-			
+
+							
+							var valuePath = _hasValuePath(varName);
+							tree.addChild(cleanName, pointer, false, valuePath, filter, index);
+					
 
 						}else if(_isBlock(varName) || _isNegativBlock(varName)){
+
 							var	subnodes = _getBlockNodes(node, varName),
 								blockType = (_isBlock(varName)) ? "block" : "negativblock",
-								cleanName = _cleanVarName(varName),
 								lastNode = _dom.getLastNode(subnodes),
 								shadowDom = _copyNodeBlock(subnodes, lastNode);
 
 							var pointer = new Mold.Lib.DomPointer({
-								name : varName,
+								name : varName.split("|")[0],
 								type : blockType,
 								node : node,
 								shadowDom : shadowDom,
-								lastNode : lastNode,
+								lastNode : lastNode.nextSibling || lastNode,
 								subnodes : subnodes
 							});
-
-
-							var valuePath = _hasValuePath(varName)
-							var subtree = tree.addChild(cleanName, pointer, false, valuePath);
-
-							//subtree.hide();
-
-							tree = _setOpenedTree(_cleanVarName(varName), subtree);
-							node.nodeValue = "";
+						
+							
+							var valuePath = _hasValuePath(varName),
+								subtree = tree.addChild(cleanName, pointer, false, valuePath, filter, index);
+								tree = _setOpenedTree(cleanName, subtree),
+								node.nodeValue = "";
 
 						}else if(_isBlockEnd(varName)){
 							var opend = _getOpenedTree(_cleanVarName(varName));
@@ -436,12 +448,12 @@ Seed({
 				subnode = false,
 				attributeLen = (node.attributes) ? node.attributes.length : 0;
 
-			if(node.hasChildNodes && node.hasChildNodes() && node.nodeType != 2){
-				var nodeLen = node.childNodes.length
-			
-			
+			if(node.hasChildNodes && node.hasChildNodes() && nodeType != 2){
+				var childsNodes =  node.childNodes;
+				var nodeLen = childsNodes.length;
+				
 				for(; i < nodeLen; i++){
-					subnode = node.childNodes[i];
+					subnode = childsNodes[i];
 					tree = _parseDomTree(subnode, tree, template, element, index);	
 				}
 			}
@@ -477,7 +489,7 @@ Seed({
 							mainTree : mainTree,
 							stringValue : node.nodeValue
 						});
-						
+					
 						var valuePath = _hasValuePath(varName)
 						tree.addChild(varName, pointer, false, valuePath);
 						
@@ -494,6 +506,8 @@ Seed({
 							mainTree : mainTree,
 							stringValue : node.nodeValue
 						});
+
+
 
 						var valuePath = _hasValuePath(varName)
 						var subtree = tree.addChild(cleanName, pointer, false, valuePath);
@@ -525,6 +539,7 @@ Seed({
 			}
 
 		}
+
 
 		var _parseCollection = function(collection, tree, template, index){
 			var i = 0,

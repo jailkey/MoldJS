@@ -36,7 +36,7 @@ Seed({
 				var handler =  node.nodeValue.split(":")[0];
 				var moldEvent = node.nodeValue.split(":")[1];
 				
-				new Mold.Lib.Event(element).on("click", function(e){
+				new Mold.Lib.Event(element).on(handler, function(e){
 					var data ={
 						e : e,
 						element : this,

@@ -6,7 +6,8 @@ Seed({
 		include : [
 			"Mold.Lib.Tree",
 			"Mold.Lib.TreeFactory",
-			"Mold.Lib.Event"
+			"Mold.Lib.Event",
+			"Mold.Lib.TemplateFilter"
 		]
 	},
 	function(content){
@@ -21,26 +22,23 @@ Seed({
 
 		Mold.mixing(this, new Mold.Lib.Event(this));
 			
-		
-
 
 		var _hideTemplate = function(element){
 		
-				Mold.each(element, function(element){
-					if(element.childs && element.childs[0]){
-						_hideTemplate(element.childs[0]);
-					}
-					element.hide()
-				
-				});
-			
+			Mold.each(element, function(element){
+				if(element.childs && element.childs[0]){
+					_hideTemplate(element.childs[0]);
+				}
+				element.hide();
+			});
+
 		}
 
 		var _parseTemplate = function(templateContent){
 			_applyToDom(templateContent);
 			Mold.Lib.TreeFactory.preParseTemplate(_shadowTemplate);
 			var tree = _buildTree();
-			_hideTemplate(tree.childs[0]);
+			//_hideTemplate(tree.childs[0]);
 			return tree;
 		}
 
@@ -73,26 +71,58 @@ Seed({
 		}
 
 
-		if(typeof content === "function"){
-			_templateContent = content.toString().replace(/(^function\s*\(\)\s*\{\s*\/\*\|)([\s\S]*)(\|\*\/\s*\})/g, function(){
-				return arguments[2];
-			});
+	
+
+		var _viewModelObject = {
+			set : function(model, name, value){
+				_viewModel[model] = _viewModel[model] || {};
+				_viewModel[model][name] = value;
+				that.trigger("viewmodel.change", { model : _viewModel, modelname : model, name : name, value : value })
+				return _viewModel[model][name];
+			},
+			get : function(model, name){
+				if(!model && !name){
+					return _viewModel;
+				}
+				if(_viewModel[model] && _viewModel[model][name]){
+					return _viewModel[model][name];
+				}
+				return false;
+			},
+			remove : function(model, name){
+				if(_viewModel[model] && _viewModel[model][name]){
+					delete _viewModel[model][name];
+					return true;
+				}
+				return false;
+			}
 		}
 
 
 		var _addData = function(template, data, bind){
 				Mold.each(template, function(element, name){
+
 					if(data[name] != undefined){
+
 						if(Mold.isArray(data[name])){
+
 							data[name].on("list.item.add", function(e){
-								if(!element.childs[e.data.index]){
-									element.add();
-								}else{
-									if(element.isHidden()){
-										element.show();
+								var filterResult = true;
+								
+								if(element.filter && element.filter.length){
+									//_applyFilter(element);
+								}				
+								//if(filterResult){
+									if(!element.childs[e.data.index]){
+										element.add();
+									}else{
+										if(element.isHidden()){
+											element.show();
+										}
 									}
-								}
-								_addData(element.childs[e.data.index], e.data.value, bind);
+									_addData(element.childs[e.data.index], e.data.value, bind);
+								//}
+								
 							}).on("list.item.remove", function(e){
 								element.remove(e.data.index);
 							}).on("list.item.change", function(e){
@@ -111,30 +141,106 @@ Seed({
 				});
 		}
 
+		var _each = function(element, callback){
+			
+			if(element.childs && element.childs.length){
+				Mold.each(element.childs, function(childElement){
+					
+					Mold.each(childElement, function(selected, name){
+						callback.call(this, selected, name);
+						_each(selected, callback);
+					});
+				});
+			}
+		}
+
+		var _visibility = function(element, callback){
+			var rowcount = -1; 
+			if(element.childs && element.childs.length){
+				var i = 0,
+					len = element.childs.length;
+
+				for(; i < len; i++){
+					var selected = element.childs[i];
+					rowcount++;
+					if(
+						Mold.some(selected, function(selectedChild, name){
+							var output = callback.call(this, selectedChild, rowcount);
+							if(output === "exit"){
+								i = len;
+								return false;
+							}
+							return output;
+						})
+					){
+						element.show(false, i);
+					}else{
+						element.hide(i);
+					}
+				}
+			}
+		}
+
+
+
+		var _applyFilter = function(element){
+
+			if(element.filter && element.filter.length){
+				Mold.each(element.filter, function(filterName){
+					var filterParts = filterName.split(":");
+					filterName =  filterParts[0];
+					var filterParameter = (filterParts[1]) ? filterParts[1] : false;
+
+					var filter = Mold.Lib.TemplateFilter.get(filterName);
+					if(filter){
+						switch (filter.select){
+							case "child":
+								switch (filter.type){
+									case "visibility" :
+										_visibility(element, function(child, rowcount){
+											return filter.action.call(this, that, {
+												child : child,
+												viewModel : _viewModel,
+												element : element, 
+												rowcount : rowcount,
+												parameter : filterParameter
+											});
+										});
+										break;
+									default:
+										break;
+								}
+								break;
+							default:
+								break;
+						}
+					}
+				});	
+			}
+		}
+
+
+
+		if(typeof content === "function"){
+			_templateContent = content.toString().replace(/(^function\s*\(\)\s*\{\s*\/\*\|)([\s\S]*)(\|\*\/\s*\})/g, function(){
+				return arguments[2];
+			});
+		}
+	
+
 		_compiledTemplate = _parseTemplate(_templateContent);
 
+
+
+
 		this.publics = {
-			viewModel : {
-				set : function(model, name, value){
-					_viewModel[model] = _viewModel[model] || {};
-					_viewModel[model][name] = value;
-					return _viewModel[model][name];
-				},
-				get : function(model, name){
-					if(_viewModel[model] && _viewModel[model][name]){
-						return _viewModel[model][name];
-					}
-					return false;
-				},
-				remove : function(model, name){
-					if(_viewModel[model] && _viewModel[model][name]){
-						delete _viewModel[model][name];
-						return true;
-					}
-					return false;
-				}
-			},
+			viewModel : _viewModelObject,
 			triggerEvent : _triggerEvent,
+			applyFilter : _applyFilter,
+			visibility : _visibility,
+			each : function(callback){
+				_each(_compiledTemplate, callback);
+			},
 			snatch : function(data){
 				Mold.each(data, function(callback, name){
 					_snatched[name] = callback;

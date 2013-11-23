@@ -6,25 +6,25 @@ Seed({
 			"Mold.Lib.Event"
 		],
 		compiler : {
-			//preparsePublics : true
+			preparsePublics : true
 		}
 	},
-	function(name, parent, valuePath, index, template){
+	function(name, parent, valuePath, index, template, filter){
 
 		var _childs = [],
-			_name = name,
-			_value = false,
+			_name = name.split("|")[0],
+			_value = "",
 			_pointer = [],
+			_filter = filter,
 			_parent = parent || false,
 			_isHidden = false,
 			_setValueListener = [],
-			_valuePath = valuePath || false,
-			that = this,
+			_valuePath = valuePath || "",
 			_index = index || false,
-			_template = template || false;
+			_template = template || false,
+			_visibileChilds = 0,
+			that = this,
 			undefined;
-
-
 	
 
 		var _checkThisValue = function(name, parent){
@@ -91,36 +91,73 @@ Seed({
 			_setValueListener.push(callback);
 		}
 
+
+		var _showPointer = function(pointer, value){
+			var oldVisibility = pointer.isVisible();
+			switch(pointer.getType()){
+				case "string-value":
+					pointer.show(value);
+					break;
+				case "string-block":
+					pointer.show(value);
+					break;
+				case "string-negativblock":
+					pointer.hide(value);
+					break;
+				case "value":
+					pointer.show(value);
+					break;
+				case "block":
+					pointer.show(value);
+					break;
+				case "negativblock":
+					pointer.hide();
+					break;
+				default:
+					break;
+			}
+			if(oldVisibility !== pointer.isVisible()){
+				_visibileChilds++;
+			}
+		}
+
 		var _showPointerValue = function(pointerList, value){
 			var len = pointerList.length,
-				pointerUpdates = [],
 				i = 0;
-
 
 			for(; i < len; i++){
 				var pointer = pointerList[i];
-				switch(pointer.getType()){
-					case "string-value":
-						pointer.show(value);
-						break;
-					case "string-block":
-						pointer.show(value);
-						break;
-					case "string-negativblock":
-						pointer.hide(value);
-						break;
-					case "value":
-						pointer.show(value);
-						break;
-					case "block":
-						pointer.show(value);
-						break;
-					case "negativblock":
-						pointer.hide();
-						break;
-					default:
-						break;
-				}
+				_showPointer(pointer, value)
+
+			}
+		}
+
+		var _hidePointer = function(pointer, value){
+			var oldVisibility = pointer.isVisible();
+			switch(pointer.getType()){
+				case "string-value":
+					pointer.hide();
+					break;
+				case "string-block":
+					pointer.hide();
+					break;
+				case "value":
+					pointer.hide();
+					break;
+				case "block":
+					pointer.hide();
+					break;
+				case "string-negativblock":
+					pointer.show(value);
+					break;
+				case "negativblock":
+					pointer.show(value);
+					break;
+				default:
+					break;
+			}
+			if(oldVisibility !== pointer.isVisible()){
+				_visibileChilds--;
 			}
 		}
 
@@ -132,30 +169,7 @@ Seed({
 
 			for(; i < len; i++){
 				var pointer = pointerList[i];
-				switch(pointer.getType()){
-					case "string-value":
-						pointer.hide();
-						break;
-					case "string-block":
-				
-						pointer.hide();
-						break;
-					case "value":
-						pointer.hide();
-						break;
-					case "block":
-						pointer.hide();
-						break;
-					case "string-negativblock":
-					
-						pointer.show(value);
-						break;
-					case "negativblock":
-						pointer.show(value);
-						break;
-					default:
-						break;
-				}
+				_hidePointer(pointer, value);
 			}
 		}
 
@@ -163,18 +177,28 @@ Seed({
 
 		var _clone = function(){
 			
-			var newTree = new Mold.Lib.Tree(_name, _parent, _valuePath, 0, _template),
-				selfPointerClone = _pointer[0].clone();
-				_index = _childs.length;
-				Mold.Lib.TreeFactory.parseCollection(selfPointerClone.shadowDom, newTree, template, _index);
-				_childs.push(newTree.childs[0])
+			var newTree = new Mold.Lib.Tree(_name, _parent, _valuePath, 0, _template, _filter),
+				selfPointerClone = _pointer[0].clone(),
+				index = _childs.length;
+
+				Mold.Lib.TreeFactory.parseCollection(selfPointerClone.subnodes, newTree, template, index, _filter);
+				_childs.push(newTree.childs[0]);
 				_pointer.push(selfPointerClone);
 				
 				selfPointerClone.add();
 			return newTree;
 		}
 
-		_hidePointerValue(_pointer);
+
+		var _getVisibleChilds = function(){
+			var output = 0,
+				i = 0,
+				len  = _pointer.length;
+			for(; i < len; i++){
+				output += (_pointer[i].isVisible()) ? 1 : 0;
+			};
+			return output;
+		}
 
 		this.publics = {
 
@@ -183,9 +207,15 @@ Seed({
 			pointer : _pointer,
 			name : _name,
 			valuePath : _valuePath,
-
+			filter : _filter,
+			visibleChildLength : function(){
+				return _visibileChilds;
+			},
 			isHidden : function(){
 				return _isHidden;
+			},
+			isChildHidden : function(index){
+				return !_pointer[index].isVisible();
 			},
 			parent : function(){
 				return _parent;
@@ -240,26 +270,34 @@ Seed({
 			},
 
 			hide : function(index){
-				if(!index){
+				if(index === undefined) {
 					_isHidden = true;
 					_hidePointerValue(_pointer);
+				}else{
+					if(_pointer[index]){
+						_hidePointer(_pointer[index]);
+					}
 				}
 			},
 
-			show : function(index){
-				if(!index){
+			show : function(value, index){
+				if(index === undefined){
 					_isHidden = false;
-					_showPointerValue(_pointer);
+					_showPointerValue(_pointer, value);
+				}else{
+					if(_pointer[index]){
+						_showPointer(_pointer[index], value);
+					}
 				}
 			},
-			addChild : function(name, value, index, valuePath){
+			addChild : function(name, value, index, valuePath, filter, childIndex){
 				var index = index || 0;
 				_childs[index] = _childs[index] || {};
 				if(!_childs[index][name]){
-					_childs[index][name] = new Mold.Lib.Tree(name, this, valuePath, index, _template);
+					_childs[index][name] = new Mold.Lib.Tree(name, this, valuePath, index, _template, filter);
 				}
 				_childs[index][name].addPointer(value);
-				_childs[index][name].setIndex(index);
+				_childs[index][name].setIndex(childIndex);
 				value.setChildIndex(index);
 				return _childs[index][name];
 			},

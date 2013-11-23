@@ -3,7 +3,7 @@ Seed({
 		name : "Mold.Lib.DomPointer",
 		dna : "class",
 		compiler : {
-			//preparsePublics : true
+			preparsePublics : true
 		}
 	},
 	function(config){
@@ -15,13 +15,14 @@ Seed({
 			_oldValue = _nodeValue,
 			_subnodes = config.subnodes,
 			_subnodeValues = [],
+			_lastShadowNode = config.lastShadowNode,
 			_lastNode = config.lastNode,
 			_parentElement = config.parentElement || _node.parentElement,
 			_shadowDom = config.shadowDom || false,
 			_isVisible = false,
 			_valueStore = false,
+			_filter = config.filter,
 			_childIndex = false;
-			//_node.nodeValue = "";
 
 			_node.nodeValue = ""
 
@@ -46,10 +47,25 @@ Seed({
 			});
 		}
 
+		var _hideList = function(pointer, dontremove){
+			Mold.each(pointer, function(element){
+				if(Mold.isArray(element)){
+					_hideList(element, dontremove);
+				}else{
+					if(element.parentNode && element !== dontremove){
+						if(!_valueStore){
+							_valueStore = document.createElement("div");
+						}
+						_valueStore.appendChild(element);
+					}
+				}
+			});
+		}
+
 		var _hide = function(from, to, dontremove){
 			var node = from, nextNode;
-			
 			while(node != null){
+
 				nextNode = node.nextSibling;
 				if(node.parentNode && node !== dontremove){
 					if(!_valueStore){
@@ -68,18 +84,21 @@ Seed({
 
 
 		var _show = function(value){
-			if(value.hasChildNodes && value.hasChildNodes()){
 
+			if(value.hasChildNodes && value.hasChildNodes()){
+				_subnodes = [];
 				var  subnode = value.firstChild;
 				
 				while(subnode != null){
 				
 					var nextNode = subnode.nextSibling;
 					if(subnode.hasChildNodes()){
-						_show(_show)
+						_show(subnode.childNodes)
 					}
 					if(subnode){
-						_parentElement.insertBefore(subnode, _lastNode);
+						var lastNode = _getLastShadowNode(_subnodes);
+						_parentElement.insertBefore(subnode, _lastShadowNode);
+
 						_subnodes.push(subnode);
 					}
 
@@ -89,17 +108,39 @@ Seed({
 		}
 
 
-		var _add = function(shadowDom){
+		var _getFragment = function(shadowDom, fragment){
 			if(shadowDom){
 
 				Mold.each(shadowDom, function(element){
 			
 					if(Mold.isArray(element)){
+						_getFragment(element, fragment);
+					}else{
+						// referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+						console.log("append")
+						fragment.appendChild(element)
+						//_parentElement.insertBefore(element, _lastNode);
+					}
+				});
+			}
+			return fragment;
+		}
+
+		var _add = function(shadowDom){
+			if(shadowDom){
+				//var frament = document.createDocumentFragment();
+				Mold.each(shadowDom, function(element){
+			
+					if(Mold.isArray(element)){
 						_add(element);
 					}else{
+						// referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 						_parentElement.insertBefore(element, _lastNode);
 					}
 				});
+				
+				
+				//_parentElement.insertBefore(_getFragment(shadowDom, document.createDocumentFragment()), _lastNode);
 			}
 		}
 
@@ -120,17 +161,35 @@ Seed({
 
 		var _clone = function(node, subnodes, shadowDom){
 
+			var shadowCopy = shadowDom || (_shadowDom) ? _copy(_shadowDom) : false;
+			var subnodeCopy = subnodes || (_subnodes) ? _copy(shadowCopy)  : false;
+			var lastShadowNode = (subnodeCopy) ? _getLastShadowNode(subnodeCopy) : _lastNode;			
+
 			var pointer = new Mold.Lib.DomPointer({
 				name : _name,
 				type : _type,
 				node : node || _node.cloneNode(true),
 				parentElement : _parentElement,
-				shadowDom : shadowDom || (_shadowDom) ? _copy(_shadowDom) : false,
+				shadowDom : shadowCopy,
+				lastShadowNode : lastShadowNode,
 				lastNode : _lastNode,
-				subnodes : subnodes || (_subnodes) ? _copy(_subnodes) : false
+				subnodes : subnodeCopy
 			});
 	
 			return pointer;
+		}
+
+		var _getLastShadowNode = function(element){
+			if(Mold.isArray(element)){
+				return _getLastShadowNode(element[element.length -1])
+			}else{
+				return element;
+			}
+		}
+
+
+		if(!_lastShadowNode){
+			_lastShadowNode = _getLastShadowNode(_subnodes)
 		}
 
 
@@ -139,6 +198,7 @@ Seed({
 			subnodes : _subnodes,
 			shadowDom : _shadowDom,
 			name : _name,
+			filter : _filter,
 			getNode : function(){
 				return _node;
 			},
@@ -172,11 +232,12 @@ Seed({
 				return _clone(node, subnodes, shadowDom);
 			},
 			add : function(){
-				_add(_shadowDom);
+				_add(_subnodes);
 			},
 			show : function(value){
+				_isVisible = true;
 				if(_type === "value"){
-					if(value !== false && value !== ""){
+					if(value !== false && value !== "" && value !== undefined){
 						_nodeValue = _node.nodeValue;
 						_node.nodeValue = value;
 					}else{
@@ -188,18 +249,23 @@ Seed({
 				}
 			},
 			hide : function(){
+				_isVisible = false;
 				if(_type === "value"){
 					_nodeValue = _node.nodeValue;
 					_node.nodeValue = "";
 				}else{
-					_hide(_node.nextSibling, _lastNode, _lastNode);
-					/*
 					if(_subnodes){
-						_hide(_subnodes, _lastNode )
+						_hideList(_subnodes, _lastShadowNode)
+						
 					}
-					*/
 				}
 
+			},
+			isVisible : function(){
+				return _isVisible;
+			},
+			test : function(){
+				return "twst"
 			}
 		}
 

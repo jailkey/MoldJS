@@ -148,6 +148,12 @@ Seed (
 					});
 				}
 			},
+			once : function(event, callback, config){
+				var element = Mold.Lib.EventStore.getElementEvent(_element,  event);
+				if(!element || element.toString() !== callback.toString()){
+					this.on(event, callback, config);
+				}
+			},
 			on : function(event, callback, config){
 				var executeOn  = function(callback){
 					if(_isHTMLElement && _isElementEvent(event)){
@@ -183,7 +189,9 @@ Seed (
 				return _element;
 			},
 			trigger : function(event, data, config){
-				var output = false;
+				var output = false,
+					events = [];
+
 				if(!data || !data.id || data.id !== "event"){
 					var eventData = {
 						data : data || false,
@@ -195,7 +203,7 @@ Seed (
 					var eventData = data;
 				}
 					
-				var events = [];
+				
 			
 				if(config && config.exclude && config.exclude.indexOf(event) > -1){
 					
@@ -206,8 +214,11 @@ Seed (
 						events = events.concat(all);
 					}
 				}
-				var i = 0, eventsLen =events.length;
-				var eventObject = false;
+
+				var i = 0, 
+					eventsLen =events.length,
+					eventObject = {};
+
 				for(; i < eventsLen;  i++){
 					if(_isHTMLElement && _isElementEvent(event)){
 						eventObject = _initEvent(event);

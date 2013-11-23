@@ -2,6 +2,7 @@
 Seed({
 		name : "Mold.Lib.Model",
 		dna : "class",
+		version : "0.0.2",
 		include : [ 
 			"Mold.Lib.Event",
 			"Mold.Lib.List",
@@ -25,12 +26,12 @@ Seed({
 				if(data.on){
 
 					var result = data.trigger("validation.error", { 
-									error : validationError,
-									value : data[name],
-									oldValue : data[name],
-									name : name,
-									element : data
-								});
+						error : validationError,
+						value : data[name],
+						oldValue : data[name],
+						name : name,
+						element : data
+					});
 
 				}
 				that.trigger("validation.error", { 
@@ -226,6 +227,9 @@ Seed({
 
 			},
 			save : function(){
+				if(!_adapter){
+					throw "Can not save without adapter!"
+				}
 				_adapter.save(this.json())
 			},
 			load : function(){

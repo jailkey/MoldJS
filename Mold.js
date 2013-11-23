@@ -97,6 +97,7 @@ var Mold = (function(config){
 	};
 	
 	var _isSeedAdded = function(target){
+		target = (target.indexOf("->") !== -1) ? target.split("->")[1] : target;
 		return ( _createdMold[ target ] ) ? true : false;
 	};
 	
@@ -108,6 +109,7 @@ var Mold = (function(config){
 
 			if(! _isSeedAdded(seedName)){
 				output =  false;
+				return "exit";
 			}
 		});
 
@@ -121,20 +123,19 @@ var Mold = (function(config){
 		var _isLoaded = false;
 		this.bind = function ( callback ){
 			if(!_isLoaded){
-				_actions[_actions.length] = callback;
+				_actions.push(callback);
 			}else{
-				callback(name);
+				
+				callback.call(this, name);
 			}
 			return this;
 		};
 		
 		this.loaded = function(){
-			var newactions = [],
-				i = 0;
-
+			var newactions = [];
 			Mold.each(_actions, function(element){
 				if( typeof element === "function" ){
-					element(name);
+					element.call(this, name);
 				}else{
 					newactions.push(element);
 				}
@@ -638,6 +639,7 @@ var Mold = (function(config){
 * @param (object) seed - Expects a seed object
 **/
 		addSeed : function(seed){
+
 			if(!seed.loaded){
 				seed.loaded = true;
 				if(seed.events){
@@ -667,13 +669,15 @@ var Mold = (function(config){
 								});
 							}
 						}else{
+
 							startCreating = _isSeedAdded(seed[property]);
 							if(!startCreating){
-								Mold.load({ name : seed[property]});
+								Mold.load({ name : seed[property], isExternal : _externalSeeds[seed.name] || false });
 							}
 						}
 					}
 				});
+
 				//If the seed has to wait for the DNA a callback will be added
 				if(startCreating){
 					if(typeof Mold.getDNA(seed.dna).wait === "function"){
@@ -714,7 +718,7 @@ var Mold = (function(config){
 								if(seed.events.aftercreate){
 									seed.events.aftercreate(seed);
 								}
-							}							
+							}				
 							if(!_Mold[seed.name]){
 								Mold.log("Error", { code : 8, seedname: seed.name});
 							}else{
@@ -725,6 +729,7 @@ var Mold = (function(config){
 						}
 					}
 					
+
 					if(Mold.cue.get("seed", seed.name)){
 						Mold.cue.remove("seed", seed.name)
 						Mold.checkSeedCue();
@@ -732,7 +737,6 @@ var Mold = (function(config){
 					
 					if(_Mold[seed.name]){
 						_Mold[seed.name].isLoaded = true;
-						
 					}
 				}else{
 					Mold.cue.add("seed", seed.name, seed);
@@ -772,7 +776,6 @@ var Mold = (function(config){
 						path += "&cachoff="+Math.random();
 					}
 				}
-				
 				if(_config.localRepository !== null){
 					path = _config.localRepository + path;
 
@@ -797,7 +800,8 @@ var Mold = (function(config){
 				}
 				
 				_addElementEvent(scriptElement, "error", function(){
-					Mold.log("Error", { code : 1, filename : this.src} );
+					throw "File not Found "+this.src+"!";
+					//Mold.log("Error", { code : 1, filename : this.src} );
 				});
 				if(typeof error === "function"){
 					_addElementEvent(scriptElement, "error", error);
@@ -860,7 +864,6 @@ var Mold = (function(config){
 				var path = seedName.split(".");
 				var filePath = (seed.url) ? seed.url : _config.seedPath;
 				filePath += path.join("/") + ".js";
-
 				if(_externalSeeds[seed.name]){
 					if(_externalSeeds[seed.name] === "external"){
 						filePath = _config.externalRepository + filePath;
@@ -870,6 +873,7 @@ var Mold = (function(config){
 						filePath = _externalSeeds[seed.name] + filePath;
 					}
 				}
+
 
 				seed.isLoaded = false;
 				seed.isCreated = true;
@@ -1361,12 +1365,9 @@ Mold.addDNA({
 Mold.addDNA({ 
 	name :  "data", 
 	create : function(seed) {
-		try {
-			var target = Mold.createChain(seed.name.substring(0, seed.name.lastIndexOf(".")));
-			target[seed.name.substring(seed.name.lastIndexOf(".")+1, seed.name.length)] = seed.func;
-		}catch(e){
-			Mold.log("Error", { code : 3, dnaname: "data", error : e});
-		}
+		var target = Mold.createChain(seed.name.substring(0, seed.name.lastIndexOf(".")));
+		target[seed.name.substring(seed.name.lastIndexOf(".")+1, seed.name.length)] = seed.func;
+
 	}
 });
 
@@ -1406,4 +1407,7 @@ Mold.addDNA({
 	return seedFunction;
 }());
 
+Mold.onlog(function(type, test){
+	console.log(type, test);
+});
 

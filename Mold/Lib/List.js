@@ -54,13 +54,18 @@ Seed({
 
 
 		_array.push = function() {
-            
-    		Mold.each(arguments, function(element){
+
+            var i = 0,
+                len = arguments.length,
+                element = false;
+    		
+            for(; i < len; i++){
+                element = arguments[i];
     			_array.oldPush(element);
     			element = _creatListItem(element);
     			_array.trigger("list.item.add", { length : _array.length, index : _array.length -1, value : element, list : _array});
     			
-    		});
+    		};
     	};
 
     	_array.pop = function(){
@@ -89,8 +94,11 @@ Seed({
     		Mold.each(argumentsArray, function(element){
     			_array.oldUnShift(element);
     			_creatListItem(element);
-    			var value = _array[_array.length -1];
-    			_array.trigger("list.item.add", { length : _array.length , index : _array.length -1, value : value});
+    			_array.trigger("list.item.add", { 
+                    length : _array.length ,
+                    index : _array.length -1,
+                    value : _array[_array.length -1]
+                });
     			
     		});
     	}

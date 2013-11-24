@@ -34,24 +34,40 @@ var Mold = (function(config){
 
 	var _detectFeatures = function(){
 		var checker = false;
-		_features["history"] = !!(window.history && history.pushState);
-		_features["geolocation"] = 'geolocation' in navigator;
-		_features["indexedDB"] = !!window.indexedDB;
-		_features["postMessage"] = !!window.postMessage;
-		_features["websql"] = !!window.openDatabase;
-		_features["webGL"] =  !!window.WebGLRenderingContext;
-		_features["webworkers"] = !!window.Worker;
-		_features["applicationCache"] = !!window.applicationCache;
-		_features["canvas"] = !!((checker = document.createElement('canvas')) 
-									&& checker.getContext 
-									&& checker.getContext('2d')
-								); checker = false;
-		_features["defineProperty"] = !!Object.defineProperty;
-		_features["querySelector"] = !!document.querySelectorAll;
-		_features["querySelectorAll"] = !!document.querySelectorAll;
-		_features["sessionStorage"] = !!window.sessionStorage;
-		_features["localStorage"] = !!window.localStorage;
-		_features["proxy"] = !!window.Proxy;
+		if(!_isNodeJS){
+			_features["history"] = !!(window.history && history.pushState);
+			_features["geolocation"] = 'geolocation' in navigator;
+			_features["indexedDB"] = !!window.indexedDB;
+			_features["postMessage"] = !!window.postMessage;
+			_features["websql"] = !!window.openDatabase;
+			_features["webGL"] =  !!window.WebGLRenderingContext;
+			_features["webworkers"] = !!window.Worker;
+			_features["applicationCache"] = !!window.applicationCache;
+			_features["canvas"] = !!((checker = document.createElement('canvas')) 
+										&& checker.getContext 
+										&& checker.getContext('2d')
+									); checker = false;
+			_features["defineProperty"] = !!Object.defineProperty;
+			_features["querySelector"] = !!document.querySelectorAll;
+			_features["querySelectorAll"] = !!document.querySelectorAll;
+			_features["sessionStorage"] = !!window.sessionStorage;
+			_features["localStorage"] = !!window.localStorage;
+			_features["proxy"] = !!window.Proxy;
+		}else{
+			_features = { 
+				"history" : false,
+				"geolocation" : false,
+				"indexedDB" : false,
+				"postMessage" : false,
+				"websql" : false,
+				"webGL" : false,
+				"webworkers": false,
+				"applicationCache": false,
+				"querySelector": false,
+				"sessionStorage" : false,
+				"proxy" : false
+			}
+		}
 	}
 
 	_detectFeatures();
@@ -747,6 +763,22 @@ var Mold = (function(config){
 				}
 			}
 		},
+		node : function(){
+
+			if(!_isNodeJS) {
+				return false;
+			}
+
+			return {
+				require : function(file){
+					if(_isNodeJS){
+						return require(file);
+					}
+					return false;
+				},
+				__dirname : __dirname
+			}
+		}(),
 /**
 * @methode loadScript
 * @desc Loads a specified Script
@@ -1306,17 +1338,22 @@ Mold.addDNA({
 						return string;
 					}
 					if(result){
-						var publicsString = getPublics(result[2]);
-						var insertProp = "";
+						var publicsString = getPublics(result[2]),
+							insertProp = "",
+							removeString = result[1] + publicsString;
+
 						var literalRoutines = Mold.jsparser.parseObjectLitral(publicsString, function(property){
 							insertProp = insertProp + "\n this"+"."+property.name+"="+property.value+";\n\n";
 						});
-						var removeString = result[1] + publicsString;
+
 						seed.func = Mold.jsparser.removeFromFunction(seed.func, removeString);
 						seed.func = Mold.jsparser.injectAfter(seed.func, insertProp);
 					}
 				}
-				if(seed.compiler && (seed.compiler.disableWrapping || seed.compiler.preparsePublics)){
+				if(	
+					seed.compiler 
+					&& (seed.compiler.disableWrapping || seed.compiler.preparsePublics)
+				){
 					seed.func.prototype.className = seed.name;
 					target[Mold.getTargetName(seed)] = seed.func;
 				}else{

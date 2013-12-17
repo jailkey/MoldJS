@@ -10,10 +10,12 @@ Seed(
 		]
 	},
 	function(){
+		console.log("init")
 		var color = Mold.Lib.Color;
 		var template = new Mold.Lib.Template(function(){
 			/*|				
 				as{{hans}}{{peter}}<div class="test">{{vorname}}</div>
+				<input name="q" value="" mold-data="search" mold-event="keyup:@search">
 				<ul>
 				{{#list}}
 					<li class="test" style="background-color:{{background}};{{#color}}color:{{.}};{{/color}}{{^color}}color:#00ff00;{{/color}}font-size:{{size}}">
@@ -29,40 +31,12 @@ Seed(
 					{{/nachname}}
 				{{/name}}
 				<br>
-				{{#nachname}}
-					IN NACHNAME
-					<br>
-
-					2. {{.}}
-					{{./name}}	
-					<div class="irgendwas">
-						childinhalte
-						{{#was}}
-								NOCHWAS
-						{{/was}}
-					</div>
-
-					<br>
-				{{/nachname}}
-				<br>
-				{{^nachname}}
-					3. Kein Nachname! 
-					{{this.list.test}}
-				{{/nachname}}
-				
-				{{nachname}}
-
-				
-				<a href="#" mold-event="click:@addSomething">Hier noch ein Link</a>
-
-				<input name="test" mold-data="query" value="" type="text" />
-
-				<textarea name="testarea" mold-data="query"></textarea>
+			
 				<ul>
-				{{#adress}}
+				{{#adress|search:number,plz|max:5}}
 				<li>
-					<div class="test">{{number}}</div>
-					<div class="test">{{plz}}</div>
+					{{number}}<br>
+					{{plz}}<br>
 
 					{{#nocheineliste}}
 						<div>
@@ -73,8 +47,7 @@ Seed(
 
 					INHALT IN ADRESSE
 					
-					{{testzwei}}
-				</li>
+					{{testzwei}}</li>
 				{{/adress}}
 				</ul>
 			|*/
@@ -87,6 +60,7 @@ Seed(
 				return false;
 			}
 		});
+
 
 
 		var content = template.get();
@@ -104,16 +78,27 @@ Seed(
 		//model.data.nachname = "TEST"
 
 		var t_start, t_end;
-	
-
-
 		template.bind(model);
-
+		
 		model.data.list.push(
-			{ text : "irgendwas", background : "#555888" }
+			{ text : "irgendwas", background : "#555888", number : Math.round(Math.random()*5) }
 		);
 
-		var elementCount = 10;
+
+
+
+		template.on("search", function(e){
+			console.log("dosearch")
+		//	template.bind(model);
+		})
+
+
+		template.once("viewmodel.change", function (e){
+			template.applyFilter(template.tree().childs[0].adress);
+		});
+
+
+		var elementCount = 1000;
 
 //		model.data.list[0].background = "#888111";
 
@@ -149,9 +134,14 @@ Seed(
 
 			t_start = new Date().getTime();
 			for(var i = 0; i < elementCount; i++){
+				/*
+				tree.childs[0].adress.add();
+				tree.childs[0].adress.childs[i].number.setValue(i)
+				tree.childs[0].adress.childs[i].plz.setValue(Math.round(Math.random()*5))
+*/
 				
 				model.data.adress.push(
-					{ number : i + ".", plz : "irgendwas"}
+					{ number : i + ".", plz : Math.round(Math.random()*5) }
 				)
 			}
 			t_end = new Date().getTime();

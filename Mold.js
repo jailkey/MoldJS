@@ -3,21 +3,20 @@
  * @version 0.1.3;
  */
  "use strict";
-if(typeof Titanium !== undefined) { var GLOBAL = this };
 
 var Mold = (function(config){
-	var _config = (config) ? config :  "CONFIG FAILED";
-	var _Mold = {};
-	var _targetWrapper = {};
-	var _cue = {};
-	var _createdMold = {};
-	var _externalRepository = false;
-	var _repositoryName = "Mold";
-	var _localRepository = false;
-	var _externalSeeds = {};
-	var _isDom = false;
-	var _features = {};
-	var undefined;
+	var _config = (config) ? config :  "CONFIG FAILED",
+		_Mold = {},
+		_targetWrapper = {},
+		_cue = {},
+		_createdMold = {},
+		_externalRepository = false,
+		_repositoryName = "Mold",
+		_localRepository = false,
+		_externalSeeds = {},
+		_isDom = false,
+		_features = {},
+		undefined;
 	
 	try {
 		var _isNodeJS = (!!window) ? false : true ;
@@ -29,31 +28,32 @@ var Mold = (function(config){
 		var _documentHead = document.getElementsByTagName("head")[0];
 	}
 	
-	var _isTitanium = (typeof Titanium !== "undefined") ? true : false;
-	var _isNodeJS = (_isTitanium) ? false : _isNodeJS;
+
 	
 
 	var _detectFeatures = function(){
 		var checker = false;
 		if(!_isNodeJS){
-			_features["history"] = !!(window.history && history.pushState);
-			_features["geolocation"] = 'geolocation' in navigator;
-			_features["indexedDB"] = !!window.indexedDB;
-			_features["postMessage"] = !!window.postMessage;
-			_features["websql"] = !!window.openDatabase;
-			_features["webGL"] =  !!window.WebGLRenderingContext;
-			_features["webworkers"] = !!window.Worker;
-			_features["applicationCache"] = !!window.applicationCache;
-			_features["canvas"] = !!((checker = document.createElement('canvas')) 
+			_features = {
+				"history" : !!(window.history && history.pushState),
+				"geolocation" : 'geolocation' in navigator,
+				"indexedDB" : !!window.indexedDB,
+				"postMessage" : !!window.postMessage,
+				"websql" : !!window.openDatabase,
+				"webGL" : !!window.WebGLRenderingContext,
+				"webworkers" : !!window.Worker,
+				"applicationCache" : !!window.applicationCache,
+				"canvas" : !!((checker = document.createElement('canvas')) 
 										&& checker.getContext 
 										&& checker.getContext('2d')
-									); checker = false;
-			_features["defineProperty"] = !!Object.defineProperty;
-			_features["querySelector"] = !!document.querySelectorAll;
-			_features["querySelectorAll"] = !!document.querySelectorAll;
-			_features["sessionStorage"] = !!window.sessionStorage;
-			_features["localStorage"] = !!window.localStorage;
-			_features["proxy"] = !!window.Proxy;
+									),
+				"defineProperty" : !!Object.defineProperty,
+				"querySelector" : !!document.querySelectorAll,
+				"querySelectorAll" : !!document.querySelectorAll,
+				"sessionStorage" : !!window.sessionStorage,
+				"localStorage" : !!window.localStorage,
+				"proxy" : !!window.Proxy
+			}
 		}else{
 			_features = { 
 				"history" : false,
@@ -75,7 +75,7 @@ var Mold = (function(config){
 
 	var _getRootObject = function(){
 		
-		var rootObject = (_isNodeJS) ? global : (_isTitanium) ? GLOBAL : window;
+		var rootObject = (_isNodeJS) ? global : window;
 		return rootObject;
 	}
 	
@@ -176,7 +176,7 @@ var Mold = (function(config){
 	}
 	
 	var _ready = function(callback){
-		if(!_isDom && !_isNodeJS && !_isTitanium){
+		if(!_isDom && !_isNodeJS){
 			_addElementEvent(window, "load", callback);
 		}else{
 			callback();
@@ -820,8 +820,6 @@ var Mold = (function(config){
 					throw "File not found "+path+"!";
 					//Mold.log("Error", { code : 1, filename : path} );
 				}
-			}else if(_isTitanium){
-				Titanium.include("/"+path);
 			}else{
 				var scriptElement = document.createElement("script");
 				if(_config.cacheOff){
@@ -1465,8 +1463,6 @@ Mold.addDNA({
 				Mold.load({ name : mainScript });
 			}
 		});
-	}else if(Mold.isTitanium){
-		GLOBAL.Seed = seedFunction
 	}else{
 		window.Seed = seedFunction;
 	}

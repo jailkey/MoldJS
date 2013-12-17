@@ -6,12 +6,40 @@ Seed(
 			"external->Mold.DNA.Controller",
 			"external->Mold.Lib.Template",
 			"external->Mold.Lib.Color",
+			"external->Mold.Lib.DomScope",
+			"external->Mold.Lib.TemplateDirective",
+			"Mold.TestView",
 			"Mold.TestModel"
 		]
 	},
 	function(){
 		console.log("init")
 		var color = Mold.Lib.Color;
+
+		Mold.Lib.TemplateDirective.add({
+			at : "element",
+			name : "x-special",
+			seed : "Mold.TestView",
+			replace : true,
+			collect : [
+				{
+					element : "img",
+					name : "image",
+					childs : [
+						{ attribute : "src" },
+						{ attribute : "title" }
+					]
+				},
+				{
+					attribute : "attr"
+				}
+			],
+			action : function(){
+				console.log("do action")
+			}
+		});
+
+
 		var template = new Mold.Lib.Template(function(){
 			/*|				
 				as{{hans}}{{peter}}<div class="test">{{vorname}}</div>
@@ -50,8 +78,25 @@ Seed(
 					{{testzwei}}</li>
 				{{/adress}}
 				</ul>
+
+				<x-special attr="irgenwas">
+					<img src="/bildpfad" title="Ein Titel">
+					<img src="/bildpfad" title="Ein anderes Bild">
+				</x-special>
+
+				<x-panel>
+					<x-tab title="irgendwas">
+						Inner HTML 
+						<div class="lalal">		
+							xontentS
+						</div>
+					<x-tab>
+				</x-panel>
 			|*/
 		});
+
+
+
 	
 
 		template.snatch({
@@ -98,47 +143,13 @@ Seed(
 		});
 
 
-		var elementCount = 1000;
+		var elementCount = 10;
 
-//		model.data.list[0].background = "#888111";
-
-		
-	//	window.setTimeout(function(){
-		/*
-			t_start = new Date().getTime();		
-			for(var i = 0; i < elementCount; i++){	
-				tree.childs[0].list.add();
-				tree.childs[0].list.childs[i].background.setValue("#efefef")
-			}
-			t_end = new Date().getTime();
-			var endTime = (t_end - t_start);
-			console.log("executed in:", endTime, "per Line", endTime / elementCount);
-*/
-	//	}, 1000);
-/*
-			window.setTimeout(function(){
-				t_start = new Date().getTime();		
-				for(var i = 0; i < elementCount; i++){	
-					tree.childs[0].adress.childs[i].number.setValue("------------------");
-				}
-				t_end = new Date().getTime();
-				var endTime = (t_end - t_start);
-				console.log("executed in:", endTime, "per Line", endTime / elementCount);
-			}, 3000)
-		
-		
-			var newModel = model.data.list.slice(5, 7);
-			console.log("neModel", newModel)
-*/
 		window.setTimeout(function(){
 
 			t_start = new Date().getTime();
 			for(var i = 0; i < elementCount; i++){
-				/*
-				tree.childs[0].adress.add();
-				tree.childs[0].adress.childs[i].number.setValue(i)
-				tree.childs[0].adress.childs[i].plz.setValue(Math.round(Math.random()*5))
-*/
+
 				
 				model.data.adress.push(
 					{ number : i + ".", plz : Math.round(Math.random()*5) }
@@ -150,49 +161,7 @@ Seed(
 			
 		}, 50);	
 
-/*
 
-		window.setTimeout(function(){
-			t_start = new Date().getTime();
-			var parentElement = document.createElement("div");
-			for(var i = 0; i < elementCount; i++){
-				var element = document.createElement("div");
-				element.innerHTML = i+".";
-				element.style.backgroundColor = "#"+Math.floor(Math.random()*16777215).toString(16);
-				element.style.fontSize =  Math.floor(Math.random()*30) +"px";
-				parentElement.appendChild(element)
-			}
-
-			document.querySelector(".template-target").appendChild(parentElement);
-			t_end = new Date().getTime();
-			console.log("executed in:", (t_end - t_start));
-		}, 3000);
-		*/
-	
-		/*
-		t_start = new Date().getTime();
-
-		model.data.list.splice(300, 500,
-			{ test : "INSERTED", background : '#'+Math.floor(Math.random()*16777215).toString(16), size : "40px" },
-			{ test : "INSERTED", background : '#'+Math.floor(Math.random()*16777215).toString(16), size : "40px" }
-		);
-
-		t_end = new Date().getTime();
-		console.log("executed in:", (t_end - t_start));
-		*/
-		/*
-		window.setTimeout(function(){
-			t_start = new Date().getTime();
-			model.data.list.reverse()
-
-			t_end = new Date().getTime();
-			console.log("executed in:", (t_end - t_start));
-			//model.data.list[0] = { "test" : "last", "background" : "#ff00ee" };
-		}, 2000);
-		*/
-		console.log("model->", model)
-
-		//console.log("template->", )
 		
 
 
@@ -200,23 +169,13 @@ Seed(
 		window.model = model;
 
 		
-/*
+
+
+		//var newScope = new Mold.Lib.DomScope(document);
+
 		
+		//console.log("scope", newScope)
 
-		userModel.on("change", function(e){
-			template.append(e.data.data);
-		});
-
-
-		userModel.data.name = "Hanswurdst";
-
-		userModel.data.vorname = "vorname";
-	
-		userModel.data.list.push({ "test" : "irgendwas" })
-		
-*/
-
-	//	window.model = userModel;
 
 		this.actions = {
 			"@setname" : function(e){

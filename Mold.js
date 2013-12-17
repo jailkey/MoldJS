@@ -417,7 +417,10 @@ var Mold = (function(config){
 * @param (Object) collection - the value
 **/
 		isNodeList : function(collection){
-			if(Object.prototype.toString.call(collection) === "[object NodeList]"){
+			if(
+				Object.prototype.toString.call(collection) === "[object NodeList]"
+				||  Object.prototype.toString.call(collection) === "[object HTMLCollection]"
+			){
 				return true;
 			}
 			return false;

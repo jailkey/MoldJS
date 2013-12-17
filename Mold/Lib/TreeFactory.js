@@ -370,15 +370,15 @@ Seed({
 				//Parse Elementnodes
 				case 1:
 					element = node;
-					if((directive = _directive.get("attribute", nodeName))){
-						directive.call(this, node, element, template, index);
+					if((directive = _directive.get("element", nodeName))){
+						directive.apply(node, element, template, index);
 					}
 					break;
 				//Parse Attributenodes
 				case 2:
 				
 					if((directive = _directive.get("attribute", nodeName))){
-						directive.call(this, node, element, template, index);
+						directive.apply(node, element, template, index);
 					}
 
 					if(varName){

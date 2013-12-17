@@ -77,8 +77,8 @@ Seed({
 				
 				target[Mold.getTargetName(seed)] = function(){
 					var view = new seed.func();
-					if(!view.template){
-						throw "View needs property 'template' to work correct!"
+					if(!view.scope){
+						throw "a view needs the property 'scope' to work correct!"
 					}
 					
 					var getEventFunction = function(callback){

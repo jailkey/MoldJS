@@ -44,9 +44,9 @@ var Mold = (function(config){
 				"webworkers" : !!window.Worker,
 				"applicationCache" : !!window.applicationCache,
 				"canvas" : !!((checker = document.createElement('canvas')) 
-										&& checker.getContext 
-										&& checker.getContext('2d')
-									),
+								&& checker.getContext 
+								&& checker.getContext('2d')
+							),
 				"defineProperty" : !!Object.defineProperty,
 				"querySelector" : !!document.querySelectorAll,
 				"querySelectorAll" : !!document.querySelectorAll,
@@ -1084,20 +1084,15 @@ var Mold = (function(config){
 			},
 
 			areOpendEqualClosedBrackets : function(literalString){
-				var opendCurlyLen = literalString.split("{").length;
-				var closedCurlyLen = literalString.split("}").length;
-				var opendSquareLen = literalString.split("[").length;
-				var closedSquareLen = literalString.split("]").length;
-				var opendRoundeLen = literalString.split("(").length;
-				var closedRoundLen = literalString.split(")").length;
-				if(opendCurlyLen === closedCurlyLen 
-					&& opendSquareLen === closedSquareLen 
-					&& opendRoundeLen === closedRoundLen
-				){
-					return true;
-				}else{
-					return false;
-				}
+				var brackets = [["{", "}"], ["[", "]"], ["(", ")"]];
+				return !Mold.some(brackets, function(values){
+					if(
+						literalString.split(values[0]).length
+						!== literalString.split(values[1]).length
+					){
+						return true;
+					}
+				});
 			},
 
 			parseObjectLitral : function(literalString, onelement){

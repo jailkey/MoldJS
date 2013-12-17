@@ -1,6 +1,6 @@
 /**
  * @author Jan Kaufmann <jan@moldjs.de>
- * @version 0.1.2;
+ * @version 0.1.3;
  */
  "use strict";
 if(typeof Titanium !== undefined) { var GLOBAL = this };
@@ -17,6 +17,7 @@ var Mold = (function(config){
 	var _externalSeeds = {};
 	var _isDom = false;
 	var _features = {};
+	var undefined;
 	
 	try {
 		var _isNodeJS = (!!window) ? false : true ;
@@ -185,13 +186,33 @@ var Mold = (function(config){
 	var _getMainScript = function(){
 		if(_isNodeJS){
 			var output = false;
-			process.argv.forEach(function (val, index, array) {
-				if(index >= 2){
-					
-					output = val;
-					//Mold.load({name : val});
+			process.argv.forEach(function (val, index, argumentList) {
+				if(val === "-repo"){
+					if(argumentList[index+1]){
+						_config.localRepository = argumentList[index+1];
+					}else{
+						throw "You can not use -repro without repositiory path!"
+					}
+				}
+				if(val === "-extrepo"){
+					if(argumentList[index+1]){
+						_config.externalRepository = argumentList[index+1]
+					}else{
+						throw "You can not use -extrepo without repositiory path! "
+					}
+				}
+				if(argumentList.length >= 2){
+					output = argumentList[argumentList.length-1];
+				}else{
+					throw "Main seed is not defined!"
 				}
 			});
+			if(!_config.externalRepository){
+				_config.externalRepository = "./";
+			}
+			if(!_config.localRepository){
+				_config.localRepository = "./";
+			}
 			return output;
 		}else{
 			var i = 0,
@@ -790,12 +811,14 @@ var Mold = (function(config){
 	
 			if(_isNodeJS){
 				var nodePath = require('fs');
-				path = "./"+path;
+				if(path.substring(0, 2) !== "./"){
+					path = "./"+path;
+				}
 				if(nodePath.existsSync(path)){
 					var testMold = require(path);
 				}else{
-					
-					Mold.log("Error", { code : 1, filename : path} );
+					throw "File not found "+path+"!";
+					//Mold.log("Error", { code : 1, filename : path} );
 				}
 			}else if(_isTitanium){
 				Titanium.include("/"+path);
@@ -884,7 +907,7 @@ var Mold = (function(config){
 		}
 
 
-	
+		
 		var seedName = seed.name;
 		if(!_Mold[seedName]){
 			if(!seedName){
@@ -904,6 +927,14 @@ var Mold = (function(config){
 					}else{
 						filePath = _externalSeeds[seed.name] + filePath;
 					}
+				}else{
+					if(	
+						_config.localRepository !== false 
+						&& _config.localRepository !== undefined
+					){
+						filePath =_config.localRepository+filePath;
+				
+					}
 				}
 
 
@@ -914,8 +945,6 @@ var Mold = (function(config){
 				if( typeof _Mold[seedName].loader !== "object" ){
 					_Mold[seedName].loader = new _loader(seedName);
 				}
-				
-
 				Mold.loadScript(filePath, 
 					function(element){
 						if(_externalSeeds[seed.name] === "lib"){

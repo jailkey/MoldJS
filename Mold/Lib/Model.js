@@ -232,8 +232,23 @@ Seed({
 				}
 				_adapter.save(this.json())
 			},
-			load : function(){
-
+			load : function(id){
+				if(!_adapter){
+					throw "Can not load without adapter!"
+				}
+				_adapter.load(id)
+			},
+			remove : function(){
+				if(!_adapter){
+					throw "Can not remove without adapter!"
+				}
+				_adapter.remove();
+			},
+			add : function(){
+				if(!_adapter){
+					throw "Can not add without adapter!"
+				}
+				_adapter.add();
 			},
 			bind : function(model){
 				

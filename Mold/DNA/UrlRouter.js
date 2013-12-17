@@ -22,7 +22,7 @@ Seed({
 				}else if(Mold.isNodeJS){
 					Mold.Lib.GlobalEvents.on("location.update", function(data){
 						urlRouter.setLocation(data.data.location );
-						urlRouter.setServerParameter(data.data.request, data.data.response);
+						urlRouter.setServerParameter(data.data.request, data.data.response, data.data.session);
 						urlRouter.initRoutes();
 					});
 				}

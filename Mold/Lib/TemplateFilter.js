@@ -14,11 +14,7 @@ Seed({
 			name : "max",
 			select : "child",
 			type : "visibility",
-			action : function(template, data){
-				//var filterModel = 
-				//console.log(element, element.visibleChildLength())
-		
-
+			action : function(template, data){		
 				if(data.element.isChildHidden(data.child.getIndex())){
 					return false;
 				}
@@ -26,7 +22,7 @@ Seed({
 					if(data.rowcount < data.parameter){
 						return true;
 					}else{
-						return "exit";
+						return false;
 					}
 				}else{
 

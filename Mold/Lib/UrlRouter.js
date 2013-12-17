@@ -9,6 +9,7 @@ Seed({
 	function(seed){
 		var _path, _params, _hashes, _seed, _loadedSeeds = {}, _request = false, _response = false;
 		var _seed = seed;
+		var _events = Mold.Lib.GlobalEvents;
 		
 		var _location =  {
 			pathname : "",
@@ -25,12 +26,16 @@ Seed({
 			setLocation : function(location){
 				_location = location;
 			},
-			setServerParameter : function(request, response){
+			setServerParameter : function(request, response, session){
 				_request = request;
 				_response = response;
+				_session = session;
 			},
 			markSeedAsLoaded : function(seedName){
 				_loadedSeeds[seedName] = true;
+			},
+			setEventObject : function(events){
+				_events = events;
 			},
 			isSeedLoaded : function(seedName){
 				if(_loadedSeeds[seedName]){
@@ -268,10 +273,12 @@ Seed({
 								});
 							}else{
 								Mold.ready(function(){
-									Mold.Lib.GlobalEvents.trigger(route.replace("@", ""), { urlparameter : parameter, request : _request, response : _response }, { saveTrigger : true });
+									_events.trigger(route.replace("@", ""), { urlparameter : parameter, request : _request, response : _response, session : _session }, { saveTrigger : true });
 								});
 							}
 						}else if(route.substring(0,4) === "Mold"){
+							parameter = parameter || {};
+							parameter.eventHandler = _events;
 							that.loadSeed(route, parameter);
 						}
 					}

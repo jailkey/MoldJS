@@ -16,7 +16,10 @@ Seed (
 	function(element){
 		var _element = element;
 		var that = this;
-		var _isHTMLElement = _element instanceof  Element;
+		
+		var _isHTMLElement =  ( typeof Element !== "undefined" && _element instanceof  Element) ?  true : false;
+		
+
 		var _elementEvents = [
 			"blur", "change", "contextmenu", "copy", "cut", "dblclick", "error",
 			"focus", "focusin", "focusout", "hashchange", "keydown", "keypress", "keyup", 

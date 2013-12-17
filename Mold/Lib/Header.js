@@ -2,38 +2,39 @@ Seed({
 		name : "Mold.Lib.Header",
 		dna : "class"
 	},
-	function(type){
+	function(type, len){
 
-		var _getFileHeader = function (type){
+		var _getMimeType = function (type){
 
 			type = type.toLowerCase();
-
-			var head = { 'Content-Type':'text/html' }
+			var head = false;
 
 			switch(type){
+				case 'html':
+					head = 'text/html';
 				case 'js':
-					head={'Content-Type':'text/javascript'};
+					head= 'text/javascript';
 					break;
 				case 'css':
-					head = {'Content-Type':'text/css'};
+					head = 'text/css';
 					break;
 				case 'png':
-					head = {'Content-Type':'image/png'};
+					head = 'image/png';
 					break;
 				case 'gif':
-					head = {'Content-Type':'image/gif'};
+					head = 'image/gif';
 					break;
 				case 'jpg':
-					head = {'Content-Type':'image/jpeg'};
+					head = 'image/jpeg';
 					break;
 				case 'ico':
-					head = {'Content-Type':'image/x-icon'};
+					head = 'image/x-icon';
 					break;
 				case 'ogg':
-					head = {'Content-Type':'audio/ogg'};
+					head = 'audio/ogg';
 					break;
 				case 'ebm':
-					head = {'Content-Type':'video/webm'};
+					head = 'video/webm';
 				break;
 			}
 
@@ -41,7 +42,7 @@ Seed({
 
 		}
 
-		var header = _getFileHeader(type);
+		var header = _getMimeType(type);
 
 		return header;
 	}

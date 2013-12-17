@@ -13,23 +13,17 @@ Seed({
 			Mold.addLoadingProperty("extend");
 		},
 		create : function(seed) {
-
-			try {	
 			
 				var target = Mold.createChain(Mold.getSeedChainName(seed));
 				var viewPrototype = function(){
 					var that = this;
+					var _modelRoutes = false;
 					Mold.mixing(this, new Mold.Lib.Event(that));
 					Mold.mixing(this, new Mold.Lib.Parents());
 
-					this.elements = [];
-					this.filter = false;
-					
-					this.appendChild = function(element){
-						this.trigger("append", { element : element });
-						this.elements.push(element);
-					}
-					
+					this.template = false;
+
+					this.filter = false;					
 					
 					this.registerd = [];
 					this.register = function(instance){
@@ -42,27 +36,16 @@ Seed({
 						}
 						return instance;
 					}
-					
-					this.appendView = function(view, name){
 
-						that.trigger("append.view."+name, { name : name, view : view});
-					};
-					
-					this.appendModel = function(model, filter, translation){
-						this.filter = filter;
-						that.trigger("append.model", { model : model, translation : translation });
-					}
+					this.addModelRoute = function(modelRoute){
 
-					this.appendModelItem = function(model, item, filter, translation){
-						this.filter = filter;
-						that.trigger("append.model.item", { model : model, item : item, translation : translation });
-					}
-
-					this.removeModelItem = function(model, item, translation){
-						that.trigger("remove.model.item", { model : model, item : item, translation : translation });
 					}
 					
-					
+					this.bind = function(model){
+						if(!_modelRoutes){
+							that.template.bind(model);
+						}
+					}					
 					
 					this.destroy = function(){
 						that.off();
@@ -79,10 +62,9 @@ Seed({
 
 
 				if(!seed.extend){
-
 					seed.func =	Mold.extend( viewPrototype, seed.func, {
-							superClassName : "rootclass",
-							sourceURL : seed.name
+						superClassName : "rootclass",
+						sourceURL : seed.name
 					});
 			
 				}else{
@@ -95,23 +77,23 @@ Seed({
 				
 				target[Mold.getTargetName(seed)] = function(){
 					var view = new seed.func();
-					if(!view.element){
-						Mold.log("Error", { code : 11, dnaname: "view", seed : seed});
+					if(!view.template){
+						throw "View needs property 'template' to work correct!"
 					}
 					
 					var getEventFunction = function(callback){
-							if(typeof callback=== "function"){
-								return function(e){
-									callback({ data : {
-										elementEvent : e, element : this
-									}});
-								}
-							}else{
-								var eventName = callback.replace("@", "");
-								return function(e){
-									view.trigger(eventName, { elementEvent : e, element : this});
-								}
+						if(typeof callback=== "function"){
+							return function(e){
+								callback({ data : {
+									elementEvent : e, element : this
+								}});
 							}
+						}else{
+							var eventName = callback.replace("@", "");
+							return function(e){
+								view.trigger(eventName, { elementEvent : e, element : this});
+							}
+						}
 
 					}
 
@@ -133,10 +115,6 @@ Seed({
 					return view;
 				}
 				return target[Mold.getTargetName(seed)];
-				
-			}catch(e){
-				Mold.log("Error", { code : 3, dnaname: "view", error : e, seed : seed});
-			}
 		}
 	}
 );

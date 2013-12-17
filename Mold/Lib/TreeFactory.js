@@ -6,7 +6,8 @@ Seed({
 		include : [
 			"Mold.Lib.DomPointer",
 			"Mold.Lib.DomLessPointer",
-			"Mold.Lib.TemplateDirective"
+			"Mold.Lib.TemplateDirective",
+			"Mold.Lib.Event"
 		]
 	},
 	function(){
@@ -15,6 +16,8 @@ Seed({
 			_compiledTemplate = false,
 			_directive = Mold.Lib.TemplateDirective,
 			undefined;
+
+		Mold.mixing(this, new Mold.Lib.Event(this))
 
 /*Add some Textnodes, after this step every templatevariable exists in a single node, without other content*/
 
@@ -306,9 +309,7 @@ Seed({
 							if(	
 								data[plainName] && data[plainName].value && _isBlock(varName) 
 								|| (!data[plainName] || !data[plainName].value && _isNegativBlock(varName))
-							){
-
-								
+							){	
 								if(data[plainName].subvalue){
 										var subContent = _getSubContent(content, "{{"+varName+"}}", "{{/"+plainName+"}}");
 										output += _parseStringContent(subContent, data[plainName].subvalue);
@@ -353,6 +354,7 @@ Seed({
 			}
 		}
 
+		var that = this;
 		
 		var _parseDomTree = function(node, tree, template, element, index){
 

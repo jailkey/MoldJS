@@ -426,6 +426,20 @@ var Mold = (function(config){
 			return false;
 		},
 
+		isNode : function(element){
+			return(
+					(typeof element === "object") 
+					? element instanceof Node 
+					: (
+						element 
+						&& typeof element === "object" 
+						&& typeof element.nodeType === "number"
+						&& typeof element.nodeName === "string"
+					)
+				)
+				
+		},
+
 		getMainScript : _getMainScript,
 /**
 * @namespace Mold

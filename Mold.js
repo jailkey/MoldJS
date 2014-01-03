@@ -52,7 +52,8 @@ var Mold = (function(config){
 				"querySelectorAll" : !!document.querySelectorAll,
 				"sessionStorage" : !!window.sessionStorage,
 				"localStorage" : !!window.localStorage,
-				"proxy" : !!window.Proxy
+				"proxy" : !!window.Proxy,
+				"mutationObserver" : window.MutationObserver
 			}
 		}else{
 			_features = { 
@@ -66,7 +67,8 @@ var Mold = (function(config){
 				"applicationCache": false,
 				"querySelector": false,
 				"sessionStorage" : false,
-				"proxy" : false
+				"proxy" : false,
+				"mutationObserver" : false
 			}
 		}
 	}
@@ -427,6 +429,7 @@ var Mold = (function(config){
 		},
 
 		isNode : function(element){
+			if (!element) { return false; } 
 			return(
 					(typeof element === "object") 
 					? element instanceof Node 
@@ -1196,7 +1199,7 @@ var Mold = (function(config){
 * @param (Array) selected - Expects an array with the property- and methodenames that will be copied, the parameter is optional, if it is not given, all methodes an parametes will be copied
 * @return (Object) - returns the target object with the new methodes an properties
 **/
-		mixing : function(target, origin, selected){
+		mixing : function(target, origin, selected, config){
 			for(var property in origin){
 				
 				if(property != "className"){
@@ -1205,7 +1208,13 @@ var Mold = (function(config){
 							target[property] = origin[property];
 						}
 					}else{
-						target[property] = origin[property];
+						if(config && config.protected){
+							if(!target[property]){
+								target[property] = origin[property];
+							}
+						}else{
+							target[property] = origin[property];
+						}
 					}
 				}
 			}

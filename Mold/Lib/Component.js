@@ -1,33 +1,42 @@
 Seed({
 		name : "Mold.Lib.Component",
-		dna : "class"
+		dna : "class",
+		include : [
+			"Mold.Lib.DomScope",
+			"Mold.Lib.Loader",
+			"Mold.Lib.Event"
+		]
 	},
-	function(elementName, attributes, createController){
+	function(seed){
 
-		var _registerElement = function(){
+		var _seed = seed,
+			_that = this,
+			_loader = new Mold.Lib.Loader();
 
-		}
+		Mold.mixing(this, new Mold.Lib.Event(this));
 
+		_loader.on("ready", function(){
+			_that.trigger("files.loaded")
+		});
+
+		_loader.on("error", function(){
+			_that.trigger("files.error")
+		});
+
+		_loader.on("process", function(e){
+			_that.trigger("files.loading", e.data);
+		});
 
 		this.publics = {
-			getElements : function(){
-
+			directive : function(directive){
+				directive.seed = _seed;
+				Mold.Lib.DomScope.directive(directive);
 			},
-			append : function(doc){
-				var elements = doc.getElementsByTagName(elementName);
-				console.log(elements)
-				Mold.each(elements, function(element){
-					var parameter = {};
-					Mold.each(attributes, function(attribute, name){
-						var value = element.getAttribute(name);
-						if(value){
-							parameter[name] = value;
-						}else{
-							parameter[name] = attribute;
-						}
-					});
-					createController.call(this, element, parameter);
-				})
+			files : function(file){
+				_loader.append(file);
+				if(!_loader.isLoading()){
+					_loader.load();
+				}
 			}
 		}
 	}

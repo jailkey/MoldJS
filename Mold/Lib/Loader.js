@@ -8,13 +8,15 @@ Seed({
 	function(){
 
 		var _files = [],
-			_fileLen = 0;
+			_fileLen = 0,
+			_isLoading = false,
+			_isLoadingError = false;
 
 		Mold.mixing(this, new Mold.Lib.Event(this));
 
 		var _getFileTyp = function(file){
 			var typs = {
-				image : [ "png", "jpg", "gif" ],
+				image : [ "png", "jpg", "gif", "bmp" ],
 				script : [ "js" ],
 				style : [ "css", "scss" ]
 			}
@@ -34,31 +36,71 @@ Seed({
 		var _getFileObject = function(file){
 			return {
 				name : file,
-				typ : _getFileTyp(file)
+				type : _getFileTyp(file)
 			};
 			
 		}
 
 		var _checkLoaded = function(){
 			if(_files.length === 0){
-				that.trigger("ready");
+				if(!_isLoadingError){
+					that.trigger("ready");
+				}
+				_isLoading = false;
 			}else{
 				_loadNextFile();
 			}
 		}
 
 		var _loadNextFile = function(){
+
 			var selectedFile = _files.shift();
-			console.log("load Next File", selectedFile);
-			that.trigger("process", { len : _fileLen, _loaded : (_fileLen -_files.length), filename : selectedFile.name})
-			if(selectedFile.typ === "script"){
+			that.trigger("process", { len : _fileLen, _loaded : (_fileLen -_files.length), filename : selectedFile.name});
+			_isLoading = true;
+
+			if(selectedFile.type === "script"){
+
 				Mold.loadScript(selectedFile.name, function(){
 					_checkLoaded();
 				})
-			}else if(selectedFile.typ === "image"){
-				console.log("LoadImage");
-			}else if(selectedFile.typ === "css"){
-				console.log("LoadStyle");
+
+			}else if(selectedFile.type === "image"){
+
+				var img = new Image(),
+					imageEvents = new Mold.Lib.Event(img);
+
+				imageEvents.on("load", function(){
+					_checkLoaded();
+				});
+
+				imageEvents.on("error", function(e){
+					that.trigger("error", e);
+					_isLoadingError = true;
+					_checkLoaded();
+				});
+
+				img.src = selectedFile.name;
+
+			}else if(selectedFile.type === "style"){
+
+				var styleSheet = document.createElement("link"),
+					styleEvent = new Mold.Lib.Event(styleSheet);
+
+				styleEvent.on("load", function(){
+					_checkLoaded();
+				});
+
+				styleEvent.on("error", function(e){
+					that.trigger("error", e);
+					_isLoadingError = true;
+					_checkLoaded();
+				});
+
+				styleSheet.type = "text/css";
+				styleSheet.rel = "stylesheet";
+				styleSheet.href = selectedFile.name;
+				document.getElementsByTagName("head")[0].appendChild(styleSheet);
+
 			}
 			
 		}
@@ -66,12 +108,12 @@ Seed({
 		
 
 		this.publics = {
+			isLoading : function(){
+				return _isLoading;
+			},
 			append : function(file){
-				console.log("file", file);
-				if(typeof file === "object"){
-					for(var entry in file){
-						_files.push(_getFileObject(file[entry]));
-					}
+				if(Mold.isArray(file)){
+					_files.concat(file);
 				}else{
 					_files.push(_getFileObject(file));
 				}

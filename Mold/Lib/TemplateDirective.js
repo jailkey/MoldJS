@@ -10,77 +10,179 @@ Seed({
 		var _directives = [];
 		var _directivesIndex = {};
 
+
 		/*
 			Directive Exampel
 			{
 				at : "attribute|element",
 				name : "mold-event",
+				seed : "seedname", [optional]
+				collect {}, [optional]
+				replace : true, [optional]
 				action : function(node, element, template){
 					
 				}
 			}
 		*/
+		//var _mainTemplate = new Mold.Lib.Template(document);
+		var _watchList = [];
+		var _watch = function(element, callback){
+			if(Mold.isSupported("mutationObserver")){
+				var observer = new MutationObserver(function(mutations){
+					Mold.each(mutations, function(mutation){
+						callback.call(this, mutation);
+					});
+				});
+				observer.observe(element, { attributes: true, childList: true, characterData: true })
+				_watchList.push(element);
+			}else{
+				throw "Your Browser does not support MutationObserver!"
+			}
+		}
 
-		var _collect = function(scope, collection, bind){
-			var output;
+		var _collectChilds = function(elements, collection, elementName, output, watchable){
+
+			var i = 0,
+				len = elements.length,
+				childs = {},
+				selected;
+
+			if(!output[elementName]){
+				output[elementName] = [];
+			}
+
+			for(; i < len; i++){
+				selected = elements[i];
+				childs = {};
+				
+				Mold.each(collection.childs, function(item){
+					output[elementName][i] = output[elementName][i] || {};
+					_collect(selected, item, output[elementName][i], watchable);
+					if(output[elementName].len != output[elementName].length){
+						output[elementName].len = output[elementName].length;
+					}
+				})
+			};
+			return output;
+		}
+
+		var _collect = function(scope, collection, output, watchable){
+			
 			if(Mold.isArray(collection)){
-				output = [];
 				Mold.each(collection, function(item, name){
-					output.push(_collect(scope, item, bind))
+					_collect(scope, item, output, watchable)
 				});
 			}else{
-				output = {};
+				
 				if(collection.element){
-
+					
 					var elements = scope.getElementsByTagName(collection.element);
 					var elementName = collection.name || collection.element;
-					output[elementName] = [];
+					
 					if(collection.childs){
-						Mold.each(elements, function(selected){
-							var childs = {};
-							Mold.each(collection.childs, function(item){
-								Mold.mixing(childs, _collect(selected, item, bind));
-							})
-							output[elementName].push(childs);
+						_collectChilds(elements, collection, elementName, output, watchable)
+					}
+
+					if(watchable){
+						_watch(scope, function(mutation){
+							if(mutation.type === "childList"){
+								Mold.each(mutation.addedNodes, function(selectedNode){
+									if(
+										selectedNode.nodeName 
+										&& collection.element 
+										&& (selectedNode.nodeName.toLowerCase() === collection.element.toLowerCase())
+									){
+										output[elementName].concat(_collectChilds(elements, collection,  elementName, output, watchable));
+										//output[elementName].trigger("element.added", {})
+									}
+								});
+							}
 						});
 					}
+				}else if(collection.content){
+					
+					if(collection.content === "html"){
+						var content = scope.innerHTML;
+					}
+
+					if(content){
+						var contentName = collection.name || collection.content;
+						output[contentName] = content;
+						
+						if(watchable){
+							_watch(scope, function(mutation){
+								output[contentName] = scope.innerHTML;
+							});
+						}
+					}
+
 				}else if(collection.attribute){
+					
 					var attribute = scope.getAttribute(collection.attribute);
-					var attributeName = collection.name || collection.attribute;
-					output[attributeName] = attribute;
+					
+					if(attribute){	
+						var attributeName = collection.name || collection.attribute;
+						output[attributeName] = attribute;
+
+						if(watchable){
+							_watch(scope, function(mutation){
+								if(
+									mutation.type === "attributes" 
+									&& mutation.attributeName === collection.attribute
+								){
+									output[attributeName] = mutation.target.getAttribute(collection.attribute);
+								}
+							});
+						}
+					}
 				}
 			}
 			return output;
 		}
 
 		var _add = function(directive){
-			
-
+			directive._id = Mold.getId();
 			directive.apply = function(node, element, template, index){
-				directive.scope = element;
-				if(directive.seed){
-					var seed = Mold.getSeed(directive.seed);
-					directive.instance = new seed();
-					if(directive.collect){
-						var collection = _collect(directive.scope, directive.collect, false);
-						console.log("collection", collection)
-					}
-					if(directive.instance.scope){
+				if(!element.hasDirective || !element.hasDirective(directive._id)){
+					directive.scope = element;
+					if(directive.seed){
+
+						if(directive.collect){
+							if(directive.watchable){
+
+							}
+							var collection = _collect(directive.scope, directive.collect, {},directive.watchable);
+						}
+
+						var seed = Mold.getSeed(directive.seed);
+						directive.instance = new seed(collection);
 						
-						if(directive.replace) {
-							directive.replace(directive.instance.scope);
-						}else{
-							directive.append(directive.instance.scope);
+						if(directive.instance.scope){
+							if(directive.replace) {
+								directive.replaceElement(directive.instance.scope);
+							}else{
+								directive.appendElement(directive.instance.scope);
+							}
 						}
 					}
+					if(!element.hasDirective){
+						element.hasDirective = function(id){
+							return element.directives[id] || false;
+						}
+					}
+					if(!element.directives){
+						element.directives = [];
+					}
+					element.directives.push(directive._id)
+					directive.action.call(directive, node, element, template, index);
 				}
-				directive.action.call(directive, node, element, template, index);
 			}
-			directive.append = function(child){
-				return directive.scope.appendChild;
+			
+			directive.appendElement = function(child){
+				return directive.scope.appendChild(child);
 			}
 
-			directive.replace = function(child){
+			directive.replaceElement = function(child){
 				return directive.scope.parentNode.replaceChild(child, directive.scope);
 			}
 
@@ -115,13 +217,14 @@ Seed({
 			name : "mold-data",
 			action : function(node, element, template, index){
 				var viewModel = node.nodeValue;
-				if(element.nodeName.toLowerCase() === "input"
+				if(
+					element.nodeName.toLowerCase() === "input"
 					|| element.nodeName.toLowerCase() === "textarea"
 				){
 					new Mold.Lib.Event(element).on("keyup", function(e){
 						var name = element.getAttribute("name");
 						template.viewModel.set(viewModel, name, element.value)
-					})
+					});
 				}
 			}
 		});

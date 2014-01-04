@@ -18,6 +18,7 @@ Seed({
 			_compiledTemplate = false,
 			_viewModel = {},
 			_snatched = {},
+			_contentType = false,
 			undefined;
 
 		Mold.mixing(this, new Mold.Lib.Event(this));
@@ -38,7 +39,13 @@ Seed({
 			_applyToDom(templateContent);
 			Mold.Lib.TreeFactory.preParseTemplate(_shadowTemplate);
 			var tree = _buildTree();
-			//_hideTemplate(tree.childs[0]);
+			return tree;
+		}
+
+		var _parseElement = function(templateElement){
+			_shadowTemplate = templateElement;
+			Mold.Lib.TreeFactory.preParseTemplate(_shadowTemplate);
+			var tree = _buildTree();
 			return tree;
 		}
 
@@ -219,16 +226,37 @@ Seed({
 			}
 		}
 
-
+		var _refresh = function(){
+			//console.log("refresh");
+			//console.log(_compiledTemplate);
+			switch(_contentType){
+				case "string":
+					_compiledTemplate = _parseTemplate(_templateContent);
+					break;
+				case "node":
+					_compiledTemplate = _parseElement(_templateContent);
+					break;
+				default:
+					break;
+			}
+		}
 
 		if(typeof content === "function"){
 			_templateContent = content.toString().replace(/(^function\s*\(\)\s*\{\s*\/\*\|)([\s\S]*)(\|\*\/\s*\})/g, function(){
 				return arguments[2];
 			});
+			_contentType = "string";
+			_compiledTemplate = _parseTemplate(_templateContent);
+		}else if(Mold.isNode(content)){
+			_templateContent = content;
+			_contentType = "node"
+			_compiledTemplate = _parseElement(_templateContent);
+		}else{
+			console.log("is nothing")
 		}
 	
 
-		_compiledTemplate = _parseTemplate(_templateContent);
+		
 
 
 
@@ -240,6 +268,9 @@ Seed({
 			visibility : _visibility,
 			each : function(callback){
 				_each(_compiledTemplate, callback);
+			},
+			refresh : function(){
+				_refresh();
 			},
 			snatch : function(data){
 				Mold.each(data, function(callback, name){

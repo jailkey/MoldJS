@@ -17,14 +17,14 @@ Seed (
 		var _element = element;
 		var that = this;
 		
-		var _isHTMLElement =  ( typeof Element !== "undefined" && _element instanceof  Element) ?  true : false;
+		var _isHTMLElement =  Mold.isNode(element);
 		
-
 		var _elementEvents = [
 			"blur", "change", "contextmenu", "copy", "cut", "dblclick", "error",
 			"focus", "focusin", "focusout", "hashchange", "keydown", "keypress", "keyup", 
 			"load",  "paste", "reset", "resize", "scroll",
-			"select", "submit", "textinput", "transitionend", "unload", "DOMAttrModified"
+			"select", "submit", "textinput", "transitionend", "unload", 
+			"DOMAttrModified", "DOMSubtreeModified", "DOMNodeInserted", "DOMNodeRemoved", "DOMCharacterDataModified"
 		];
 		
 		var _mouseEvents = [

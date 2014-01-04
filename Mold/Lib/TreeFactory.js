@@ -381,6 +381,19 @@ Seed({
 						directive.apply(node, element, template, index);
 					}
 
+					if(nodeName === "class"){
+						
+						var classes = nodeValue.split(" "),
+							i = 0,
+							len = classes.length;
+						
+						for(; i < len; i++){
+							if((directive = _directive.get("class", classes[i]))){
+								directive.apply(node, element, template, index);
+							}
+						}
+					}
+
 					if(varName){
 						var pointer = _parseDomLessTree(node, tree, tree);
 					};

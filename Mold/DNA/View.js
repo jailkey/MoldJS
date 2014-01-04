@@ -76,7 +76,8 @@ Seed({
 	
 				
 				target[Mold.getTargetName(seed)] = function(){
-					var view = new seed.func();
+					var config = (arguments) ? arguments[0] : {};
+					var view = new seed.func(config);
 					if(!view.scope){
 						throw "a view needs the property 'scope' to work correct!"
 					}

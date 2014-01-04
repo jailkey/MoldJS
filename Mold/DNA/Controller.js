@@ -28,8 +28,21 @@ Seed({
 				
 					this.instanceOf = seed.name;
 
+					this.scope = false;
+
+					this.registerScope = function(scope){
+						console.log("register scope");
+						if(!this.scope){
+							this.scope = document.createDocumentFragment();
+						}
+						this.scope.appendChild(scope);
+					}
+
 					this.register = function(instance){
 						this.registerd.push(instance);
+						if(instance.scope){
+							this.registerScope(instance.scope);
+						}
 						instance.on("all", function(e){
 							that.trigger(e.event, e, { exclude : ["data", "destroy"] });
 						});
@@ -49,6 +62,8 @@ Seed({
 						}
 						delete that;
 					}
+
+
 					
 					
 					return this;
@@ -72,7 +87,7 @@ Seed({
 						return constructor;
 					})
 
-					var controller = new wrapper(arguments);
+					var controller = new wrapper((arguments) ? arguments[0] : {});
 				
 					for(action in controller.actions){
 						controller.on(action.replace("@", ""), controller.actions[action]);
@@ -80,7 +95,7 @@ Seed({
 					
 					if(arguments[0] && arguments[0].eventHandler){
 						arguments[0].eventHandler.at("all", function(e){
-								controller.trigger(e.event, e.data );
+								controller.trigger(e.event, e.data);
 							},
 							{
 								triggerElement : controller

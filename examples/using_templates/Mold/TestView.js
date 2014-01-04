@@ -5,10 +5,12 @@ Seed({
 			"external->Mold.DNA.View"
 		]
 	},
-	function(){
+	function(config){
 		var element = document.createElement("div");
-		element.innerHTML = "TEST";
+		element.innerHTML = "YEAR IT WORKS!!!";
 		this.scope = element;
-		console.log("view")
+		console.log("view", config)
+
+
 	}
 )

@@ -7,20 +7,23 @@ Seed(
 			"external->Mold.Lib.Template",
 			"external->Mold.Lib.Color",
 			"external->Mold.Lib.DomScope",
-			"external->Mold.Lib.TemplateDirective",
-			"Mold.TestView",
+			"Mold.TestController",
 			"Mold.TestModel"
 		]
 	},
 	function(){
-		console.log("init")
+		
+		console.log("init");
+
+
 		var color = Mold.Lib.Color;
 
-		Mold.Lib.TemplateDirective.add({
+		Mold.Lib.DomScope.directive({
 			at : "element",
 			name : "x-special",
-			seed : "Mold.TestView",
-			replace : true,
+			seed : "Mold.TestController",
+			replace : false,
+			watchable : true,
 			collect : [
 				{
 					element : "img",
@@ -32,12 +35,29 @@ Seed(
 				},
 				{
 					attribute : "attr"
+				},
+				{
+					content : "html"
 				}
 			],
 			action : function(){
-				console.log("do action")
+				console.log("do action");
 			}
 		});
+
+
+/*
+		Mold.Lib.DomScope.directive({
+			at : "class",
+			name : "hans",
+			seed : "Mold.TestController",
+			replace : false,
+			action : function(node, element, template, index){
+				console.log("do action", node, element, template, index);
+			}
+		});
+
+		*/
 
 
 		var template = new Mold.Lib.Template(function(){
@@ -79,10 +99,7 @@ Seed(
 				{{/adress}}
 				</ul>
 
-				<x-special attr="irgenwas">
-					<img src="/bildpfad" title="Ein Titel">
-					<img src="/bildpfad" title="Ein anderes Bild">
-				</x-special>
+			
 
 				<x-panel>
 					<x-tab title="irgendwas">
@@ -90,7 +107,13 @@ Seed(
 						<div class="lalal">		
 							xontentS
 						</div>
-					<x-tab>
+					</x-tab>
+					<x-tab title="Noch Ein Tab">
+						Inner HTML 
+						<div class="lalal">		
+							anderer content
+						</div>
+					</x-tab>
 				</x-panel>
 			|*/
 		});
@@ -108,13 +131,13 @@ Seed(
 
 
 
-		var content = template.get();
-		console.log(content);
+		//var content = template.get();
+		//console.log(content);
 
 
-		document.querySelector(".template-target").appendChild(content)
+	//	document.querySelector(".template-target").appendChild(content)
 		
-		window.tree = template.tree();
+	//	window.tree = template.tree();
 
 		var model = new Mold.TestModel();
 
@@ -137,29 +160,28 @@ Seed(
 		//	template.bind(model);
 		})
 
-
+/*
 		template.once("viewmodel.change", function (e){
 			template.applyFilter(template.tree().childs[0].adress);
 		});
-
+*/
 
 		var elementCount = 10;
 
-		window.setTimeout(function(){
+	
 
-			t_start = new Date().getTime();
-			for(var i = 0; i < elementCount; i++){
-
-				
-				model.data.adress.push(
-					{ number : i + ".", plz : Math.round(Math.random()*5) }
-				)
-			}
-			t_end = new Date().getTime();
-		
-			console.log("executed in:", (t_end - t_start));
+		t_start = new Date().getTime();
+		for(var i = 0; i < elementCount; i++){
 			
-		}, 50);	
+			model.data.adress.push(
+				{ number : i + ".", plz : Math.round(Math.random()*5) }
+			)
+		}
+		t_end = new Date().getTime();
+	
+		console.log("executed in:", (t_end - t_start));
+			
+			
 
 
 		

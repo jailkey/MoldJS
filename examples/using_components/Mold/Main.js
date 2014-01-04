@@ -2,13 +2,23 @@ Seed({
 		name : "Mold.Main",
 		dna : "action",
 		include : [
-			"external->Mold.Component.SlideShow"
+			"external->Mold.Lib.Component",
+			"Mold.Test"
 		]
 	},
 	function(){
-		console.log("SlideShow")
-		var slideShow = new Mold.Component.SlideShow();
-		console.log(slideShow);
-		slideShow.append(document)
+		var component = new Mold.Lib.Component("Mold.Test");
+
+		component.on("files.loaded", function(){
+			console.log("ALL FILES Loaded");
+		});
+
+		component.on("files.error", function(){
+			console.log("FILES KONNTEN NICHT geladen werden")
+		});
+
+		component.files("logo.png");
+		component.files("stressed_linen.png");
+		component.files("test.css");
 	}
 );

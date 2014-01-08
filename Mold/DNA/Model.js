@@ -16,18 +16,18 @@ Seed({
 		createBy : "new",
 		create : function(seed) {
 			var target = Mold.createChain(Mold.getSeedChainName(seed));
-			var adapter = false;
-			if(seed.adapter){
-				adapter = Mold.getSeed(seed.adapter.replace("external->", ""));
-				if(seed.resource){
-					adapter = new adapter({ path : seed.resource });
-				}else{
-					throw "Ressource not given!"
-				}
-			}
+			
 			target[Mold.getTargetName(seed)] = function(){
+				var adapter = false;
+				if(seed.adapter){
+					adapter = Mold.getSeed(seed.adapter.replace("external->", ""));
+					if(seed.resource){
+						adapter = new adapter({ path : seed.resource });
+					}else{
+						throw "Ressource not given!"
+					}
+				}
 				var model = new Mold.Lib.Model({ properties : seed.func, adapter : adapter });
-					
 				return model;
 			}
 		}

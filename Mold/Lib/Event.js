@@ -124,8 +124,7 @@ Seed (
 						if(config && config.triggerElement){
 							config.triggerElement.trigger(trigger[i].event, trigger[i].data);
 						}else{
-					
-							this.trigger(trigger[i].event, trigger[i].data);
+							callback.call(this, trigger[i].data);
 						}
 						
 						_firedActions[event][callback] == true;

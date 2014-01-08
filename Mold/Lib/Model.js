@@ -205,18 +205,74 @@ Seed({
 
 		
 		_createModel(_properties, _data);
+
+
+		var _protected = {
+			trigger : true,
+			off : true,
+			on : true,
+			once : true,
+			bubble : true,
+			delegate : true,
+			at : true,
+			when : true,
+			_eid : true,
+			then : true
+		}
 		
-		var _update = function(model, data){
-			Mold.each(data, function(element, name){
-				if(Mold.isObject(element) || Mold.isArray(element) ){
-					_update(model[name], element);
-				}else{
-					if(model[name] &&  model[name] !== element){
-						model[name] = element;
-					}
+		var _add = function(model, data){
+
+			//Mold.each(data, function(element, name){
+				
+				if(Mold.isArray(data)){
+					
+					Mold.each(data, function(item){
+						model.push(item);
+					})
+				}else if(Mold.isObject(data)){
+					Mold.each(data, function(item, name){
+						if(Mold.isObject(item) || Mold.isArray(item)){
+							_add(model[name], item);
+						}else{
+							model[name] = item;
+						}
+					})
+					
 				}
-			});
-		} 
+			
+			//return model;
+		}
+
+
+		var _clean = function(model){
+			if(Mold.isArray(model)){
+				model.remove();
+			}else if(Mold.isObject(model)){
+				Mold.each(model, function(item, name){
+					if(Mold.isObject(model[name]) || Mold.isArray(model[name])){
+						_clean(model[name]);
+					}else{
+						if(!_protected[name]){
+							model[name] = false;
+						}
+					}
+				})
+			}
+		}
+
+		var _update = function(model, data){
+			_clean(model);
+			_add(model, data);
+		}
+
+		//var _modelAddContent
+
+		if(_adapter){
+			_adapter.on("update", function(e){
+				_update(_data, e.data);
+				that.trigger("update", e.data);
+			})
+		}
 
 		this.publics = {
 			data : _data,
@@ -255,6 +311,7 @@ Seed({
 			},
 			update : function(newData){
 				_update(_data, newData);
+
 			},
 			json : function(){
 				return JSON.stringify(model.data, function(key, value){

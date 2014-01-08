@@ -117,7 +117,7 @@ Seed({
 						_getFragment(element, fragment);
 					}else{
 						// referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
-						console.log("append")
+						
 						fragment.appendChild(element)
 						//_parentElement.insertBefore(element, _lastNode);
 					}

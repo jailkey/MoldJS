@@ -1,0 +1,22 @@
+{
+  "name": "MoldJS",
+  "version": "0.0.1",
+  "homepage": "https://github.com/jailkey/MoldJS",
+  "authors": [
+    "Jan <jan@position-absurd.de>"
+  ],
+  "description": "Polymorph JavaScript structure and pattern framework",
+  "main": "Mold.js",
+  "keywords": [
+    "javascript",
+    "polymoph",
+    "structure",
+    "pattern",
+    "framework",
+    "MVC",
+    "MV",
+    "directives",
+    "templateengine"
+  ],
+  "license": "MIT"
+}

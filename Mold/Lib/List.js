@@ -64,7 +64,6 @@ Seed({
     			_array.oldPush(element);
     			element = _creatListItem(element);
     			_array.trigger("list.item.add", { length : _array.length, index : _array.length -1, value : element, list : _array});
-    			
     		};
     	};
 
@@ -133,6 +132,14 @@ Seed({
             while(_array.length){
                 _array.pop();
             }
+        }
+
+        _array.each = function(callback){
+            Mold.each(_array, callback);
+        }
+
+        _array.some = function(callback){
+            Mold.some(_array, callback);
         }
 
 	   return _array;

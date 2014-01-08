@@ -53,24 +53,19 @@ Seed({
 		console.log(_styles);
 
 		
-
+		var _getRuleByProperty = function(poperty){
+			
+		}
 
 		var _getRule = function(styleSheetName, selector){
 			var styleSheetList = document.styleSheets;
-			if(this._cache[styleSheetName] && this._cache[styleSheetName][selector]){
-				return  this._cache[styleSheetName][selector];
-			}
 			for(var i = 0; i < styleSheetList.length; i++){
 				if(styleSheetList[i].href && styleSheetList[i].href.indexOf(styleSheetName) > -1){
-					this._cache[styleSheetList[i]] = {}
+			
 					var rules = styleSheetList[i].cssRules || styleSheetList[i].rules;
-					
 					if(rules){
-						//alert("rouls found")
 						for(var y = 0; y < rules.length; y++){
-
 							if(rules[y].selectorText === selector){
-								this._cache[styleSheetList[i]][selector] = rules[y];
 								return rules[y];
 							}
 						}

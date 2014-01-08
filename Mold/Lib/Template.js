@@ -123,9 +123,8 @@ Seed({
 									if(!element.childs[e.data.index]){
 										element.add();
 									}else{
-										if(element.isHidden()){
-											element.show();
-										}
+										element.show();
+										
 									}
 									_addData(element.childs[e.data.index], e.data.value, bind);
 								//}

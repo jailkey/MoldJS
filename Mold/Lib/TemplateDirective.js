@@ -9,7 +9,9 @@ Seed({
 
 		var _directives = [];
 		var _directivesIndex = {};
+		var _that = this;
 
+		Mold.mixing(this, new Mold.Lib.Event(this));
 
 		/*
 			Directive Exampel
@@ -142,7 +144,7 @@ Seed({
 
 		var _add = function(directive){
 			directive._id = Mold.getId();
-			directive.apply = function(node, element, template, index){
+			directive.apply = function(node, element, template, index, style){
 				if(!element.hasDirective || !element.hasDirective(directive._id)){
 					directive.scope = element;
 					if(directive.seed){
@@ -154,6 +156,10 @@ Seed({
 							var collection = _collect(directive.scope, directive.collect, {},directive.watchable);
 						}
 
+						if(style){
+							collection = style;
+						}
+
 						var seed = Mold.getSeed(directive.seed);
 						directive.instance = new seed(collection);
 						
@@ -163,6 +169,9 @@ Seed({
 							}else{
 								directive.appendElement(directive.instance.scope);
 							}
+						}else{
+							directive.instance.scope = directive.scope;
+							directive.instance.trigger("scope");
 						}
 					}
 					if(!element.hasDirective){
@@ -174,7 +183,9 @@ Seed({
 						element.directives = [];
 					}
 					element.directives.push(directive._id)
-					directive.action.call(directive, node, element, template, index);
+					if(directive.action){
+						directive.action.call(directive, node, element, template, index);
+					}
 				}
 			}
 			
@@ -189,6 +200,7 @@ Seed({
 			_directives.push(directive);
 			_directivesIndex[directive.at] = _directivesIndex[directive.at] || {};
 			_directivesIndex[directive.at][directive.name] = _directives[_directives.length -1];
+			_that.trigger("directive.added", { directive : directive });
 		}
 
 /*Mold View Event*/
@@ -231,6 +243,8 @@ Seed({
 
 		
 		return {
+			on : this.on,
+			trigger : this.trigger,
 			add : function(directive){
 				_add(directive);
 			},

@@ -2,12 +2,20 @@ Seed({
 		name : "Mold.Lib.UrlRouter",
 		dna : "class",
 		author : "Jan Kaufmann",
+		polymorph : true,
 		include : [
 			"Mold.Lib.GlobalEvents"
 		]
 	},
 	function(seed){
-		var _path, _params, _hashes, _seed, _loadedSeeds = {}, _request = false, _response = false;
+		var _path, 
+			_params, 
+			_hashes,  
+			_loadedSeeds = {}, 
+			_request = false,
+			_response = false, 
+			_session = false;
+		
 		var _seed = seed;
 		var _events = Mold.Lib.GlobalEvents;
 		
@@ -284,7 +292,7 @@ Seed({
 					}
 				}else{
 					if(!Mold.isNodeJS){
-						Mold.log("Error", { code : 10, dnaname: "urlrouter", error : "No route found! " +_seed.name+ " "});
+						//Mold.log("Error", { code : 10, dnaname: "urlrouter", error : "No route found! " +_seed.name+ " "});
 					}
 				}
 			}

@@ -45,19 +45,19 @@ Seed(
 			}
 		});
 
-
 /*
+
 		Mold.Lib.DomScope.directive({
-			at : "class",
-			name : "hans",
+			at : "style-property",
+			name : "grid",
 			seed : "Mold.TestController",
 			replace : false,
 			action : function(node, element, template, index){
-				console.log("do action", node, element, template, index);
+				//console.log("do action", node, element, template, index);
 			}
 		});
 
-		*/
+	*/
 
 
 		var template = new Mold.Lib.Template(function(){

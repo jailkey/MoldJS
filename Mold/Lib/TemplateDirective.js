@@ -2,7 +2,8 @@ Seed({
 		name : "Mold.Lib.TemplateDirective",
 		dna : "static",
 		include : [
-			"Mold.Lib.Event"
+			"Mold.Lib.Event",
+			"Mold.Lib.Controller"
 		]
 	},
 	function(){
@@ -160,9 +161,25 @@ Seed({
 							collection = style;
 						}
 
-						var seed = Mold.getSeed(directive.seed);
-						directive.instance = new seed(collection);
-						
+						var scope = {
+							append : function(element){
+								if(directive.replace) {
+									directive.replaceElement(element);
+								}else{
+									directive.appendElement(element);
+								}
+							}
+						}
+
+						if(typeof directive.seed === "string"){
+							var seed = Mold.getSeed(directive.seed);
+							
+						}else{
+							var seed = new Mold.Lib.Controller(directive.seed);
+						}
+
+						directive.instance = new seed(scope, collection);
+
 						if(directive.instance.scope){
 							if(directive.replace) {
 								directive.replaceElement(directive.instance.scope);

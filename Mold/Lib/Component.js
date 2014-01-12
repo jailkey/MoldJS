@@ -33,7 +33,7 @@ Seed({
 				Mold.Lib.DomScope.directive(directive);
 			},
 			files : function(file){
-				if(file.length > 0){
+				if(file && file.length > 0){
 					_loader.append(file);
 					if(!_loader.isLoading()){
 						_loader.load();

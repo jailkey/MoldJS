@@ -15,13 +15,21 @@ Seed({
 		createBy : "new",
 		create : function(seed) {
 			var target = Mold.createChain(Mold.getSeedChainName(seed));
-	
-			 
-			var component = new Mold.Lib.Component(seed.controller);
-			Mold.each(seed.func.directives, function(directive){
+			
+
+			if(seed.controller){
+				
+				var component = new Mold.Lib.Component(seed.controller);
+			}else if(seed.func){
+				var component = new Mold.Lib.Component(seed.func);
+			}else{
+				throw "No controller given for component "+seed.name+"!";
+			}
+			Mold.each(seed.directives, function(directive){
 				component.directive(directive);
+
 			});
-			if(seed.func.files){
+			if(seed.files){
 				component.files(seed.func.files);
 			}
 				

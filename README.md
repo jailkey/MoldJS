@@ -320,7 +320,7 @@ Seed({
 	function(){
 		//this seed will executed as a controller
 
-		//use register to delegate events this events of a Seed to the controller use the register method
+		//use register to delegate events from a Seed to the controller
 		var view = this.register(new Mold.Misc.View());
 		
 		//To react with an event in a controller you can define the "actions" object:

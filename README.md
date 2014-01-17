@@ -2,5 +2,200 @@ MoldJS
 ======
 JavaScript Structure and Pattern Framework 
 
+##Installation
+
+###Manual installation (brower/npm coming soon)
+* Download Files
+* Create directory and extract files
+* Create Index.html with and include following in the head:
+
+```html
+<script  src="Mold.js" type="text/javascript"  data-mold-main="Mold.Main"></script>
+``` 
+
+Now Mold.js try to load /Mold/Main.js. 
+If you use the default repository this file is defined as a "Mold-Module" called "Seed".
+This Seed will be executed after all dependencys are loaded and the dom is ready, cause the Seed dna is "action", of which more in the next chappter.
+
+
+
+##Building a Module (Seed)
+
+###Module-structure
+In Mold every Seed has his own directory. The directory/file-structure represents the object-structure in JavaScript.
+A module with the dir/file-structure /Mold/Misc/MySeed.js becomes in JavaScript to Mold.Misc.MySeed
+It works like package-managers in other programming enviroments.
+
+###Create a Modulefile
+A Seed file must have the same name like the Seed and you have tu put it in the right place in the structur.
+Every see have two required propertys, "name" the seed name, and dna, the seed pattern.
+
+```javascript
+Seed({
+		name : "Mold.Misc.MySeed", //represents the file- and the object-structure and the
+		dna : "static" //defines how the Seed will be executed
+	},
+	function(){
+		//The code of the Seed, in case of dna "static" it can be every valid JavaScript code, the main thing is that it is writen in a clousure.
+
+		return {
+			doSomething : function(){
+				console.log("something")
+			}
+		}
+	}
+);
+```
+
+###Import other Seeds and describe dependencys
+Now we have created a Seed and we will use it in another, therefor we have the Seed-property "include".
+
+```javascript
+Seed({
+		name : "Mold.Main",
+		dna : "action",
+		include : [
+			"Mold.Misc.MySeed"
+		]
+	},
+	function(){
+		//if all dependencies are loaded and dom is ready excute:
+		Mold.Misc.MySeed.doSomething();
+		//console output is "something"
+	}
+);
+```
+The "include" property is optional and can be a string or an array.
+
+##Useing diffrent repositorys
+In a realworld scenario it come in handy to use diffrent repositorys for the core and your application.
+Mold provides an easy way to do that:
+
+```html
+<script 
+	data-mold-main="Mold.Main"
+	data-mold-repository=""
+	data-mold-external-repository="http://yourdomain.com/externalrepro/"
+	src="Mold.js" type="text/javascript"
+></script>
+```
+After you add a path to the external repository you can get the external Seed in the include property with the prefix "external->".
+
+```javascript
+Seed({
+		name : "Mold.Main",
+		dna : "action",
+		include : [
+			"external->Mold.Lib.Ajax"
+		]
+	},
+	function(){
+		var ajax =  new Mold.Lib.Ajax();
+	}
+);
+```
+All dependecies in external Seed will loaded from the external repository.
+The path of the external repository can include another domain, cause Seeds will loaded via JSONP.
+
+
+##Use diffrent dna
+The dna of a Seed defines how the Seed will be executed, the dna can preparse code, inject dependecies, check the interface or excute special seed property.
+Simply put, it defines a pattern.
+
+###Build-in dna
+There are six types of dna build in:
+* dna
+* static
+* class
+* singelton 
+* data
+* action
+
+Here is a short description of ever type:
+
+####dna
+The dna with the name dna defines a new dna ;)
+This is an extra chappter so lets save it for later.
+
+####static
+A Seed with a static dna will be executed, after all dependecies are loaded.
+The result will inserted to the object chain (seed chain).
+
+Example: 
+```javascript
+Seed({
+		name : "Mold.Misc.MySeed",
+		dna : "static"
+	},
+	function(){
+		return {
+			doSomething : function(){
+				console.log("something")
+			}
+		}
+	}
+);
+
+/*
+	If we include this seed, we can access via Mold.Lib.MySeed and excute the doSomthing method via Mold.Lib.MySeed.doSomthing().
+	A Seed with the dna "static" exists only once, no matter how much Seeds include this Seed.
+	You can use it for global configurations or, to change data between objects.
+
+*/
+```
+
+####class
+The "class" dna defines a Seed as class, it added options for extending another class, and for defining "pivate" and "public" propertys/methodes.
+A Seed with the dna "class" must instanced with the keyword new. So there can be more the one instance.
+
+Example:
+```javascript
+Seed({
+		name : "Mold.Misc.MySeed",
+		dna : "class",
+		extend : "external->Mold.Lib.Ajax"
+	},
+	function(){
+
+		var _myPrivateProperty = "value of my private property"; //defines a private property;
+
+		this.publics = {
+			publicMethod : function(){
+				console.log("calling a public method");
+			},
+			callingAPrivate : function(){
+				console.log(_myPrivateProperty);
+			},
+			getFile : function(){
+				this.send("url to my file", false, { method : "GET"});
+			}
+		}
+	}
+);
+
+
+/*
+	After we include this example we can create a new instance with:
+	
+	var myTest = new Mold.Misc.MySeed();
+
+	Now we ca access the public Methodes but not the private
+
+	myTest.publicMethod() outputs "calling a public method" on the console,
+
+	myTest._myPrivateProperty throws an error cause you have no access to private propertys
+
+	myTest.callingAPrivate() logs "value of my private property" cause the method can access the private property
+
+
+
+*/
+
+```
+
+
+
 ##Deutsche Dokumentation
 ###[Einleitung](https://github.com/jailkey/MoldJS/wiki/MoldJS-Einleitung)
+
+

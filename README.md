@@ -264,6 +264,43 @@ Seed({
 */
 ```
 
+####action
+If you give the "action" dna to a Seed, the Seed will executed after all dependecies are loaded.
+In simple apps you can use it for the main Seed as glue code.
+
+Example
+```javascript
+Seed({
+		name : "Mold.Main",
+		dna : "action"
+	},
+	function(){
+		console.log("this message will be logged after this Seed is loaded.");
+	}
+}
+);
+```
+
+####other dna
+If you need other dna, like controller, model, view, urlrouter etc. you can load it like other seeds.
+
+Example
+```javascript
+Seed({
+		name : "Mold.Misc.MySeed",
+		dna : "controller",
+		include : [
+			"external->Mold.DNA.Controller"
+		]
+	},
+	function(){
+		//this seed will handeld like a controller
+	}
+}
+);
+```
+
+
 
 ##Deutsche Dokumentation
 ###[Einleitung](https://github.com/jailkey/MoldJS/wiki/MoldJS-Einleitung)

@@ -4,7 +4,7 @@ Seed(
 		dna : "urlrouter",
 		onhashchange : "update",
 		include : [
-			"external#Mold.DNA.UrlRouter"
+			"external->Mold.DNA.UrlRouter"
 		]
 	},
 	{

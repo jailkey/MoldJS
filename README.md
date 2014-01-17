@@ -4,7 +4,7 @@ JavaScript Structure and Pattern Framework
 
 ##Installation
 
-###Manual installation (brower/npm coming soon)
+###Manual installation (bower/npm coming soon)
 * Download Files
 * Create directory and extract files
 * Create Index.html with and include following in the head:
@@ -14,8 +14,8 @@ JavaScript Structure and Pattern Framework
 ``` 
 
 Now Mold.js try to load /Mold/Main.js. 
-If you use the default repository this file is defined as a "Mold-Module" called "Seed".
-This Seed will be executed after all dependencys are loaded and the dom is ready, cause the Seed dna is "action", of which more in the next chappter.
+If you use the default repository, this file is defined as a "Mold-Modul" called "Seed".
+The Seed will be executed after all dependencys are loaded and the dom is ready, cause the Seed dna is "action", of which more in the next chappter.
 
 
 
@@ -27,7 +27,7 @@ A module with the dir/file-structure /Mold/Misc/MySeed.js becomes in JavaScript 
 It works like package-managers in other programming enviroments.
 
 ###Create a Modulefile
-A Seed file must have the same name like the Seed and you have tu put it in the right place in the structur.
+A Seed file must have the same name like the Seed and you have to put it in the right place in the structur.
 Every see have two required propertys, "name" the seed name, and dna, the seed pattern.
 
 ```javascript
@@ -69,8 +69,8 @@ Seed({
 ```
 The "include" property is optional and can be a string or an array.
 
-##Useing diffrent repositorys
-In a realworld scenario it come in handy to use diffrent repositorys for the core and your application.
+##Useing diffrent repositories
+In a realworld scenario it come in handy to use diffrent repositories for the core and your application.
 Mold provides an easy way to do that:
 
 ```html
@@ -81,7 +81,7 @@ Mold provides an easy way to do that:
 	src="Mold.js" type="text/javascript"
 ></script>
 ```
-After you add a path to the external repository you can get the external Seed in the include property with the prefix "external->".
+After you add the path to the external repository, you can get external Seeds in the include property with the prefix "external->".
 
 ```javascript
 Seed({
@@ -136,10 +136,11 @@ Seed({
 			}
 		}
 	}
-);
+);‚
 
 /*
-	If we include this seed, we can access via Mold.Lib.MySeed and excute the doSomthing method via Mold.Lib.MySeed.doSomthing().
+	If we include this seed, we can access via Mold.Lib.MySeed 
+	and excute the doSomthing method via Mold.Lib.MySeed.doSomthing().
 	A Seed with the dna "static" exists only once, no matter how much Seeds include this Seed.
 	You can use it for global configurations or, to change data between objects.
 
@@ -227,17 +228,15 @@ Seed({
 );
 
 /*
-	Create an instances:
+	create instances:
 
 	var instanceOne = new Mold.Misc.MySeed();
-
 	var instanceTwo = new Mold.Misc.MySeed();
 
-	Now intanceOne and intanceTwo are the same;
+	now intanceOne and intanceTwo are the same;
 	if you set one of them you can get the value from the other:
 
 	instanceOne.set("some value");
-
 	instanceTwo.get() it returns "some value";
 */
 ```
@@ -257,7 +256,7 @@ Seed({
 );
 
 /*
-	After loading you can call:
+	after loading you can call:
 
 	Mold.Misc.MySeed.dataProperty
 

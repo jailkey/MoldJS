@@ -32,13 +32,14 @@ Every see have two required propertys, "name" the seed name, and dna, the seed p
 
 ```javascript
 Seed({
-		//represents the file- and the object-structure and the
+		//represents the file- and the object-structure 
 		name : "Mold.Misc.MySeed",
 		//defines how the Seed will be executed
 		dna : "static" 
 	},
 	function(){
-		//The code of the Seed, in case of dna "static" it can be every valid JavaScript code, the main thing is that it is writen in a clousure.
+		//The code of the Seed, in case of dna "static" it can be every valid JavaScript code,
+		//the main thing is that it is writen in a clousure.
 
 		return {
 			doSomething : function(){

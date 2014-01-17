@@ -15,7 +15,7 @@ JavaScript Structure and Pattern Framework
 
 Now Mold.js try to load /Mold/Main.js. 
 If you use the default repository, this file is defined as a "Mold-Modul" called "Seed".
-The Seed will be executed after all dependencys are loaded and the dom is ready, cause the Seed dna is "action", of which more in the next chapter.
+The Seed will be executed after all dependencies are loaded and the dom is ready, cause the Seed dna is "action", of which more in the next chapter.
 
 
 
@@ -50,7 +50,7 @@ Seed({
 );
 ```
 
-###Import other Seeds and describe dependencys
+###Import other Seeds and describe dependencies
 Now we have created a Seed and we will use it in another, therefor we have the Seed-property "include".
 
 ```javascript

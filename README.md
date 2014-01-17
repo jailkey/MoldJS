@@ -32,8 +32,10 @@ Every see have two required propertys, "name" the seed name, and dna, the seed p
 
 ```javascript
 Seed({
-		name : "Mold.Misc.MySeed", //represents the file- and the object-structure and the
-		dna : "static" //defines how the Seed will be executed
+		//represents the file- and the object-structure and the
+		name : "Mold.Misc.MySeed",
+		//defines how the Seed will be executed
+		dna : "static" 
 	},
 	function(){
 		//The code of the Seed, in case of dna "static" it can be every valid JavaScript code, the main thing is that it is writen in a clousure.
@@ -153,11 +155,13 @@ Example:
 Seed({
 		name : "Mold.Misc.MySeed",
 		dna : "class",
+		//with the extend property in a Seed with class dna you can extend another Seed
 		extend : "external->Mold.Lib.Ajax"
 	},
 	function(){
 
-		var _myPrivateProperty = "value of my private property"; //defines a private property;
+		//defines a private property;
+		var _myPrivateProperty = "value of my private property"; 
 
 		this.publics = {
 			publicMethod : function(){
@@ -167,7 +171,8 @@ Seed({
 				console.log(_myPrivateProperty);
 			},
 			getFile : function(){
-				this.send("url to my file", false, { method : "GET"});
+				//Calling a method from the extended class
+				this.send("url/to/my/file", false, { method : "GET"});
 			}
 		}
 	}
@@ -187,12 +192,78 @@ Seed({
 
 	myTest.callingAPrivate() logs "value of my private property" cause the method can access the private property
 
-
+	At the code in the top you see the extend property is extending the "Mold.Lib.Ajax" Seed.
+	Now you can use every public propertys/methods from Mold.Lib.Ajax. 
+	All this propertys/methodes are in the "this" scope, so in the example we can call a the send method from the Ajax class.
 
 */
 
 ```
 
+
+####singelton
+Dna of the type singelton extend the class dna.
+You can used it like a class, but there is only one instance.
+
+Example
+```javascript
+Seed({
+		name : "Mold.Misc.MySeed",
+		dna : "singelton"
+	},
+	function(){
+
+		var _value = "";
+
+		this.publics = {
+			set : function(value){
+				_value = value;
+			},
+			get : function(){
+				return _value;
+			}
+		}
+	}
+);
+
+/*
+	Create an instances:
+
+	var instanceOne = new Mold.Misc.MySeed();
+
+	var instanceTwo = new Mold.Misc.MySeed();
+
+	Now intanceOne and intanceTwo are the same;
+	if you set one of them you can get the value from the other:
+
+	instanceOne.set("some value");
+
+	instanceTwo.get() it returns "some value";
+*/
+```
+
+####data
+The "data" dna saves data in the structure, it expects data in JSON format.
+
+Example
+```javascript
+Seed({
+		name : "Mold.Misc.MySeed",
+		dna : "data"
+	},
+	{	
+		dataProperty : "mydatavalue"
+	}
+);
+
+/*
+	After loading you can call:
+
+	Mold.Misc.MySeed.dataProperty
+
+	and you get "mydatavalue"
+*/
+```
 
 
 ##Deutsche Dokumentation

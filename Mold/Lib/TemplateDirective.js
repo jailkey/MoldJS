@@ -120,24 +120,29 @@ Seed({
 					}
 
 				}else if(collection.attribute){
-					
-					var attribute = scope.getAttribute(collection.attribute);
-					
-					if(attribute){	
-						var attributeName = collection.name || collection.attribute;
-						output[attributeName] = attribute;
 
-						if(watchable){
-							_watch(scope, function(mutation){
-								if(
-									mutation.type === "attributes" 
-									&& mutation.attributeName === collection.attribute
-								){
-									output[attributeName] = mutation.target.getAttribute(collection.attribute);
-								}
-							});
+					var collectedAttributes = (Mold.isArray(collection.attribute)) ? collection.attribute : [collection.attribute]
+
+					Mold.each(collectedAttributes, function(selectedAttribute){
+
+						var attribute = scope.getAttribute(selectedAttribute);
+						
+						if(attribute){
+							var attributeName = selectedAttribute.name || selectedAttribute;
+							output[attributeName] = attribute;
+
+							if(watchable){
+								_watch(scope, function(mutation){
+									if(
+										mutation.type === "attributes" 
+										&& mutation.attributeName === attributeName
+									){
+										output[attributeName] = mutation.target.getAttribute(attributeName);
+									}
+								});
+							}
 						}
-					}
+					});
 				}
 			}
 			return output;

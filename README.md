@@ -15,7 +15,7 @@ JavaScript Structure and Pattern Framework
 
 Now Mold.js try to load /Mold/Main.js. 
 If you use the default repository, this file is defined as a "Mold-Modul" called "Seed".
-The Seed will be executed after all dependencys are loaded and the dom is ready, cause the Seed dna is "action", of which more in the next chappter.
+The Seed will be executed after all dependencys are loaded and the dom is ready, cause the Seed dna is "action", of which more in the next chapter.
 
 
 
@@ -117,7 +117,7 @@ Here is a short description of ever type:
 
 ####dna
 The dna with the name dna defines a new dna ;)
-This is an extra chappter so lets save it for later.
+This is an extra chapter so lets save it for later.
 
 ####static
 A Seed with a static dna will be executed, after all dependecies are loaded.
@@ -185,15 +185,15 @@ Seed({
 	
 	var myTest = new Mold.Misc.MySeed();
 
-	Now we ca access the public Methodes but not the private
+	Now we can access the public methodes but not the private.
 
 	myTest.publicMethod() outputs "calling a public method" on the console,
 
-	myTest._myPrivateProperty throws an error cause you have no access to private propertys
+	myTest._myPrivateProperty throws an error cause you have no access to private propertys.
 
 	myTest.callingAPrivate() logs "value of my private property" cause the method can access the private property
 
-	At the code in the top you see the extend property is extending the "Mold.Lib.Ajax" Seed.
+	At the code on the top, you see the extend property is extending the "Mold.Lib.Ajax" Seed.
 	Now you can use every public propertys/methods from Mold.Lib.Ajax. 
 	All this propertys/methodes are in the "this" scope, so in the example we can call a the send method from the Ajax class.
 
@@ -277,12 +277,11 @@ Seed({
 	function(){
 		console.log("this message will be logged after this Seed is loaded.");
 	}
-}
 );
 ```
 
 ####other dna
-If you need other dna, like controller, model, view, urlrouter etc. you can load it like other seeds.
+If you need other dna like controller, model, view, urlrouter etc. you can load it like other seeds.
 
 Example
 ```javascript
@@ -294,11 +293,94 @@ Seed({
 		]
 	},
 	function(){
-		//this seed will handeld like a controller
+		//this seed will executed as a controller
 	}
-}
 );
 ```
+You can find all DNA Seeds in Mold/DNA/
+
+It's possible to write your own dna, an example will follow in a later chapter.
+
+
+###useing controller
+Controllers are one of the most important things in Mold, they are the connector between dom, views, models and classes 
+and they act if special events will happen. Controllers are isomorphic, like the most Seeds you can use it in the Browser and node.js.
+
+There are some ways to create a controller, the simplest way is to use the controller dna.
+
+```javascript
+Seed({
+		name : "Mold.Misc.MySeed",
+		dna : "controller",
+		include : [
+			"external->Mold.DNA.Controller",
+			"Mold.Misc.View"
+		]
+	},
+	function(){
+		//this seed will executed as a controller
+
+		//use register to delegate events this events of a Seed to the controller use the register method
+		var view = this.register(new Mold.Misc.View());
+		
+		//To react with an event in a controller you can define the "actions" object:
+		this.actions = {
+			"@url.changed" : function(){
+				//do something if the url changes 
+			},
+			"@click.view" : function(){
+				//do somthing if a element is clicked in the view
+			}
+		}
+	}
+);
+```
+
+As you see there are some special controller properties and methods.
+Most important are the register methode and the actions object.
+
+###using the url router
+To react on url changes you can use the "urlrouter" dna.
+Mostly the main seed will be an urlrouter
+
+```javascript
+Seed({
+		name : "Mold.Main",
+		dna : "urlrouter",
+		onhashchange : "update",
+		include : [
+			"external->Mold.DNA.UrlRouter"
+		]
+	},
+	{
+		//The router expects an collection of routes
+		//Start with / if you will react on the path
+		//If the value is "@ready->"" and then a seed, 
+		//the router wait until the dom is loaded, and after it load and execute the seed
+		"/" : "@read->Mold.Misc.MySeed",
+
+		//if you start with a # the route acts if the hash changes.
+		//Use @something to trigger a globale event, you can catch it in the controller
+		"#somethig" : "@url.changed"
+	}
+);
+```
+
+There are much more options to use an urlrouter, you can define variables with * or : , 
+on serverside you can react on the http request message with GET/POST/DELETE/PUT.
+
+For more infos look at the API description. (coming soon ;))
+
+p.s. On serversite use "sessionrouter" dna, cause a urlrouter is global an trigger the events for all users
+
+
+
+
+
+
+
+
+
 
 
 

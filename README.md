@@ -69,8 +69,8 @@ Seed({
 ```
 The "include" property is optional and can be a string or an array.
 
-##Useing diffrent repositories
-In a realworld scenario it come in handy to use diffrent repositories for the core and your application.
+##Useing different repositories
+In a realworld scenario it come in handy to use different repositories for the core and your application.
 Mold provides an easy way to do that:
 
 ```html
@@ -96,11 +96,11 @@ Seed({
 	}
 );
 ```
-All dependecies in external Seed will loaded from the external repository.
+All dependecies in the external Seed will loaded from the external repository.
 The path of the external repository can include another domain, cause Seeds will loaded via JSONP.
 
 
-##Use diffrent dna
+##Use different dna
 The dna of a Seed defines how the Seed will be executed, the dna can preparse code, inject dependecies, check the interface or excute special seed property.
 Simply put, it defines a pattern.
 
@@ -113,11 +113,11 @@ There are six types of dna build in:
 * data
 * action
 
-Here is a short description of ever type:
+Here is a short description of every type:
 
 ####dna
 The dna with the name dna defines a new dna ;)
-This is an extra chapter so lets save it for later.
+This is an extra chapter, so lets save it for later.
 
 ####static
 A Seed with a static dna will be executed, after all dependecies are loaded.
@@ -142,21 +142,21 @@ Seed({
 	If we include this seed, we can access via Mold.Lib.MySeed 
 	and excute the doSomthing method via Mold.Lib.MySeed.doSomthing().
 	A Seed with the dna "static" exists only once, no matter how much Seeds include this Seed.
-	You can use it for global configurations or, to change data between objects.
+	You can use it for global configurations or to exchange data between objects.
 
 */
 ```
 
 ####class
-The "class" dna defines a Seed as class, it added options for extending another class, and for defining "pivate" and "public" propertys/methodes.
-A Seed with the dna "class" must instanced with the keyword new. So there can be more the one instance.
+The "class" dna defines a Seed as a class, it added options for extending another class, and for defining "pivate" and "public" propertys/methods.
+A Seed with the dna "class" must instanced with the keyword new. So there can be more then one instance.
 
 Example:
 ```javascript
 Seed({
 		name : "Mold.Misc.MySeed",
 		dna : "class",
-		//with the extend property in a Seed with class dna you can extend another Seed
+		//with the extend property in a Seed, with class dna, you can extend another Seed
 		extend : "external->Mold.Lib.Ajax"
 	},
 	function(){
@@ -193,8 +193,8 @@ Seed({
 
 	myTest.callingAPrivate() logs "value of my private property" cause the method can access the private property
 
-	At the code on the top, you see the extend property is extending the "Mold.Lib.Ajax" Seed.
-	Now you can use every public propertys/methods from Mold.Lib.Ajax. 
+	In the code on the top, you see the extend property is extending the "Mold.Lib.Ajax" Seed.
+	Now you can access every public propertys/methods from Mold.Lib.Ajax. 
 	All this propertys/methodes are in the "this" scope, so in the example we can call a the send method from the Ajax class.
 
 */

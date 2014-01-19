@@ -7,7 +7,7 @@ JavaScript Structure and Pattern Framework
 ###Manual installation (bower/npm coming soon)
 * Download Files
 * Create directory and extract files
-* Create Index.html with and include following in the head:
+* Create Index.html and include following in the head:
 
 ```html
 <script  src="Mold.js" type="text/javascript"  data-mold-main="Mold.Main"></script>
@@ -15,20 +15,19 @@ JavaScript Structure and Pattern Framework
 
 Now Mold.js try to load /Mold/Main.js. 
 If you use the default repository, this file is defined as a "Mold-Modul" called "Seed".
-The Seed will be executed after all dependencies are loaded and the dom is ready, cause the Seed dna is "action", of which more in the next chapter.
-
+The Seed will be executed after all dependencies are loaded.
 
 
 ##Building a Module (Seed)
 
 ###Module-structure
 In Mold every Seed has his own directory. The directory/file-structure represents the object-structure in JavaScript.
-A module with the dir/file-structure /Mold/Misc/MySeed.js becomes in JavaScript to Mold.Misc.MySeed
+A module with the dir/file structure /Mold/Misc/MySeed.js becomes in JavaScript to Mold.Misc.MySeed.
 It works like package-managers in other programming enviroments.
 
 ###Create a Modulefile
 A Seed file must have the same name like the Seed and you have to put it in the right place in the structur.
-Every see have two required propertys, "name" the seed name, and dna, the seed pattern.
+Every Seed have two required propertys, "name" the seed name, and dna, the seed pattern.
 
 ```javascript
 Seed({
@@ -354,10 +353,10 @@ Seed({
 		]
 	},
 	{
-		//The router expects an collection of routes
+		//The router expects a collection of routes
 		//Start with / if you will react on the path
-		//If the value is "@ready->"" and then a seed, 
-		//the router wait until the dom is loaded, and after it load and execute the seed
+		//If the value is "@ready->" and a seed is following, 
+		//the router wait until the dom is loaded, after it loads and executes the seed
 		"/" : "@read->Mold.Misc.MySeed",
 
 		//if you start with a # the route acts if the hash changes.

@@ -3,14 +3,36 @@
 		dna : "class",
 		author : "Jan Kaufmann",
 		include : [
-			"Mold.Lib.Event"
+			"Mold.Lib.Event",
+			"Mold.Lib.Promise"
 		]
 	},
 	function(){
-		var events = new Mold.Lib.Event(this);
-		Mold.mixing(this, events);
 		
+		var events = new Mold.Lib.Event(this),
+			that = this,
+			undefined;
+
+		Mold.mixing(this, events);
+
 		this.publics = {
+
+			get : function(url, data){
+				
+				var promise = new Mold.Lib.Promise(function(fulfilled, rejected){
+
+					events.on("ajax.get.success", function(value){
+						fulfilled(value);
+					}).on("ajax.error", function(value){
+						rejected(value);
+					});
+					
+					that.send(url, data, { method : "GET" });
+
+				});
+
+				return promise;
+			},
 		
 			send : function(url, data, config){
 				var xhr; 
@@ -39,6 +61,9 @@
 				}  
 				
 				xhr.onreadystatechange =  function () {  
+					var jsonData = false,
+						contentType = false;
+
 					if(xhr.readyState < 4) {
 						switch(xhr.readyState){
 							case "0":
@@ -59,13 +84,23 @@
 					if(xhr.status !== 200) {
 						events.trigger("ajax.error", { xhr : xhr });
 						return;  
-					}   
+					}  
+					
+					
 					if(xhr.readyState === 4) {
-						try{
-    						var jsonData = JSON.parse(xhr.response);
-    					}catch(e){
-    						var jsonData = false;
-    					}
+
+						if(typeof xhr.getResponseHeader === "function"){
+							contentType = xhr.getResponseHeader('Content-Type');
+						}
+
+						switch(contentType){
+							case "application/json":
+								jsonData = JSON.parse(xhr.response);
+								break;
+							default:
+								break;
+						}
+    						
 						
 						if(config.method === "GET"){
 							events.trigger("ajax.get.success", { xhr : xhr, json : jsonData });

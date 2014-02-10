@@ -75,6 +75,14 @@ Seed({
 						element : data
 					});
 
+					that.trigger("validation.error."+name, {
+						error : validationError,
+						value : arguments[2],
+						oldValue : arguments[1],
+						name : name,
+						element : data
+					});
+
 					if(!Mold.isObject(result)){
 						arguments[2] = result;
 					}
@@ -314,7 +322,7 @@ Seed({
 
 			},
 			json : function(){
-				return JSON.stringify(model.data, function(key, value){
+				return JSON.stringify(_data, function(key, value){
 					if(key == "_eid"){
 						return undefined;
 					}

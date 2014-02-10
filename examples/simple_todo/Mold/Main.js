@@ -30,7 +30,7 @@ Seed(
 		});
 
 		var model = new Mold.Lib.Model({
-			properties :{
+			properties : {
 				list : [
 					{ entry : "string" }
 				],

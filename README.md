@@ -374,6 +374,98 @@ For more infos look at the API description. (coming soon ;))
 p.s. On serversite use "sessionrouter" dna, cause a urlrouter is global an trigger the events for all users
 
 
+###build a model
+Models in Model are handeld like JSON Object, but they can additional fire events change and validation events and sync data with the backend. You can use it as a class or dna.
+
+```javascript
+Seed({
+		name : "Mold.Main",
+		dna : "action",
+		include : [
+			"external->Mold.Lib.Model",
+			"external->Mold.Adapter.Rest"
+		]
+	},
+	function(){
+
+		//create a model
+		var model = new Mold.Lib.Model(
+			//define the model stucture
+			properties : {
+				list : [
+					{ entry : "string" }
+				],
+				myproperty : "string"
+			}
+			//define how to sync the model
+			adapter : new Mold.Adapter.Rest({ path : "my/rest/route/" })
+		);
+
+		//define some events
+		model.data.on("property.change.myproperty", function(e){
+			console.log("Myproperty has change!", "New value is:" + e.data.value);
+		})
+
+		//trigger the event 
+		model.data.myproperty = "something";
+
+		//use save() to save the data via the given adapter (in our case it sends a POST-request with models data);
+		model.save();
+
+		//if you want to use validation turn it on
+		model.validation(true);
+
+		//define an event
+		model.data.myproperty.on("validation.error", function(e){
+			console.log("Error!", e.data.error);
+		});
+
+		//triggers an error, cause the property validation is string, not number
+		model.data.myproperty = 5;
+
+
+	}
+});
+```
+There are much more model options, but there is no documention for it (at the moment);
+
+
+###create a template
+To create a template use Mold.Lib.Template class or template dna, you can create templates from dom elements, strings, or special function syntax:
+
+
+
+```javascript
+Seed({
+		name : "Mold.Main",
+		dna : "action",
+		include : [
+			"external->Mold.Lib.Template"
+		]
+	},
+	function(){
+
+		//Create a Template with special function syntax
+		var template = new Mold.Lib.Template(function(){
+			/*|
+
+				<div class="irgendwas">
+					{{myproperty}}
+				</div>
+			|*/
+		});
+
+		//add some content
+		template.append({ myproperty : "some value"});
+
+		//append to document
+		document.body.appendChild(template.get());
+
+	
+	}
+);
+```
+
 
 
 

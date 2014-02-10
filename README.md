@@ -389,17 +389,17 @@ Seed({
 	function(){
 
 		//create a model
-		var model = new Mold.Lib.Model(
+		var model = new Mold.Lib.Model({
 			//define the model stucture
 			properties : {
 				list : [
 					{ entry : "string" }
 				],
 				myproperty : "string"
-			}
+			},
 			//define how to sync the model
 			adapter : new Mold.Adapter.Rest({ path : "my/rest/route/" })
-		);
+		});
 
 		//define some events
 		model.data.on("property.change.myproperty", function(e){
@@ -416,8 +416,8 @@ Seed({
 		model.validation(true);
 
 		//define an event
-		model.data.myproperty.on("validation.error", function(e){
-			console.log("Error!", e.data.error);
+		model.data.on("validation.error", function(e){
+			console.log("Validation Error at", e.data.name);
 		});
 
 		//triggers an error, cause the property validation is string, not number
@@ -425,7 +425,7 @@ Seed({
 
 
 	}
-});
+);
 ```
 There are much more model options, but there is no documention for it (at the moment);
 

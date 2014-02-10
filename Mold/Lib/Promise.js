@@ -128,11 +128,19 @@ Seed({
 			then : function(onFulFilled, onRejected){
 				return _then(onFulFilled, onRejected);
 			},
-			fulfill : function(value) {
-				_fulfill(value);
-			},
 			reject : function(reason) {
 				_reject(reason);
+			},
+			fulfill : function(value){
+				_fulfill(value);
+			},
+			resolve : function(value){
+				if(value && typeof value.then === "function"){
+					var promise = new Mold.Lib.Promise(function(resolve, reject){
+						value.then(resolve, reject);
+					})
+					return promise
+				}
 			}
 		}
 	}

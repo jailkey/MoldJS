@@ -18,7 +18,6 @@ Seed({
 
 		this.publics = {
 			save : function(data){
-				console.log("data", data)
 				this.send(_restpath+"?rand"+Math.random(), "data="+data, { method : "POST"});
 			},
 			load : function(id){

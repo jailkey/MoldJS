@@ -112,34 +112,37 @@ Seed({
 					if(data[name] != undefined){
 
 						if(Mold.isArray(data[name])){
-
-							data[name].on("list.item.add", function(e){
-								var filterResult = true;
-								
-								if(element.filter && element.filter.length){
-									//_applyFilter(element);
-								}				
-								//if(filterResult){
-									if(!element.childs[e.data.index]){
-										element.add();
-									}else{
-										element.show();
-										
-									}
-									_addData(element.childs[e.data.index], e.data.value, bind);
-								//}
-								
-							}).on("list.item.remove", function(e){
-								element.remove(e.data.index);
-							}).on("list.item.change", function(e){
-								_addData(element.childs[e.data.index], e.data.value, bind)
-							});
+							if(bind){
+								data[name].on("list.item.add", function(e){
+									var filterResult = true;
+									
+									if(element.filter && element.filter.length){
+										//_applyFilter(element);
+									}				
+									//if(filterResult){
+										if(!element.childs[e.data.index]){
+											element.add();
+										}else{
+											element.show();
+											
+										}
+										_addData(element.childs[e.data.index], e.data.value, bind);
+									//}
+									
+								}).on("list.item.remove", function(e){
+									element.remove(e.data.index);
+								}).on("list.item.change", function(e){
+									_addData(element.childs[e.data.index], e.data.value, bind)
+								});
+							}
 
 						}else{
 							element.setValue(data[name])
-							data.on("property.change."+name, function(e){
-								element.setValue(e.data.value)
-							})
+							if(bind){
+								data.on("property.change."+name, function(e){
+									element.setValue(e.data.value)
+								});
+							}
 						}
 						
 					}
@@ -316,7 +319,11 @@ Seed({
 				if(!_compiledTemplate){
 					throw "Template not compiled!";
 				}
-				_addData(_compiledTemplate, model.data, false);	
+				if(model.className && model.className === "Mold.Lib.Model"){
+					_addData(_compiledTemplate.childs[0], model.data, false);	
+				}else{
+					_addData(_compiledTemplate.childs[0], model, false);
+				}
 				return this;
 			},
 /**

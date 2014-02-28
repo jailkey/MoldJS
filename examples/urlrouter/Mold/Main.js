@@ -8,7 +8,7 @@ Seed(
 		]
 	},
 	{
-		"#seed-one" : "@ready->Mold.Test",
+		"/" : "@ready->Mold.Test",
 		"#login/:user/action/:postid" : "@doaction"
 	}
 );

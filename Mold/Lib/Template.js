@@ -1,4 +1,4 @@
-"use strict";
+
 Seed({
 		name : "Mold.Lib.Template",
 		dna : "class",
@@ -49,14 +49,23 @@ Seed({
 			return tree;
 		}
 
+		var _copyNodesToElements = function(target, node){
+			while (node.hasChildNodes()) {
+  				target.appendChild(node.removeChild(node.firstChild))
+			}
+		}
+
 
 		var _applyToDom = function(template){
-			_shadowTemplate = document.createElement("div");
-			_shadowTemplate.id = "test";
-			_shadowTemplate.innerHTML = template;
-			_shadowTemplate.type = "text"
+			_shadowTemplate = document.createDocumentFragment();
+			var container = document.createElement("div");
+			container.innerHTML = template;
+			while (container.hasChildNodes()) {
+  				_shadowTemplate.appendChild(container.removeChild(container.firstChild))
+			}
+		
 		}
-		var that = this;
+		
 		var _buildTree = function(){
 			var tree = Mold.Lib.TreeFactory.parseDomTree(_shadowTemplate, new Mold.Lib.Tree("root", false, false, false, that), that);
 			return tree;

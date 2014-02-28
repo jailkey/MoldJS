@@ -1,6 +1,8 @@
 MoldJS
 ======
-JavaScript Structure and Pattern Framework 
+//JavaScript structure and pattern framework 
+Untested big feature monster without documentation
+
 
 ##Installation
 
@@ -78,7 +80,7 @@ Mold provides an easy way to do that:
 	data-mold-main="Mold.Main"
 	data-mold-repository=""
 	data-mold-external-repository="http://yourdomain.com/externalrepro/"
-	src="Mold.js" type="text/javascript"
+	src="http://yourdomain.com/externalrepro/Mold.js" type="text/javascript"
 ></script>
 ```
 After you add the path to the external repository, you can get external Seeds in the include property with the prefix "external->".

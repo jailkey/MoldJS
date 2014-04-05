@@ -144,7 +144,14 @@ Seed({
 									_addData(element.childs[e.data.index], e.data.value, bind)
 								});
 							}
-
+							Mold.each(data[name], function(selectedData, index){
+								if(!element.childs[index]){
+									element.add();
+								}else{
+									element.show();		
+								}
+								_addData(element.childs[index], selectedData, bind);
+							})
 						}else{
 							element.setValue(data[name])
 							if(bind){
@@ -258,6 +265,7 @@ Seed({
 			});
 			_contentType = "string";
 			_compiledTemplate = _parseTemplate(_templateContent);
+			this.trigger("ready");
 		}else if(Mold.isNode(content)){
 			_templateContent = content;
 			_contentType = "node"

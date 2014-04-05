@@ -56,20 +56,7 @@ var Mold = (function(config){
 				"mutationObserver" : window.MutationObserver
 			}
 		}else{
-			_features = { 
-				"history" : false,
-				"geolocation" : false,
-				"indexedDB" : false,
-				"postMessage" : false,
-				"websql" : false,
-				"webGL" : false,
-				"webworkers": false,
-				"applicationCache": false,
-				"querySelector": false,
-				"sessionStorage" : false,
-				"proxy" : false,
-				"mutationObserver" : false
-			}
+			_features = {}
 		}
 	}
 
@@ -441,6 +428,17 @@ var Mold = (function(config){
 					)
 				)
 				
+		},
+		is : function(value){
+			if(
+				value === undefined 
+				&& value !== false
+				&& value !== 0
+			){
+				return false;
+			}else{
+				return true;
+			}
 		},
 
 		getMainScript : _getMainScript,

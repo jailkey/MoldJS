@@ -23,7 +23,9 @@ Seed (
 			"blur", "change", "contextmenu", "copy", "cut", "dblclick", "error",
 			"focus", "focusin", "focusout", "hashchange", "keydown", "keypress", "keyup", 
 			"load",  "paste", "reset", "resize", "scroll",
-			"select", "submit", "textinput", "transitionend", "unload", 
+			"select", "submit", "textinput", "transitionend", "unload",
+			"touchstart", "touchend", "touchcancel", "touchleave", "touchmove",
+			"animationstart", "animationiteration", "animationend",
 			"DOMAttrModified", "DOMSubtreeModified", "DOMNodeInserted", "DOMNodeRemoved", "DOMCharacterDataModified"
 		];
 		
@@ -33,7 +35,10 @@ Seed (
 		];
 		
 		var _translateEvents = {
-			"transitionend" : [ "msTransitionEnd", "webkitTransitionEnd", "oTransitionEnd" ]
+			"transitionend" : [ "msTransitionEnd", "webkitTransitionEnd", "oTransitionEnd" ],
+			"animationstart" : [ "msAnimationStart", "webkitAnimationStart", "oAnimationStart"],
+			"animationiteration" : [ "msAnimationInteration", "webkitAnimationIteration", "oAnimationIteration"],
+			"animationend" : [ "msAnimationEnd", "webkitAnimationEnd", "oAnimationEnd"]
 		};
 		
 		_elementEvents = _elementEvents.concat(_mouseEvents);
@@ -58,11 +63,22 @@ Seed (
 		
 		var _isEventSupported = function(eventName) {
 			eventName = eventName;
-			var isSupported = (eventName in _element);
+			var isSupported = ('on'+eventName in _element);
 			if (!isSupported) {
+				
 				_element.setAttribute(eventName, 'return;');
 				isSupported = typeof _element[eventName] == 'function';
 				_element.removeAttribute(eventName, 'return;');
+			}
+			if(!isSupported){
+				if(
+					eventName.indexOf("webkit") > -1 
+					&& navigator 
+					&& navigator.userAgent.indexOf("WebKit") > -1
+				){
+					//Woraground for Webkit Browser
+					return true;
+				}
 			}
 			return isSupported;
 		}
@@ -204,8 +220,6 @@ Seed (
 				}else{
 					var eventData = data;
 				}
-					
-				
 			
 				if(config && config.exclude && config.exclude.indexOf(event) > -1){
 					
@@ -233,7 +247,7 @@ Seed (
 					}
 				}
 				Mold.Lib.EventStore.saveTrigger(_element, event, data);
-				return output || _element;
+				return (Mold.is(output)) ? output : _element;
 			}
 
 		}

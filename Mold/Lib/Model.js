@@ -15,6 +15,7 @@ Seed({
 			_data = {},
 			that = this,
 			_adapter = config.adapter,
+			_dataId =  false,
 			_isValidation = false;
 
 		Mold.mixing(this, new Mold.Lib.Event(this));
@@ -22,6 +23,7 @@ Seed({
 	
 		var _createProperty = function(element, name, data){
 			var validationError = _notValid(element, data[name], "property");
+			console.log("create property", name, element, data, validationError)
 			if(validationError){
 				if(data.on){
 
@@ -151,9 +153,11 @@ Seed({
 			}
 			Mold.mixing(data[name] , new Mold.Lib.Event(data[name]));
 			Mold.watch(data, name, function(e){
+				
 				_createModel(element, arguments[2]);
 				Mold.mixing(data[name], arguments[2]);
 				Mold.mixing(arguments[2] , new Mold.Lib.Event(arguments[2]));
+				
 				data[name].trigger("object.change", { value : arguments[2], name : name });
 				
 				return arguments[2];
@@ -164,7 +168,6 @@ Seed({
 		}
 
 		var _createItem = function(element, name, data){
-
 			if(Mold.isArray(element)){
 				data = _createList(element, name, data);
 			}else if(Mold.isObject(element)){
@@ -231,7 +234,6 @@ Seed({
 		var _add = function(model, data){
 
 			//Mold.each(data, function(element, name){
-				
 				if(Mold.isArray(data)){
 					
 					Mold.each(data, function(item){
@@ -240,9 +242,13 @@ Seed({
 				}else if(Mold.isObject(data)){
 					Mold.each(data, function(item, name){
 						if(Mold.isObject(item) || Mold.isArray(item)){
-							_add(model[name], item);
+							if(model[name]){
+								_add(model[name], item);
+							}
 						}else{
-							model[name] = item;
+							if(model[name]){
+								model[name] = item;
+							}
 						}
 					})
 					
@@ -268,6 +274,16 @@ Seed({
 			}
 		}
 
+		var _refresh = function(){
+			Mold.each(_data, function(selected){
+				if(Mold.isArray(selected)){
+					Mold.each(selected, function(element){
+						
+					})
+				}
+			})
+		}
+
 		var _update = function(model, data){
 			_clean(model);
 			_add(model, data);
@@ -276,8 +292,12 @@ Seed({
 		//var _modelAddContent
 
 		if(_adapter){
+			//console.log("adapter")
+			var that = this;
 			_adapter.on("update", function(e){
-				_update(_data, e.data);
+				
+				_update(_data, e.data.data);
+				console.log("data updated", e.data, _data);
 				that.trigger("update", e.data);
 			})
 		}
@@ -290,29 +310,35 @@ Seed({
 			isValid : function(){
 
 			},
-			save : function(){
+			save : function(id){
 				if(!_adapter){
-					throw "Can not save without adapter!"
+					throw "Can not save data without adapter!"
 				}
-				_adapter.save(this.json())
+				if(!id){
+					id = _dataId;
+				}
+				_dataId = _adapter.save(this.data, id);
+				console.log("save datae", this.data, id);
 			},
 			load : function(id){
 				if(!_adapter){
-					throw "Can not load without adapter!"
+					throw "Can not load data without adapter!"
 				}
-				_adapter.load(id)
+				_dataId = id;
+				var data = _adapter.load(id);
+				//console.log("model data loaded", id, data);
 			},
 			remove : function(){
 				if(!_adapter){
-					throw "Can not remove without adapter!"
+					throw "Can not remove data without adapter!"
 				}
 				_adapter.remove();
 			},
 			add : function(){
 				if(!_adapter){
-					throw "Can not add without adapter!"
+					throw "Can not add data without adapter!"
 				}
-				_adapter.add();
+				_dataId = _adapter.add();
 			},
 			bind : function(model){
 				

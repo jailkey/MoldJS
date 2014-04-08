@@ -57,7 +57,7 @@
 			var _checkArguments = function(interfaceInfo, methode, instance, arguments){
 					if(interfaceInfo[methode]){
 						if(arguments.length < interfaceInfo[methode].parameter.length){
-							Mold.log("Error", "Interface Fehler: Die Methode " +methode + " der Klasse " + instance.instanceof + " erwartet mindestens " + interfaceInfo[methode].parameter.length + " Argumente");
+							throw "INTERFACE ERROR - " + methode + " of class " + instance.className + " needs " + interfaceInfo[methode].parameter.length + " argumentes"
 						}
 					}
 			};
@@ -67,8 +67,10 @@
 				var error = false;
 				var valueTypes = {
 					"string" : { type : String },
-					"number" : { type : Number},
-					"function" : { type : Function}
+					"number" : { type : Number },
+					"function" : { type : Function },
+					"boolean" : { type : Boolean },
+					"object" : { type : Object }
 				}
 				
 				switch (typeof interfaceValue){
@@ -81,7 +83,10 @@
 							}
 						}
 						if(interfaceValue.instanceof){
-							error = (returnValue.instanceof && returnValue.instanceof === interfaceValue.instanceof) ? false : interfaceValue.instanceof;
+							error = (
+										returnValue.instanceof 
+										&& returnValue.instanceof === interfaceValue.instanceof
+									) ? false : interfaceValue.instanceof;
 						}
 						break;
 					default:
@@ -89,7 +94,10 @@
 				}
 
 				if(error && error !== "undefined"){
-					Mold.log("Error", { code : 7, property : property, instance : instance, valuetype : error});
+
+					Mold.log("Error", { 
+							code : 7, property : property, instance : instance, valuetype : error
+					});
 				}
 			};
 
@@ -100,7 +108,7 @@
 						
 						if(instance[property]){
 							if(typeof classInterface[property] !== typeof instance[property]){
-								Mold.log("Error", { code : 5, property : propery, instance : instance, interface : classInterface});
+								throw "INTERFACE ERROR - property " + property + " in class " + instance.className + " expects " + (typeof classInterface[property]) + " type!";
 							}else{
 								
 								if(typeof classInterface[property] === "function"){ 
@@ -123,7 +131,7 @@
 								}
 							}
 						}else{
-							Mold.log("Error", { code : 6, property : property, instance : instance, interface : classInterface});
+							throw "INTERFACE ERROR - method " + property + " is not implemented in class " + instance.className;
 						}
 					}
 				}

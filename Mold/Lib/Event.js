@@ -192,7 +192,7 @@ Seed (
 				};
 				
 				
-				return _element;
+				return this;
 			},
 			off : function(event, callback){
 				if(_isHTMLElement && _isElementEvent(event)){

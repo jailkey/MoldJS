@@ -7,7 +7,9 @@ Seed({
 			"Mold.Lib.Tree",
 			"Mold.Lib.TreeFactory",
 			"Mold.Lib.Event",
-			"Mold.Lib.TemplateFilter"
+			"Mold.Lib.TemplateFilter",
+			"Mold.Lib.Directive",
+			"Mold.Defaults.TemplateDirectives"
 		]
 	},
 	function(content){
@@ -16,6 +18,7 @@ Seed({
 			_templateContent = "",
 			_shadowTemplate = false,
 			_compiledTemplate = false,
+			_container = false,
 			_viewModel = {},
 			_snatched = {},
 			_contentType = false,
@@ -39,6 +42,22 @@ Seed({
 			_applyToDom(templateContent);
 			Mold.Lib.TreeFactory.preParseTemplate(_shadowTemplate);
 			var tree = _buildTree();
+
+			that.on("after.init", function(){
+				var addDirectives = function(scope){
+					Mold.each(Mold.Defaults.TemplateDirectives, function(directive){			
+						Mold.Lib.Directive.add(
+							directive,
+							scope,
+							that
+						);	
+					});
+					
+				}
+
+				addDirectives(_shadowTemplate);
+			});
+			
 			return tree;
 		}
 
@@ -58,12 +77,33 @@ Seed({
 
 		var _applyToDom = function(template){
 			_shadowTemplate = document.createDocumentFragment();
-			var container = document.createElement("div");
-			container.innerHTML = template;
-			while (container.hasChildNodes()) {
-  				_shadowTemplate.appendChild(container.removeChild(container.firstChild))
+			_container = document.createElement("div");
+			_container.innerHTML = template;
+			while (_container.hasChildNodes()) {
+  				_shadowTemplate.appendChild(_container.removeChild(_container.firstChild))
 			}
 		
+		}
+
+		var _appendTo = function(target){
+			while(_shadowTemplate.hasChildNodes()){
+				target.append(_shadowTemplate.removeChild(_shadowTemplate.firstChild))
+			}
+
+			var targetObserver = new Mold.Lib.Event(target);
+
+			var addDirectives = function(){
+				Mold.each(Mold.Defaults.TemplateDirectives, function(directive){			
+					Mold.Lib.Directive.add(
+						directive,
+						target,
+						that
+					);	
+				});
+				
+			}
+
+			targetObserver.on("DOMNodeInserted", addDirectives)
 		}
 		
 		var _buildTree = function(){
@@ -362,6 +402,9 @@ Seed({
 **/
 			get : function(){
 				return _shadowTemplate;
+			},
+			appendTo : function(target){
+				return _appendTo(target);
 			},
 /**
 * @namespace Mold.Lib.Template

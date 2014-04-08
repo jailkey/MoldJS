@@ -363,6 +363,14 @@ var Mold = (function(config){
 			}
 		},
 		
+		contains : function(list, needel){
+			return !!Mold.find(list, function(element){
+				if(element == needel){
+					return true;
+				}
+				return false;
+			})
+		},
 
 /**
 * @namespace Mold
@@ -1280,23 +1288,45 @@ var Mold = (function(config){
 
 				var oldval = obj[property];
 				var newval = oldval;
-
-				var getter = function () {
-					return newval;
-				}
-				var setter = function (val) {
-					oldval = newval;
-					return newval = callback.call(obj, property, oldval, val);
-				}
+				/*use mutation observer for HTML elements*/
 				
-				
-				if (delete obj[property]) { 
-					Object.defineProperty(obj, property, {
-						  get: getter, 
-						  set: setter,
-						  enumerable: true,
-						  configurable: true
+				if(Mold.isNode(obj) && Mold.isSupported('mutationObserver')){
+					
+					var observer = new MutationObserver(function(mutations) {
+						Mold.each(mutations, function(mutation) {
+							if(
+								mutation.target === obj 
+								&& mutation.target[property]
+							){
+								oldval = mutation.target[property];
+								callback.call(obj, property, oldval, mutation.target[property]);
+							}
+					  	});    
 					});
+				
+					observer.observe(obj, { 
+						attributes: true,
+						childList: true,
+						characterData: true 
+					});
+				
+				}else{
+					
+					var getter = function () {
+						return newval;
+					}
+					var setter = function (val) {
+						oldval = newval;
+						return newval = callback.call(obj, property, oldval, val);
+					}
+					if (delete obj[property]) { 
+						Object.defineProperty(obj, property, {
+							  get: getter, 
+							  set: setter,
+							  enumerable: true,
+							  configurable: true
+						});
+					}
 				}
 			}
 		},
@@ -1410,6 +1440,9 @@ Mold.addDNA({
 							}
 						}
 						delete that.publics;
+						if(that.trigger && typeof that.trigger === "function"){
+							that.trigger("after.init");
+						}
 						return constructor;
 					});
 				

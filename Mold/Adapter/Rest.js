@@ -17,18 +17,23 @@ Seed({
 		});
 
 		this.publics = {
-			save : function(data){
-				this.send(_restpath+"?rand"+Math.random(), "data="+data, { method : "POST"});
+			save : function(data, id){
+				var dataString = JSON.stringifiy(data);
+
+				this.send(_restpath+"?rand"+Math.random(), "data="+dataString, { method : "POST" });
+
+				//return id;
 			},
 			load : function(id){
 				id = id || "";
-				this.send(_restpath+id+"?rand"+Math.random(), false, { method : "GET"});
+				return this.send(_restpath+id+"?rand"+Math.random(), false, { method : "GET" });
 			},
 			remove : function(id){
-				this.send(_restpath+id, false, { method : "DELETE"});
+				return this.send(_restpath+id, false, { method : "DELETE" });
 			},
 			add : function(data){
-				this.send(_restpath, "data="+data, { method : "PUT"});
+				return this.send(_restpath, "data="+data, { method : "PUT" });
+				//return id;
 			}
 		}
 	}

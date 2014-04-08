@@ -6,7 +6,6 @@ Seed({
 		include : [
 			"Mold.Lib.DomPointer",
 			"Mold.Lib.DomLessPointer",
-			"Mold.Lib.TemplateDirective",
 			"Mold.Lib.Event"
 		]
 	},
@@ -14,6 +13,7 @@ Seed({
 
 		var _shadowTemplate = false,
 			_compiledTemplate = false,
+			that = this,
 			_directive = Mold.Lib.TemplateDirective,
 			undefined;
 
@@ -358,11 +358,10 @@ Seed({
 		
 		var _parseDomTree = function(node, tree, template, element, index){
 
-			var varName =  _containsVar(node.nodeValue);
-			var directive;
-			var nodeName = node.nodeName;
-			var nodeType = node.nodeType;
-			var nodeValue =  node.nodeValue;
+			var varName =  _containsVar(node.nodeValue),
+				nodeName = node.nodeName,
+				nodeType = node.nodeType,
+				nodeValue =  node.nodeValue;
 
 			index = index || 0;
 
@@ -370,28 +369,14 @@ Seed({
 				//Parse Elementnodes
 				case 1:
 					element = node;
-					if((directive = _directive.get("element", nodeName))){
-						directive.apply(node, element, template, index);
-					}
 					break;
 				//Parse Attributenodes
 				case 2:
-				
-					if((directive = _directive.get("attribute", nodeName))){
-						directive.apply(node, element, template, index);
-					}
-
 					if(nodeName === "class"){
 						
 						var classes = nodeValue.split(" "),
 							i = 0,
 							len = classes.length;
-						
-						for(; i < len; i++){
-							if((directive = _directive.get("class", classes[i]))){
-								directive.apply(node, element, template, index);
-							}
-						}
 					}
 
 					if(varName){
@@ -444,6 +429,7 @@ Seed({
 								subtree = tree.addChild(cleanName, pointer, false, valuePath, filter, index);
 								tree = _setOpenedTree(cleanName, subtree),
 								node.nodeValue = "";
+						
 
 						}else if(_isBlockEnd(varName)){
 							var opend = _getOpenedTree(_cleanVarName(varName));
@@ -581,6 +567,10 @@ Seed({
 			parseCollection : _parseCollection,
 			parseDomFromTro : _parseFromTo,
 			parseDomTree : _parseDomTree,
+			on : function(action, callback){
+				console.log("add event", action, callback)
+				that.on(action, callback)
+			}
 		}
 	}
 )

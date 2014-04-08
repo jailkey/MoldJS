@@ -51,8 +51,9 @@ describe("Test Mold.Lib.Model", function(){
 			 		]
 			 	}
 			 });
+			 /*
 			 testModel.validation(true);
-			/* testModel.on("validation.error", function(e){
+			 testModel.on("validation.error", function(e){
 			 	console.log("-----validation error", e)
 			 })*/
 		});
@@ -79,6 +80,7 @@ describe("Test Mold.Lib.Model", function(){
 		it("First level object added", function(){
 			flag = false;
 			testModel.data.obj.on("object.change", function(e){
+				console.log("Change", e.data)
 				expect(e.data.value.objitem).toEqual("objectitemvalue");
 				expect(e.data.value.subobject.subitem).toEqual("subobjectitemvalue");
 				expect(e.data.name).toEqual("obj");

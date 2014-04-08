@@ -2,8 +2,8 @@ Seed({
 		name : "Mold.Lib.DomScope",
 		dna : "static",
 		include : [
-			"Mold.Lib.TemplateDirective",
-			"Mold.Lib.Template",
+			"Mold.Lib.Directive",
+			//"Mold.Lib.Template",
 			"Mold.Lib.CssParser"
 		]
 	},
@@ -11,19 +11,23 @@ Seed({
 		
 		//var _mainTemplate = new Mold.Lib.Template(document.documentElement);
 		var cssParser = new Mold.Lib.CssParser();
+
 		
-		Mold.Lib.TemplateDirective.on("directive.added", function(e){
+		Mold.Lib.Directive.on("directive.added", function(e){
 			var directive = e.data.directive;
+			var scope = e.data.scope || document;
+
+
+
 			switch(directive.at){
 				case "element":
-					var elements = document.getElementsByTagName(directive.name);
+					var elements = scope.getElementsByTagName(directive.name);
 					break;
 				case "attribute":
-					var elements = document.querySelectorAll("["+directive.name+"]");
+					var elements = scope.querySelectorAll("["+directive.name+"]");
 					break;
 				case "class":
-					console.log("get class directive")
-					var elements = document.getElementsByClassName(directive.name);
+					var elements = scope.getElementsByClassName(directive.name);
 					break;
 				case "style-property":
 					var elementStyles = cssParser.getElementsByStyleProperty(directive.name);
@@ -38,21 +42,45 @@ Seed({
 					break;
 			}
 			if(elements && elements.length){
-				var index = 0;
-				var template = false;
-				Mold.each(elements, function(element){
-					directive.apply(element, element, template, index, (styleAttributes) ? styleAttributes[index] : false);
-					index++;
+				
+				var index = 0,
+					template = e.data.template || false,
+					node = false;
+
+				Mold.each(elements, function(element, elementName){
+					if(elementName != "length"){
+						switch(directive.at){
+							case "element":
+								node = element;
+								break;
+							case "attribute":
+								node = element.getAttributeNode(directive.name);
+								break;
+							case "class":
+								node = element;
+								break;
+						}
+					
+						directive.apply(node, element, template, index, (styleAttributes) ? styleAttributes[index] : false);
+						index++;
+					}
 				});
 			}
 		});
 
 		return {
 
-			directive : function(directive){
-				cssParser.at("ready", function(){
-					Mold.Lib.TemplateDirective.add(directive);
-				});
+			directive : function(directive, scope, template){
+				
+				if(directive.at !== "style-property"){
+					//console.log("addwith template", template);
+					Mold.Lib.Directive.add(directive, scope, template);
+				}else{
+					cssParser.at("ready", function(){
+						
+						Mold.Lib.Directive.add(directive, scope, template);
+					});
+				}
 				//_mainTemplate.refresh();
 			}
 		}

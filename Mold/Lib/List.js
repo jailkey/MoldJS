@@ -1,7 +1,7 @@
 Seed({
 		name : "Mold.Lib.List",
 		dna : "class",
-		version : "0.1.0",
+		version : "0.1.1",
 		include : [
 			"Mold.Lib.Event"
 		],
@@ -16,7 +16,11 @@ Seed({
 		Mold.each(_array, function(element, index){
 
 			Mold.watch(_array, index, function(property, oldValue, newValue){
-				_array.trigger("list.item.change."+property, { index : property, oldValue : oldValue, value : newValue });
+				_array.trigger("list.item.change." + property, { 
+                    index : property,
+                    oldValue : oldValue,
+                    value : newValue
+                });
 				return newValue;
 			})
 		});
@@ -45,8 +49,28 @@ Seed({
 			Mold.watch(_array, _array.length -1, function(property, oldValue, newValue){
 				_creatListItem(newValue);
 
-                _array.trigger("list.item.change", { list: _array, index : property, oldValue : oldValue, value : newValue, list : _array });
-				_array.trigger("list.item.change."+property, { list: _array, index : property, oldValue : oldValue, value : newValue, list : _array });
+                _array.trigger("list.item.change", { 
+                    list: _array,
+                    index : property,
+                    oldValue : oldValue,
+                    value : newValue,
+                    list : _array 
+                });
+
+				_array.trigger("list.item.change."+property, { 
+                    list: _array,
+                    index : property,
+                    oldValue : oldValue,
+                    value : newValue,
+                    list : _array 
+                });
+
+                /*ugly workaround for webkit*/
+                if(_array.length - 1 === +property){
+                    _array.pop();
+                    _array.push(newValue);
+                }
+
 				return newValue;
 			});
             return element;
@@ -63,14 +87,26 @@ Seed({
                 element = arguments[i];
     			_array.oldPush(element);
     			element = _creatListItem(element);
-    			_array.trigger("list.item.add", { length : _array.length, index : _array.length -1, value : element, list : _array});
+    			_array.trigger("list.item.add", { 
+                    length : _array.length,
+                    index : _array.length -1,
+                    value : element,
+                    list : _array
+                });
     		};
     	};
 
     	_array.pop = function(){
     		var value = _array[_array.length -1];
     		var len = (_array.length > 0 ) ? _array.length -1 : 0;
-    		_array.trigger("list.item.remove", { length : len, index : len , value : false, oldValue : value});
+    		
+            _array.trigger("list.item.remove", { 
+                length : len,
+                index : len,
+                value : false,
+                oldValue : value
+            });
+
     		_array.oldPop();
     		return value;
     	}
@@ -80,7 +116,12 @@ Seed({
     		var value = _array[_array.length -1];
     		_array.oldShift();
             var len = (_array.length > 0 ) ? _array.length -1 : 0;
-    		_array.trigger("list.item.remove", { length : len, index : len , value : false, oldValue : value});
+    		_array.trigger("list.item.remove", {
+                length : len,
+                index : len, 
+                value : false,
+                oldValue : value
+            });
     		return value;
     	}
 
@@ -123,7 +164,12 @@ Seed({
     		var toDelete = len - argumentsArray.length;
     		for(var i = 0; i < toDelete; i++){
     			var outLen = _array.length + toDelete -i;
-    			_array.trigger("list.item.remove", { length : _array.length, index : outLen -1, value : false, oldValue : _array[_array.length - (i+1)]});
+    			_array.trigger("list.item.remove", {
+                    length : _array.length,
+                    index : outLen -1,
+                    value : false,
+                    oldValue : _array[_array.length - (i+1)]
+                });
     		}
 
     	}
@@ -140,6 +186,14 @@ Seed({
 
         _array.some = function(callback){
             Mold.some(_array, callback);
+        }
+
+        _array.update = function(index, value){
+            if(_array[index]){
+                _array[index] = value;
+            }else{
+                _array.push(value)
+            }
         }
 
 	   return _array;

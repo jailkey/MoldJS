@@ -2,7 +2,7 @@
 Seed({
 		name : "Mold.Lib.Model",
 		dna : "class",
-		version : "0.0.2",
+		version : "0.0.3",
 		include : [ 
 			"Mold.Lib.Event",
 			"Mold.Lib.List",
@@ -23,7 +23,7 @@ Seed({
 	
 		var _createProperty = function(element, name, data){
 			var validationError = _notValid(element, data[name], "property");
-			console.log("create property", name, element, data, validationError)
+			
 			if(validationError){
 				if(data.on){
 
@@ -47,6 +47,7 @@ Seed({
 			data[name] = data[name] || "";
 
 			Mold.watch(data, name, function(){
+
 				data.trigger("property.change."+name, {
 					value : arguments[2],
 					name : name
@@ -56,6 +57,7 @@ Seed({
 					value : arguments[2],
 					name : name 
 				});
+
 
 				var validationError = _notValid(element, arguments[2], "property");
 				if(validationError){
@@ -89,6 +91,7 @@ Seed({
 						arguments[2] = result;
 					}
 				}
+
 				return arguments[2];
 			});
 			return data;
@@ -118,7 +121,6 @@ Seed({
 					
 				}
 				_createModel(element[0], e.data.value);
-				
 			});
 
 			if(listValue){
@@ -153,7 +155,7 @@ Seed({
 			}
 			Mold.mixing(data[name] , new Mold.Lib.Event(data[name]));
 			Mold.watch(data, name, function(e){
-				
+
 				_createModel(element, arguments[2]);
 				Mold.mixing(data[name], arguments[2]);
 				Mold.mixing(arguments[2] , new Mold.Lib.Event(arguments[2]));
@@ -317,8 +319,8 @@ Seed({
 				if(!id){
 					id = _dataId;
 				}
-				_dataId = _adapter.save(this.data, id);
-				console.log("save datae", this.data, id);
+				_dataId = _adapter.save(_data, id);
+			
 			},
 			load : function(id){
 				if(!_adapter){

@@ -48,6 +48,11 @@ describe("Test Mold.Lib.Model", function(){
 			 					}
 			 				]
 			 			}
+			 		],
+			 		"anotherlist" : [
+			 			{
+			 				"name" : "string"
+			 			}
 			 		]
 			 	}
 			 });
@@ -105,7 +110,6 @@ describe("Test Mold.Lib.Model", function(){
 			flag = false;
 
 			testModel.data.obj.subobject.on("property.change.subitem", function(e){
-				console.log("test->property change subitem", e.data);
 				expect(e.data.value).toEqual("anewsubvalue");
 				expect(e.data.name).toEqual("subitem");
 				flag = true;
@@ -188,6 +192,8 @@ describe("Test Mold.Lib.Model", function(){
 
 		});
 
+
+
 		it("Add a list in a list value", function(){
 			flag = false;
 			testModel.data.list[0].sublist.on("list.item.change.0", function(e){
@@ -224,11 +230,50 @@ describe("Test Mold.Lib.Model", function(){
 		});
 
 
-		it("Change a list in an object", function(){
+		it("change an objectvalue in a list", function(){
+			flag = false;
+				
+			testModel.data.anotherlist.push({
+				name : "Marie"
+			});
+
+			testModel.data.anotherlist.push({
+				name : "Hans"
+			})
+
+			testModel.data.anotherlist.push({
+				name : "Lena"
+			})
+
+			testModel.data.anotherlist.on("list.item.change.1", function(e){
+				console.log("change item 1", e.data)
+				expect(e.data.value.name).toEqual("Peter");
+				flag = true;
+			});
+
+			testModel.data.anotherlist[0] = {
+				name : "Jan"
+			}
+			expect(testModel.data.anotherlist[0].name).toEqual("Jan");
+
+			testModel.data.anotherlist[1] = {
+				name : "Peter"
+			}
+			//console.log("TEST TO PETER")
 			
 
+			testModel.data.anotherlist[2] = {
+				name : "Dieter"
+			}
 
-		});
+			expect(testModel.data.anotherlist[2].name).toEqual("Dieter");
+			//expect(testModel.data.anotherlist[2].name).toEqual("Dieter");
+
+			waitsFor(function() {
+				testModel.data.anotherlist.off("list.item.change.1");
+				return flag;
+			}, "Event anotherlist ist.item.change.1 fired", 750);
+		})
 
 
 

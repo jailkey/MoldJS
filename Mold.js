@@ -53,7 +53,9 @@ var Mold = (function(config){
 				"sessionStorage" : !!window.sessionStorage,
 				"localStorage" : !!window.localStorage,
 				"proxy" : !!window.Proxy,
-				"mutationObserver" : window.MutationObserver
+				"mutationObserver" : !!window.MutationObserver,
+				"registerElement" : !!document.registerElement
+
 			}
 		}else{
 			_features = {}
@@ -275,6 +277,8 @@ var Mold = (function(config){
 			if(Array.prototype.forEach && collection.forEach){
 				collection.forEach(iterator, context);
 			}else if(Mold.isArray(collection)){
+		
+				
 				var len = collection.length;
 				for (; i < len; i++) {
 				 	if(iterator.call(context, collection[i], i, collection) === "break") {
@@ -284,9 +288,12 @@ var Mold = (function(config){
 			}else {
 				var keys = Mold.keys(collection);
 				var len = keys.length;
+
 				for(; i < len; i++){
-					if(collection[keys[i]] && iterator.call(context, collection[keys[i]], keys[i], collection) === "break"){
-						return true;
+					if(!(Mold.isNodeList(collection) && keys[i] === "length")){
+						if(collection[keys[i]] && iterator.call(context, collection[keys[i]], keys[i], collection) === "break"){
+							return true;
+						}
 					}
 				}
 			}
@@ -424,7 +431,10 @@ var Mold = (function(config){
 		},
 
 		isNode : function(element){
+			
 			if (!element) { return false; } 
+			if(window && element === window){ return true }
+
 			return(
 					(typeof element === "object") 
 					? element instanceof Node 
@@ -437,6 +447,25 @@ var Mold = (function(config){
 				)
 				
 		},
+
+		isValidHTML5Element : function(name){
+			return Mold.contains([
+				"html", "head", "title", "base", "link", "meta", "style",
+				"script", "noscript", "template",
+				"body", "section", "nav", "article", "aside", "h1", "h2", "h3", "h4", "h5", "h6",
+				"header", "footer", "address", "main",
+				"p", "hr", "pre", "blockquote", "ol", "ul", "li", "dl", "dt", "dd", "figure", "figcaption", "div",
+				"a", "em", "strong", "small", "a", "s", "cite", "q", "dfn", "abbr", "data", "time", "code", "var",
+				"samp", "kbd", "sub", "sup", "i", "b", "u", "mark", "ruby", "rt", "rp", "bdi", "bdo", "span",
+				"br", "wbr", "ins", "del", "img", "iframe", "embed", "object", "param", "video", "audio",
+				"source", "track", "canvas", "map", "area", "svg", "math",
+				"table", "caption", "colgroup", "col", "tbody", "thead", "tfoot", "tr", "td", "th",
+				"form", "fieldset", "label", "input", "button", "select", "datalist", "optgroup", "option",
+				"textarea", "keygen", "output", "progress", "meter", "details", "summary", "menuitem"
+			], name.toLowerCase());
+		},
+
+
 		is : function(value){
 			if(
 				value === undefined 
@@ -1288,8 +1317,8 @@ var Mold = (function(config){
 
 				var oldval = obj[property];
 				var newval = oldval;
-				/*use mutation observer for HTML elements*/
 				
+				/*use mutation observer for HTML elements*/
 				if(Mold.isNode(obj) && Mold.isSupported('mutationObserver')){
 					
 					var observer = new MutationObserver(function(mutations) {

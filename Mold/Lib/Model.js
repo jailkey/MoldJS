@@ -294,12 +294,9 @@ Seed({
 		//var _modelAddContent
 
 		if(_adapter){
-			//console.log("adapter")
 			var that = this;
 			_adapter.on("update", function(e){
-				
 				_update(_data, e.data.data);
-				console.log("data updated", e.data, _data);
 				that.trigger("update", e.data);
 			})
 		}
@@ -328,7 +325,6 @@ Seed({
 				}
 				_dataId = id;
 				var data = _adapter.load(id);
-				//console.log("model data loaded", id, data);
 			},
 			remove : function(){
 				if(!_adapter){

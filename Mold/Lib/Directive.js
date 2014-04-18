@@ -4,14 +4,16 @@ Seed({
 		include : [
 			"Mold.Lib.Event",
 			"Mold.Lib.Controller",
-			"Mold.Lib.CssParser"
+			"Mold.Lib.CssParser",
+			"Mold.Lib.Element"
 		]
 	},
 	function(){
 
 		var _directives = [],
 			_directivesIndex = {},
-			_that = this;
+			_that = this,
+			cssParser = new Mold.Lib.CssParser();
 
 		Mold.mixing(this, new Mold.Lib.Event(this));
 
@@ -28,7 +30,7 @@ Seed({
 				}
 			}
 		*/
-		//var _mainTemplate = new Mold.Lib.Template(document);
+	
 		var _watchList = [];
 		var _watch = function(element, callback){
 			if(Mold.isSupported("mutationObserver")){
@@ -59,7 +61,7 @@ Seed({
 				selected = elements[i];
 				childs = {};
 				
-				Mold.each(collection.childs, function(item){
+				Mold.each(collection.childs, function(item, name){
 					output[elementName][i] = output[elementName][i] || {};
 					_collect(selected, item, output[elementName][i], watchable);
 					if(output[elementName].len != output[elementName].length){
@@ -74,6 +76,7 @@ Seed({
 			
 			if(Mold.isArray(collection)){
 				Mold.each(collection, function(item, name){
+
 					_collect(scope, item, output, watchable)
 				});
 			}else{
@@ -133,7 +136,6 @@ Seed({
 					var collectedAttributes = (Mold.isArray(collection.attribute)) ? collection.attribute : [collection.attribute]
 
 					Mold.each(collectedAttributes, function(selectedAttribute){
-
 						var attribute = scope.getAttribute(selectedAttribute);
 						
 						if(attribute){
@@ -161,7 +163,9 @@ Seed({
 			if(!directive._id){
 				directive._id = Mold.getId();
 			}
+			
 			directive.apply = function(node, element, template, index, style){
+
 				if(!element.hasDirective || !element.hasDirective(directive._id)){
 					directive.scope = element;
 					if(directive.seed){
@@ -194,7 +198,7 @@ Seed({
 							var seed = new Mold.Lib.Controller(directive.seed);
 						}
 
-						directive.instance = new seed(scope, collection);
+						directive.instance = new seed(scope, new Mold.Lib.Element(element), collection);
 
 						if(directive.instance.scope){
 							if(directive.replace) {
@@ -265,7 +269,7 @@ Seed({
 						elements = [],
 						styleAttributes = [];
 
-					Mold.each(elementStyles, function(selected){
+					Mold.each(elementStyles, function(selected, name){
 						elements.push(selected.element)
 						styleAttributes.push(selected.properties)
 					});
@@ -313,6 +317,7 @@ Seed({
 			on : this.on,
 			trigger : this.trigger,
 			add : function(directive, scope, template){
+
 				if(!directive.overwrite){
 					directive = this.get(directive.at, directive.name) || directive;
 				}

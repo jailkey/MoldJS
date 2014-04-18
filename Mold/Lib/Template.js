@@ -285,8 +285,7 @@ Seed({
 		}
 
 		var _refresh = function(){
-			//console.log("refresh");
-			//console.log(_compiledTemplate);
+
 			switch(_contentType){
 				case "string":
 					_compiledTemplate = _parseTemplate(_templateContent);

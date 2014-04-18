@@ -191,8 +191,6 @@ Seed (
 					return _element;
 				};
 				
-				
-
 				return this;
 			},
 			off : function(event, callback){

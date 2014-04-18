@@ -568,7 +568,6 @@ Seed({
 			parseDomFromTro : _parseFromTo,
 			parseDomTree : _parseDomTree,
 			on : function(action, callback){
-				console.log("add event", action, callback)
 				that.on(action, callback)
 			}
 		}

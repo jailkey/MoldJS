@@ -18,7 +18,6 @@ Seed({
 			if(Mold.isObject(data)){
 				data = JSON.stringify(data);
 			}
-			console.log("save:", id, data);
 			return localStorage.setItem(id, data);
 		}
 
@@ -54,7 +53,6 @@ Seed({
 
 		this.publics = {
 			save : function(data, id){
-				console.log("save local", data, id);
 				if(id){
 					_save(data, id);
 					return id;

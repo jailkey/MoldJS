@@ -7,6 +7,9 @@ Seed({
 			"Mold.Lib.Component"
 		]
 	},
+/*
+	Ccontroller parameter scope, element, collection
+*/
 	{
 		name :  "component",
 		dnaInit : function(){
@@ -27,7 +30,6 @@ Seed({
 			}
 			Mold.each(seed.directives, function(directive){
 				component.directive(directive);
-
 			});
 			if(seed.files){
 				component.files(seed.func.files);

@@ -305,7 +305,7 @@ You can find all DNA Seeds in Mold/DNA/
 It's possible to write your own dna, an example will follow in a later chapter.
 
 
-###useing controller
+###using controller
 Controllers are one of the most important things in Mold, they are the connector between dom, views, models and classes 
 and they act if special events will happen. Controllers are isomorphic, like the most Seeds you can use it in the Browser and node.js.
 

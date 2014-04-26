@@ -54,7 +54,9 @@ var Mold = (function(config){
 				"localStorage" : !!window.localStorage,
 				"proxy" : !!window.Proxy,
 				"mutationObserver" : !!window.MutationObserver,
-				"registerElement" : !!document.registerElement
+				"registerElement" : !!document.registerElement,
+				"blob" : !!window.Blob,
+				"url" : !!window.URL
 
 			}
 		}else{

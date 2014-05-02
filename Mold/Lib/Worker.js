@@ -2,7 +2,8 @@ Seed({
 		name : "Mold.Lib.Worker",
 		dna : "class",
 		include : [
-			"Mold.Lib.Event"
+			"Mold.Lib.Event",
+			"Mold.Lib.Info"
 		]
 	},
 	function(workerFunction){
@@ -10,7 +11,7 @@ Seed({
 		Mold.mixing(this, new Mold.Lib.Event(this));
 		var that = this;
 
-		if(Mold.isSupported("blob") && Mold.isSupported("url")){
+		if(Mold.Lib.Info.isSupported("blob") && Mold.Lib.Info.isSupported("url")){
 			var workerString = workerFunction.toString();
 			workerString = "onmessage = "+workerString;
 	 		var workerBlob = new Blob([workerString], { type : 'text/javascript' } );
@@ -27,6 +28,10 @@ Seed({
 				if(worker){
 					worker.postMessage(message);
 				}else{
+					/* if worker is not supported add post execute directly*/
+					/*implement*/
+
+
 					throw "NO WORKER DEIFNED"
 				}
 			}

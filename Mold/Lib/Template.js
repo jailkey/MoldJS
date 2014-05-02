@@ -7,9 +7,14 @@ Seed({
 			"Mold.Lib.Tree",
 			"Mold.Lib.TreeFactory",
 			"Mold.Lib.Event",
-			"Mold.Lib.TemplateFilter",
+			"Mold.Lib.TemplateFilter"
+		],
+		browserInclude : [
 			"Mold.Lib.Directive",
 			"Mold.Defaults.TemplateDirectives"
+		],
+		nodeInclude : [
+			"Mold.Lib.Document"
 		]
 	},
 	function(content){
@@ -22,10 +27,17 @@ Seed({
 			_viewModel = {},
 			_snatched = {},
 			_contentType = false,
+			_doc = false,
+			_testMode = false,
 			undefined;
 
 		Mold.mixing(this, new Mold.Lib.Event(this));
 			
+		if(Mold.isNodeJS || _testMode){
+			_doc = new Mold.Lib.Document();
+		}else{
+			_doc = document;
+		}
 
 		var _hideTemplate = function(element){
 		
@@ -42,22 +54,22 @@ Seed({
 			_applyToDom(templateContent);
 			Mold.Lib.TreeFactory.preParseTemplate(_shadowTemplate);
 			var tree = _buildTree();
+			if(!Mold.isNodeJS){
+				that.on("after.init", function(){
+					var addDirectives = function(scope){
+						Mold.each(Mold.Defaults.TemplateDirectives, function(directive){			
+							Mold.Lib.Directive.add(
+								directive,
+								scope,
+								that
+							);	
+						});
+						
+					}
 
-			that.on("after.init", function(){
-				var addDirectives = function(scope){
-					Mold.each(Mold.Defaults.TemplateDirectives, function(directive){			
-						Mold.Lib.Directive.add(
-							directive,
-							scope,
-							that
-						);	
-					});
-					
-				}
-
-				addDirectives(_shadowTemplate);
-			});
-			
+					addDirectives(_shadowTemplate);
+				});
+			}
 			return tree;
 		}
 
@@ -76,18 +88,22 @@ Seed({
 
 
 		var _applyToDom = function(template){
-			_shadowTemplate = document.createDocumentFragment();
-			_container = document.createElement("div");
+			_shadowTemplate =  _doc.createElement("div"); //_doc.createDocumentFragment();
+			_container = _doc.createElement("div");
 			_container.innerHTML = template;
+		
 			while (_container.hasChildNodes()) {
+
   				_shadowTemplate.appendChild(_container.removeChild(_container.firstChild))
 			}
+
 		
 		}
 
 		var _appendTo = function(target){
 			while(_shadowTemplate.hasChildNodes()){
-				target.append(_shadowTemplate.removeChild(_shadowTemplate.firstChild))
+				target.appendChild(_shadowTemplate.removeChild(_shadowTemplate.firstChild));
+
 			}
 
 			var targetObserver = new Mold.Lib.Event(target);
@@ -156,6 +172,7 @@ Seed({
 
 
 		var _addData = function(template, data, bind){
+
 				Mold.each(template, function(element, name){
 
 					if(data[name] != undefined){
@@ -163,6 +180,7 @@ Seed({
 						if(Mold.isArray(data[name])){
 							if(bind){
 								data[name].on("list.item.add", function(e){
+									console.log("asdd list item")
 									var filterResult = true;
 									
 									if(element.filter && element.filter.length){
@@ -346,7 +364,7 @@ Seed({
 **/
 			bind : function(model){
 				if(!_compiledTemplate){
-					throw "Tempate not compiled!";
+					throw "Template not compiled!";
 				}
 				_addData(_compiledTemplate.childs[0], model.data, true);	
 				return that;

@@ -7,6 +7,9 @@ Seed({
 			"Mold.Lib.DomPointer",
 			"Mold.Lib.DomLessPointer",
 			"Mold.Lib.Event"
+		],
+		nodeInclude : [
+			"Mold.Lib.Document"
 		]
 	},
 	function(){
@@ -15,9 +18,17 @@ Seed({
 			_compiledTemplate = false,
 			that = this,
 			_directive = Mold.Lib.TemplateDirective,
+			_doc = false,
+			_testMode = false,
 			undefined;
 
 		Mold.mixing(this, new Mold.Lib.Event(this))
+
+		if(Mold.isNodeJS || _testMode){
+			_doc = new Mold.Lib.Document();
+		}else{
+			_doc = document;
+		}
 
 /*Add some Textnodes, after this step every templatevariable exists in a single node, without other content*/
 
@@ -29,8 +40,8 @@ Seed({
 				case 2:
 					if((varName = _containsVar(node.nodeValue))){
 						
-						targetNode = document.createTextNode("test");
-						afterTargetNode = document.createTextNode("test 2");
+						targetNode = _doc.createTextNode("test");
+						afterTargetNode = _doc.createTextNode("test 2");
 						node.insertBefore(afterTargetNode, node.nextSibling);
 						node.insertBefore(targetNode, node.nextSibling);
 
@@ -47,9 +58,8 @@ Seed({
 						expString = '([\\s\\S]*?)('+name+')([\\s\\S]*)';
 						regExp  = new RegExp(expString, "gm");
 						result = regExp.exec(node.nodeValue);
-						targetNode = document.createTextNode(result[2]);
-						afterTargetNode = document.createTextNode(result[3]);
-						
+						targetNode = _doc.createTextNode(result[2]);
+						afterTargetNode = _doc.createTextNode(result[3]);
 						node.parentNode.insertBefore(afterTargetNode, node.nextSibling);
 						node.parentNode.insertBefore(targetNode, node.nextSibling);
 						node.nodeValue = result[1];
@@ -365,6 +375,7 @@ Seed({
 
 			index = index || 0;
 
+
 			switch(nodeType){
 				//Parse Elementnodes
 				case 1:
@@ -448,7 +459,7 @@ Seed({
 			var i =0,
 				subnode = false,
 				attributeLen = (node.attributes) ? node.attributes.length : 0;
-
+	
 			if(node.hasChildNodes && node.hasChildNodes() && nodeType != 2){
 				var childsNodes =  node.childNodes;
 				var nodeLen = childsNodes.length;

@@ -229,89 +229,6 @@ Seed({
 				"_startFingerPosition" : _startFingerPosition
 			});
 		}
-/*
-		var _exportTouch = function(touch, target){
-
-			var x1 = target[0].clientX,
-				y1 = target[0].clientY,
-				fingerDistance = false;
-
-			if(target.length === 2){
-				
-				var x2 = target[1].clientX,
-					y2 = target[1].clientY;
-
-				fingerDistance = Math.sqrt(
-					Math.pow(x1 - x2, 2) 
-					+ Math.pow(y1 - y2, 2)
-				);
-			}
-
-			var fingerPositions = [];
-
-			Mold.each(target, function(position){
-				var fingerPositionX = (fingerPositions[0]) ? fingerPositions[0].x : 0;
-				var fingerPositionY = (fingerPositions[0]) ? fingerPositions[0].y : 0;
-				fingerPositions.push({
-					x : position.clientX,
-					y : position.clientY,
-					difX : Math.abs(_startX - position.clientX),
-					difY : Math.abs(_startY - position.clientY),
-					startDistance :  Math.sqrt(
-						Math.pow(_startX - position.clientX, 2) 
-						+ Math.pow(_startY - position.clientY, 2)
-					),
-					angle : _getAngel(
-						{ x : fingerPositionX, y : fingerPositionY},
-						{ x : position.clientX, y : position.clientY}
-					)
-				})
-			});
-
-			if(!_lastTimeStamp){
-				_lastTimeStamp = touch.timeStamp;
-			}
-
-			if(!_lastFingerPosition){
-				_lastFingerPosition = fingerPositions[0];
-			}
-			var distance = parseInt(Math.sqrt(
-				Math.pow(_lastFingerPosition.x - fingerPositions[0].x, 2) 
-				+ Math.pow(_lastFingerPosition.y - fingerPositions[0].y, 2)
-			), 10);
-
-			var speed = (touch.timeStamp - _lastTimeStamp);
-
-			_lastTimeStamp = touch.timeStamp;
-			
-			var touchProperties = {
-				on : false,
-				event : touch,
-				fingers : target.length,
-				startTime : _startTime,
-				time : touch.timeStamp,
-				distance : distance,
-				lastStartTime : _lastTouchStart,
-				fingerPositions : fingerPositions,
-				fingerDistance : fingerDistance,
-				lastFingerDistance : _lastFingerDistance || false,
-				startFingerPositions : _startFingerPosition,
-				timer : _timer,
-				speed : speed,
-				stop : function(){
-					_stopHandlingEvents = true;
-				},
-				isStoped : function(){
-					return _stopHandlingEvents;
-				}
-			};
-
-			_lastFingerPosition = fingerPositions[0];
-
-			return touchProperties;
-		}
-
-		*/
 
 /*handles touch start*/
 		var _lastCaputer = 0;
@@ -333,6 +250,7 @@ Seed({
 
 				_lastTouchStart = e.timeStamp;
 				_lastFingerDistance = touchPropertys.fingerDistance;
+				that.trigger("touch.start", touchPropertys);
 			});
 			
 		});

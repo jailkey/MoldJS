@@ -5,7 +5,8 @@ Seed({
 			"Mold.Lib.Event",
 			"Mold.Lib.Controller",
 			"Mold.Lib.CssParser",
-			"Mold.Lib.Element"
+			"Mold.Lib.Element",
+			"Mold.Lib.Info"
 		]
 	},
 	function(){
@@ -13,7 +14,8 @@ Seed({
 		var _directives = [],
 			_directivesIndex = {},
 			_that = this,
-			cssParser = new Mold.Lib.CssParser();
+			doc = (Mold.isMoldJS) ? false : document;
+			cssParser = new Mold.Lib.CssParser(document);
 
 		Mold.mixing(this, new Mold.Lib.Event(this));
 
@@ -33,7 +35,7 @@ Seed({
 	
 		var _watchList = [];
 		var _watch = function(element, callback){
-			if(Mold.isSupported("mutationObserver")){
+			if(Mold.Lib.Info.isSupported("mutationObserver")){
 				var observer = new MutationObserver(function(mutations){
 					Mold.each(mutations, function(mutation){
 						callback.call(this, mutation);
@@ -103,9 +105,9 @@ Seed({
 											_collectChilds(
 												elements,
 												collection,
-												 elementName,
-												 output,
-												 watchable
+												elementName,
+												output,
+												watchable
 											)
 										);
 										//output[elementName].trigger("element.added", {})
@@ -246,8 +248,6 @@ Seed({
 		}
 
 
-
-
 		this.on("directive.added", function(e){
 
 			var directive = e.data.directive,
@@ -317,7 +317,7 @@ Seed({
 			on : this.on,
 			trigger : this.trigger,
 			add : function(directive, scope, template){
-
+				console.log("add directive")
 				if(!directive.overwrite){
 					directive = this.get(directive.at, directive.name) || directive;
 				}

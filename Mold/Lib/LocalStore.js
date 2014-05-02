@@ -1,10 +1,13 @@
 Seed({
 		name : "Mold.Lib.LocalStore",
-		dna : "class"
+		dna : "class",
+		include : [
+			"Mold.Lib.Info"
+		]
 	},
 	function(){
 
-		if(!Mold.isSupported('localStorage')){
+		if(!Mold.Lib.Info.isSupported('localStorage')){
 			throw "Your Browser does not support localStorage!"
 		}
 

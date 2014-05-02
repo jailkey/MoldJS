@@ -3,7 +3,7 @@ Seed({
 		name : "Mold.Lib.DomPointer",
 		dna : "class",
 		compiler : {
-			preparsePublics : true
+			//preparsePublics : true
 		}
 	},
 	function(config){
@@ -17,16 +17,14 @@ Seed({
 			_subnodeValues = [],
 			_lastShadowNode = config.lastShadowNode,
 			_lastNode = config.lastNode,
-			_parentElement = config.parentElement || _node.parentElement,
+			_parentElement = config.parentElement || _node.parentNode,
 			_shadowDom = config.shadowDom || false,
 			_isVisible = false,
 			_valueStore = false,
 			_filter = config.filter,
 			_childIndex = false;
 
-			_node.nodeValue = ""
-
-		
+			_node.nodeValue = "";
 
 		var _cleanSubnodes = function(){
 			var i = 0, len = _subnodes.length;
@@ -97,8 +95,9 @@ Seed({
 					}
 					if(subnode){
 						var lastNode = _getLastShadowNode(_subnodes);
-						_parentElement.insertBefore(subnode, _lastShadowNode);
-
+						if(_parentElement){
+							_parentElement.insertBefore(subnode, _lastShadowNode);
+						}
 						_subnodes.push(subnode);
 					}
 
@@ -116,10 +115,7 @@ Seed({
 					if(Mold.isArray(element)){
 						_getFragment(element, fragment);
 					}else{
-						// referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
-						
 						fragment.appendChild(element)
-						//_parentElement.insertBefore(element, _lastNode);
 					}
 				});
 			}
@@ -128,19 +124,14 @@ Seed({
 
 		var _add = function(shadowDom){
 			if(shadowDom){
-				//var frament = document.createDocumentFragment();
 				Mold.each(shadowDom, function(element){
 			
 					if(Mold.isArray(element)){
 						_add(element);
 					}else{
-						// referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 						_parentElement.insertBefore(element, _lastNode);
 					}
 				});
-				
-				
-				//_parentElement.insertBefore(_getFragment(shadowDom, document.createDocumentFragment()), _lastNode);
 			}
 		}
 
@@ -265,7 +256,7 @@ Seed({
 				return _isVisible;
 			},
 			test : function(){
-				return "twst"
+				return "test"
 			}
 		}
 

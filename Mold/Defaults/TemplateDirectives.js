@@ -9,7 +9,6 @@ Seed({
 			name : "mold-event",
 			action : function(node, element, template, index){
 
-				//console.log("apply Mold event", node)
 				
 				var handler =  node.nodeValue.split(":")[0];
 				var moldEvent = node.nodeValue.split(":")[1];

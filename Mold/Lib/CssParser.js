@@ -6,12 +6,12 @@ Seed({
 			"Mold.Lib.Event"
 		]
 	},
-	function(){
+	function(doc){
 		
 		Mold.mixing(this, new Mold.Lib.Event(this));
 
 
-		var _files = document.querySelectorAll('link[rel="stylesheet"]'),
+		var _files = doc.querySelectorAll('link[rel="stylesheet"]'),
 			_that = this,
 			_contents = "",
 			_fileCounter = 0,

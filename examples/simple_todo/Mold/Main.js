@@ -44,6 +44,7 @@ Seed(
 
 		template
 			.on("add.entry", function(e){
+
 				if(e.data.listdata && e.data.listdata.entry !== ""){
 					model.data.list.push({ entry : e.data.listdata.entry })
 					model.data.error = false;
@@ -52,15 +53,15 @@ Seed(
 				}
 			})
 			.on("delete.entry", function(e){
+				console.log("delete entry", e.data.index)
 				model.data.list.splice(e.data.index, 1);
 			})
 			.on("delete.all", function(e){
 				model.data.list.remove();
 			})
 
-		document
-			.querySelector(".template-target")
-			.appendChild(template.get());
+		
+		template.appendTo(document.querySelector(".template-target"));
 
 
 

@@ -27,13 +27,17 @@ Seed({
 			_that.trigger("files.loading", e.data);
 		});
 
+		var _timer = false;
+
 		this.publics = {
 			directive : function(directive){
 				directive.seed = _seed;
 				Mold.Lib.Directive.add(directive, document);
-				
-				new Mold.Lib.Event(document).on("DOMNodeInserted", function(){
-					Mold.Lib.Directive.add(directive, document);
+				new Mold.Lib.Event(document).on("DOMNodeInserted", function(e){
+					window.clearTimeout(_timer);
+					_timer = window.setTimeout(function(){
+						Mold.Lib.Directive.add(directive, document);
+					}, 50);
 				});
 
 

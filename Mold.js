@@ -15,7 +15,6 @@ var Mold = (function(config){
 		_localRepository = false,
 		_externalSeeds = {},
 		_isDom = false,
-		_features = {},
 		undefined;
 	
 	try {
@@ -24,47 +23,11 @@ var Mold = (function(config){
 		var _isNodeJS = true;
 	}
 
+
 	if(!_isNodeJS){
 		var _documentHead = document.getElementsByTagName("head")[0];
 	}
-	
 
-	
-
-	var _detectFeatures = function(){
-		var checker = false;
-		if(!_isNodeJS){
-			_features = {
-				"history" : !!(window.history && history.pushState),
-				"geolocation" : 'geolocation' in navigator,
-				"indexedDB" : !!window.indexedDB,
-				"postMessage" : !!window.postMessage,
-				"websql" : !!window.openDatabase,
-				"webGL" : !!window.WebGLRenderingContext,
-				"webworkers" : !!window.Worker,
-				"applicationCache" : !!window.applicationCache,
-				"canvas" : !!((checker = document.createElement('canvas')) 
-								&& checker.getContext 
-								&& checker.getContext('2d')
-							),
-				"defineProperty" : !!Object.defineProperty,
-				"querySelector" : !!document.querySelectorAll,
-				"querySelectorAll" : !!document.querySelectorAll,
-				"sessionStorage" : !!window.sessionStorage,
-				"localStorage" : !!window.localStorage,
-				"proxy" : !!window.Proxy,
-				"mutationObserver" : !!window.MutationObserver,
-				"registerElement" : !!document.registerElement,
-				"blob" : !!window.Blob,
-				"url" : !!window.URL
-
-			}
-		}else{
-			_features = {}
-		}
-	}
-
-	_detectFeatures();
 
 	var _getRootObject = function(){
 		
@@ -180,6 +143,7 @@ var Mold = (function(config){
 		if(_isNodeJS){
 			var output = false;
 			process.argv.forEach(function (val, index, argumentList) {
+
 				if(val === "-repo"){
 					if(argumentList[index+1]){
 						_config.localRepository = argumentList[index+1];
@@ -434,8 +398,10 @@ var Mold = (function(config){
 
 		isNode : function(element){
 			
-			if (!element) { return false; } 
-			if(window && element === window){ return true }
+			if(_isNodeJS) { return false; }
+			if(!element) { return false; }
+			
+			if(element === window){ return true }
 
 			return(
 					(typeof element === "object") 
@@ -449,24 +415,6 @@ var Mold = (function(config){
 				)
 				
 		},
-
-		isValidHTML5Element : function(name){
-			return Mold.contains([
-				"html", "head", "title", "base", "link", "meta", "style",
-				"script", "noscript", "template",
-				"body", "section", "nav", "article", "aside", "h1", "h2", "h3", "h4", "h5", "h6",
-				"header", "footer", "address", "main",
-				"p", "hr", "pre", "blockquote", "ol", "ul", "li", "dl", "dt", "dd", "figure", "figcaption", "div",
-				"a", "em", "strong", "small", "a", "s", "cite", "q", "dfn", "abbr", "data", "time", "code", "var",
-				"samp", "kbd", "sub", "sup", "i", "b", "u", "mark", "ruby", "rt", "rp", "bdi", "bdo", "span",
-				"br", "wbr", "ins", "del", "img", "iframe", "embed", "object", "param", "video", "audio",
-				"source", "track", "canvas", "map", "area", "svg", "math",
-				"table", "caption", "colgroup", "col", "tbody", "thead", "tfoot", "tr", "td", "th",
-				"form", "fieldset", "label", "input", "button", "select", "datalist", "optgroup", "option",
-				"textarea", "keygen", "output", "progress", "meter", "details", "summary", "menuitem"
-			], name.toLowerCase());
-		},
-
 
 		is : function(value){
 			if(
@@ -1019,31 +967,6 @@ var Mold = (function(config){
 		
 	},
 
-
-/**
-* @methode isSupported
-* @desc Test if the Browser has native suppport for the given property/methode
-* @param (String) name - Expects the method-/propertyname
-* @return (Boolen) - if test is successfull it returns true, else if it returns false
-**/
-	isSupported : function(name){
-		if(typeof _features[name] !== "undefined"){
-			return _features[name];
-		}else{
-			throw "There is no feature detection for '"+name+"'' implemented!";
-		}
-	},
-
-/**
-* @methode addFeatureTest
-* @desc Test if the Browser has native suppport for the given feature
-* @param (String) name - Expects the method-/propertyname
-* @return (Boolen) - if test is successfull it returns true, else if it returns false
-**/
-	addFeatureTest : function(name, test){
-		_features[name] = test();
-	},
-
 /**
 * @methode addMethod
 * @desc Add a method to Mold.js, methodes with equal names will overwriten
@@ -1321,7 +1244,7 @@ var Mold = (function(config){
 				var newval = oldval;
 				
 				/*use mutation observer for HTML elements*/
-				if(Mold.isNode(obj) && Mold.isSupported('mutationObserver')){
+				if(Mold.isNode(obj) && !!window.MutationObserver){
 					
 					var observer = new MutationObserver(function(mutations) {
 						Mold.each(mutations, function(mutation) {
@@ -1342,7 +1265,6 @@ var Mold = (function(config){
 					});
 				
 				}else{
-					
 					var getter = function () {
 						return newval;
 					}
@@ -1390,6 +1312,11 @@ Mold.addDNA({
 	name :  "dna", 
 	dnaInit : function(){
 		Mold.addLoadingProperty("include");
+		if(Mold.isNodeJS){
+			Mold.addLoadingProperty("nodeInclude");
+		}else{
+			Mold.addLoadingProperty("browserInclude");
+		}
 	},
 	create : function(seed) {
 		if(seed.func.methodes){

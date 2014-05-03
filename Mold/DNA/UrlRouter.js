@@ -3,7 +3,7 @@ Seed({
 		dna : "dna",
 		author : "Jan Kaufmann",
 		include : [
-			"Mold.Lib.GlobalEvents",
+			"Mold.Lib.Observer",
 			"Mold.Lib.UrlRouter"
 		]
 	},
@@ -20,7 +20,7 @@ Seed({
 						window.addEventListener("hashchange", urlRouter.initRoutes, false);
 					}
 				}else if(Mold.isNodeJS){
-					Mold.Lib.GlobalEvents.on("location.update", function(data){
+					Mold.Lib.Observer.sub("location.update", function(data){
 						urlRouter.setLocation(data.data.location );
 						urlRouter.setServerParameter(data.data.request, data.data.response, data.data.session);
 						urlRouter.initRoutes();

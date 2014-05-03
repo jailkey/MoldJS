@@ -14,6 +14,7 @@ Seed({
 		var _directives = [],
 			_directivesIndex = {},
 			_that = this,
+			_cache = {},
 			doc = (Mold.isMoldJS) ? false : document;
 			cssParser = new Mold.Lib.CssParser(document);
 
@@ -165,9 +166,8 @@ Seed({
 			if(!directive._id){
 				directive._id = Mold.getId();
 			}
-			
+		
 			directive.apply = function(node, element, template, index, style){
-
 				if(!element.hasDirective || !element.hasDirective(directive._id)){
 					directive.scope = element;
 					if(directive.seed){
@@ -247,9 +247,93 @@ Seed({
 			 });
 		}
 
+		var _appendStyleProperty = function(element){
+			Mold.each(_directives, function(directive){
+				if(element.nodeType !== 1){
+					return false;
+				}
+				if(directive.at !== "style-property"){
+					return false;
+				}
+				var elementStyles = cssParser.getElementsByStyleProperty(directive.name);
+			
+				Mold.each(elementStyles, function(selected){
+					
+					if(!selected.element.hasDirective || !selected.element.hasDirective(directive._id)){
+						styleAttributes = selected.properties;
+						element = selected.element;
+						node = element;
+						directive.apply(
+							node,
+							element,
+							false,
+							0,
+							(styleAttributes) ? styleAttributes : false
+						);
+						
+					}
+				});
+					
+				
+			})
+		}
+
+		var _appendElement = function(element){
+			
+			var cacheName = element.nodeName,
+				template = false,
+				styleAttributes = false;
+
+			Mold.each(_directives, function(directive){
+
+				if(element.nodeType !== 1){
+					return false;
+				}
+
+				if(!!element.hasDirective && element.hasDirective(directive._id)){
+					return false;
+				}
+
+				if(directive.at === "element" && directive.name.toUpperCase() !== element.nodeName){
+					return false;
+				}
+
+				if(directive.at === "attribute" && element.getAttribute &&!element.getAttribute(directive.name)){
+					return false;
+				}
+					
+				if(directive.at === "class"){
+
+				}
+
+				if(directive.at === "style-property"){
+					return false;
+				}
+
+				console.log("append directive", directive.name, directive)
+
+				var index = _cache[cacheName+"len"];
+				if(directive.at === "attribute"){
+					node =  element.getAttributeNode(directive.name);
+				}else{
+					node = element;
+				}
+				directive.apply(
+					node,
+					element,
+					template,
+					index,
+					(styleAttributes) ? styleAttributes[index] : false
+				);
+				_cache[cacheName+"len"]++;
+					
+				
+			});
+		}
+
 
 		this.on("directive.added", function(e){
-
+			
 			var directive = e.data.directive,
 				scope = e.data.scope || document;
 
@@ -282,6 +366,7 @@ Seed({
 				
 				var index = 0,
 					template = e.data.template || false,
+					cacheName = false,
 					node = false;
 
 				Mold.each(elements, function(element, elementName){
@@ -305,24 +390,37 @@ Seed({
 							index,
 							(styleAttributes) ? styleAttributes[index] : false
 						);
+
+						cacheName = node.nodeName
 						index++;
 					}
 				});
+				_cache[cacheName+"len"] = index; 
 			}
 		});
 
 
-		
+		Mold.Lib.Observer.sub("create.element", function(e){
+			_appendElement(e.data.element);
+		});
+
+		new Mold.Lib.Event(document).on("DOMNodeInserted", function(e){
+			_appendElement(e.target);
+			_appendStyleProperty(e.target);
+		});
+
 		return {
 			on : this.on,
 			trigger : this.trigger,
+			appendElement : _appendElement,
 			add : function(directive, scope, template){
-				console.log("add directive")
+				
 				if(!directive.overwrite){
 					directive = this.get(directive.at, directive.name) || directive;
 				}
 				if(directive.at !== "style-property"){
 					_add(directive, scope, template);
+					
 				}else{
 					cssParser.at("ready", function(){
 						_add(directive, scope, template);

@@ -4,7 +4,7 @@ Seed({
 		include : [
 			"Mold.TestView",
 			"external->Mold.DNA.Controller",
-			"external->Mold.Lib.Observer"
+			"external->Mold.Lib.Watcher"
 		]
 	},
 	function(config){
@@ -13,7 +13,7 @@ Seed({
 		
 		var view = this.register(new Mold.TestView());
 
-		var observer = new Mold.Lib.Observer(config, {
+		var watcher = new Mold.Lib.Watcher(config, {
 			"*" : "@config.change",
 			"image.len" : "@image.added",
 			"image.*.*" : function(){
@@ -23,17 +23,17 @@ Seed({
 
 		console.log("start", config)
 
-		observer.on("config.change", function(e){
+		watcher.on("config.change", function(e){
 			console.log("config data change", e.data, config)
 
 		})
 
-		observer.on("image.attribute.change", function(e){
+		watcher.on("image.attribute.change", function(e){
 			console.log("image.attribute.title.change", e.data, config)
 
 		})
 
-		observer.on("image.added", function(e){
+		watcher.on("image.added", function(e){
 			console.log("image added", config)
 
 		})

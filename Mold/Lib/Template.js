@@ -29,6 +29,7 @@ Seed({
 			_contentType = false,
 			_doc = false,
 			_testMode = false,
+			_tid = Mold.getId(),
 			undefined;
 
 		Mold.mixing(this, new Mold.Lib.Event(this));
@@ -57,7 +58,10 @@ Seed({
 			if(!Mold.isNodeJS){
 				that.on("after.init", function(){
 					var addDirectives = function(scope){
-						Mold.each(Mold.Defaults.TemplateDirectives, function(directive){			
+
+						Mold.each(Mold.Defaults.TemplateDirectives, function(directive){		
+							directive._id = directive.name +"_"+that._eid;
+							console.log("dirID:", directive._id, "templatID", that._eid)
 							Mold.Lib.Directive.add(
 								directive,
 								scope,
@@ -91,8 +95,11 @@ Seed({
 			_shadowTemplate =  _doc.createElement("div"); //_doc.createDocumentFragment();
 			_container = _doc.createElement("div");
 			_container.innerHTML = template;
+
+			
 		
 			while (_container.hasChildNodes()) {
+				var templateElement = _container.firstChild;
 
   				_shadowTemplate.appendChild(_container.removeChild(_container.firstChild))
 			}
@@ -101,25 +108,24 @@ Seed({
 		}
 
 		var _appendTo = function(target){
-			while(_shadowTemplate.hasChildNodes()){
-				target.appendChild(_shadowTemplate.removeChild(_shadowTemplate.firstChild));
-
-			}
-
-			var targetObserver = new Mold.Lib.Event(target);
 
 			var addDirectives = function(){
-				Mold.each(Mold.Defaults.TemplateDirectives, function(directive){			
+				Mold.each(Mold.Defaults.TemplateDirectives, function(directive){
 					Mold.Lib.Directive.add(
 						directive,
 						target,
 						that
 					);	
 				});
-				
 			}
 
-			targetObserver.on("DOMNodeInserted", addDirectives)
+			while(_shadowTemplate.hasChildNodes()){
+				var targetObserver = new Mold.Lib.Event(_shadowTemplate.firstChild);
+				targetObserver.on("DOMNodeInserted", addDirectives);
+				target.appendChild(_shadowTemplate.removeChild(_shadowTemplate.firstChild));
+
+			}
+
 		}
 		
 		var _buildTree = function(){

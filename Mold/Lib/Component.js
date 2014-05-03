@@ -4,7 +4,8 @@ Seed({
 		include : [
 			"Mold.Lib.Directive",
 			"Mold.Lib.Loader",
-			"Mold.Lib.Event"
+			"Mold.Lib.Event",
+			"Mold.Lib.Observer"
 		]
 	},
 	function(seed){
@@ -33,18 +34,13 @@ Seed({
 			directive : function(directive){
 				directive.seed = _seed;
 				Mold.Lib.Directive.add(directive, document);
-				new Mold.Lib.Event(document).on("DOMNodeInserted", function(e){
-					window.clearTimeout(_timer);
-					_timer = window.setTimeout(function(){
-						Mold.Lib.Directive.add(directive, document);
-					}, 50);
-				});
 
+				
 
 				if(directive.at === "attribute"){
 					new Mold.Lib.Event(document).on("attribute.modified", function(e){
 						if(e.data.attr === directive.name){
-							Mold.Lib.Directive.add(directive, document);
+							//Mold.Lib.Directive.add(directive, document);
 						}
 					});
 				}

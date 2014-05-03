@@ -116,6 +116,24 @@ Seed({
 		this.publics = {
 			changeState : _changeState,
 			async : _async,
+			all : function(promises){
+				var fullfillCount = 0;
+				var promise = new Mold.Lib.Promise(function(fullfill, resolve){
+					var fullfillAll = function(){
+						fullfillCount++;
+						if(fullfillCount === promises.length){
+							fullfill.call();
+						}
+					}
+					Mold.each(promises, function(prom){
+						prom.then(
+							fullfillAll,
+							resolve
+						);
+					});
+				});
+				return promise;
+			},
 			fail : function(onfail){
 				return _then(undefined, onfail);
 			},

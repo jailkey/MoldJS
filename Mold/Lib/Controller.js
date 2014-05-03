@@ -4,7 +4,7 @@ Seed({
 		dna : "class",
 		include :[
 			"Mold.Lib.Event",
-			"Mold.Lib.GlobalEvents",
+			"Mold.Lib.Observer",
 			"Mold.Lib.Parents"
 		]
 	},
@@ -92,7 +92,7 @@ Seed({
 					}
 				);
 			}else{
-				Mold.Lib.GlobalEvents.at("all", function(e){
+				Mold.Lib.Observer.at("all", function(e){
 						controllerWrapped.trigger(e.event, e.data );
 					},
 					{

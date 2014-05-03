@@ -195,11 +195,20 @@ Seed (
 			},
 			off : function(event, callback){
 				if(_isHTMLElement && _isElementEvent(event)){
-					_element.removeEventListener(_getEventName(event), callback);
+					if(callback){
+						_element.removeEventListener(_getEventName(event), callback);
+					}else{
+						var elementEvents = Mold.Lib.EventStore.getElementEvent(_element, event);
+						var i = 0, len = elementEvents.length;
+						for(; i < len; i++){
+							_element.removeEventListener(_getEventName(event), elementEvents[i]);
+						}
+					}
 				}
-				if(event && callback){
+				if(event){
 					Mold.Lib.EventStore.removeElementEvent(_element, event, callback);
 				}else{
+					
 					Mold.Lib.EventStore.removeEvents(_element);
 				}
 				

@@ -5,7 +5,7 @@ Seed(
 		author : "Jan Kaufmann",
 		include : [
 			"Mold.Lib.Event",
-			"Mold.Lib.GlobalEvents",
+			"Mold.Lib.Observer",
 			"Mold.Server.Session"
 		],
 		description : "",
@@ -48,7 +48,7 @@ Seed(
 			}
 		}
 		
-		Mold.Lib.GlobalEvents.on("redirect", function(){
+		Mold.Lib.Observer.on("redirect", function(){
 			//console.log("redirect");
 		});
 		console.log("start server");

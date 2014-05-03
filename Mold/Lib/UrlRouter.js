@@ -4,7 +4,7 @@ Seed({
 		author : "Jan Kaufmann",
 		polymorph : true,
 		include : [
-			"Mold.Lib.GlobalEvents"
+			"Mold.Lib.Observer"
 		]
 	},
 	function(seed){
@@ -17,7 +17,7 @@ Seed({
 			_session = false;
 		
 		var _seed = seed;
-		var _events = Mold.Lib.GlobalEvents;
+		var _events = Mold.Lib.Observer;
 		
 		var _location =  {
 			pathname : "",

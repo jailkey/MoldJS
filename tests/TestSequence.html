@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<title>Jasmine Spec Runner</title>
+		<link rel="shortcut icon" type="image/png" href="spec/jasmine/jasmine_favicon.png">
+		<link rel="stylesheet" type="text/css" href="spec/jasmine/jasmine.css">
+		<script type="text/javascript" src="spec/jasmine/jasmine.js"></script>
+		<script type="text/javascript" src="spec/jasmine/jasmine-html.js"></script>
+
+		<script	data-mold-repository=""
+			data-mold-external-repository="../"
+			data-mold-cache="off"
+			src="../Mold.js" type="text/javascript"
+		></script>
+
+		<script type="text/javascript" src="spec/SequenceSpec.js"></script>
+		<script type="text/javascript">
+			(function() {
+				var jasmineEnv = jasmine.getEnv();
+				jasmineEnv.updateInterval = 1000;
+
+				var trivialReporter = new jasmine.TrivialReporter();
+
+				jasmineEnv.addReporter(trivialReporter);
+
+				jasmineEnv.specFilter = function(spec) {
+					return trivialReporter.specFilter(spec);
+				};
+
+
+				function execJasmine() {
+					jasmineEnv.execute();
+				}
+
+				Mold.ready(function(){
+					execJasmine();
+				});
+
+			})();
+		</script>
+	</head>
+	<body>
+
+	</body>
+</html>		
+
+
+

@@ -3,7 +3,7 @@ Seed({
 		dna : "dna",
 		author : "Jan Kaufmann",
 		include : [
-			"Mold.Lib.GlobalEvents",
+			"Mold.Lib.Observer",
 			"Mold.Lib.UrlRouter"
 		]
 	},

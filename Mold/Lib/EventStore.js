@@ -31,16 +31,16 @@ Seed (
 			},
 			removeElementEvent : function(element, event, value){
 				var item = this.getElement(element);
-				if(item && item[event]){
+				if(item && item.events[event]){
 					if(value){
-						for(var i = 0; i < item[event].length; i++){
-							if(item[event][i] === value){
-								item[event].splice(i, 1);
+						for(var i = 0; i < item.events[event].length; i++){
+							if(item.events[event][i] === value){
+								item.events[event].splice(i, 1);
 								break;
 							}
 						}
 					}else{
-						delete item[event];
+						delete item.events[event];
 					}
 				}
 			},

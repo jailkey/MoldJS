@@ -4,7 +4,7 @@ Seed({
 		include : [
 			"Mold.TestView",
 			"external->Mold.DNA.Controller",
-			"external->Mold.Lib.Observer"
+			"external->Mold.Lib.Watcher"
 		]
 	},
 	function(config){

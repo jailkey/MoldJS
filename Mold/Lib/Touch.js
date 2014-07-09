@@ -30,6 +30,7 @@ Seed({
 				dragTolerance : 3,
 				captureDelay : 0,
 			}, config),
+			_useAngle = ((config.subset && Mold.contains(config.subset, "rotate")) ? true : false),
 			that = this;
 
 		Mold.mixing(this, new Mold.Lib.Event(this));
@@ -79,8 +80,100 @@ Seed({
 			return false;
 		}
 
-/*creates an touchevent from standard javascript event*/
+
+/* caluclation without worker*/
+		var _calculate = function(target, touch){
 		
+			var output = {};
+
+			var _getAngel = function(from, to){
+				var angle = Math.atan((from.y - to.y) * -1 / (from.x - to.x)) * (180 / Math.PI);
+				return parseInt((angle < 0) ? angle + 180 : angle);
+			}
+
+			var x1 = target[0].clientX,
+				y1 = target[0].clientY,
+				fingerDistance = false;
+
+			if(target.length === 2){
+				
+				var x2 = target[1].clientX,
+					y2 = target[1].clientY;
+
+				fingerDistance = Math.sqrt(
+					Math.pow(x1 - x2, 2) 
+					+ Math.pow(y1 - y2, 2)
+				);
+			}
+
+			var fingerPositions = [];
+
+			for(var i = 0; i < target.length; i++){
+				var position = target[i];
+				var fingerPositionX = (fingerPositions[0]) ? fingerPositions[0].x : 0;
+				var fingerPositionY = (fingerPositions[0]) ? fingerPositions[0].y : 0;
+				fingerPositions.push({
+					x : position.clientX,
+					y : position.clientY,
+					difX : Math.abs(_startX - position.clientX),
+					difY : Math.abs(_startY - position.clientY),
+					startDistance :  Math.sqrt(
+						Math.pow(_startX - position.clientX, 2) 
+						+ Math.pow(_startY - position.clientY, 2)
+					),
+					angle : (_useAngle) ? _getAngel(
+						{ x : fingerPositionX, y : fingerPositionY},
+						{ x : position.clientX, y : position.clientY}
+					) : false
+				})
+			}
+
+			if(!_lastTimeStamp){
+				_lastTimeStamp = touch.timeStamp;
+			}
+
+			if(!_lastFingerPosition){
+				_lastFingerPosition = fingerPositions[0];
+			}
+			/*
+			var distance = parseInt(Math.sqrt(
+				Math.pow(_lastFingerPosition.x - fingerPositions[0].x, 2) 
+				+ Math.pow(_lastFingerPosition.y - fingerPositions[0].y, 2)
+			), 10);*/
+
+			var speed = (touch.timeStamp - _lastTimeStamp);
+
+			_lastTimeStamp = touch.timeStamp;
+			
+			var touchProperties = {
+				on : false,
+				fingers : target.length,
+				startTime : _startTime,
+				time : touch.timeStamp,
+				//distance : distance,
+				lastStartTime : _lastTouchStart,
+				fingerPositions : fingerPositions,
+				fingerDistance : fingerDistance,
+				lastFingerDistance :  _lastFingerDistance || false,
+				startFingerPositions : _startFingerPosition,
+				speed : speed,
+				timer : _timer,
+				stop : function(){
+					_stopHandlingEvents = true;
+				},
+				isStoped : function(){
+					return _stopHandlingEvents;
+				}
+			};
+
+			
+			_lastFingerPosition = fingerPositions[0];
+
+			return { properties : touchProperties, globals : output};
+		}
+
+/*creates an touchevent from standard javascript event*/
+		/*
 		var exportWorker = new Mold.Lib.Worker(function(e){
 			
 			var target = e.data.target;
@@ -161,7 +254,7 @@ Seed({
 			output["_lastFingerPosition"] = fingerPositions[0];
 
 			postMessage({ properties : touchProperties, globals : output, _wid : e.data._wid});
-		})
+		}, 'calculateTouch')
 
 		
 		var _setGlobals = function(globals){
@@ -191,6 +284,7 @@ Seed({
 	
 		exportWorker.on("message", _onMessage);
 		
+		
 		var _wid = 0;
 		var _registerdWorker = {};
 		var _exportTouchAsync = function(touch, target, callback){
@@ -206,7 +300,7 @@ Seed({
 				}
 			});
 
-/*Wait for Workerst aswer*/
+//Wait for Workerst aswer
 			 _wid++;
 
 			_registerdWorker["w"+_wid] = {
@@ -229,6 +323,19 @@ Seed({
 				"_startFingerPosition" : _startFingerPosition
 			});
 		}
+		*/
+
+		var _exportTouchSync = function(touch, target, callback){
+
+			var data = _calculate(target, touch);
+
+
+			
+			
+			callback.call(this, data.properties)
+		}
+
+		var _exportTouch  = (config.useWorker) ? _exportTouchAsync : _exportTouchSync;
 
 /*handles touch start*/
 		var _lastCaputer = 0;
@@ -240,7 +347,7 @@ Seed({
 			_startY = e.targetTouches[0].clientY;
 
 
-			_exportTouchAsync(e, e.targetTouches, function(touchPropertys){
+			_exportTouch(e, e.targetTouches, function(touchPropertys){
 				_startFingerPosition = touchPropertys.fingerPositions;
 				Mold.mixing(touchPropertys, {
 					on : "start"
@@ -261,7 +368,7 @@ Seed({
 			e.preventDefault();
 			//console.log()
 			if(_config.captureDelay < e.timeStamp - _lastCaputer){
-				_exportTouchAsync(e, e.changedTouches, function(touchPropertys){
+				_exportTouch(e, e.changedTouches, function(touchPropertys){
 					
 
 					Mold.mixing(touchPropertys, {
@@ -279,7 +386,7 @@ Seed({
 /*handles touch end*/
 		element.on('touchend', function(e){
 			//var touchPropertys = _exportTouch(e, e.changedTouches);
-			_exportTouchAsync(e, e.changedTouches, function(touchPropertys){
+			_exportTouch(e, e.changedTouches, function(touchPropertys){
 				Mold.mixing(touchPropertys, {
 					on : "end"
 				});
@@ -296,19 +403,27 @@ Seed({
 
 /*add a new touchevent*/
 		var _add = function(name, callback){
-			_gestures[name] = callback;
+			if(_config.subset){
+				if(Mold.contains(_config.subset, name)){
+					_gestures[name] = callback;
+				}
+			}else{
+				_gestures[name] = callback;
+			}
+			
 		}
 
 		_add("tab", function(touch){
 			if(touch.on === "end" && touch.fingers === 1 && !touch.isStoped()){
-				that.trigger("tap", touch);
+
+				that.trigger("tab", touch, { context : element } );
 			}
 		});
 
 		_add("single.tab", function(touch, config){
 			if(touch.on === "end" && touch.fingers === 1 && !touch.isStoped()){
 				touch.timer.set("single.tab.timer", config.doubleTabTime, function(){
-					that.trigger("single.tap", touch);
+					that.trigger("single.tab", touch);
 				});
 			}
 		});
@@ -317,7 +432,7 @@ Seed({
 			if(touch.on === "start" && touch.fingers === 1){
 				touch.timer.clear("single.tab.timer");
 				if(touch.lastStartTime + config.doubleTabTime >= touch.time){
-					that.trigger("double.tap", touch);
+					that.trigger("double.tab", touch);
 					touch.stop();
 				}
 			}

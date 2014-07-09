@@ -12,7 +12,7 @@ Seed({
 			_config = config,
 			_that = this;
 
-		Mold.mixing(this, Mold.Lib.Event(this));
+		Mold.mixing(this, new Mold.Lib.Event(this));
 
 		var _observeProperty = function(data, propertyName, eventName){
 			Mold.watch(data, propertyName, function(property, oldval, val){
@@ -41,7 +41,7 @@ Seed({
 		}
 
 		var _observeAll = function(data, eventName){
-			eventName = eventName || "data.change"
+			eventName = eventName || "data.change";
 			Mold.each(data, function(item, name){
 				if(Mold.isArray(item)){
 					_observeList(item, eventName, name);
@@ -93,7 +93,6 @@ Seed({
 							_observeProperty(data, property, eventName)
 							break;
 					}
-					console.log("watch", property, observeData);
 				}
 			};
 		}
@@ -103,7 +102,11 @@ Seed({
 				_observeAll(data);
 			}else{
 				Mold.each(config, function(value, name){
-					value = (typeof value === "function") ? value : value.split("@")[1];
+					
+					value = (typeof value === "function") 
+						? value : (value.indexOf("@") > -1) 
+						? value.split("@")[1] : value;
+
 					_parseObserverPattern(name, value, data);
 				});
 			}
@@ -112,7 +115,9 @@ Seed({
 		_observe(_data, _config);
 		
 		this.publics = {
+			observer : function(){
 
+			}
 		}
 	}
 )

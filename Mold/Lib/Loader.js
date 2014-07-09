@@ -2,7 +2,8 @@ Seed({
 		name : "Mold.Lib.Loader",
 		dna : "class",
 		include : [
-			"Mold.Lib.Event"
+			"Mold.Lib.Event",
+			"Mold.Lib.Promise"
 		]
 	},
 	function(){
@@ -41,7 +42,7 @@ Seed({
 			
 		}
 
-		var _checkLoaded = function(){
+		var _checkLoaded = function(async){
 			if(_files.length === 0){
 				if(!_isLoadingError){
 					that.trigger("ready");
@@ -55,61 +56,110 @@ Seed({
 		var _loadNextFile = function(async){
 			
 			var selectedFile = _files.shift();
-			that.trigger("process", { len : _fileLen, _loaded : (_fileLen -_files.length), filename : selectedFile.name});
+			
 			_isLoading = true;
 
-			if(selectedFile.type === "script"){
+			var promise = new Mold.Lib.Promise(function(resolve, reject){
 
-				Mold.loadScript(selectedFile.name, function(){
-					_checkLoaded(async);
-				})
+				if(selectedFile.type === "script"){
 
-			}else if(selectedFile.type === "image"){
+					Mold.loadScript(selectedFile.name, function(){
+						that.trigger("process", { len : _fileLen, _loaded : (_fileLen -_files.length), filename : selectedFile.name});
+						resolve();
+					})
 
-				var img = new Image(),
-					imageEvents = new Mold.Lib.Event(img);
+				}else if(selectedFile.type === "image"){
 
-				imageEvents.on("load", function(e){
-					console.log("successfully loaded", img);
-					_checkLoaded();
-				});
+					var img = new Image(),
+						imageEvents = new Mold.Lib.Event(img);
 
-				imageEvents.on("error", function(e){
-					that.trigger("error", e);
-					console.log("Error", e, img)
-					_isLoadingError = true;
-					_checkLoaded(async);
-				});
-				
-				img.src = selectedFile.name;
-			//	console.log("add source", selectedFile.name, img);
+					imageEvents.on("load", function(e){
+						that.trigger("process", { len : _fileLen, _loaded : (_fileLen -_files.length), filename : selectedFile.name});
+						resolve();
+					});
 
-			}else if(selectedFile.type === "style"){
+					imageEvents.on("error", function(e){
+						that.trigger("error", e);
+						_isLoadingError = true;
+						reject(e);
+					});
+					
+					img.src = selectedFile.name;
 
-				var styleSheet = document.createElement("link"),
-					styleEvent = new Mold.Lib.Event(styleSheet);
 
-				styleEvent.on("load", function(){
-					_checkLoaded(async);
-				});
+				}else if(selectedFile.type === "style"){
 
-				styleEvent.on("error", function(e){
-					that.trigger("error", e);
-					_isLoadingError = true;
-					_checkLoaded(async);
-				});
+					var styleSheet = document.createElement("link"),
+						styleEvent = new Mold.Lib.Event(styleSheet);
 
-				styleSheet.type = "text/css";
-				styleSheet.rel = "stylesheet";
-				styleSheet.href = selectedFile.name;
-				document.getElementsByTagName("head")[0].appendChild(styleSheet);
+					styleEvent.on("load", function(){
+						that.trigger("process", { len : _fileLen, _loaded : (_fileLen -_files.length), filename : selectedFile.name});
+						resolve();
+					});
 
-			}
+					styleEvent.on("error", function(e){
+						that.trigger("error", e);
+						reject(e);
+						_isLoadingError = true;
+					});
 
-			if(async){
-				//_checkLoaded(async);
-			}
+					styleSheet.type = "text/css";
+					styleSheet.rel = "stylesheet";
+					styleSheet.href = selectedFile.name;
+					document.getElementsByTagName("head")[0].appendChild(styleSheet);
+
+				}
+			});
+
 			
+			return promise;
+			
+		}
+
+
+		var _loadAsync = function(){
+			var loadPromises = [];
+			for(var i = 0; i < _fileLen; i++){
+				loadPromises.push(_loadNextFile());
+			}
+			var promise = new Mold.Lib.Promise().all(loadPromises);
+			
+			promise.then(function(){
+				that.trigger("ready");
+			});
+			
+			promise.fail(function(e){
+				that.trigger("error", e);
+			});
+			
+			return promise;
+		}
+
+		
+		var _check = function(success, fail){
+			var filePromise = _loadNextFile();
+
+			filePromise.then(function(){
+				if(_files.length === 0){
+					if(!_isLoadingError){
+						that.trigger("ready");
+						success();
+					}
+					_isLoading = false;
+				}else{
+					_check(success, fail);
+				}
+			});
+
+			filePromise.fail(function(e){
+				that.trigger("error", e);
+				fail();
+			});
+		}
+
+		var _loadSync = function(){
+			var promise = new Mold.Lib.Promise(_check);
+			return promise;
 		}
 
 		
@@ -130,8 +180,13 @@ Seed({
 			},
 			load : function(async){
 				_fileLen = _files.length;
-				_loadNextFile(async);
-				return this;
+				if(async){
+					console.log("load async");
+					return _loadAsync();
+				}
+				console.log("load synce")
+				return _loadSync();
+			
 			}
 
 		}

@@ -33,7 +33,7 @@ Seed({
 				file.error(function(){
 					_fileCounter++;
 					if(_fileCounter === _files.length){
-						_that.trigger("ready");
+						_that.trigger("error");
 					}
 				});
 			}
@@ -59,6 +59,7 @@ Seed({
 				closed = 0,
 				i = 0,
 				len = value.length;
+
 			
 			for(; i < len; i++){
 				switch(value[i]){
@@ -74,17 +75,23 @@ Seed({
 				}
 			}
 			
+			return 0;
 		}
+		var counter = 0;
 
 		var _parseContent = function(content){
 			var nextBracked = content.indexOf("{"),
 				output = {},
 				rule,
 				ruleContent;
+
+
+
 	
 			while(nextBracked > -1){
 				rule = content.substring(0, nextBracked);
-
+				counter++;
+				
 				content = content.substring(nextBracked +1, content.length);
 				endBracked = content.indexOf("}");
 				nextBracked = content.indexOf("{");
@@ -98,20 +105,26 @@ Seed({
 					nextBracked = content.indexOf("{");
 				}else{
 					endBracked =  _getClosingPosition(content);
+					nextBracked = content.indexOf("{", endBracked);
 					ruleContent = content.substring(0, endBracked);
 					content = content.substring(endBracked, content.length);
 					output[rule] = {
 						rules : _parseContent(ruleContent)
 					};
 				}
+
 			}
 			
 			return output;
 		}
+		var start = new Date().getTime();
+
 
 		this.on("ready", function(e){
 
 			_parsedContent = _parseContent(_contents);
+			var ende = new Date().getTime();
+			console.log("css parse an load time", (ende - start) + "ms", counter)
 		});
 
 		var _getElementsByStyleProperty = function(content, property){

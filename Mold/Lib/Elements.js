@@ -5,9 +5,10 @@ Seed ({
 			"Mold.Lib.Element"
 		]
 	},
-	function(selector){
+	function(selector, object){
 
-		var selection = document.querySelectorAll(selector);
+		var object = object || document;
+		var selection = object.querySelectorAll(selector);
 		var collection = [];
 		var that = this;
 
@@ -26,6 +27,13 @@ Seed ({
 							element[name].apply(that, args);
 						});
 					}
+				}
+			});
+		}else{
+			var copyElement = new Mold.Lib.Element('div');
+			Mold.each(copyElement, function(func, name){
+				if(typeof func === "function"){
+					collection[name] = function(){}
 				}
 			});
 		}

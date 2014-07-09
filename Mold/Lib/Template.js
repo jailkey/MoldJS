@@ -58,10 +58,8 @@ Seed({
 			if(!Mold.isNodeJS){
 				that.on("after.init", function(){
 					var addDirectives = function(scope){
-
 						Mold.each(Mold.Defaults.TemplateDirectives, function(directive){		
 							directive._id = directive.name +"_"+that._eid;
-							console.log("dirID:", directive._id, "templatID", that._eid)
 							Mold.Lib.Directive.add(
 								directive,
 								scope,
@@ -186,7 +184,6 @@ Seed({
 						if(Mold.isArray(data[name])){
 							if(bind){
 								data[name].on("list.item.add", function(e){
-									console.log("asdd list item")
 									var filterResult = true;
 									
 									if(element.filter && element.filter.length){

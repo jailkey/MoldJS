@@ -10,31 +10,38 @@ Seed({
 			_callbacks = [],
 			undefined;
 
+		var PromiseError = function(message){
+			return {
+				name : "PromiseError",
+				message : message
+			}
+		}
+
 		var _changeState = function(state, value){
 
 			if ( _state === state ) {
-				throw new Error("can't transition to same state: " + state);
+				throw Error("can't transition to same state: " + state);
 			}
 
 			if ( 
 				_state === "fulfilled" 
 				|| _state === "rejeced" 
 			) {
-				throw new Error("can't transition from current state: " + state);
+				throw Error("can't transition from current state: " + state);
 			}
 
 			if (
 				state === "fulfilled" 
 				&& arguments.length < 2 
 			) {
-				throw new Error("transition to fulfilled must have a non null value");
+				throw Error("transition to fulfilled must have a non null value");
 			}
 
 			if ( 
 				state === "rejeced"
 				&& value === null 
 			) {
-				throw new Error("transition to rejected must have a non null reason");
+				throw Error("transition to rejected must have a non null reason");
 			}
 
 			_state = state;
@@ -49,12 +56,13 @@ Seed({
 				return false;
 			}
 
-			Mold.each(_callbacks, function(callbackObject){
 
+		
+			Mold.eachShift(_callbacks, function(callbackObject){
 				var nextCall = (_state === "fulfilled") ? callbackObject.onFulFilled : callbackObject.onRejected;
-				if(typeof nextCall !== "function" ){	
-					callbackObject.promise.changeState( _state, _value );
+				if(typeof nextCall !== "function" ){
 
+					callbackObject.promise.changeState(_state, _value );
 				}else{
 
 					try {
@@ -70,8 +78,10 @@ Seed({
 							callbackObject.promise.changeState("fulfilled", value);
 						}
 					}catch(error){
-
+						
 						callbackObject.promise.changeState("rejected", error);
+						
+						throw error;
 					}
 				}
 			});
@@ -89,7 +99,6 @@ Seed({
 					onRejected : onRejected,
 					promise : promise
 				});
-
 				_resolve();
 			});
 
@@ -116,6 +125,9 @@ Seed({
 		this.publics = {
 			changeState : _changeState,
 			async : _async,
+			state : function(){
+				return _state;
+			},
 			all : function(promises){
 				var fullfillCount = 0;
 				var promise = new Mold.Lib.Promise(function(fullfill, resolve){

@@ -251,7 +251,7 @@ Seed (
 							_element.dispatchEvent(eventObject);
 						}
 					}else{
-						output = events[i].call(this,eventData) || output;
+						output = events[i].call(((config && config.context) ? config.context : this), eventData) || output;
 					}
 				}
 				Mold.Lib.EventStore.saveTrigger(_element, event, data);

@@ -74,12 +74,22 @@ var Mold = (function(config){
 		return ( _createdMold[ target ] ) ? true : false;
 	};
 	
+	var _onlySubSeeds = function(seedList){
+		var output = true;
+		Mold.each(seedList, function(seed){
+			if(typeof seed === "string" && !_isSeedAdded(seed)){
+				output = false;
+				return "exit";
+			}
+		});
+
+		return output;
+	}
 	
 	var _areSeedsAdded = function(included){
 		var output = true;
 		Mold.each(included, function(value){
 			var seedName = (value.indexOf("->") !== -1) ? value.split("->")[1] : value;
-
 			if(! _isSeedAdded(seedName)){
 				output =  false;
 				return "exit";
@@ -88,6 +98,35 @@ var Mold = (function(config){
 
 		return output;
 	};
+
+	var _getImports = function(seedList){
+		var imports = [];
+		Mold.each(seedList, function(seed){
+			if(Mold.isArray(seed)){
+				imports = imports.concat(_getImports(seed));
+			}else if(Mold.isObject(seed)){
+				imports.push(seed);
+			}
+		});
+		return imports
+	}
+
+	var _removeImports = function(seedList){
+		var newList = [];
+		Mold.each(seedList, function(entry, key){
+			if(Mold.isArray(entry)){
+				newList.push(_removeImports(entry));
+			}else if(Mold.isObject(entry)){
+				Mold.each(entry, function(value){
+					newList.push(value)
+				});
+			}else{
+				newList.push(entry);
+			}
+		});
+
+		return newList;
+	}
 	
 	var _loader = function(name){
 		var _name = name;
@@ -236,14 +275,15 @@ var Mold = (function(config){
 * @param (function) iterator - a callback function
 * @param (object) context - optional context Object
 **/
-		each : function(collection, iterator, context){
+		each : function(collection, iterator, context, test){
 			var i = 0;
 			if(collection == null || collection === false) { return false; }
-	
+
+			
 			if(Array.prototype.forEach && collection.forEach){
 				collection.forEach(iterator, context);
 			}else if(Mold.isArray(collection)){
-		
+				
 				
 				var len = collection.length;
 				for (; i < len; i++) {
@@ -254,10 +294,13 @@ var Mold = (function(config){
 			}else {
 				var keys = Mold.keys(collection);
 				var len = keys.length;
-
+				
 				for(; i < len; i++){
 					if(!(Mold.isNodeList(collection) && keys[i] === "length")){
-						if(collection[keys[i]] && iterator.call(context, collection[keys[i]], keys[i], collection) === "break"){
+						if(
+							Mold.is(collection[keys[i]]) 
+							&& iterator.call(context, collection[keys[i]], keys[i], collection) === "break"
+						){
 							return true;
 						}
 					}
@@ -265,7 +308,16 @@ var Mold = (function(config){
 			}
 			return true;
 		},
-
+/**/
+	eachShift : function(collection, callback){
+		if(!collection){
+			return false;
+		}
+		while(collection.length){
+			var selected = collection.shift();
+			callback.call(this, selected);
+		}
+	},
 
 /**
 * @namespace Mold
@@ -675,6 +727,30 @@ var Mold = (function(config){
 			});
 			return false;
 		},
+		loadSubSeeds : function(seedList, seedName){
+			if(_onlySubSeeds(seedList)){
+				var subSeedList = [];
+				Mold.each(seedList, function(entry){
+					if(Mold.isArray(entry)){
+						Mold.each(entry, function(subEntry){
+							subSeedList.push(subEntry);
+						});
+					}
+				});
+				Mold.each(subSeedList, function(subElement){
+					if(Mold.isArray(subElement)){
+						Mold.loadSubSeeds(subSeedList, seedName);
+					}else{
+						if(!_Mold[subElement]){
+							Mold.load({ name : subElement, isExternal : _externalSeeds[seedName] || false });
+						}
+					}
+				});
+				return subSeedList;
+				//Mold.checkSeedCue();
+			}
+			return seedList;
+		},
 /**
 * @methode addSeed
 * @desc Adds a Seed to Mold.js
@@ -695,18 +771,25 @@ var Mold = (function(config){
 				//Checks if all dependencies will be loaded
 				var loadingproperties = Mold.getLoadingproperties();
 				var startCreating = true;
+				seed.imports = seed.imports || [];
 				Mold.each(loadingproperties, function(property){
-
+					
+					
 					if(seed[property]){
+						seed.imports = seed.imports.concat(_getImports(seed[property]));
+						seed[property] = _removeImports(seed[property]);
+
 						if(typeof seed[property] === "object"){
 							startCreating = _areSeedsAdded(seed[property]);
 
 							if(!startCreating){
 								Mold.each(seed[property], function(element){
-
-									if( !_Mold[element] ){
-
-										Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false });
+									if(Mold.isArray(element)){
+										seed[property] = Mold.loadSubSeeds(seed[property], seed.name);
+									}else{
+										if(!_Mold[element]){
+											Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false });
+										}
 									}
 								});
 							}
@@ -753,8 +836,10 @@ var Mold = (function(config){
 						
 						if(!_createdMold[seed.name]){
 							_createdMold[seed.name] = seed;
-							
+						
+							seed.func = Mold.importSeeds(seed.func, seed.imports);
 							Mold.getDNA(seed.dna).create(seed);
+							//! Seed is loaded %seed.name%!
 							Mold.log("Info", "Seed "+seed.name+ " loaded!");
 							if(seed.events){
 								if(seed.events.aftercreate){
@@ -889,7 +974,7 @@ var Mold = (function(config){
 		if(_isExternal(seed.name) || seed.isExternal){
 			var urlName = seed.name;
 			if(seed.name.indexOf("->") !== -1){
-				seedName = seed.name = seed.name.split("->")[1];
+				var seedName = seed.name = seed.name.split("->")[1];
 			}
 			if(urlName.indexOf("lib->") !== -1){
 				_externalSeeds[seed.name] = "lib";
@@ -912,6 +997,7 @@ var Mold = (function(config){
 
 		
 		var seedName = seed.name;
+
 		if(!_Mold[seedName]){
 			if(!seedName){
 				Mold.log("Error", { code : 2});
@@ -977,6 +1063,22 @@ var Mold = (function(config){
 			if( typeof Mold[name] === "undefined" ){
 				Mold[name] = method;
 			}
+		},
+
+/**
+* @methode importSeeds
+* @desc Import Seeds from array of objects to target seed
+* @param (Function) target - the target seed
+* @param (array) method - an array of objects
+**/
+		importSeeds : function(target, imports){
+			var importString = "";
+			Mold.each(imports, function(seed){
+				Mold.each(seed, function(value, key){
+					importString += " var "+key+" = "+value+";\n";
+				});
+			})
+			return Mold.jsparser.injectBefore(target, importString);
 		},
 /**
 * @namespace Mold

@@ -141,20 +141,21 @@ describe("Mold Core Lib", function () {
 				return isMoldReady;
 			}, "Molde is ready", 750);
 
-			var loader = Mold.load({ name : "Mold.Misc.Singelton" });
+			var loader = Mold.load({ name : "external->Mold.Test" });
 			loader.bind(function(){
 				flag = true;
 			})
 
 			waitsFor(function() {
 				return flag;
-			}, "Seed succsessfully loaded", 750);
+			}, "Seed succsessfully loaded", 1750);
 
 		});
 
-		it("create Instance and execute Method", function(){
-			var singelton  = new Mold.Misc.Singelton();
-			expect(singelton.publicMethod()).toEqual(true);
+		it("create instance and test imported seeds", function(){
+			var testInstance = new Mold.Test();
+
+			expect(testInstance.testMethod()).toEqual(true);
 		});
 
 		

@@ -31,14 +31,17 @@ Seed({
 					"mutationObserver" : !!window.MutationObserver,
 					"registerElement" : !!document.registerElement,
 					"blob" : !!window.Blob,
-					"url" : !!window.URL
+					"url" : !!window.URL,
+					"supports" : !!((window.CSS && window.CSS.supports) || window.supportsCSS || false),
+					"orientation" : !!window.DeviceOrientationEvent,
+					"touch" : !!('ontouchstart' in window)
 
 				}
 			}else{
 				_features = {}
 			}
 		}
-
+/*init featuredetection*/
 		_detectFeatures();
 
 		return {
@@ -86,6 +89,13 @@ Seed({
 					"form", "fieldset", "label", "input", "button", "select", "datalist", "optgroup", "option",
 					"textarea", "keygen", "output", "progress", "meter", "details", "summary", "menuitem"
 				], name.toLowerCase());
+			},
+
+			isSupportedPropery : function(name){
+				if(this.isSupported("supports")){
+					var supports = window.CSS.supports || window.supportsCSS;
+					return supports(name);
+				}
 			}
 
 		}

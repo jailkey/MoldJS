@@ -28,6 +28,7 @@ Seed({
 				seed : "seedname", [optional]
 				collect {}, [optional]
 				replace : true, [optional]
+				watchable : true, [optional]
 				action : function(node, element, template){
 					
 				}
@@ -94,7 +95,9 @@ Seed({
 					}
 
 					if(watchable){
+
 						_watch(scope, function(mutation){
+
 							if(mutation.type === "childList"){
 								Mold.each(mutation.addedNodes, function(selectedNode){
 									if(
@@ -139,23 +142,32 @@ Seed({
 					var collectedAttributes = (Mold.isArray(collection.attribute)) ? collection.attribute : [collection.attribute]
 
 					Mold.each(collectedAttributes, function(selectedAttribute){
-						var attribute = scope.getAttribute(selectedAttribute);
-						
-						if(attribute){
-							var attributeName = selectedAttribute.name || selectedAttribute;
-							output[attributeName] = attribute;
 
-							if(watchable){
-								_watch(scope, function(mutation){
-									if(
-										mutation.type === "attributes" 
-										&& mutation.attributeName === attributeName
-									){
-										output[attributeName] = mutation.target.getAttribute(attributeName);
-									}
-								});
-							}
+						
+						if(!scope.getAttribute(selectedAttribute)){
+							scope[selectedAttribute] = false;
 						}
+						var attribute = scope[selectedAttribute];
+						
+						/*
+						if(!attribute){
+							attribute = false;
+						}*/
+						var attributeName = selectedAttribute.name || selectedAttribute;
+						output[attributeName] = attribute;
+
+						if(watchable){
+
+							_watch(scope, function(mutation){
+								if(
+									mutation.type === "attributes" 
+									&& mutation.attributeName === attributeName
+								){
+									output[attributeName] = mutation.target.getAttribute(attributeName);
+								}
+							});
+						}
+						
 					});
 				}
 			}
@@ -173,10 +185,7 @@ Seed({
 					if(directive.seed){
 
 						if(directive.collect){
-							if(directive.watchable){
-
-							}
-							var collection = _collect(directive.scope, directive.collect, {},directive.watchable);
+							var collection = _collect(directive.scope, directive.collect, {}, directive.watchable);
 						}
 
 						if(style){
@@ -309,8 +318,6 @@ Seed({
 				if(directive.at === "style-property"){
 					return false;
 				}
-
-				console.log("append directive", directive.name, directive)
 
 				var index = _cache[cacheName+"len"];
 				if(directive.at === "attribute"){

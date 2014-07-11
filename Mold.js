@@ -238,6 +238,69 @@ var Mold = (function(config){
 	var _isExternal = function(path){
 		return (path.indexOf("->") !== -1) ? true : false;
 	}
+
+
+	var _loadSubSeeds = function(seedList, seedName){
+		if(_onlySubSeeds(seedList)){
+			var subSeedList = [];
+			Mold.each(seedList, function(entry){
+				if(Mold.isArray(entry)){
+					Mold.each(entry, function(subEntry){
+						subSeedList.push(subEntry);
+					});
+				}
+			});
+			Mold.each(subSeedList, function(subElement){
+				if(Mold.isArray(subElement)){
+					_loadSubSeeds(subSeedList, seedName);
+				}else{
+					if(!_Mold[subElement]){
+						Mold.load({ name : subElement, isExternal : _externalSeeds[seedName] || false });
+					}
+				}
+			});
+			return subSeedList;
+		}
+		return seedList;
+	}
+
+	var _preparse = function(input, scriptName, dna){
+		//Mold.cue.add("seedpreparser", name, callback);
+		if(typeof input === "function"){
+			var code = input.toString();
+			code = code.substring(0, code.lastIndexOf("}")+1);
+			
+			var pattern = new RegExp("function\\s*\(([\\s\\S]*?)\)\\s*\{([\\s\\S]*?)\}$", "g"),
+				matches = pattern.exec(code);
+
+			if(matches){
+				var parameter = matches[2].replace("(", "").replace(")", ""),
+					objectEnd = matches[3];
+			
+				if(objectEnd){
+					
+					var outputCode = objectEnd;
+					Mold.each(Mold.cue.getType("seedpreparser"), function(value){
+						outputCode = value.call(this, outputCode);
+					});
+					if(dna){
+						Mold.each(Mold.cue.getType("seedpreparser_"+dna), function(value){
+							outputCode = value.call(this, outputCode);
+						});
+					}
+					
+					return new Function(parameter, outputCode);
+				}else{
+					//! can't parse function
+					return input;
+				}
+			}
+		}else{
+			//! preparse only functions
+		}
+		return input;
+	}
+
 	
 	if(!_isNodeJS){
 		_ready(function(){
@@ -647,7 +710,12 @@ var Mold = (function(config){
  * @callback onlogCallback
  * @param {String} type The type of the logmessage, default it can be "Error", "Info", or "Debug"
  * @param {String|Object} message The errormessage, if the logtype is "Error" it will be an object 
- */		
+ */
+
+
+ 		addPreparser : function(name, callback){
+ 			Mold.cue.add("seedpreparser", name, callback);
+ 		},
 
 /**
 * @methode addLoadingProperty
@@ -716,7 +784,7 @@ var Mold = (function(config){
 			});
 			
 		},
-		checkLoadedNames : function(name){
+		checkLoadedSeeds : function(name){
 			var seeds = Mold.cue.getType("loadedseeds");
 			
 			Mold.each(_Mold, function(seedValue, seedName){
@@ -727,30 +795,7 @@ var Mold = (function(config){
 			});
 			return false;
 		},
-		loadSubSeeds : function(seedList, seedName){
-			if(_onlySubSeeds(seedList)){
-				var subSeedList = [];
-				Mold.each(seedList, function(entry){
-					if(Mold.isArray(entry)){
-						Mold.each(entry, function(subEntry){
-							subSeedList.push(subEntry);
-						});
-					}
-				});
-				Mold.each(subSeedList, function(subElement){
-					if(Mold.isArray(subElement)){
-						Mold.loadSubSeeds(subSeedList, seedName);
-					}else{
-						if(!_Mold[subElement]){
-							Mold.load({ name : subElement, isExternal : _externalSeeds[seedName] || false });
-						}
-					}
-				});
-				return subSeedList;
-				//Mold.checkSeedCue();
-			}
-			return seedList;
-		},
+		
 /**
 * @methode addSeed
 * @desc Adds a Seed to Mold.js
@@ -785,7 +830,7 @@ var Mold = (function(config){
 							if(!startCreating){
 								Mold.each(seed[property], function(element){
 									if(Mold.isArray(element)){
-										seed[property] = Mold.loadSubSeeds(seed[property], seed.name);
+										seed[property] = _loadSubSeeds(seed[property], seed.name);
 									}else{
 										if(!_Mold[element]){
 											Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false });
@@ -828,7 +873,7 @@ var Mold = (function(config){
 					
 					if(Mold.getDNA(seed.dna).create){
 						if(!_Mold[seed.name]){
-							var newname = Mold.checkLoadedNames(seed.name);
+							var newname = Mold.checkLoadedSeeds(seed.name);
 							if(newname){
 								seed.name = newname;
 							}
@@ -836,8 +881,11 @@ var Mold = (function(config){
 						
 						if(!_createdMold[seed.name]){
 							_createdMold[seed.name] = seed;
-						
+
 							seed.func = Mold.importSeeds(seed.func, seed.imports);
+							
+							seed.func = _preparse(seed.func, seed.dna);
+
 							Mold.getDNA(seed.dna).create(seed);
 							//! Seed is loaded %seed.name%!
 							Mold.log("Info", "Seed "+seed.name+ " loaded!");
@@ -1072,152 +1120,45 @@ var Mold = (function(config){
 * @param (array) method - an array of objects
 **/
 		importSeeds : function(target, imports){
-			var importString = "";
-			Mold.each(imports, function(seed){
-				Mold.each(seed, function(value, key){
-					importString += " var "+key+" = "+value+";\n";
-				});
-			})
-			return Mold.jsparser.injectBefore(target, importString);
+			if(imports.length){
+				var importString = "";
+				Mold.each(imports, function(seed){
+					Mold.each(seed, function(value, key){
+						importString += " var "+key+" = "+value+";\n";
+					});
+				})
+				return Mold.injectBefore(target, importString);
+			}else{
+				return target;
+			}
 		},
-/**
-* @namespace Mold
-* @object 
-* @name jsparser
-* @desc Include methodes to parse jscode
-* @values splitCodeAndParameter, injectBefore, injectAfter, removeFromFunction, removeFromFunction, deleteComments, areOpendEqualClosedBrackets, parseObjectLitral
-**/
 
-		jsparser : {
-			splitCodeAndParameter : function(func){
-				func = func.toString();
-				func = func.substring(0, func.lastIndexOf("}")+1);
-				var pattern = new RegExp("function\\s*\(([\\s\\S]*?)\)\\s*\{([\\s\\S]*?)\}$", "g");
-				var matches = pattern.exec(func);
-				if(matches){
-					var parameter = matches[2];
-					parameter = parameter.replace("(", "").replace(")", "").replace("anonymous", "");
-					var code = matches[3];
-					return { parameter : parameter, code : code}
-				}
-				return false;
-			},
 /**
 * @methode injectBefore
 * @desc Injects code at the beginning of a Functionobject;
 * @param (Function) func - Expects a function object
 * @param (String) code - Expects code to be injected
 **/
-			injectBefore : function(func, code){
-				func = func.toString();
-				func = func.substring(0, func.lastIndexOf("}")+1);
-				var pattern = new RegExp("function\\s*\(([\\s\\S]*?)\)\\s*\{([\\s\\S]*?)\}$", "g");
-				var matches = pattern.exec(func);
-				if(matches){
-					var parameter = matches[2];
+		injectBefore : function(func, code){
+			func = func.toString();
+			func = func.substring(0, func.lastIndexOf("}")+1);
+			var pattern = new RegExp("function\\s*\(([\\s\\S]*?)\)\\s*\{([\\s\\S]*?)\}$", "g");
+			var matches = pattern.exec(func);
+			if(matches){
+				var parameter = matches[2];
 
-					parameter = parameter.replace("(", "").replace(")", "");
-					var objectEnd = matches[3];
-					if(objectEnd){
-						var newCode = "\n"+code+"\n"+objectEnd;
-						return new Function(parameter, newCode);
-					}else{
-						Mold.log("Error", { code : 9, inject : code, func : func});
-						return false;
-					}
-				 }else{
-					Mold.log("Error", { code : 9, inject : code, func : func});
-				 }
-			},
-
-			injectAfter : function(func, code){
-				var functionValues = Mold.jsparser.splitCodeAndParameter(func);
-				if(functionValues){
-					if(functionValues.code.lastIndexOf("return") > functionValues.code.lastIndexOf("}")){
-						functionValues.code = functionValues.code.substring(0, 
-							functionValues.code.lastIndexOf("return")) 
-							+ code 
-							+ functionValues.code.substring( functionValues.code.lastIndexOf("return"), functionValues.code.length
-						);
-
-					}else{
-						functionValues.code = functionValues.code +code;
-					}
-					return new Function(functionValues.parameter, functionValues.code);
+				parameter = parameter.replace("(", "").replace(")", "");
+				var objectEnd = matches[3];
+				if(objectEnd){
+					var newCode = "\n"+code+"\n"+objectEnd;
+					return new Function(parameter, newCode);
 				}else{
+					throw "Can not inject code, cause function end not found";
 					return false;
 				}
-			},
-
-			removeFromFunction : function(func, codeToRemove){
-				var oldfunction = func;
-				func = func.toString();
-				func = func.replace(codeToRemove, "");
-				var functionValues = Mold.jsparser.splitCodeAndParameter(func);
-				if(functionValues){
-					return new Function(functionValues.parameter, functionValues.code);
-				}
-				return oldfunction;
-			},
-
-
-			deleteComments : function(codeString){
-				return codeString.replace(/\/\*[\s\S]*?\*\//gm, "");
-			},
-
-			areOpendEqualClosedBrackets : function(literalString){
-				var brackets = [["{", "}"], ["[", "]"], ["(", ")"]];
-				return !Mold.some(brackets, function(values){
-					if(
-						literalString.split(values[0]).length
-						!== literalString.split(values[1]).length
-					){
-						return true;
-					}
-				});
-			},
-
-			parseObjectLitral : function(literalString, onelement){
-				literalString = Mold.jsparser.deleteComments(literalString);
-				var output = [];
-
-				var propertyValueStart = literalString.indexOf(":");
-				var stringStart = literalString.indexOf("{")+1;
-				if(stringStart > propertyValueStart){
-					stringStart = literalString.indexOf(",")+1;
-					if(stringStart > propertyValueStart){
-						stringStart = 0;
-					}
-				}
-				var elementName = Mold.trim(literalString.substring(stringStart, propertyValueStart));
-				literalString = literalString.substring(propertyValueStart, literalString.length);
-				propertyValueStart = literalString.indexOf(":");
-				var propertyValueEnd = literalString.indexOf(",");
-				if(propertyValueEnd == -1){
-					return false;
-				}
-				var elementValue = Mold.trim(literalString.substring(propertyValueStart+1, propertyValueEnd));
-				while(!Mold.jsparser.areOpendEqualClosedBrackets(elementValue)){
-					propertyValueEnd = literalString.indexOf(",", propertyValueEnd +1);
-					if(propertyValueEnd == -1){
-						propertyValueEnd = literalString.lastIndexOf("}") -1;
-					}
-					elementValue = Mold.trim(literalString.substring(propertyValueStart+1, propertyValueEnd));
-				}
-				literalString = literalString.substring(propertyValueEnd, literalString.length);
-				var outputValue = { name : elementName, value : elementValue };
-				if(literalString){
-					output.push(outputValue)
-					output = output.concat(Mold.jsparser.parseObjectLitral(literalString, onelement));
-				}
-				
-				if(typeof onelement === "function"){
-					onelement.call(this, outputValue);
-				}
-
-				return output;
-
-			},
+			 }else{
+			 	throw "Can not inject code, function does not match function pattern";
+			 }
 		},
 
 /**
@@ -1237,7 +1178,7 @@ var Mold = (function(config){
 				var parameter = RegExp.$2.replace(")","").replace("(", "").replace(" ", "").split(","); 
 				var newConstructor = "\n\t this."+superclassname+".constructor.apply(this, arguments); \n"
 				if(config && config.sourceURL){
-					newConstructor += "\n\t\/\/@sourceURL="+config.sourceURL+"\n";
+					newConstructor += "\n\t\/\/#sourceURL="+config.sourceURL+"\n";
 				}
 				newConstructor += RegExp.$3.substr(0, RegExp.$3.lastIndexOf("}"));
 				subClass = new Function(parameter, newConstructor);
@@ -1450,66 +1391,29 @@ Mold.addDNA({
 		Mold.addLoadingProperty("implements");
 	},
 	create : function(seed) {
-		
-				var target = Mold.createChain(Mold.getSeedChainName(seed));			
-				if(seed.extend){
-					var superClass = Mold.getSeed(seed.extend);
-					seed.func = Mold.extend(superClass, seed.func, { sourceURL : seed.name });
+		var target = Mold.createChain(Mold.getSeedChainName(seed));			
+		if(seed.extend){
+			var superClass = Mold.getSeed(seed.extend);
+			seed.func = Mold.extend(superClass, seed.func, { sourceURL : seed.name });
 
+		}
+
+		var wrapperClass = Mold.wrap(seed.func, function(that){
+			if(that.publics){
+				for(var property in that.publics){
+					that[property] = that.publics[property];
 				}
-
-				if(seed.compiler && seed.compiler.preparsePublics){
-					var result = /(this\.publics.*?=.*?)(\{[\s\S]*\})/gm.exec(seed.func.toString());
-
-					var getPublics = function(string){
-						var opend = string.split("{").length,
-							closed = string.split("}").length;
-
-						while(opend != closed){
-							string = string.substring(0, string.lastIndexOf("}"));
-							opend =  string.split("{").length;
-							closed = string.split("}").length;
-						}
-						string = string.substring(0, string.lastIndexOf("}")+1);
-						return string;
-					}
-					if(result){
-						var publicsString = getPublics(result[2]),
-							insertProp = "",
-							removeString = result[1] + publicsString;
-
-						var literalRoutines = Mold.jsparser.parseObjectLitral(publicsString, function(property){
-							insertProp = insertProp + "\n this"+"."+property.name+"="+property.value+";\n\n";
-						});
-
-						seed.func = Mold.jsparser.removeFromFunction(seed.func, removeString);
-						seed.func = Mold.jsparser.injectAfter(seed.func, insertProp);
-					}
-				}
-				if(	
-					seed.compiler 
-					&& (seed.compiler.disableWrapping || seed.compiler.preparsePublics)
-				){
-					seed.func.prototype.className = seed.name;
-					target[Mold.getTargetName(seed)] = seed.func;
-				}else{
-					var wrapperClass = Mold.wrap(seed.func, function(that){
-						if(that.publics){
-							for(var property in that.publics){
-								that[property] = that.publics[property];
-							}
-						}
-						delete that.publics;
-						if(that.trigger && typeof that.trigger === "function"){
-							that.trigger("after.init");
-						}
-						return constructor;
-					});
-				
-					wrapperClass.prototype.className = seed.name;
-					target[Mold.getTargetName(seed)] = wrapperClass;
-				}
-				return target[Mold.getTargetName(seed)];
+			}
+			delete that.publics;
+			if(that.trigger && typeof that.trigger === "function"){
+				that.trigger("after.init");
+			}
+			return constructor;
+		});
+	
+		wrapperClass.prototype.className = seed.name;
+		target[Mold.getTargetName(seed)] = wrapperClass;
+		return target[Mold.getTargetName(seed)];
 		
 	}
 });

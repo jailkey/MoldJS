@@ -141,7 +141,7 @@ describe("Mold Core Lib", function () {
 				return isMoldReady;
 			}, "Molde is ready", 750);
 
-			var loader = Mold.load({ name : "external->Mold.Test" });
+			var loader = Mold.load({ name : "Mold.Test" });
 			loader.bind(function(){
 				flag = true;
 			})

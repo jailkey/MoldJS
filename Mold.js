@@ -12,7 +12,7 @@ var Mold = (function(config){
 		_createdMold = {},
 		_externalRepository = false,
 		_repositoryName = "Mold",
-		_localRepository = false,
+		_9epository = false,
 		_externalSeeds = {},
 		_isDom = false,
 		undefined;
@@ -52,7 +52,7 @@ var Mold = (function(config){
 	};
 	
 	var _getSeedChain = function( target ){
-		
+
 		var path = target.split(".");
 		var chain = _getRootObject();
 		Mold.each(path, function(element){
@@ -101,6 +101,9 @@ var Mold = (function(config){
 
 	var _getImports = function(seedList){
 		var imports = [];
+		if(typeof seedList === "string"){
+			return imports;
+		}
 		Mold.each(seedList, function(seed){
 			if(Mold.isArray(seed)){
 				imports = imports.concat(_getImports(seed));
@@ -113,6 +116,9 @@ var Mold = (function(config){
 
 	var _removeImports = function(seedList){
 		var newList = [];
+		if(typeof seedList === "string"){
+			return seedList;
+		}
 		Mold.each(seedList, function(entry, key){
 			if(Mold.isArray(entry)){
 				newList.push(_removeImports(entry));
@@ -215,7 +221,7 @@ var Mold = (function(config){
 				mainScript = false,
 				repositiory = false,
 				scripts = document.getElementsByTagName("script");
-			
+		
 
 			if((mainScript = Mold.find(scripts, function(script){
 				if(script.getAttribute("data-mold-main") || script.getAttribute("src").indexOf("Mold.js") > -1){
@@ -223,6 +229,10 @@ var Mold = (function(config){
 					_config.externalRepository =  script.getAttribute("data-mold-external-repository");
 					_config.localRepository = script.getAttribute("data-mold-repository");
 					_config.cacheOff = (script.getAttribute("data-mold-cache") === "off") ? true : false;
+					if(Mold){
+						Mold.EXTERNAL_REPOSITORY = _config.externalRepository;
+						Mold.LOCAL_REPOSITORY = _config.localRepository;
+					}
 					return true;
 				}else{
 					return false;
@@ -255,6 +265,7 @@ var Mold = (function(config){
 					_loadSubSeeds(subSeedList, seedName);
 				}else{
 					if(!_Mold[subElement]){
+
 						Mold.load({ name : subElement, isExternal : _externalSeeds[seedName] || false });
 					}
 				}
@@ -264,8 +275,17 @@ var Mold = (function(config){
 		return seedList;
 	}
 
-	var _preparse = function(input, scriptName, dna){
-		//Mold.cue.add("seedpreparser", name, callback);
+	var _postProcess = function(createdSeed, rawSeed){
+		Mold.each(Mold.cue.getType("postprocessor"), function(value){
+			var output = value.call(this, createdSeed, rawSeed);
+			if(output){
+				createdSeed = output;
+			}
+		});
+		return createdSeed;
+	}
+
+	var _preProcess = function(input, scriptName, dna){
 		if(typeof input === "function"){
 			var code = input.toString();
 			code = code.substring(0, code.lastIndexOf("}")+1);
@@ -280,11 +300,12 @@ var Mold = (function(config){
 				if(objectEnd){
 					
 					var outputCode = objectEnd;
-					Mold.each(Mold.cue.getType("seedpreparser"), function(value){
+					outputCode = "//# sourceURL="+scriptName+"\n" + outputCode;
+					Mold.each(Mold.cue.getType("seedprocessor"), function(value){
 						outputCode = value.call(this, outputCode);
 					});
 					if(dna){
-						Mold.each(Mold.cue.getType("seedpreparser_"+dna), function(value){
+						Mold.each(Mold.cue.getType("seedprocessor_"+dna), function(value){
 							outputCode = value.call(this, outputCode);
 						});
 					}
@@ -314,6 +335,9 @@ var Mold = (function(config){
 	}
 	
 	return {
+
+		EXTERNAL_REPOSITORY : _config.externalRepository,
+		LOCAL_REPOSITORY : config.localRepository,
 /**
 * @namespace Mold
 * @methode trim
@@ -326,6 +350,14 @@ var Mold = (function(config){
 			phrase = phrase.replace(/\n*/gm, "");
 			phrase = phrase.replace(/^\s+|\s+$/g, "");
 			return phrase;
+		},
+
+		startsWith : function(phrase, search){
+			return phrase.slice(0, search.length) === search;
+		},
+
+		endsWith : function(phrase, search){
+			return phrase.slice(phrase.length - search.length) === search;
 		},
 
 /**
@@ -713,8 +745,12 @@ var Mold = (function(config){
  */
 
 
- 		addPreparser : function(name, callback){
- 			Mold.cue.add("seedpreparser", name, callback);
+ 		addPreProcessor: function(name, callback){
+ 			Mold.cue.add("seedprocessor", name, callback);
+ 		},
+
+ 		addPostProcessor: function(name, callback){
+ 			Mold.cue.add("postprocessor", name, callback);
  		},
 
 /**
@@ -795,6 +831,17 @@ var Mold = (function(config){
 			});
 			return false;
 		},
+
+		addSeedNameCleaner : function(name, action){
+			Mold.cue.add("seednamecleaner", name, action)
+		},
+
+		cleanSeedName : function(seedName){
+			Mold.each(Mold.cue.getType("seednamecleaner"), function(action){
+				seedName = action.call(null, seedName);
+			});
+			return seedName;
+		},
 		
 /**
 * @methode addSeed
@@ -860,14 +907,13 @@ var Mold = (function(config){
 				var target = (_targetWrapper[seed.name]) ? _targetWrapper[seed.name] : seed.name;
 				var targets = target.split(".");
 				_createTarget(targets);
+
 				if(seed.events && seed.events.log){
 					Mold.onlog(seed.events.log);
 				}
 				if(seed.onlog){
 					Mold.onlog(seed.onlog);
 				}
-				
-				
 
 				if(startCreating){
 					
@@ -884,9 +930,14 @@ var Mold = (function(config){
 
 							seed.func = Mold.importSeeds(seed.func, seed.imports);
 							
-							seed.func = _preparse(seed.func, seed.dna);
+							seed.func = _preProcess(seed.func, seed.name.split('.').join('/')+'.js', seed.dna);
 
-							Mold.getDNA(seed.dna).create(seed);
+							var createdSeed = Mold.getDNA(seed.dna).create(seed);
+							createdSeed = _postProcess(createdSeed, seed);
+
+
+							var target = Mold.createChain(Mold.getSeedChainName(seed));
+							target[Mold.getTargetName(seed)] = createdSeed;
 							//! Seed is loaded %seed.name%!
 							Mold.log("Info", "Seed "+seed.name+ " loaded!");
 							if(seed.events){
@@ -956,10 +1007,10 @@ var Mold = (function(config){
 					var testMold = require(path);
 				}else{
 					throw "File not found "+path+"!";
-					//Mold.log("Error", { code : 1, filename : path} );
 				}
 			}else{
-				var scriptElement = document.createElement("script");
+				
+				
 				if(_config.cacheOff){
 					if(path.indexOf("?") == -1){
 						path += "?cachoff="+Math.random();
@@ -967,17 +1018,15 @@ var Mold = (function(config){
 						path += "&cachoff="+Math.random();
 					}
 				}
-				if(_config.localRepository !== null){
-					path = _config.localRepository + path;
+				
+				var scriptElement = document.createElement("script");
+					scriptElement.src = path,
+					scriptElement.type = "text/javascript",
+					scriptElement.onloadDone = false;
 
-				}else if(_config.externalRepository !== null){
-					path = _config.externalRepository + path;
-				}
-
-				scriptElement.src = path;
-				scriptElement.type = "text/javascript";
 				_documentHead.appendChild(scriptElement);
-				scriptElement.onloadDone = false;
+				
+				
 				_addElementEvent(scriptElement, "load", function(){
 					scriptElement.onloadDone = true;
 				});
@@ -985,6 +1034,7 @@ var Mold = (function(config){
 				_addElementEvent(scriptElement, "readystatechange", function(){
 					scriptElement.onloadDone = true;
 				});
+
 				if(typeof success === "function"){
 					_addElementEvent(scriptElement, "load", success);
 					_addElementEvent(scriptElement, "readystatechange", success);
@@ -992,8 +1042,8 @@ var Mold = (function(config){
 				
 				_addElementEvent(scriptElement, "error", function(){
 					throw "File not Found "+this.src+"!";
-					//Mold.log("Error", { code : 1, filename : this.src} );
 				});
+
 				if(typeof error === "function"){
 					_addElementEvent(scriptElement, "error", error);
 				}
@@ -1011,7 +1061,35 @@ var Mold = (function(config){
 * @methode loadScriptError
 * @desc Creats a seed object chain in Mold.js scope, if an object allready exists it will not be overwritten. For not existing object an empty namespace will created.
 **/
+
+
+/**
+* @methode addLoadingRule
+* @desc  adds a rule to control the loading process
+* @param (String) name - Expects the name of the rule
+* @param (Function) a function with a control statement 
+**/
+	 addLoadingRule : function(name, rule){
+	 	Mold.cue.add("loadingrules", name, rule);
+	 },
+
+
+ 	getLoadingRule : function(seed){
+ 		var loadingRules = Mold.cue.getType("loadingrules"),
+			rule = false;
 		
+		Mold.find(loadingRules, function(selectedRule){
+			var result = selectedRule.call(null, seed);
+			if(result){
+
+				rule = result;
+			}else{
+				return false;
+			}
+		});
+		return rule
+ 	},
+
 /**
 * @methode load
 * @desc Load the specified Seed
@@ -1019,69 +1097,42 @@ var Mold = (function(config){
 * @return (Object) A loader Object it offers a "loaded" eventlistener 
 **/
 	load : function(seed){
-		if(_isExternal(seed.name) || seed.isExternal){
-			var urlName = seed.name;
-			if(seed.name.indexOf("->") !== -1){
-				var seedName = seed.name = seed.name.split("->")[1];
-			}
-			if(urlName.indexOf("lib->") !== -1){
-				_externalSeeds[seed.name] = "lib";
-			}else{
-				if(seed.isExternal){
-					_externalSeeds[seed.name]  = seed.isExternal;
-				}else{
-					if(urlName.indexOf("external->") !== -1){
-					
-						_externalSeeds[seed.name] = _config.externalRepository;
-					}else{
-						_externalSeeds[seed.name] = urlName.split("->")[0];
 
-					}
-				}
-			}
-			seed.isExternal = _externalSeeds[seed.name];
+		var rule = Mold.getLoadingRule(seed);
+
+		if(!rule){
+			throw "No loading rule found!"
+		}
+		
+		var seedName = seed.name = rule.seedName;
+		
+		if(rule.isExternal || seed.isExternal){
+			_externalSeeds[seed.name] = seed.isExternal || rule.path;
+			seed.isExternal = rule.path;
 		}
 
-
-		
-		var seedName = seed.name;
-
 		if(!_Mold[seedName]){
+			
 			if(!seedName){
-				Mold.log("Error", { code : 2});
+				throw "Seedname ist not defined!"
 			}
-			if( seedName!="" ) {
 
+			if( seedName !="" ) {
+				var filePath = "";
 
-				var path = seedName.split(".");
-				var filePath = (seed.url) ? seed.url : _config.seedPath;
-				filePath += path.join("/") + ".js";
 				if(_externalSeeds[seed.name]){
-					if(_externalSeeds[seed.name] === "external"){
-						filePath = _config.externalRepository + filePath;
-					}else if(_externalSeeds[seed.name] === "lib"){
-						filePath = seed.name;
-					}else{
-						filePath = _externalSeeds[seed.name] + filePath;
-					}
-				}else{
-					if(	
-						_config.localRepository !== false 
-						&& _config.localRepository !== undefined
-					){
-						filePath =_config.localRepository+filePath;
-				
-					}
+					filePath = _externalSeeds[seed.name];
 				}
 
-
+				filePath += rule.file;
 				seed.isLoaded = false;
 				seed.isCreated = true;
-				
 				_Mold[seedName] = seed;
+				
 				if( typeof _Mold[seedName].loader !== "object" ){
 					_Mold[seedName].loader = new _loader(seedName);
 				}
+
 				Mold.loadScript(filePath, 
 					function(element){
 						if(_externalSeeds[seed.name] === "lib"){
@@ -1094,6 +1145,7 @@ var Mold = (function(config){
 					false,
 					{ isExternal : seed.isExternal }
 				);
+
 			}
 		}
 		
@@ -1123,8 +1175,10 @@ var Mold = (function(config){
 			if(imports.length){
 				var importString = "";
 				Mold.each(imports, function(seed){
+
+
 					Mold.each(seed, function(value, key){
-						importString += " var "+key+" = "+value+";\n";
+						importString += " var "+key+" = "+Mold.cleanSeedName(value)+";\n";
 					});
 				})
 				return Mold.injectBefore(target, importString);
@@ -1153,7 +1207,7 @@ var Mold = (function(config){
 					var newCode = "\n"+code+"\n"+objectEnd;
 					return new Function(parameter, newCode);
 				}else{
-					throw "Can not inject code, cause function end not found";
+					throw "Can not inject code, cause functions end not found";
 					return false;
 				}
 			 }else{
@@ -1195,14 +1249,14 @@ var Mold = (function(config){
 
 
 /**
-* @methode mixing
+* @methode mixin
 * @desc Adds Methods from one Object to another
 * @param (Object) target - Expects the target object
 * @param (Object) origin - Expects the origin object
 * @param (Array) selected - Expects an array with the property- and methodenames that will be copied, the parameter is optional, if it is not given, all methodes an parametes will be copied
 * @return (Object) - returns the target object with the new methodes an properties
 **/
-		mixing : function(target, origin, selected, config){
+		mixin : function(target, origin, selected, config){
 			for(var property in origin){
 				
 				if(property != "className"){
@@ -1351,6 +1405,65 @@ var Mold = (function(config){
 });
 
 
+Mold.addLoadingRule("external", function(seed){
+ 	if(seed.name.indexOf("external->") > -1 || Mold.startsWith(seed.name, "->")){
+
+ 		var path = Mold.EXTERNAL_REPOSITORY,
+ 			seedName = seed.name.split("->")[1],
+			fileParts = seedName.split("."),
+			file = fileParts.join("/") + ".js";
+
+ 		return { path : path, file : file, isExternal : true, seedName: seedName }
+ 	}else{
+ 		return false;
+ 	}
+});
+/*
+Mold.addLoadingRule("lib", function(seed){
+ 	if(seed.name.indexOf("lib->") > -1){
+ 		
+ 		var path = "",
+ 			seedName = seed.name.split("->")[1],
+ 			fileParts = seedName.split("."),
+			file = fileParts.join("/") + ".js";
+ 		
+ 		return { path : path, file : file, isExternal : true, seedName: seedName };
+ 	}else{
+ 		return false;
+ 	}
+});
+*/
+
+
+Mold.addLoadingRule("standard", function(seed){
+ 	if(
+ 		seed.name.indexOf("->") === -1 
+ 		&& seed.name.indexOf("http:") === -1
+ 		&& seed.name.indexOf("https:") === -1
+ 	 ){
+
+ 		var path = Mold.LOCAL_REPOSITORY,
+ 			seedName = seed.name,
+ 			fileParts = seedName.split("."),
+			file = fileParts.join("/") + ".js";
+		
+		return { path : path, file : file, isExternal : false, seedName: seedName }
+ 	}else{
+ 		return false;
+ 	}
+ });
+
+Mold.addSeedNameCleaner("standard", function(seedName){
+	if(Mold.startsWith(seedName, "->")){
+		seedName = seedName.slice(2, seedName.length);
+	}
+	if(seedName.indexOf("->") > -1){
+		seedName = seedName.split("->")[0];
+	}
+	return seedName;
+});
+
+
 Mold.addDNA({ 
 	name :  "dna", 
 	dnaInit : function(){
@@ -1370,7 +1483,7 @@ Mold.addDNA({
 			seed.func.init(seed);
 		}
 		Mold.addDNA(seed.func);
-		
+		return (seed.func.methodes) ? seed.func.methodes() : seed.func;
 	}
 });
 
@@ -1378,9 +1491,7 @@ Mold.addDNA({
 Mold.addDNA({ 
 	name :  "static", 
 	create : function(seed) {
-		var target = Mold.createChain(Mold.getSeedChainName(seed));
-		target[Mold.getTargetName(seed)] = seed.func();
-		
+		return  seed.func();
 	}
 });
 
@@ -1412,8 +1523,7 @@ Mold.addDNA({
 		});
 	
 		wrapperClass.prototype.className = seed.name;
-		target[Mold.getTargetName(seed)] = wrapperClass;
-		return target[Mold.getTargetName(seed)];
+		return wrapperClass; 
 		
 	}
 });
@@ -1435,9 +1545,7 @@ Mold.addDNA({
 		}
 		
 		wrapperClass.prototype = targetClass.prototype;
-		var target = Mold.createChain(Mold.getSeedChainName(seed));
-		target[Mold.getTargetName(seed)] = wrapperClass;
-		return target[Mold.getTargetName(seed)];
+		return wrapperClass;
 		
 	}
 });
@@ -1445,9 +1553,7 @@ Mold.addDNA({
 Mold.addDNA({ 
 	name :  "data", 
 	create : function(seed) {
-		var target = Mold.createChain(seed.name.substring(0, seed.name.lastIndexOf(".")));
-		target[seed.name.substring(seed.name.lastIndexOf(".")+1, seed.name.length)] = seed.func;
-
+		return seed.func;
 	}
 });
 
@@ -1460,6 +1566,7 @@ Mold.addDNA({
 		if(typeof seed.func === "function"){
 			seed.func()
 		}
+		return seed.func;
 	}
 });
 
@@ -1468,6 +1575,7 @@ Mold.addDNA({
 	var seedFunction = function(seed, func){
 		seed.func = func;
 		Mold.addSeed(seed);
+		//return 
 	};
 	if(Mold.isNodeJS){
 

@@ -9,7 +9,7 @@ Seed({
 	},
 	function(){
 		
-		Mold.mixing(this, new Mold.Lib.Event(this));
+		Mold.mixin(this, new Mold.Lib.Event(this));
 		var _localStore = new Mold.Lib.LocalStore();
 
 		this.publics = {

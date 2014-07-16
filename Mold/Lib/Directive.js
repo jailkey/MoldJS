@@ -18,7 +18,7 @@ Seed({
 			doc = (Mold.isMoldJS) ? false : document;
 			cssParser = new Mold.Lib.CssParser(document);
 
-		Mold.mixing(this, new Mold.Lib.Event(this));
+		Mold.mixin(this, new Mold.Lib.Event(this));
 
 		/*
 			Directive Exampel
@@ -97,7 +97,7 @@ Seed({
 					if(watchable){
 
 						_watch(scope, function(mutation){
-
+						
 							if(mutation.type === "childList"){
 								Mold.each(mutation.addedNodes, function(selectedNode){
 									if(
@@ -105,6 +105,7 @@ Seed({
 										&& collection.element 
 										&& (selectedNode.nodeName.toLowerCase() === collection.element.toLowerCase())
 									){
+										output[elementName] = output[elementName] || [];
 										output[elementName].concat(
 											_collectChilds(
 												elements,
@@ -114,8 +115,16 @@ Seed({
 												watchable
 											)
 										);
-										//output[elementName].trigger("element.added", {})
+										output.trigger("element.added", { name: elementName, node : selectedNode, mutation : mutation})
 									}
+								});
+							}else if (mutation.type === "attributes"){
+								var collectedAttributes = (Mold.isArray(collection.attribute)) ? collection.attribute : [collection.attribute]
+								Mold.each(collectedAttributes, function(selectedAttribute){
+									if(mutation.attributeName === selectedAttribute){
+										output.trigger('attribute.changed',  { name: selectedAttribute, mutation : mutation});
+									}
+									
 								});
 							}
 						});
@@ -133,6 +142,7 @@ Seed({
 						if(watchable){
 							_watch(scope, function(mutation){
 								output[contentName] = scope.innerHTML;
+								output.trigger("html.change", { name: contentName, mutation : mutation})
 							});
 						}
 					}
@@ -159,11 +169,13 @@ Seed({
 						if(watchable){
 
 							_watch(scope, function(mutation){
+
 								if(
 									mutation.type === "attributes" 
 									&& mutation.attributeName === attributeName
 								){
 									output[attributeName] = mutation.target.getAttribute(attributeName);
+									output.trigger("attribute.changed", { name: attributeName, mutation : mutation})
 								}
 							});
 						}
@@ -185,7 +197,7 @@ Seed({
 					if(directive.seed){
 
 						if(directive.collect){
-							var collection = _collect(directive.scope, directive.collect, {}, directive.watchable);
+							var collection = _collect(directive.scope, directive.collect, Mold.mixin({}, new Mold.Lib.Event({})), directive.watchable);
 						}
 
 						if(style){

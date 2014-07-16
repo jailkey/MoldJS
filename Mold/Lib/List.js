@@ -25,7 +25,7 @@ Seed({
 			})
 		});
 
-	    Mold.mixing(_array, new Mold.Lib.Event(_array));
+	    Mold.mixin(_array, new Mold.Lib.Event(_array));
 
 		_array.oldPush = _array.push;
 		_array.oldPop = _array.pop;

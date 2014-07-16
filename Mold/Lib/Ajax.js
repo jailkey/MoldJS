@@ -13,7 +13,7 @@
 			that = this,
 			undefined;
 
-		Mold.mixing(this, events);
+		Mold.mixin(this, events);
 
 		this.publics = {
 

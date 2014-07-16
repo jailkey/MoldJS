@@ -16,7 +16,7 @@ Seed(
 		var http = require('http');
 		var that = this;
 		var _routes = [];
-		Mold.mixing(this, new Mold.Lib.Event(this));
+		Mold.mixin(this, new Mold.Lib.Event(this));
 		
 		var _startServer = function(){
 			process.on('uncaughtException', function (error) {

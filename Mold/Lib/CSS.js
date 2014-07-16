@@ -15,7 +15,7 @@ Seed({
 
 		var _styles = {};
 
-		Mold.mixing(this, new Mold.Lib.Event(this));
+		Mold.mixin(this, new Mold.Lib.Event(this));
 
 
 

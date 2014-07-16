@@ -18,8 +18,8 @@ Seed({
 			_dataId =  false,
 			_isValidation = false;
 
-		Mold.mixing(this, new Mold.Lib.Event(this));
-		Mold.mixing(_data, new Mold.Lib.Event(_data));
+		Mold.mixin(this, new Mold.Lib.Event(this));
+		Mold.mixin(_data, new Mold.Lib.Event(_data));
 	
 		var _createProperty = function(element, name, data){
 			var validationError = _notValid(element, data[name], "property");
@@ -137,11 +137,11 @@ Seed({
 			_notValid(element, value, "itemlist");
 			if(useValue){
 				if(!value.on){
-					Mold.mixing(value, new Mold.Lib.Event(value));
+					Mold.mixin(value, new Mold.Lib.Event(value));
 				}
 			}else{
 				if(!data[index].on){
-					Mold.mixing(data[index], new Mold.Lib.Event(data[index]));
+					Mold.mixin(data[index], new Mold.Lib.Event(data[index]));
 				}
 			}
 			_createModel(element, value);
@@ -153,12 +153,12 @@ Seed({
 			if(!data[name]){
 				data[name] = {};
 			}
-			Mold.mixing(data[name] , new Mold.Lib.Event(data[name]));
+			Mold.mixin(data[name] , new Mold.Lib.Event(data[name]));
 			Mold.watch(data, name, function(e){
 
 				_createModel(element, arguments[2]);
-				Mold.mixing(data[name], arguments[2]);
-				Mold.mixing(arguments[2] , new Mold.Lib.Event(arguments[2]));
+				Mold.mixin(data[name], arguments[2]);
+				Mold.mixin(arguments[2] , new Mold.Lib.Event(arguments[2]));
 				
 				data[name].trigger("object.change", { value : arguments[2], name : name });
 				

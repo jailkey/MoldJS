@@ -14,8 +14,8 @@ Seed({
 
 			var that = this;
 			this.ident = Mold.getId();
-			Mold.mixing(this, new Mold.Lib.Event(this));
-			Mold.mixing(this, new Mold.Lib.Parents());
+			Mold.mixin(this, new Mold.Lib.Event(this));
+			Mold.mixin(this, new Mold.Lib.Parents());
 			this.registerd = [];
 			this.registerdParents = [];
 

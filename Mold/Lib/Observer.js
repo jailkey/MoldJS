@@ -8,7 +8,7 @@ Seed({
 	},
 	function(){
 		var events = new Mold.Lib.Event(this);
-		Mold.mixing(this, events);
+		Mold.mixin(this, events);
 		return {
 			pub : this.trigger,
 			sub : this.on,

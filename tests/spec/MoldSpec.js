@@ -181,7 +181,7 @@ describe("Mold Core Lib", function () {
 		
 	});
 
-	describe("Mold.mixing", function(){
+	describe("Mold.mixin", function(){
 		
 	});
 

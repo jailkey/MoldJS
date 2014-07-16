@@ -6,8 +6,8 @@ Seed({
 		var viewPrototype = function(){
 			var that = this;
 			var _modelRoutes = false;
-			Mold.mixing(this, new Mold.Lib.Event(that));
-			Mold.mixing(this, new Mold.Lib.Parents());
+			Mold.mixin(this, new Mold.Lib.Event(that));
+			Mold.mixin(this, new Mold.Lib.Parents());
 
 			this.template = false;
 

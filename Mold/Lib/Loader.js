@@ -13,7 +13,7 @@ Seed({
 			_isLoading = false,
 			_isLoadingError = false;
 
-		Mold.mixing(this, new Mold.Lib.Event(this));
+		Mold.mixin(this, new Mold.Lib.Event(this));
 
 		var _getFileTyp = function(file){
 			var typs = {

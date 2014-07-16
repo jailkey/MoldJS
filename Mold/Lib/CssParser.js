@@ -8,7 +8,7 @@ Seed({
 	},
 	function(doc){
 		
-		Mold.mixing(this, new Mold.Lib.Event(this));
+		Mold.mixin(this, new Mold.Lib.Event(this));
 
 
 		var _files = doc.querySelectorAll('link[rel="stylesheet"]'),

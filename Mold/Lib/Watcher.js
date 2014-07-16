@@ -12,7 +12,7 @@ Seed({
 			_config = config,
 			_that = this;
 
-		Mold.mixing(this, new Mold.Lib.Event(this));
+		Mold.mixin(this, new Mold.Lib.Event(this));
 
 		var _observeProperty = function(data, propertyName, eventName){
 			Mold.watch(data, propertyName, function(property, oldval, val){

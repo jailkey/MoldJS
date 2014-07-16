@@ -14,7 +14,7 @@ Seed({
 			_that = this,
 			_loader = new Mold.Lib.Loader();
 
-		Mold.mixing(this, new Mold.Lib.Event(this));
+		Mold.mixin(this, new Mold.Lib.Event(this));
 
 		_loader.on("ready", function(){
 			_that.trigger("files.loaded")

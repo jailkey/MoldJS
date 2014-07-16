@@ -22,7 +22,7 @@ Seed({
 			_testMode = false,
 			undefined;
 
-		Mold.mixing(this, new Mold.Lib.Event(this))
+		Mold.mixin(this, new Mold.Lib.Event(this))
 
 		if(Mold.isNodeJS || _testMode){
 			_doc = new Mold.Lib.Document();

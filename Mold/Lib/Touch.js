@@ -21,7 +21,7 @@ Seed({
 			_lastFingerPosition = false,
 			_lastTouchEvent = false,
 			_lastTimeStamp = false,
-			_config = Mold.mixing({
+			_config = Mold.mixin({
 				doubleTabTime : 400,
 				holdTime : 800,
 				minSwipTime : 50,
@@ -33,7 +33,7 @@ Seed({
 			_useAngle = ((config.subset && Mold.contains(config.subset, "rotate")) ? true : false),
 			that = this;
 
-		Mold.mixing(this, new Mold.Lib.Event(this));
+		Mold.mixin(this, new Mold.Lib.Event(this));
 
 		that.on("all", function(e){
 			_lastTouchEvent =  e.event;
@@ -265,7 +265,7 @@ Seed({
 
 		
 		var _onMessage = function(e){
-			Mold.mixing(e.data.properties, {
+			Mold.mixin(e.data.properties, {
 				"event" : _registerdWorker[e.data._wid].touch,
 				"timer" : _timer,
 				"stop" : function(){
@@ -294,7 +294,7 @@ Seed({
 				if(name !== "length"){
 					newTarget[+name] = {};
 
-					Mold.mixing(newTarget[+name], value, [
+					Mold.mixin(newTarget[+name], value, [
 						"clientX", "clientY"
 					]);
 				}
@@ -349,7 +349,7 @@ Seed({
 
 			_exportTouch(e, e.targetTouches, function(touchPropertys){
 				_startFingerPosition = touchPropertys.fingerPositions;
-				Mold.mixing(touchPropertys, {
+				Mold.mixin(touchPropertys, {
 					on : "start"
 				});
 
@@ -371,7 +371,7 @@ Seed({
 				_exportTouch(e, e.changedTouches, function(touchPropertys){
 					
 
-					Mold.mixing(touchPropertys, {
+					Mold.mixin(touchPropertys, {
 						on : "move"
 					});
 
@@ -387,7 +387,7 @@ Seed({
 		element.on('touchend', function(e){
 			//var touchPropertys = _exportTouch(e, e.changedTouches);
 			_exportTouch(e, e.changedTouches, function(touchPropertys){
-				Mold.mixing(touchPropertys, {
+				Mold.mixin(touchPropertys, {
 					on : "end"
 				});
 				_execute(touchPropertys);
@@ -539,7 +539,7 @@ Seed({
 
         		if(Math.abs(angleDifference) > 18 || _rotation){
         			
-        			Mold.mixing(touch, {
+        			Mold.mixin(touch, {
         				angel : angleDifference
         			})
 

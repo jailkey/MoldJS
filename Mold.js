@@ -568,6 +568,7 @@ var Mold = (function(config){
 				value === undefined 
 				&& value !== false
 				&& value !== 0
+				&& value !== ''
 			){
 				return false;
 			}else{

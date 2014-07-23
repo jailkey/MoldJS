@@ -8,24 +8,24 @@ Seed({
 	},
 	function(workerFunction, name, test){
 		
-		Mold.mixing(this, new Mold.Lib.Event(this));
+		Mold.mixin(this, new Mold.Lib.Event(this));
 		var that = this;
 
 		
 		
 		
-			if(Mold.Lib.Info.isSupported("blob") && Mold.Lib.Info.isSupported("url")){
-				var workerString = workerFunction.toString();
-				workerString = "onmessage = "+workerString;
-		 		var workerBlob = new Blob([workerString], { type : 'text/javascript' } );
-				var workerURL = URL.createObjectURL(workerBlob);
-				var worker = new Worker(workerURL);
-				worker.onmessage = function(e) {
+		if(Mold.Lib.Info.isSupported("blob") && Mold.Lib.Info.isSupported("url")){
+			var workerString = workerFunction.toString();
+			workerString = "onmessage = "+workerString;
+	 		var workerBlob = new Blob([workerString], { type : 'text/javascript' } );
+			var workerURL = URL.createObjectURL(workerBlob);
+			var worker = new Worker(workerURL);
+			worker.onmessage = function(e) {
 
-					that.trigger("message", e.data);
-				};
-				
-			}
+				that.trigger("message", e.data);
+			};
+			
+		}
 		
 			
 		this.publics = {

@@ -26,6 +26,7 @@ Seed ({
 						Mold.each(collection, function(element){
 							element[name].apply(that, args);
 						});
+						return collection;
 					}
 				}
 			});

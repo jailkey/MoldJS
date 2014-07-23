@@ -26,7 +26,7 @@ Seed({
 			}else if(seed.func){
 				var component = new Mold.Lib.Component(seed.func);
 			}else{
-				throw "No controller given for component "+seed.name+"!";
+				throw new Error("No controller given for component "+seed.name+"!");
 			}
 			Mold.each(seed.directives, function(directive){
 				component.directive(directive);
@@ -34,9 +34,7 @@ Seed({
 			if(seed.files){
 				component.files(seed.func.files);
 			}
-				
-			target[Mold.getTargetName(seed)] = component;
-			
+			return component;
 		}
 	}
 );

@@ -20,10 +20,8 @@ Seed({
 				var controllerCode = seed.controller;
 			}
 			var controller = new Mold.Lib.Controller(controllerCode, seed.name);
-			target[Mold.getTargetName(seed)] = controller; 
-			
-			return target[Mold.getTargetName(seed)];
-				
+	
+			return controller;
 		}
 	}
 );

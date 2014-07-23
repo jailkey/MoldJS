@@ -220,9 +220,7 @@ Seed({
 						}else{
 							var seed = new Mold.Lib.Controller(directive.seed);
 						}
-
 						directive.instance = new seed(scope, new Mold.Lib.Element(element), collection);
-
 						if(directive.instance.scope){
 							if(directive.replace) {
 								directive.replaceElement(directive.instance.scope);

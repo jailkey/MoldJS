@@ -30,8 +30,6 @@
 			Mold.addDNA(classDNA);
 		},
 		create : function(seed){
-			var target = Mold.createChain(Mold.getSeedChainName(seed));
-			target[Mold.getTargetName(seed)] = seed.func;
 			return seed.func;
 		},
 		methodes : function(){

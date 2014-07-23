@@ -16,15 +16,12 @@ Seed (
 			that = this;
 
 
-
 		if(typeof markup === "function"){
 			markup = markup.toString().replace(/(^function\s*\(\)\s*\{\s*\/\*\|)([\s\S]*)(\|\*\/\s*\})/g, function(){
 				return arguments[2];
 			});
 
 		}
-
-		
 
 		var _getElementByPropertieValue = function(callback, elements){
 			var output = [];

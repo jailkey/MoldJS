@@ -14,6 +14,7 @@ var Mold = (function(config){
 		_repositoryName = "Mold",
 		_9epository = false,
 		_externalSeeds = {},
+		_inProzess = {},
 		_isDom = false,
 		undefined;
 	
@@ -135,10 +136,12 @@ var Mold = (function(config){
 	}
 	
 	var _loader = function(name){
-		var _name = name;
-		var _actions = [];
-		var _onerror = [];
-		var _isLoaded = false;
+		
+		var _name = name,
+			_actions = [],
+			_onerror = [],
+			_isLoaded = false;
+		
 		this.bind = function ( callback ){
 			if(!_isLoaded){
 				_actions.push(callback);
@@ -193,20 +196,20 @@ var Mold = (function(config){
 					if(argumentList[index+1]){
 						_config.localRepository = argumentList[index+1];
 					}else{
-						throw "You can not use -repro without repositiory path!"
+						throw new Error("You can not use -repro without repositiory path!");
 					}
 				}
 				if(val === "-extrepo"){
 					if(argumentList[index+1]){
 						_config.externalRepository = argumentList[index+1]
 					}else{
-						throw "You can not use -extrepo without repositiory path! "
+						throw new Error("You can not use -extrepo without repositiory path!");
 					}
 				}
 				if(argumentList.length >= 2){
 					output = argumentList[argumentList.length-1];
 				}else{
-					throw "Main seed is not defined!"
+					throw new Error("Main seed is not defined!");
 				}
 			});
 			if(!_config.externalRepository){
@@ -217,11 +220,11 @@ var Mold = (function(config){
 			}
 			return output;
 		}else{
+
 			var i = 0,
 				mainScript = false,
 				repositiory = false,
 				scripts = document.getElementsByTagName("script");
-		
 
 			if((mainScript = Mold.find(scripts, function(script){
 				if(script.getAttribute("data-mold-main") || script.getAttribute("src").indexOf("Mold.js") > -1){
@@ -229,14 +232,19 @@ var Mold = (function(config){
 					_config.externalRepository =  script.getAttribute("data-mold-external-repository");
 					_config.localRepository = script.getAttribute("data-mold-repository");
 					_config.cacheOff = (script.getAttribute("data-mold-cache") === "off") ? true : false;
+					_config.debug = (script.getAttribute("data-mold-debug") === "on") ? true : false;
 					if(Mold){
 						Mold.EXTERNAL_REPOSITORY = _config.externalRepository;
 						Mold.LOCAL_REPOSITORY = _config.localRepository;
+					}
+					if(_config.debug ){
+						Mold.log("Info", "-RUN DEBUG MODE-")
 					}
 					return true;
 				}else{
 					return false;
 				}
+				
 			}))){
 				return mainScript.getAttribute("data-mold-main");
 			};
@@ -284,19 +292,48 @@ var Mold = (function(config){
 		});
 		return createdSeed;
 	}
+	var _createed = 0;
+	
+	var _createCompiledSeed = function(name, codeString, onComplete){
 
-	var _preProcess = function(input, scriptName, dna){
+		Mold.compiledSeeds = Mold.compiledSeeds || {};
+		codeString = "Mold.compiledSeeds['"+name+"'] = "+codeString+' \n';
+		
+		var scriptElement = document.createElement('script');
+	  	scriptElement.type = 'text/javascript';
+	  	scriptElement.src  = 'data:text/javascript;charset=utf-8,'+encodeURIComponent(codeString);
+	  	scriptElement.name = name.split("/", ".");
+	  	document.getElementsByTagName('head')[0].appendChild(scriptElement);
+	  	
+	  	
+	  	_addElementEvent(scriptElement, 'load', function(){
+	  		//console.log("CREATE FOR", _createed, name, scriptElement);
+	  		if(!scriptElement.isLoaded){
+	  			
+	  			onComplete.call(null, Mold.compiledSeeds[name]);
+	  			scriptElement.isLoaded = true;
+
+	  		}
+	  		_createed++
+	  	});
+	  	
+	  	return Mold.compiledSeeds[name];
+	}
+
+	var _preProcess = function(input, scriptName, dna, callback){
 		if(typeof input === "function"){
 			var code = input.toString();
+		
 			code = code.substring(0, code.lastIndexOf("}")+1);
-			
+			code = code.replace("anonymous", "");
 			var pattern = new RegExp("function\\s*\(([\\s\\S]*?)\)\\s*\{([\\s\\S]*?)\}$", "g"),
 				matches = pattern.exec(code);
 
 			if(matches){
-				var parameter = matches[2].replace("(", "").replace(")", ""),
+
+				var parameter = matches[2].replace("(", "").replace(")", "").replace("\n", "").replace("/*", "").replace("*/", ""),
 					objectEnd = matches[3];
-			
+
 				if(objectEnd){
 					
 					var outputCode = objectEnd;
@@ -309,17 +346,25 @@ var Mold = (function(config){
 							outputCode = value.call(this, outputCode);
 						});
 					}
+				
+					if(_config.debug){
+
+						var codeString = 'function('+((parameter.join) ? parameter.join(',') : parameter)+') {' + outputCode + ' }';
+						_createCompiledSeed(scriptName, codeString, callback);
+					}else{
+						callback.call(this, new Function(parameter, outputCode))
+					}
 					
-					return new Function(parameter, outputCode);
 				}else{
 					//! can't parse function
-					return input;
+					return callback.call(null, input);
 				}
 			}
 		}else{
 			//! preparse only functions
+			return callback.call(null, input);
 		}
-		return input;
+		
 	}
 
 	
@@ -347,8 +392,10 @@ var Mold = (function(config){
 */
 
 		trim : function(phrase){
-			phrase = phrase.replace(/\n*/gm, "");
-			phrase = phrase.replace(/^\s+|\s+$/g, "");
+			if(Mold.is(phrase)){
+				phrase = phrase.replace(/\n*/gm, "");
+				phrase = phrase.replace(/^\s+|\s+$/g, "");
+			}
 			return phrase;
 		},
 
@@ -849,6 +896,8 @@ var Mold = (function(config){
 * @desc Adds a Seed to Mold.js
 * @param (object) seed - Expects a seed object
 **/
+	
+
 		addSeed : function(seed){
 
 			if(!seed.loaded){
@@ -862,51 +911,56 @@ var Mold = (function(config){
 
 			if(seed){
 				//Checks if all dependencies will be loaded
-				var loadingproperties = Mold.getLoadingproperties();
-				var startCreating = true;
-				seed.imports = seed.imports || [];
-				Mold.each(loadingproperties, function(property){
-					
-					
-					if(seed[property]){
-						seed.imports = seed.imports.concat(_getImports(seed[property]));
-						seed[property] = _removeImports(seed[property]);
+				if(seed.status !== "dependencies-loaded"){
+					var loadingproperties = Mold.getLoadingproperties();
+					var startCreating = true;
+					seed.imports = seed.imports || [];
+					Mold.each(loadingproperties, function(property){
+						
+						
+						if(seed[property]){
+							seed.imports = seed.imports.concat(_getImports(seed[property]));
+							seed[property] = _removeImports(seed[property]);
 
-						if(typeof seed[property] === "object"){
-							startCreating = _areSeedsAdded(seed[property]);
+							if(typeof seed[property] === "object"){
+								startCreating = _areSeedsAdded(seed[property]);
 
-							if(!startCreating){
-								Mold.each(seed[property], function(element){
-									if(Mold.isArray(element)){
-										seed[property] = _loadSubSeeds(seed[property], seed.name);
-									}else{
-										if(!_Mold[element]){
-											Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false });
+								if(!startCreating){
+									Mold.each(seed[property], function(element){
+										if(Mold.isArray(element)){
+											seed[property] = _loadSubSeeds(seed[property], seed.name);
+										}else{
+											if(!_Mold[element]){
+												Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false });
+											}
 										}
-									}
-								});
-							}
-						}else{
+									});
+								}
+							}else{
 
-							startCreating = _isSeedAdded(seed[property]);
-							if(!startCreating){
-								Mold.load({ name : seed[property], isExternal : _externalSeeds[seed.name] || false });
+								startCreating = _isSeedAdded(seed[property]);
+								if(!startCreating){
+									Mold.load({ name : seed[property], isExternal : _externalSeeds[seed.name] || false });
+								}
 							}
 						}
-					}
-				});
+					});
 
-				//If the seed has to wait for the DNA a callback will be added
-				if(startCreating){
-					if(typeof Mold.getDNA(seed.dna).wait === "function"){
-						startCreating = Mold.getDNA(seed.dna).wait(seed, function(){
-							Mold.checkSeedCue();
-						});
+
+					//If the seed has to wait for the DNA a callback will be added
+					if(startCreating){
+						if(typeof Mold.getDNA(seed.dna).wait === "function"){
+							startCreating = Mold.getDNA(seed.dna).wait(seed, function(){
+								Mold.checkSeedCue();
+							});
+						}
 					}
 				}
 				
+				
 				var target = (_targetWrapper[seed.name]) ? _targetWrapper[seed.name] : seed.name;
 				var targets = target.split(".");
+				
 				_createTarget(targets);
 
 				if(seed.events && seed.events.log){
@@ -917,7 +971,7 @@ var Mold = (function(config){
 				}
 
 				if(startCreating){
-					
+				
 					if(Mold.getDNA(seed.dna).create){
 						if(!_Mold[seed.name]){
 							var newname = Mold.checkLoadedSeeds(seed.name);
@@ -926,44 +980,57 @@ var Mold = (function(config){
 							}
 						}
 						
-						if(!_createdMold[seed.name]){
-							_createdMold[seed.name] = seed;
+						if(!_createdMold[seed.name]){		
+							if(seed.status !== "preprozessing"){
+								seed.status = "preprozessing";
+								//import seeds
+								seed.func = Mold.importSeeds(seed.func, seed.imports);
 
-							seed.func = Mold.importSeeds(seed.func, seed.imports);
-							
-							seed.func = _preProcess(seed.func, seed.name.split('.').join('/')+'.js', seed.dna);
+								var initSeed = function(compiled){
+									//mark as created
+									_createdMold[seed.name] = seed;
+									//replace seed code with compiled code
+									seed.func = compiled;
+									//creat seed from dna
+									var createdSeed = Mold.getDNA(seed.dna).create(seed);	
+									createdSeed = _postProcess(createdSeed, seed);
+									//create seed chain
+									var target = Mold.createChain(Mold.getSeedChainName(seed));
+									target[Mold.getTargetName(seed)] = createdSeed;
+									//! Seed is loaded %seed.name%!
+									Mold.log("Info", "Seed "+seed.name+ " loaded!");
+									//check events after creating;
+									if(seed.events){
+										if(seed.events.aftercreate){
+											seed.events.aftercreate(seed);
+										}
+									}				
+									//check if registerd
+									if(!_Mold[seed.name]){
+										throw new Error("Seed is not registerd: "+seed.name);
+									}else{
+										if( typeof _Mold[seed.name].loader  === "object" ){
+											_Mold[seed.name].loader.loaded();
+										}
+									}
+									//Mark as loaded
+									if(_Mold[seed.name]){
+										_Mold[seed.name].isLoaded = true;
+									}
+									//Remove from seedcue
+									if(Mold.cue.get("seed", seed.name)){
+										Mold.cue.remove("seed", seed.name)
+										Mold.checkSeedCue();
+									}
 
-							var createdSeed = Mold.getDNA(seed.dna).create(seed);
-							createdSeed = _postProcess(createdSeed, seed);
-
-
-							var target = Mold.createChain(Mold.getSeedChainName(seed));
-							target[Mold.getTargetName(seed)] = createdSeed;
-							//! Seed is loaded %seed.name%!
-							Mold.log("Info", "Seed "+seed.name+ " loaded!");
-							if(seed.events){
-								if(seed.events.aftercreate){
-									seed.events.aftercreate(seed);
 								}
-							}				
-							if(!_Mold[seed.name]){
-								Mold.log("Error", { code : 8, seedname: seed.name});
-							}else{
-								if( typeof _Mold[seed.name].loader  === "object" ){
-									_Mold[seed.name].loader.loaded();
-								}
+								//Preprocess seed
+								_preProcess(seed.func, seed.name.split('.').join('/')+'.js', seed.dna, initSeed);
 							}
+						
+						}else{
+							Mold.checkSeedCue();
 						}
-					}
-					
-
-					if(Mold.cue.get("seed", seed.name)){
-						Mold.cue.remove("seed", seed.name)
-						Mold.checkSeedCue();
-					}
-					
-					if(_Mold[seed.name]){
-						_Mold[seed.name].isLoaded = true;
 					}
 				}else{
 					Mold.cue.add("seed", seed.name, seed);
@@ -1351,7 +1418,8 @@ var Mold = (function(config){
 								&& mutation.target[property]
 							){
 								oldval = mutation.target[property];
-								callback.call(obj, property, oldval, mutation.target[property]);
+
+								callback.call(obj, property,  mutation.oldValue, mutation.target[property]);
 							}
 					  	});    
 					});
@@ -1359,7 +1427,8 @@ var Mold = (function(config){
 					observer.observe(obj, { 
 						attributes: true,
 						childList: true,
-						characterData: true 
+						characterData: true ,
+						attributeOldValue: true,
 					});
 				
 				}else{

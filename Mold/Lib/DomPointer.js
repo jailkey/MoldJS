@@ -178,6 +178,15 @@ Seed({
 			}
 		}
 
+		var _addValue = function(value){
+			value = (value !== false && value !== "" && value !== undefined) ? value : _nodeValue;
+			if(Mold.isNode(value)){
+				_node =_node.parentNode.replaceChild(value, _node);
+			}else{
+				_node.nodeValue = value;
+			}
+		}
+
 
 		if(!_lastShadowNode){
 			_lastShadowNode = _getLastShadowNode(_subnodes)
@@ -228,12 +237,7 @@ Seed({
 			show : function(value){
 				_isVisible = true;
 				if(_type === "value"){
-					if(value !== false && value !== "" && value !== undefined){
-						_nodeValue = _node.nodeValue;
-						_node.nodeValue = value;
-					}else{
-						_node.nodeValue = _nodeValue;
-					}
+					_addValue(value);
 					
 				}else{
 					_show(_valueStore)

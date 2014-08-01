@@ -232,7 +232,7 @@ Seed({
 			},
 			setValue : function(value){
 				_value = value;
-				if(value != "" && value !== false && value !== undefined){
+				if(value !== "" && value !== false && value !== undefined){
 					_showPointerValue(_pointer, value);
 				}else{
 					_hidePointerValue(_pointer, value);

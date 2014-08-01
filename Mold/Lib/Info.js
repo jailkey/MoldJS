@@ -96,6 +96,11 @@ Seed({
 					var supports = window.CSS.supports || window.supportsCSS;
 					return supports(name);
 				}
+			},
+
+			isHexValue : function(hex){
+				var regExp = new RegExp('^#?([a-f0-9]{2})([a-f0-9]{2})([a-f0-9]{2})$', 'i');
+				return regExp.test(hex);
 			}
 
 		}

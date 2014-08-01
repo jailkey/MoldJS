@@ -1,6 +1,6 @@
 /**
  * @author Jan Kaufmann <jan@moldjs.de>
- * @version 0.1.3;
+ * @version 0.1.4;
  */
  "use strict";
 
@@ -1250,12 +1250,10 @@ var Mold = (function(config){
 			if(imports.length){
 				var importString = "";
 				Mold.each(imports, function(seed){
-
-
 					Mold.each(seed, function(value, key){
 						importString += " var "+key+" = "+Mold.cleanSeedName(value)+";\n";
 					});
-				})
+				});
 				return Mold.injectBefore(target, importString);
 			}else{
 				return target;
@@ -1535,7 +1533,11 @@ Mold.addSeedNameCleaner("standard", function(seedName){
 		seedName = seedName.slice(2, seedName.length);
 	}
 	if(seedName.indexOf("->") > -1){
-		seedName = seedName.split("->")[0];
+		if(seedName.indexOf("->") === 0){
+			seedName = seedName.split("->")[0];
+		}else{
+			seedName = seedName.split("->")[1];
+		}
 	}
 	return seedName;
 });

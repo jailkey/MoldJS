@@ -54,7 +54,12 @@ Seed({
 						var valueNode = element.getAttributeNode("value");
 
 						/*Set default value*/
-						template.viewModel.set(viewModel, name, element.value);
+						
+						if(template.hasVar(element.value)){
+							template.viewModel.set(viewModel, name, "");
+						}else{
+							template.viewModel.set(viewModel, name, element.value);
+						}
 
 						/*Watch nodevalue*/
 						

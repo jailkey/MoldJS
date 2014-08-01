@@ -29,6 +29,7 @@ Seed({
 			_contentType = false,
 			_doc = false,
 			_testMode = false,
+			_target = false,
 			_tid = Mold.getId(),
 			undefined;
 
@@ -93,16 +94,25 @@ Seed({
 			_shadowTemplate =  _doc.createElement("div"); //_doc.createDocumentFragment();
 			_container = _doc.createElement("div");
 			_container.innerHTML = template;
-
-			
 		
 			while (_container.hasChildNodes()) {
 				var templateElement = _container.firstChild;
 
   				_shadowTemplate.appendChild(_container.removeChild(_container.firstChild))
 			}
+			_target = _shadowTemplate;
+		}
 
-		
+		var _firstElement = function(){
+			var next = _target.firstChild;
+			var selected = false;
+			while (next) {
+				if(next.nodeType === 1){
+					selected = next;
+				}
+  				next = next.nextSibling;
+			}
+			return selected;
 		}
 
 		var _appendTo = function(target){
@@ -123,7 +133,7 @@ Seed({
 				target.appendChild(_shadowTemplate.removeChild(_shadowTemplate.firstChild));
 
 			}
-
+			_target = target;
 		}
 		
 		var _buildTree = function(){
@@ -144,6 +154,26 @@ Seed({
 			}
 			Mold.mixin(data, e);
 			this.trigger(name.split("@")[1], data)
+		}
+
+		var _hasVar = function(name, tree){
+			name = name.replace("{{", "").replace("}}", "");
+			var output = false;
+			Mold.each(tree, function(treeValue, treeName){
+				if(name === treeName){
+					 output = true;
+					 return "break";
+				}else{
+					if(treeValue.childs.length){
+						Mold.each(treeValue.childs, function(child){
+							output = (_hasVar(name, child)) ? true : output
+						})
+						
+					}
+				}
+
+			});
+			return output;
 		}
 
 
@@ -413,6 +443,11 @@ Seed({
 			tree : function(){
 				return _compiledTemplate;
 			},
+
+			hasVar : function(name){
+				return _hasVar(name, _compiledTemplate.childs[0]);
+			},
+			
 /**
 * @namespace Mold.Lib.Template
 * @methode get
@@ -422,6 +457,9 @@ Seed({
 **/
 			get : function(){
 				return _shadowTemplate;
+			},
+			getFirst : function(){
+				return _firstElement();
 			},
 			appendTo : function(target){
 				return _appendTo(target);
@@ -436,6 +474,7 @@ Seed({
 			getInner : function(){
 				return _shadowTemplate.childNodes;
 			}
+
 		}
 		
 	}

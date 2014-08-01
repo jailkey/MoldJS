@@ -320,9 +320,10 @@ var Mold = (function(config){
 	  	return Mold.compiledSeeds[name];
 	}
 
-	var _preProcess = function(input, scriptName, dna, callback){
+	var _preProcess = function(input, seedName, dna, callback){
 		if(typeof input === "function"){
 			var code = input.toString();
+			var scriptName = seedName.split('.').join('/')+'.js'
 		
 			code = code.substring(0, code.lastIndexOf("}")+1);
 			code = code.replace("anonymous", "");
@@ -346,6 +347,9 @@ var Mold = (function(config){
 							outputCode = value.call(this, outputCode);
 						});
 					}
+					Mold.each(Mold.cue.getType("seedprocessor_"+seedName), function(value){
+						outputCode = value.call(this, outputCode);
+					});
 				
 					if(_config.debug){
 
@@ -378,6 +382,8 @@ var Mold = (function(config){
 			}
 		});
 	}
+
+	var _seedLoadingCounter = 0;
 	
 	return {
 
@@ -598,15 +604,15 @@ var Mold = (function(config){
 			if(element === window){ return true }
 
 			return(
-					(typeof element === "object") 
-					? element instanceof Node 
-					: (
-						element 
-						&& typeof element === "object" 
-						&& typeof element.nodeType === "number"
-						&& typeof element.nodeName === "string"
-					)
+				(typeof element === "object") 
+				? element instanceof Node 
+				: (
+					element 
+					&& typeof element === "object" 
+					&& typeof element.nodeType === "number"
+					&& typeof element.nodeName === "string"
 				)
+			)
 				
 		},
 
@@ -998,7 +1004,8 @@ var Mold = (function(config){
 									var target = Mold.createChain(Mold.getSeedChainName(seed));
 									target[Mold.getTargetName(seed)] = createdSeed;
 									//! Seed is loaded %seed.name%!
-									Mold.log("Info", "Seed "+seed.name+ " loaded!");
+									Mold.log("Info", _seedLoadingCounter+". Seed "+seed.name+ " loaded!");
+									_seedLoadingCounter++;
 									//check events after creating;
 									if(seed.events){
 										if(seed.events.aftercreate){
@@ -1019,13 +1026,13 @@ var Mold = (function(config){
 									}
 									//Remove from seedcue
 									if(Mold.cue.get("seed", seed.name)){
-										Mold.cue.remove("seed", seed.name)
-										Mold.checkSeedCue();
+										Mold.cue.remove("seed", seed.name);
 									}
+									Mold.checkSeedCue();
 
 								}
 								//Preprocess seed
-								_preProcess(seed.func, seed.name.split('.').join('/')+'.js', seed.dna, initSeed);
+								_preProcess(seed.func, seed.name, seed.dna, initSeed);
 							}
 						
 						}else{
@@ -1637,6 +1644,14 @@ Mold.addDNA({
 			seed.func()
 		}
 		return seed.func;
+	}
+});
+
+
+Mold.addDNA({
+	name : 'package',
+	create : function(seed){
+		return seed.include;
 	}
 });
 

@@ -42,6 +42,14 @@ Seed ({
 		collection.each = function(callback){
 			Mold.each(collection, callback);
 		}
+
+		collection.get = function(number){
+			if(collection[number]){
+				return new Mold.Lib.Element(collection[number]);
+			}else{
+				return false;
+			}
+		}		
 		
 		return collection;
 	}

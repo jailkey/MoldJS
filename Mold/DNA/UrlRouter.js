@@ -12,7 +12,7 @@ Seed({
 		create : function(seed){
 			
 			if(typeof seed.func === "object"){
-				var urlRouter = new Mold.Lib.UrlRouter(seed);
+				var urlRouter = new Mold.Lib.UrlRouter(seed.func);
 				//Mold.DNA.UrlRouter.init(seed);
 				urlRouter.initRoutes();
 				if(typeof window != "undefined" && window){

@@ -13,11 +13,12 @@ Seed({
 		});
 
 		this.on("ajax.get.success", function(e){
-			_that.trigger("update", JSON.parse(e.data.xhr.responseText));
+			console.log("data", e.data.json)
+			_that.trigger("update", e.data.json);
 		});
 
 		this.publics = {
-			save : function(data, id){
+			insert : function(data){
 				var dataString = JSON.stringifiy(data);
 
 				this.send(_restpath+"?rand"+Math.random(), "data="+dataString, { method : "POST" });
@@ -26,12 +27,15 @@ Seed({
 			},
 			load : function(id){
 				id = id || "";
-				return this.send(_restpath+id+"?rand"+Math.random(), false, { method : "GET" });
+
+				var url = _restpath+encodeURIComponent(id)+"?rand"+Math.random();
+
+				return this.get(url, false);
 			},
 			remove : function(id){
 				return this.send(_restpath+id, false, { method : "DELETE" });
 			},
-			add : function(data){
+			update : function(data, id){
 				return this.send(_restpath, "data="+data, { method : "PUT" });
 				//return id;
 			}

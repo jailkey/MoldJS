@@ -39,6 +39,7 @@ Seed({
 					}
 
 					_sessions[sessionId].data.set("userevents", new Mold.Lib.Event({}));
+					
 
 					return _sessions[sessionId];
 				}else{

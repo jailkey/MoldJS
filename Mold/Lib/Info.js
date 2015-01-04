@@ -35,7 +35,8 @@ Seed({
 					"supports" : !!((window.CSS && window.CSS.supports) || window.supportsCSS || false),
 					"orientation" : !!window.DeviceOrientationEvent,
 					"speechSynthesis" : window.speechSynthesis,
-					"touch" : !!('ontouchstart' in window)
+					"touch" : !!('ontouchstart' in window),
+					"range" : !!window.Range
 
 				}
 			}else{

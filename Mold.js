@@ -1,10 +1,20 @@
 /**
+ 
+	/'\_/`\       (_ )     ( )
+	|     |   _    | |    _| |
+	| (_) | /'_`\  | |  /'_` |
+	| | | |( (_) ) | | ( (_| |
+	(_) (_)`\___/'(___)`\__,_)
+	structure and pattern framework
+
  * @author Jan Kaufmann <jan@moldjs.de>
  * @version 0.1.4;
+ *
+ *
  */
  "use strict";
-
 var Mold = (function(config){
+
 	var _config = (config) ? config :  "CONFIG FAILED",
 		_Mold = {},
 		_targetWrapper = {},
@@ -12,12 +22,14 @@ var Mold = (function(config){
 		_createdMold = {},
 		_externalRepository = false,
 		_repositoryName = "Mold",
-		_9epository = false,
+		_repository = false,
 		_externalSeeds = {},
 		_inProzess = {},
 		_isDom = false,
+		_pathes = {},
 		undefined;
 	
+	//test if Mold run in browser or not
 	try {
 		var _isNodeJS = (!!window) ? false : true ;
 	}catch(e){
@@ -29,13 +41,13 @@ var Mold = (function(config){
 		var _documentHead = document.getElementsByTagName("head")[0];
 	}
 
-
-	var _getRootObject = function(){
-		
+	//returns the global scope
+	var _getRootObject = function(){		
 		var rootObject = (_isNodeJS) ? global : window;
 		return rootObject;
 	}
 	
+	//creates the specified namespace
 	var _createTarget = function(targets){
 		var path = targets;
 		var chain = _getRootObject();
@@ -48,6 +60,7 @@ var Mold = (function(config){
 		return chain;
 	};
 	
+	//returns the seed name from the given sees path
 	var _getTargetName = function(seed){
 		return seed.name.substring(seed.name.lastIndexOf(".")+1, seed.name.length);
 	};
@@ -71,8 +84,9 @@ var Mold = (function(config){
 	};
 	
 	var _isSeedAdded = function(target){
-		target = (target.indexOf("->") !== -1) ? target.split("->")[1] : target;
-		return ( _createdMold[ target ] ) ? true : false;
+		
+		var cleanedName = Mold.cleanSeedName(target);
+		return ( _createdMold[ cleanedName ] ) ? true : false;
 	};
 	
 	var _onlySubSeeds = function(seedList){
@@ -80,7 +94,7 @@ var Mold = (function(config){
 		Mold.each(seedList, function(seed){
 			if(typeof seed === "string" && !_isSeedAdded(seed)){
 				output = false;
-				return "exit";
+				return Mold.EXIT;
 			}
 		});
 
@@ -88,12 +102,14 @@ var Mold = (function(config){
 	}
 	
 	var _areSeedsAdded = function(included){
+		
 		var output = true;
+
 		Mold.each(included, function(value){
-			var seedName = (value.indexOf("->") !== -1) ? value.split("->")[1] : value;
+			var seedName = Mold.cleanSeedName(value);
 			if(! _isSeedAdded(seedName)){
 				output =  false;
-				return "exit";
+				return Mold.EXIT;
 			}
 		});
 
@@ -208,6 +224,11 @@ var Mold = (function(config){
 				}
 				if(argumentList.length >= 2){
 					output = argumentList[argumentList.length-1];
+					var fs =  require('fs');
+					if(!fs.existsSync(output)){
+						output = false;
+					}
+					
 				}else{
 					throw new Error("Main seed is not defined!");
 				}
@@ -218,6 +239,10 @@ var Mold = (function(config){
 			if(!_config.localRepository){
 				_config.localRepository = "./";
 			}
+			if(Mold){
+				Mold.EXTERNAL_REPOSITORY = _config.externalRepository;
+				Mold.LOCAL_REPOSITORY = _config.localRepository;
+			}
 			return output;
 		}else{
 
@@ -227,7 +252,7 @@ var Mold = (function(config){
 				scripts = document.getElementsByTagName("script");
 
 			if((mainScript = Mold.find(scripts, function(script){
-				if(script.getAttribute("data-mold-main") || script.getAttribute("src").indexOf("Mold.js") > -1){
+				if(script.getAttribute("data-mold-main") || script.getAttribute("src") && script.getAttribute("src").indexOf("Mold.js") > -1){
 					_config.repositoryName  = script.getAttribute("data-mold-repository-name") || "Mold";
 					_config.externalRepository =  script.getAttribute("data-mold-external-repository");
 					_config.localRepository = script.getAttribute("data-mold-repository");
@@ -251,10 +276,6 @@ var Mold = (function(config){
 			
 		}
 		return false;
-	}
-
-	var _isExternal = function(path){
-		return (path.indexOf("->") !== -1) ? true : false;
 	}
 
 
@@ -305,11 +326,8 @@ var Mold = (function(config){
 	  	scriptElement.name = name.split("/", ".");
 	  	document.getElementsByTagName('head')[0].appendChild(scriptElement);
 	  	
-	  	
 	  	_addElementEvent(scriptElement, 'load', function(){
-	  		//console.log("CREATE FOR", _createed, name, scriptElement);
 	  		if(!scriptElement.isLoaded){
-	  			
 	  			onComplete.call(null, Mold.compiledSeeds[name]);
 	  			scriptElement.isLoaded = true;
 
@@ -322,16 +340,20 @@ var Mold = (function(config){
 
 	var _preProcess = function(input, seedName, dna, callback){
 		if(typeof input === "function"){
-			var code = input.toString();
-			var scriptName = seedName.split('.').join('/')+'.js'
-		
+			//convert code to string
+			var code = input.toString(),
+				scriptName = seedName.split('.').join('/')+'.js';
+			
+			//delete unnecessary stuff 
 			code = code.substring(0, code.lastIndexOf("}")+1);
 			code = code.replace("anonymous", "");
+
+			//split function into parameter an code
 			var pattern = new RegExp("function\\s*\(([\\s\\S]*?)\)\\s*\{([\\s\\S]*?)\}$", "g"),
 				matches = pattern.exec(code);
 
 			if(matches){
-
+				//replace comments
 				var parameter = matches[2].replace("(", "").replace(")", "").replace("\n", "").replace("/*", "").replace("*/", ""),
 					objectEnd = matches[3];
 
@@ -352,7 +374,6 @@ var Mold = (function(config){
 					});
 				
 					if(_config.debug){
-
 						var codeString = 'function('+((parameter.join) ? parameter.join(',') : parameter)+') {' + outputCode + ' }';
 						_createCompiledSeed(scriptName, codeString, callback);
 					}else{
@@ -389,6 +410,12 @@ var Mold = (function(config){
 
 		EXTERNAL_REPOSITORY : _config.externalRepository,
 		LOCAL_REPOSITORY : config.localRepository,
+		EXIT : '--exitoperation--',
+		SEED_STATUS_LOADED : '--dependencies-loaded--',
+		SEED_STATUS_PREPROZESSING : '--preprozessing--',
+		seedList  : [],
+		stopExecution : false,
+
 /**
 * @namespace Mold
 * @methode trim
@@ -413,9 +440,11 @@ var Mold = (function(config){
 			return phrase.slice(phrase.length - search.length) === search;
 		},
 
+/**FUNCTIONAL METHODES ***/
+
 /**
 * @namespace Mold
-* @methode each
+* @method each
 * @desc iterates through an List (Object, Array)
 * @public
 * @return (Boolean) 
@@ -423,31 +452,34 @@ var Mold = (function(config){
 * @param (function) iterator - a callback function
 * @param (object) context - optional context Object
 **/
-		each : function(collection, iterator, context, test){
+		each : function(collection, iterator, context){
 			var i = 0;
 			if(collection == null || collection === false) { return false; }
 
-			
 			if(Array.prototype.forEach && collection.forEach){
+
 				collection.forEach(iterator, context);
+
 			}else if(Mold.isArray(collection)){
-				
-				
+			
 				var len = collection.length;
+
 				for (; i < len; i++) {
-				 	if(iterator.call(context, collection[i], i, collection) === "break") {
+				 	if(iterator.call(context, collection[i], i, collection) === Mold.EXIT) {
 				 		return true;
 				 	};
 				}
+
 			}else {
-				var keys = Mold.keys(collection);
-				var len = keys.length;
+
+				var keys = Mold.keys(collection),
+					len = keys.length;
 				
 				for(; i < len; i++){
 					if(!(Mold.isNodeList(collection) && keys[i] === "length")){
 						if(
 							Mold.is(collection[keys[i]]) 
-							&& iterator.call(context, collection[keys[i]], keys[i], collection) === "break"
+							&& iterator.call(context, collection[keys[i]], keys[i], collection) === Mold.EXIT
 						){
 							return true;
 						}
@@ -456,7 +488,13 @@ var Mold = (function(config){
 			}
 			return true;
 		},
-/**/
+/**
+ * @namespace Mold
+ * @method eachShift
+ * @description iterates through an array and remove the selected item until the array is empty
+ * @param  {array}   collection the array
+ * @param  {function} callback  method will called on each entry, given paramter is the entry value           
+ */
 	eachShift : function(collection, callback){
 		if(!collection){
 			return false;
@@ -478,7 +516,7 @@ var Mold = (function(config){
 * @param (object) context - context Object
 **/
 		find : function(collection, iterator, context){
-			var result;
+			var result = false;
 			Mold.some(collection, function(value, index, list) {
 				if (iterator.call(context, value, index, list)) {
 					result = value;
@@ -508,13 +546,67 @@ var Mold = (function(config){
 			}
 			Mold.each(collection, function(value, index, list) {
 				if (result || (result = iterator.call(context, value, index, list))) { 
-					return "break";
+					return Mold.EXIT;
 				}
 			});
 
 			return result;
 		},
 
+
+		filter : function(collection, iterator, context){
+			if(Array.prototype.filter){
+				return collection.filter(iterator);
+			}
+			var result = [];
+			Mold.each(collection, function(value, index){
+				if(iterator.call(context, value, index)){
+					result.push(value);
+				}
+			});
+			return result;
+		},
+/**
+ * @namespace Mold
+ * @methode reject
+ * @public
+ * @description compares all values in an array
+ * @param (array) collection an array to compare
+ * @param (function) iterator callback that wich is executet on every entry
+ * @returns (array) returns a new list of values 
+ */
+
+		reject : function(collection, iterator, context){
+			if(!Mold.isArray(collection)){
+				throw "Mold.reject works only with arrays!"
+			}
+			if(collection.length === 1){
+				return collection;
+			}
+			var result = [];		
+			context = context || null;
+			Mold.eachShift(collection, function(firstElement, firstIndex){
+				var add = true;
+				Mold.each(collection, function(secondElement, secondeIndex){
+					if(
+						!iterator.call(
+							context,
+							firstElement,
+							secondElement,
+							firstIndex,
+							secondeIndex,
+							result
+						)
+					){
+						add = false;
+					}
+				});
+				if(add){
+					result.push(firstElement);
+				}
+			})
+			return result;
+		},
 
 /**
 * @namespace Mold
@@ -536,6 +628,19 @@ var Mold = (function(config){
 			}
 		},
 		
+
+
+/** TEST METHODS **/
+
+/**
+ * @namespace Mold
+ * @method  contains
+ * @description checks if a list contains a value
+ * @public
+ * @param  {array/object} list  
+ * @param  {stirng} needel
+ * @return {boolean} 
+ */
 		contains : function(list, needel){
 			return !!Mold.find(list, function(element){
 				if(element == needel){
@@ -543,6 +648,26 @@ var Mold = (function(config){
 				}
 				return false;
 			})
+		},
+
+/**
+ * @namespace Mold
+ * @method is
+ * @description test if a variable is defined
+ * @param  {mixed}  value 
+ * @return {Boolean}       
+ */
+		is : function(value){
+			if(
+				value === undefined 
+				&& value !== false
+				&& value !== 0
+				&& value !== ''
+			){
+				return false;
+			}else{
+				return true;
+			}
 		},
 
 /**
@@ -616,18 +741,7 @@ var Mold = (function(config){
 				
 		},
 
-		is : function(value){
-			if(
-				value === undefined 
-				&& value !== false
-				&& value !== 0
-				&& value !== ''
-			){
-				return false;
-			}else{
-				return true;
-			}
-		},
+
 
 		getMainScript : _getMainScript,
 /**
@@ -687,7 +801,7 @@ var Mold = (function(config){
 			if(dna){
 				return dna;
 			}else{
-				throw "DNA-handler "+dnaName+" not found!"
+				throw new Error("DNA-handler "+dnaName+" not found!");
 				return false;
 			}
 		},
@@ -917,7 +1031,7 @@ var Mold = (function(config){
 
 			if(seed){
 				//Checks if all dependencies will be loaded
-				if(seed.status !== "dependencies-loaded"){
+				if(seed.status !== Mold.SEED_STATUS_LOADED){
 					var loadingproperties = Mold.getLoadingproperties();
 					var startCreating = true;
 					seed.imports = seed.imports || [];
@@ -987,34 +1101,44 @@ var Mold = (function(config){
 						}
 						
 						if(!_createdMold[seed.name]){		
-							if(seed.status !== "preprozessing"){
-								seed.status = "preprozessing";
+							if(seed.status !== Mold.SEED_STATUS_PREPROZESSING){
+								seed.status = Mold.SEED_STATUS_PREPROZESSING;
 								//import seeds
 								seed.func = Mold.importSeeds(seed.func, seed.imports);
 
 								var initSeed = function(compiled){
+									Mold.seedList.push(_pathes[seed.name]);
 									//mark as created
+									
 									_createdMold[seed.name] = seed;
 									//replace seed code with compiled code
 									seed.func = compiled;
-									//creat seed from dna
-									var createdSeed = Mold.getDNA(seed.dna).create(seed);	
-									createdSeed = _postProcess(createdSeed, seed);
-									//create seed chain
-									var target = Mold.createChain(Mold.getSeedChainName(seed));
-									target[Mold.getTargetName(seed)] = createdSeed;
-									//! Seed is loaded %seed.name%!
-									Mold.log("Info", _seedLoadingCounter+". Seed "+seed.name+ " loaded!");
-									_seedLoadingCounter++;
-									//check events after creating;
-									if(seed.events){
-										if(seed.events.aftercreate){
-											seed.events.aftercreate(seed);
+									if(!Mold.stopExecution){
+										//creat seed from dna
+										var createdSeed = Mold.getDNA(seed.dna).create(seed);	
+										createdSeed = _postProcess(createdSeed, seed);
+										//create seed chain
+										var target = Mold.createChain(Mold.getSeedChainName(seed));
+										target[Mold.getTargetName(seed)] = createdSeed;
+										//! Seed is loaded %seed.name%!
+										
+										//check events after creating;
+										if(seed.events){
+											if(seed.events.aftercreate){
+												seed.events.aftercreate(seed);
+											}
 										}
-									}				
+									}
+								
+									Mold.log("Info", _seedLoadingCounter + ". Seed " + seed.name + " loaded!");
+									_seedLoadingCounter++;	
 									//check if registerd
 									if(!_Mold[seed.name]){
-										throw new Error("Seed is not registerd: "+seed.name);
+										if(_config.debug){
+											throw new Error("Seed is not registerd: " + seed.name);
+										}else{
+											_Mold[seed.name] = { name : seed.name};
+										}
 									}else{
 										if( typeof _Mold[seed.name].loader  === "object" ){
 											_Mold[seed.name].loader.loaded();
@@ -1074,14 +1198,19 @@ var Mold = (function(config){
 		loadScript : function(path, success, error, seedConf){
 	
 			if(_isNodeJS){
-				var nodePath = require('fs');
-				if(path.substring(0, 2) !== "./"){
+				
+				var nodePath = require('fs'),
+					pathStart = path.substring(0, 2);
+
+				if(pathStart !== "./" && pathStart !== ".." && path.substring(0, 1) !== "/"){
 					path = "./"+path;
 				}
 				if(nodePath.existsSync(path)){
+					_pathes[seedConf.seedName] = path;
 					var testMold = require(path);
+					
 				}else{
-					throw "File not found "+path+"!";
+					throw new Error("File not found "+path+"!");
 				}
 			}else{
 				
@@ -1101,7 +1230,7 @@ var Mold = (function(config){
 
 				_documentHead.appendChild(scriptElement);
 				
-				
+				_pathes[seedConf.seedName] = path;
 				_addElementEvent(scriptElement, "load", function(){
 					scriptElement.onloadDone = true;
 				});
@@ -1116,7 +1245,7 @@ var Mold = (function(config){
 				}
 				
 				_addElementEvent(scriptElement, "error", function(){
-					throw "File not Found "+this.src+"!";
+					throw new Error("File not Found "+this.src+"!");
 				});
 
 				if(typeof error === "function"){
@@ -1176,7 +1305,7 @@ var Mold = (function(config){
 		var rule = Mold.getLoadingRule(seed);
 
 		if(!rule){
-			throw "No loading rule found!"
+			throw new Error("No loading rule found!");
 		}
 		
 		var seedName = seed.name = rule.seedName;
@@ -1189,13 +1318,15 @@ var Mold = (function(config){
 		if(!_Mold[seedName]){
 			
 			if(!seedName){
-				throw "Seedname ist not defined!"
+				throw new Error("Seedname ist not defined!");
 			}
 
-			if( seedName !="" ) {
-				var filePath = "";
 
+			if( seedName !="" ) {
+
+				var filePath = rule.path || "";
 				if(_externalSeeds[seed.name]){
+
 					filePath = _externalSeeds[seed.name];
 				}
 
@@ -1207,10 +1338,9 @@ var Mold = (function(config){
 				if( typeof _Mold[seedName].loader !== "object" ){
 					_Mold[seedName].loader = new _loader(seedName);
 				}
-
 				Mold.loadScript(filePath, 
 					function(element){
-						if(_externalSeeds[seed.name] === "lib"){
+						if(rule.isScript){
 							_createdMold[seedName] = seedName;
 						}else{
 							Mold.cue.add("loadedseeds", seedName, true);
@@ -1218,7 +1348,7 @@ var Mold = (function(config){
 						Mold.checkSeedCue();
 					},
 					false,
-					{ isExternal : seed.isExternal }
+					{ isExternal : seed.isExternal, isScript : rule.isScript, seedName : seedName}
 				);
 
 			}
@@ -1254,6 +1384,7 @@ var Mold = (function(config){
 						importString += " var "+key+" = "+Mold.cleanSeedName(value)+";\n";
 					});
 				});
+
 				return Mold.injectBefore(target, importString);
 			}else{
 				return target;
@@ -1280,11 +1411,11 @@ var Mold = (function(config){
 					var newCode = "\n"+code+"\n"+objectEnd;
 					return new Function(parameter, newCode);
 				}else{
-					throw "Can not inject code, cause functions end not found";
+					throw new Error("Can not inject code, cause functions end not found");
 					return false;
 				}
 			 }else{
-			 	throw "Can not inject code, function does not match function pattern";
+			 	throw new Error("Can not inject code, function does not match function pattern");
 			 }
 		},
 
@@ -1296,11 +1427,13 @@ var Mold = (function(config){
 * @return (Class) - Returns a Class with inhired methodes an properties
 **/
 		extend : function(superClass, subClass, config){
-			var superclassname = (config && config.superClassName) ? config.superClassName : "superclass";
-			var helperClass = function(){};
+
+			var superclassname = (config && config.superClassName) ? config.superClassName : "superclass",
+				helperClass = function(){},
+				reg = new RegExp("(function\\s*\([\\s\\S]*?\)\\s*\{)([\\s\\S]*)");
+			
 			helperClass.prototype = superClass.prototype;
 			
-			var reg = new RegExp("(function\\s*\([\\s\\S]*?\)\\s*\{)([\\s\\S]*)");
 			if(reg.test(subClass)){
 				var parameter = RegExp.$2.replace(")","").replace("(", "").replace(" ", "").split(","); 
 				var newConstructor = "\n\t this."+superclassname+".constructor.apply(this, arguments); \n"
@@ -1516,13 +1649,42 @@ Mold.addLoadingRule("standard", function(seed){
  		&& seed.name.indexOf("http:") === -1
  		&& seed.name.indexOf("https:") === -1
  	 ){
-
  		var path = Mold.LOCAL_REPOSITORY,
  			seedName = seed.name,
  			fileParts = seedName.split("."),
 			file = fileParts.join("/") + ".js";
 		
 		return { path : path, file : file, isExternal : false, seedName: seedName }
+ 	}else{
+ 		return false;
+ 	}
+ });
+
+Mold.addSeedNameCleaner("standard", function(seedName){
+	if(Mold.startsWith(seedName, "->")){
+		seedName = seedName.slice(2, seedName.length);
+	}
+	if(seedName.indexOf("->") > -1){
+		if(seedName.indexOf("->") === 0){
+			seedName = seedName.split("->")[0];
+		}else{
+			seedName = seedName.split("->")[1];
+		}
+	}
+	return seedName;
+});
+
+
+Mold.addLoadingRule("external_script", function(seed){
+ 	if( 
+ 		Mold.startsWith(seed.name, "http:")
+ 		|| Mold.startsWith(seed.name, "https:")
+ 	 ){
+ 		var path = seed.name,
+ 			seedName = seed.name,
+ 			fileParts = seedName.split(".");
+		
+		return { path : '', file : seed.name, isExternal : false, seedName: seedName, isScript : true }
  	}else{
  		return false;
  	}
@@ -1643,7 +1805,7 @@ Mold.addDNA({
 	name : "action",
 	create : function(seed){
 		if(typeof seed.func === "function"){
-			seed.func()
+			seed.func.call(null)
 		}
 		return seed.func;
 	}

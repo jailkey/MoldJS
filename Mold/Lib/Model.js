@@ -16,10 +16,22 @@ Seed({
 			that = this,
 			_adapter = config.adapter,
 			_dataId =  false,
+			_registerd = [],
 			_isValidation = false;
 
 		Mold.mixin(this, new Mold.Lib.Event(this));
 		Mold.mixin(_data, new Mold.Lib.Event(_data));
+
+
+		var _register = function(instance){
+			_registerd.push(instance);
+		
+			instance.on("all", function(e){
+				that.trigger(e.event, e, { exclude : ["data", "destroy"] });
+			});
+
+			return instance;
+		}
 	
 		var _createProperty = function(element, name, data){
 			var validationError = _notValid(element, data[name], "property");
@@ -44,6 +56,7 @@ Seed({
 					element : data
 				});
 			}
+
 			data[name] = data[name] || "";
 
 			Mold.watch(data, name, function(){
@@ -103,25 +116,26 @@ Seed({
 			if(data[name] && data[name][0]){
 				var listValue = data[name];
 			}
-			
+			console.log("create List", element, name, data)
 			data[name] = new Mold.Lib.List();
-			data[name].on("list.item.add", function(e){
+			data[name]
+				.on("list.item.add", function(e){
 
-				if(Mold.isObject(e.data.value)){
-					 _createListItem(element[0], e.data.index, e.data.value, e.data.list);
-				}else{
+					if(Mold.isObject(e.data.value)){
+						 _createListItem(element[0], e.data.index, e.data.value, e.data.list);
+					}else{
+						_createModel(element[0], e.data.value);
+					}
+
+				}).on("list.item.change", function(e){
+
+					if(Mold.isObject(e.data.value) && !Mold.isArray(e.data.value)){
+						 _createListItem(element[0], e.data.index, e.data.value, e.data.list, true);
+					}else{
+						
+					}
 					_createModel(element[0], e.data.value);
-				}
-
-			}).on("list.item.change", function(e){
-
-				if(Mold.isObject(e.data.value) && !Mold.isArray(e.data.value)){
-					 _createListItem(element[0], e.data.index, e.data.value, e.data.list, true);
-				}else{
-					
-				}
-				_createModel(element[0], e.data.value);
-			});
+				});
 
 			if(listValue){
 				Mold.each(listValue, function(element){
@@ -174,6 +188,10 @@ Seed({
 				data = _createList(element, name, data);
 			}else if(Mold.isObject(element)){
 				data = _createObject(element, name, data);
+			}else if(typeof data === "string" && Mold.startsWith(Mold.cleanSeedName(data), "Mold.") ){
+				
+				var relationSeed = Mold.getSeed(Mold.cleanSeedName(data));
+				console.log("relationSeed")
 			}else{
 				data = _createProperty(element, name, data);
 			}
@@ -236,19 +254,23 @@ Seed({
 		var _add = function(model, data){
 
 			//Mold.each(data, function(element, name){
+			
 				if(Mold.isArray(data)){
 					
 					Mold.each(data, function(item){
 						model.push(item);
 					})
 				}else if(Mold.isObject(data)){
+
 					Mold.each(data, function(item, name){
+						
 						if(Mold.isObject(item) || Mold.isArray(item)){
+
 							if(model[name]){
 								_add(model[name], item);
 							}
 						}else{
-							if(model[name]){
+							if(Mold.is(model[name])){
 								model[name] = item;
 							}
 						}
@@ -289,6 +311,7 @@ Seed({
 		var _update = function(model, data){
 			_clean(model);
 			_add(model, data);
+			that.trigger("update");
 		}
 
 		//var _modelAddContent
@@ -296,8 +319,7 @@ Seed({
 		if(_adapter){
 			var that = this;
 			_adapter.on("update", function(e){
-				_update(_data, e.data.data);
-				that.trigger("update", e.data);
+				_update(_data, e.data);
 			})
 		}
 
@@ -309,42 +331,55 @@ Seed({
 			isValid : function(){
 
 			},
-			save : function(id){
+/**
+ * save  saves the model
+ * @param  {[type]} id [description]
+ */
+			save : function(){
 				if(!_adapter){
 					throw "Can not save data without adapter!"
 				}
-				if(!id){
-					id = _dataId;
+				
+				if(!_dataId){
+					//insert
+					_dataId = _adapter.insert(_data);
+				}else{
+					_adapter.update(_data, _dataId);
 				}
-				_dataId = _adapter.save(_data, id);
+				
 			
 			},
+/**
+ * load loads data by the specified resourceID
+ * @param  {number|string} id [description]
+ */
 			load : function(id){
 				if(!_adapter){
 					throw "Can not load data without adapter!"
 				}
 				_dataId = id;
-				var data = _adapter.load(id);
+				_adapter.load(id);
 			},
-			remove : function(){
-				if(!_adapter){
-					throw "Can not remove data without adapter!"
-				}
-				_adapter.remove();
-			},
-			add : function(){
-				if(!_adapter){
-					throw "Can not add data without adapter!"
-				}
-				_dataId = _adapter.add();
-			},
+
+/**
+ * [bind description]
+ * @param  {[type]} model [description]
+ * @return {[type]}       [description]
+ */
 			bind : function(model){
 				
 			},
+/**
+ * update replace the model with new data
+ * @param  {mixed} newData [description]
+ */
 			update : function(newData){
 				_update(_data, newData);
-
 			},
+/**
+ * json description]
+ * @return {[type]} [description]
+ */
 			json : function(){
 				return JSON.stringify(_data, function(key, value){
 					if(key == "_eid"){

@@ -2,20 +2,17 @@ Seed({
 		name : "Mold.Test",
 		dna : "class",
 		include : [
-			"external->Mold.Parser.Pre.ComLog",
-			"Mold.TestFour",
-			[
-				[{ "Imported" : "Mold.TestThree" }],
-				"Mold.TestTwo",
-			]
+			"Mold.Dependency",
+			"->Mold.Lib.Event"
 		]
 	},
 	function(){
-		//! das ist nur ein test
+		
+		console.log("Show this dessage if dependecy is loaded!")
+
 		this.publics = {
 			testMethod : function(){
-				var Imp = new Imported();
-				return Imp.test();
+				return true;
 			}
 		}
 	}

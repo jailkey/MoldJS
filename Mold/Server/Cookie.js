@@ -6,10 +6,11 @@ Seed({
 
 		return {
 			parse : function (request) {
+				
 				var list = {},
-				rc = request.headers.cookie;
+					requestCookie = request.headers.cookie;
 
-				rc && rc.split(';').forEach(function( cookie ) {
+				requestCookie && requestCookie.split(';').forEach(function( cookie ) {
 					var parts = cookie.split('=');
 					list[parts.shift().trim()] = unescape(parts.join('='));
 				});

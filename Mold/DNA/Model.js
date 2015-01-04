@@ -17,14 +17,14 @@ Seed({
 		create : function(seed) {
 			var target = Mold.createChain(Mold.getSeedChainName(seed));
 			
-			target[Mold.getTargetName(seed)] = function(){
+			return function(){
 				var adapter = false;
 				if(seed.adapter){
-					adapter = Mold.getSeed(seed.adapter.replace("external->", ""));
+					adapter = Mold.getSeed(Mold.cleanSeedName(seed.adapter));
 					if(seed.resource){
 						adapter = new adapter({ path : seed.resource });
 					}else{
-						throw "Ressource not given!"
+						throw new Error("Ressource not given!");
 					}
 				}
 				var model = new Mold.Lib.Model({ properties : seed.func, adapter : adapter });

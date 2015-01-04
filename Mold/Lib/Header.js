@@ -2,48 +2,96 @@ Seed({
 		name : "Mold.Lib.Header",
 		dna : "class"
 	},
-	function(type, len){
+	function(input){
+
+		var _header  = {
+			'content-type' : false,
+			'mime-type' : false,
+			'encoding' : false,
+		}
+
+		var _mimeTypes = [
+			{ 'html' : 'text/html' },
+			{ 'js' : 'text/javascript' },
+			{ 'json' : 'application/json' },
+			{ 'css' : 'text/css' },
+			{ 'png' : 'image/png' },
+			{ 'gif' : 'image/gif' },
+			{ 'jpg' : 'image/jpeg' },
+			{ 'ico' : 'image/x-icon' },
+			{ 'ogg' : 'audio/ogg' },
+			{ 'ebm' : 'video/webm' }
+		]
+
+
 
 		var _getMimeType = function (type){
 
-			type = type.toLowerCase();
-			var head = false;
-
-			switch(type){
-				case 'html':
-					head = 'text/html';
-				case 'js':
-					head= 'text/javascript';
-					break;
-				case 'css':
-					head = 'text/css';
-					break;
-				case 'png':
-					head = 'image/png';
-					break;
-				case 'gif':
-					head = 'image/gif';
-					break;
-				case 'jpg':
-					head = 'image/jpeg';
-					break;
-				case 'ico':
-					head = 'image/x-icon';
-					break;
-				case 'ogg':
-					head = 'audio/ogg';
-					break;
-				case 'ebm':
-					head = 'video/webm';
-				break;
-			}
-
-			return head;
+			return Mold.find(_mimeTypes, function(mimeType, selectedType){
+				if(selectedType === type){
+					return mimeType;
+				}
+			});
 
 		}
 
-		var header = _getMimeType(type);
+		var _getType = function (mimeType){
+			var result = false;
+			Mold.some(_mimeTypes, function(mime){
+				return Mold.some(mime, function(name, selectedType){
+					if(mimeType == name){
+						result = selectedType;
+						return true;
+					}
+				});
+			});
+			return result;
+		}
 
-		return header;
+		var _parseHeader = function(header){
+			var lines = header.split(/(\r\n|\n)/);
+			
+			Mold.each(lines, function(line){
+				line = line.replace(/(\r\n|\n)/, '');
+				if(line != ""){
+					var parts = line.split(":"),
+						name = Mold.trim(parts[0]).toLowerCase(),
+						values = parts[1].split(";");
+
+					Mold.each(values, function(value){
+						value = Mold.trim(value);
+						switch(name){
+							case 'content-type':
+								if((type = _getType(value) )){
+									_header['content-type'] = value;
+									_header['mime-type'] = value;
+								}
+								break;
+							default:
+
+							
+						}
+					});
+				}
+			});
+		}
+
+		if(input){
+			_parseHeader(input);
+		}
+
+		this.publics = {
+			getMimeType : _getMimeType,
+			getType :  _getType,
+			get : function(type){
+				if(type){
+					return _header[type.toLowerCase()] || false;
+				}
+				return _header;
+			},
+			set : function(type, value){
+				_header[type.toLowerCase()] = value;
+			}
+		}
 	}
 );

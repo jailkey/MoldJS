@@ -4,41 +4,59 @@
 		author : "Jan Kaufmann",
 		include : [
 			"Mold.Lib.Event",
-			"Mold.Lib.Promise"
+			"Mold.Lib.Promise",
+			"Mold.Lib.Header"
 		]
 	},
-	function(){
+	function(ajaxConf){
 		
 		var events = new Mold.Lib.Event(this),
 			that = this,
+			ajaxConf = ajaxConf || {},
 			undefined;
 
 		Mold.mixin(this, events);
 
 		this.publics = {
 
+
 			get : function(url, data){
 				
-				var promise = new Mold.Lib.Promise(function(fulfilled, rejected){
+				return new Mold.Lib.Promise(function(fulfilled, rejected){
 
 					events.on("ajax.get.success", function(value){
 						fulfilled(value);
 					}).on("ajax.error", function(value){
 						rejected(value);
 					});
-					
-					that.send(url, data, { method : "GET" });
+				
+					that.send(url, data, { method : "GET"});
 
 				});
+			},
 
-				return promise;
+			post : function(url, data, type){
+				return  new Mold.Lib.Promise(function(fulfilled, rejected){
+
+					events.on("ajax.post.success", function(value){
+						fulfilled(value);
+					}).on("ajax.error", function(value){
+						rejected(value);
+					});
+					
+					type = type || 'text';
+					that.send(url, data, { method : "POST", type : type});
+
+				});
 			},
 		
 			send : function(url, data, config){
 				var xhr; 
 
+				url = (ajaxConf.serverPath) ? ajaxConf.serverPath + url : url;
 				config = config || {};
 				config.method = config.method || "GET";
+
 				
 				if(typeof XMLHttpRequest !== 'undefined'){
 					var xhr = new XMLHttpRequest();  
@@ -83,38 +101,38 @@
 					}  
 					if(xhr.status !== 200) {
 						events.trigger("ajax.error", { xhr : xhr });
+						events.trigger("ajax.error."+xhr.status, { xhr : xhr });
 						return;  
 					}  
 					
 					
 					if(xhr.readyState === 4) {
 
-						if(typeof xhr.getResponseHeader === "function"){
-							contentType = xhr.getResponseHeader('Content-Type');
-						}
+						var header = new Mold.Lib.Header(xhr.getAllResponseHeaders());
 
-						switch(contentType){
+						switch(header.get('content-type')){
 							case "application/json":
 								jsonData = JSON.parse(xhr.response);
 								break;
 							default:
+								data : xhr.response;
 								break;
 						}
-    						
 						
 						if(config.method === "GET"){
-							events.trigger("ajax.get.success", { xhr : xhr, json : jsonData });
+							events.trigger("ajax.get.success", { xhr : xhr, json : jsonData, data : data});
 						}else if(config.method === "POST"){
-							events.trigger("ajax.post.success", { xhr : xhr, json : jsonData });
+							events.trigger("ajax.post.success", { xhr : xhr, json : jsonData, data : data});
 						}else if(config.method === "DELETE"){
-							events.trigger("ajax.delete.success", { xhr : xhr, json : jsonData });
+							events.trigger("ajax.delete.success", { xhr : xhr, json : jsonData, data : data});
 						}else if(config.method === "PUT"){
-							events.trigger("ajax.put.success", { xhr : xhr, json : jsonData });
+							events.trigger("ajax.put.success", { xhr : xhr, json : jsonData, data : data});
 						}
 					}  
 				} 
 				
 				xhr.open(config.method, url, true);
+
 					
 				if(config && config.isFile){
 					
@@ -125,9 +143,29 @@
 					
 				}else{
 
-					xhr.setRequestHeader ('Content-Type', 'application/x-www-form-urlencoded');
-					xhr.send("data="+data);  
+					var sendFormat = 'plain';
+
+					switch(config.type){
+						case 'json':
+							data = JSON.stringify(data);
+							xhr.setRequestHeader ('Content-Type', 'application/json');
+						
+							break;
+						case 'urlencoded':
+							xhr.setRequestHeader ('Content-Type', 'application/x-www-form-urlencoded');	
+							sendFormat = 'urlencoded';		
+							break;
+						default:
+							xhr.setRequestHeader ('Content-Type', 'plain/text');
+					}
+					
 				
+					if(sendFormat === 'urlencoded'){
+						xhr.send('data='+encodeURIComponent(data));
+					}else{
+						xhr.send(data);
+					}
+			
 				}
 			} 
 		}

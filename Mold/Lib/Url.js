@@ -10,11 +10,11 @@ Seed({
 			if(!Mold.isNodeJS){
 				
 				Mold.each(window.location.search.replace("?", "").split("&"), function(parameter){
-					console.log("ADD", parameter.split("=")[0], parameter.split("=")[1])
+					//console.log("ADD", parameter.split("=")[0], parameter.split("=")[1])
 					_parameter[parameter.split("=")[0]] = parameter.split("=")[1];
 					
 				});
-				console.log("para", _parameter);
+				//console.log("para", _parameter);
 			}else{
 				throw new Error("No url given!");
 			}
@@ -22,7 +22,7 @@ Seed({
 
 		this.publics = {
 			parameter : function(){
-				console.log("PAREA;", _parameter);
+				//console.log("PAREA;", _parameter);
 				return _parameter;
 			}
 		}

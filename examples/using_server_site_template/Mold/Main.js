@@ -30,7 +30,7 @@ Seed(
 			}
 		})
 
-
+		console.log("asdasdas")
 
 		//
 		template.bind(model);

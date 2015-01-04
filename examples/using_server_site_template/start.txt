@@ -1,2 +1,2 @@
-starte with node.js:
+start with node.js:
 node Mold.js -repo examples/using_server_site_template/ -extrepo / Mold.Main

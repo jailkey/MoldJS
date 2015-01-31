@@ -116,8 +116,13 @@ Seed({
 			if(data[name] && data[name][0]){
 				var listValue = data[name];
 			}
-			console.log("create List", element, name, data)
+			
+			if(!Mold.isObject(data)){
+				throw new Error("Data '" + data + "' is not an object, can't create property '" + name + "'!");
+			}
+
 			data[name] = new Mold.Lib.List();
+
 			data[name]
 				.on("list.item.add", function(e){
 
@@ -183,16 +188,53 @@ Seed({
 			return data;
 		}
 
+		var _createFunction = function(element, name, data){
+			data.on('object.change', function(){
+				console.log("object change");
+				/*
+				data.trigger("property.change."+name, {
+					value : element(data),
+					name : name
+				});
+
+				data.trigger("property.change", {
+					value : element(data),
+					name : name 
+				});*/
+			});
+			data[name] = element(data);
+			return data;
+		}
+
+		var _createEventTrap = function(element, name, data){
+			data = _createProperty(element, name, data);
+			element.on('change', function(){
+				data[name] = element.execute(data);
+			});
+			data[name] = element.execute(data);
+			return data;
+		}
+
 		var _createItem = function(element, name, data){
-			if(Mold.isArray(element)){
+			if(element.className && element.className == "Mold.Lib.EventTrap"){
+				console.log("EventTrap found",  element.className)
+				data = _createEventTrap(element, name, data);
+				
+			}else if(Mold.isArray(element)){
 				data = _createList(element, name, data);
 			}else if(Mold.isObject(element)){
+				
+				
+
 				data = _createObject(element, name, data);
 			}else if(typeof data === "string" && Mold.startsWith(Mold.cleanSeedName(data), "Mold.") ){
-				
-				var relationSeed = Mold.getSeed(Mold.cleanSeedName(data));
-				console.log("relationSeed")
+				//not implemented yet
+				//var relationSeed = Mold.getSeed(Mold.cleanSeedName(data));
+			
+			}else if(typeof element === 'function'){
+				_createFunction(element, name, data);
 			}else{
+
 				data = _createProperty(element, name, data);
 			}
 			return data;
@@ -208,6 +250,7 @@ Seed({
 				data = _createItem(element, name, data);
 			}
 		}
+
 
 
 		var _notValid = function(model, value, type){

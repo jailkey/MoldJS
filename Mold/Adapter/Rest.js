@@ -5,7 +5,7 @@ Seed({
 	},
 	function(config){
 
-		var _restpath = config.path;
+		var _restpath = config.path || config.resource;
 		var _that = this;
 		
 		this.on("ajax.error", function(e){

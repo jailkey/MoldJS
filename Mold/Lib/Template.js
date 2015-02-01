@@ -100,6 +100,7 @@ Seed({
 
   				_shadowTemplate.appendChild(_container.removeChild(_container.firstChild))
 			}
+			_shadowTemplate.moldTemplate = that;
 			_target = _shadowTemplate;
 		}
 

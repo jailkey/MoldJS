@@ -1,6 +1,9 @@
 Seed({
 		name : "Mold.Defaults.TemplateDirectives",
-		dna : "data"
+		dna : "data",
+		include : [
+			'Mold.Lib.Element'
+		]
 	},
 	{
 		/*Add InlineEventhadling in Templates*/
@@ -9,9 +12,12 @@ Seed({
 			name : "mold-event",
 			action : function(node, element, template, index){
 
+
 				
-				var handler =  node.nodeValue.split(":")[0];
-				var moldEvent = node.nodeValue.split(":")[1];
+				var handler =  node.nodeValue.split(":")[0],
+					moldEvent = node.nodeValue.split(":")[1],
+					template = new Mold.Lib.Element(element).getTemplate();
+			
 				
 				new Mold.Lib.Event(element).on(handler, function(e){
 					var data ={
@@ -37,7 +43,9 @@ Seed({
 				){
 					var oldelement = element;
 					element = new Mold.Lib.Element(element);
-					var name = element.attr("name");
+
+					var name = element.attr("name"),
+						template = element.getTemplate();
 
 					if(element.attr("type") === "checkbox"){
 

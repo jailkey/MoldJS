@@ -189,18 +189,8 @@ Seed({
 		}
 
 		var _createFunction = function(element, name, data){
-			data.on('object.change', function(){
-				console.log("object change");
-				/*
-				data.trigger("property.change."+name, {
-					value : element(data),
-					name : name
-				});
-
-				data.trigger("property.change", {
-					value : element(data),
-					name : name 
-				});*/
+			that.on('update', function(){
+				data[name] = element(data);
 			});
 			data[name] = element(data);
 			return data;
@@ -211,21 +201,19 @@ Seed({
 			element.on('change', function(){
 				data[name] = element.execute(data);
 			});
+			that.on('update', function(){
+				data[name] = element.execute(data);
+			});
 			data[name] = element.execute(data);
 			return data;
 		}
 
 		var _createItem = function(element, name, data){
 			if(element.className && element.className == "Mold.Lib.EventTrap"){
-				console.log("EventTrap found",  element.className)
 				data = _createEventTrap(element, name, data);
-				
 			}else if(Mold.isArray(element)){
 				data = _createList(element, name, data);
 			}else if(Mold.isObject(element)){
-				
-				
-
 				data = _createObject(element, name, data);
 			}else if(typeof data === "string" && Mold.startsWith(Mold.cleanSeedName(data), "Mold.") ){
 				//not implemented yet

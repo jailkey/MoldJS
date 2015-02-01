@@ -1626,21 +1626,6 @@ Mold.addLoadingRule("external", function(seed){
  		return false;
  	}
 });
-/*
-Mold.addLoadingRule("lib", function(seed){
- 	if(seed.name.indexOf("lib->") > -1){
- 		
- 		var path = "",
- 			seedName = seed.name.split("->")[1],
- 			fileParts = seedName.split("."),
-			file = fileParts.join("/") + ".js";
- 		
- 		return { path : path, file : file, isExternal : true, seedName: seedName };
- 	}else{
- 		return false;
- 	}
-});
-*/
 
 
 Mold.addLoadingRule("standard", function(seed){

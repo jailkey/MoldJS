@@ -192,6 +192,7 @@ Seed({
 			}
 		
 			directive.apply = function(node, element, template, index, style){
+
 				if(!element.hasDirective || !element.hasDirective(directive._id)){
 					directive.scope = element;
 					if(directive.seed){
@@ -242,6 +243,7 @@ Seed({
 					}
 					element.directives.push(directive._id)
 					if(directive.action){
+
 						directive.action.call(directive, node, element, template, index);
 					}
 				}
@@ -258,7 +260,7 @@ Seed({
 			_directives.push(directive);
 			_directivesIndex[directive.at] = _directivesIndex[directive.at] || {};
 			_directivesIndex[directive.at][directive.name] = _directives[_directives.length -1];
-			
+		
 			_that.trigger("directive.added", {
 				directive : directive,
 				scope : scope,
@@ -335,6 +337,7 @@ Seed({
 				}else{
 					node = element;
 				}
+			
 				directive.apply(
 					node,
 					element,
@@ -399,7 +402,7 @@ Seed({
 								node = element;
 								break;
 						}
-					
+						
 						directive.apply(
 							node,
 							element,

@@ -14,8 +14,6 @@ Seed({
 		Mold.mixin(this, new Mold.Lib.Event(this));
 
 		Mold.each(properties, function(value, name){
-			console.log('watch', properties, name)
-
 			value.on(name, function(){
 				_that.trigger('change');
 			});

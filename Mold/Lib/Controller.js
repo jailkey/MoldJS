@@ -93,6 +93,7 @@ Seed({
 				);
 			}else{
 				Mold.Lib.Observer.at("all", function(e){
+						
 						controllerWrapped.trigger(e.event, e.data );
 					},
 					{

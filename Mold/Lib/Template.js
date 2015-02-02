@@ -127,7 +127,7 @@ Seed({
 					);	
 				});
 			}
-
+			target.moldTemplate = _shadowTemplate.moldTemplate;
 			while(_shadowTemplate.hasChildNodes()){
 				var targetObserver = new Mold.Lib.Event(_shadowTemplate.firstChild);
 				targetObserver.on("DOMNodeInserted", addDirectives);
@@ -351,9 +351,15 @@ Seed({
 		}
 
 		if(typeof content === "function"){
-			_templateContent = content.toString().replace(/(^function\s*\(\)\s*\{\s*\/\*\|)([\s\S]*)(\|\*\/\s*\})/g, function(){
+			
+			_templateContent = content.toString().replace(/(^function\s*\(\)\s*\{\s*\/\*\|)([\s\S]*)(\|\*\/\s*\})$/g, function(){
 				return arguments[2];
 			});
+
+			//Safari Bugfix 
+			_templateContent = _templateContent.replace(/^function\s*\(\)\s*\{\s*\/\*\|/g, '');
+			_templateContent = _templateContent.replace(/\|\*\/\s*\}$/g, '');
+	
 			_contentType = "string";
 			_compiledTemplate = _parseTemplate(_templateContent);
 			this.trigger("ready");

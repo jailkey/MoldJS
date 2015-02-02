@@ -6,13 +6,13 @@ Seed({
 		]
 	},
 	{
-		save : function(data, id){
+		update : function(data, id){
 			return "boolean";
 		},
 		remove : function(id){
 			return "boolean";
 		},
-		add : function(data){
+		insert : function(data){
 			return "number";
 		},
 		load : function(id){

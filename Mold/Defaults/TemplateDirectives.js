@@ -29,7 +29,34 @@ Seed({
 				})
 			}
 		},
-		//Add datahanlind for forms in Templates
+
+		//IE Workaround for setting styles with template vaiablen
+		moldstyle : {
+			at : "attribute",
+			name : "mold-style",
+			action : function(node, element, template, index){
+
+
+				var _appendStyle = function(element, style){
+					var styles = style.split(';'),
+						len = styles.length,
+						i = 0;
+
+					for(; i < len; i++){
+						var parts = styles[i].split(':')
+						element.style[Mold.trim(parts[0])] = Mold.trim(parts[1]);
+					}
+				}
+	
+				Mold.watch(element, 'mold-style', function(property, oldavalue, value){
+					_appendStyle(element, value);
+				});
+	
+
+				
+			}
+		},
+		//Add data hanling for forms in Templates
 		moldata : {
 			at : "attribute",
 			name : "mold-data",

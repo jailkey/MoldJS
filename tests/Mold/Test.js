@@ -8,7 +8,7 @@ Seed({
 	},
 	function(){
 		
-		console.log("Show this dessage if dependecy is loaded!")
+		console.log("Show this message if dependecy is loaded!")
 
 		this.publics = {
 			testMethod : function(){

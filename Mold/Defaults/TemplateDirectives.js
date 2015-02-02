@@ -12,8 +12,6 @@ Seed({
 			name : "mold-event",
 			action : function(node, element, template, index){
 
-
-				
 				var handler =  node.nodeValue.split(":")[0],
 					moldEvent = node.nodeValue.split(":")[1],
 					template = new Mold.Lib.Element(element).getTemplate();
@@ -36,7 +34,10 @@ Seed({
 			at : "attribute",
 			name : "mold-data",
 			action : function(node, element, template, index){
-				var viewModel = node.nodeValue;
+
+				var viewModel = node.nodeValue,
+					template = new Mold.Lib.Element(element).getTemplate();
+
 				if(
 					element.nodeName.toLowerCase() === "input"
 					|| element.nodeName.toLowerCase() === "textarea"
@@ -62,7 +63,6 @@ Seed({
 						var valueNode = element.getAttributeNode("value");
 
 						/*Set default value*/
-						
 						if(template.hasVar(element.value)){
 							template.viewModel.set(viewModel, name, "");
 						}else{
@@ -70,7 +70,6 @@ Seed({
 						}
 
 						/*Watch nodevalue*/
-						
 						Mold.watch(valueNode, "nodeValue", function(property, oldavalue, value){
 						
 							template.viewModel.set(viewModel, name, value);

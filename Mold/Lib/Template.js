@@ -219,7 +219,8 @@ Seed({
 									
 									if(element.filter && element.filter.length){
 										//_applyFilter(element);
-									}				
+									}
+							
 									//if(filterResult){
 										if(!element.childs[e.data.index]){
 											element.add();
@@ -359,6 +360,8 @@ Seed({
 			//Safari Bugfix 
 			_templateContent = _templateContent.replace(/^function\s*\(\)\s*\{\s*\/\*\|/g, '');
 			_templateContent = _templateContent.replace(/\|\*\/\s*\}$/g, '');
+
+			_templateContent = _templateContent.replace(/ style=/g, 'mold-style=');
 	
 			_contentType = "string";
 			_compiledTemplate = _parseTemplate(_templateContent);

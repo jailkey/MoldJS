@@ -1213,7 +1213,7 @@ var Mold = (function(config){
 					throw new Error("File not found "+path+"!");
 				}
 			}else{
-				
+	
 				
 				if(_config.cacheOff){
 					if(path.indexOf("?") == -1){
@@ -1241,7 +1241,7 @@ var Mold = (function(config){
 
 				if(typeof success === "function"){
 					_addElementEvent(scriptElement, "load", success);
-					_addElementEvent(scriptElement, "readystatechange", success);
+					//_addElementEvent(scriptElement, "readystatechange", success);
 				}
 				
 				_addElementEvent(scriptElement, "error", function(){
@@ -1338,6 +1338,7 @@ var Mold = (function(config){
 				if( typeof _Mold[seedName].loader !== "object" ){
 					_Mold[seedName].loader = new _loader(seedName);
 				}
+
 				Mold.loadScript(filePath, 
 					function(element){
 						if(rule.isScript){

@@ -1540,7 +1540,7 @@ var Mold = (function(config){
 
 		watch : function(obj, property, callback){
 
-			if(Object.prototype.watch){
+			if(Object.prototype.watch && !Mold.isNode(obj)){
 				obj.watch(property, callback);
 			}else{
 
@@ -1548,28 +1548,36 @@ var Mold = (function(config){
 				var newval = oldval;
 				
 				/*use mutation observer for HTML elements*/
-				if(Mold.isNode(obj) && !!window.MutationObserver){
+				
+				if(Mold.isNode(obj)){
+				
+					if(!!window.MutationObserver){
+						var observer = new MutationObserver(function(mutations) {
+							Mold.each(mutations, function(mutation) {
+								
+								if(
+									mutation.target === obj
+									&& mutation.type === 'attributes'
+									&& mutation.attributeName === property
+								){
+									callback.call(obj, property,  mutation.oldValue, obj.getAttribute(property));
+								}
+						  	});    
+						});
 					
-					var observer = new MutationObserver(function(mutations) {
-						Mold.each(mutations, function(mutation) {
-							if(
-								mutation.target === obj 
-								&& mutation.target[property]
-							){
-								oldval = mutation.target[property];
-
-								callback.call(obj, property,  mutation.oldValue, mutation.target[property]);
+						observer.observe(obj, { 
+							attributes: true,
+							childList: true,
+							characterData: true ,
+							attributeOldValue: true,
+						});
+					}else{
+						obj.addEventListener('DOMAttrModified', function(e){
+							if(e.attrName === property){
+								callback.call(obj, property, e.prevValue, e.newValue);
 							}
-					  	});    
-					});
-				
-					observer.observe(obj, { 
-						attributes: true,
-						childList: true,
-						characterData: true ,
-						attributeOldValue: true,
-					});
-				
+						})
+					}
 				}else{
 					var getter = function () {
 						return newval;

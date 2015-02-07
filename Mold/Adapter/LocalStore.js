@@ -13,15 +13,19 @@ Seed({
 		var _localStore = new Mold.Lib.LocalStore();
 
 		this.publics = {
-			save : function(data, id){
+			update : function(data, id){
+				console.log("update", id, data)
 				return _localStore.save(data, id);
 			},
 			load : function(id){
+				console.log("load", id)
 				var data =  _localStore.load(id);
+				console.log("load", id, data)
 				this.trigger("update", { data : data, id : id });
 				return data;
 			},
-			add : function(data){
+			insert : function(data){
+				console.log("add data", data)
 				var id =  _localStore.add(data);
 				return id;
 			},

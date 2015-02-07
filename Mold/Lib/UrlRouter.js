@@ -81,9 +81,10 @@ Seed({
 					}
 					
 				});
-				routeRegExp += (replaced) ? "" : "/" ;
+				routeRegExp += (replaced || routeRegExp === "/") ? "" : "/" ;
 
 				var hashRegExp = new RegExp(routeRegExp , "gim");
+				
 				if(path.substring(path.length -1, path.length) !== "/"){
 					path += "/";
 				}
@@ -195,6 +196,7 @@ Seed({
 						case "/":
 
 							if(that.isUrl(cleanRoute, _path)){
+
 								path += first;
 								output = that.getNextRoute(routes, route, path, output, "path");
 
@@ -322,8 +324,9 @@ Seed({
 									that.loadSeed(route.split("@ready->")[1], parameter);
 								});
 							}else{
+
 								Mold.ready(function(){
-									var trigger = this.buildTrigger(parameter);
+									var trigger = that.buildTrigger(parameter);
 									_events.trigger(route.replace("@", ""), trigger.data, { saveTrigger : true });
 								});
 							}

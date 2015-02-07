@@ -1,13 +1,12 @@
 Seed(
 	{ 
-		name : "Mold.Test",
+		name : "Mold.MainController",
 		dna : "controller",
 		include : [
-			"external->Mold.DNA.Controller"
+			"->Mold.DNA.Controller"
 		]
 	},
 	function(){
-		alert("Seed loaded!")
 
 		this.actions = {
 			"@doaction" : function(e){

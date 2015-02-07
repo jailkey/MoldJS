@@ -312,7 +312,7 @@ Seed({
 		/**
 		 * @method selection
 		 * @description get / set a text selection
-		 * @param  {mixed} range range ident object or range ident string if not set method returns the current selection
+		 * @param  {mixed} range range ident object or range ident string, if not set method returns the current selection
 		 * @return {object}   returns a range ident object
 		 */
 			selection : function(range){

@@ -368,7 +368,7 @@ describe("Mold Core Lib", function () {
 			})
 
 			waitsFor(function() {
-			
+				
 				return waitForJquery;
 			}, "Seed and jQuery succsessfully loaded", 2500);
 
@@ -376,6 +376,7 @@ describe("Mold Core Lib", function () {
 		});
 		
 		it("test if jQuery and plugin is available", function(){
+
 			expect(Mold.WithjQuery.test()._hsla[1]).toEqual(0);
 		});
 	});

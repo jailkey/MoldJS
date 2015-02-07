@@ -7,7 +7,6 @@ Seed({
 		]
 	},
 	function(){
-	
 		return {
 			test : function(){
 				return $.Color({ saturation: 0 });

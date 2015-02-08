@@ -27,14 +27,13 @@ Seed({
 
 		var router = new Mold.Router({
 			'/test/:name/:id' : 'Mold.Test',
-			'/wasanderes' : 'Mold.Test2'
+			'/wasanderes' : 'Mold.Test2',
+			'GET/super' :  '@fireevent'
 		});
 
 		console.log(router);
 		
 		server.use(router)
-
-		
 
 		server.use(function(req, res, session, next){
 			console.log("two")

@@ -14,7 +14,6 @@ Seed({
 			console.log(session);
 
 		}
-			
 
 		return new Mold.Server.Middleware("router", function(req, res, session, next){
 			getInstance(session);

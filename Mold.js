@@ -210,6 +210,7 @@ var Mold = (function(config){
 
 				if(val === "-repo"){
 					if(argumentList[index+1]){
+
 						_config.localRepository = argumentList[index+1];
 					}else{
 						throw new Error("You can not use -repro without repositiory path!");
@@ -224,14 +225,13 @@ var Mold = (function(config){
 				}
 				if(argumentList.length >= 2){
 					output = argumentList[argumentList.length-1];
+
 					var fs =  require('fs');
-					if(!fs.existsSync(output)){
-						output = false;
-					}
 					
 				}else{
 					throw new Error("Main seed is not defined!");
 				}
+
 			});
 			if(!_config.externalRepository){
 				_config.externalRepository = "./";
@@ -239,6 +239,7 @@ var Mold = (function(config){
 			if(!_config.localRepository){
 				_config.localRepository = "./";
 			}
+
 			if(Mold){
 				Mold.EXTERNAL_REPOSITORY = _config.externalRepository;
 				Mold.LOCAL_REPOSITORY = _config.localRepository;
@@ -394,10 +395,10 @@ var Mold = (function(config){
 
 	
 	if(!_isNodeJS){
+
 		_ready(function(){
 			_isDom = true;
 			var mainScript = _getMainScript();
-			
 			if(mainScript){
 				Mold.load({ name : mainScript });
 			}
@@ -637,11 +638,14 @@ var Mold = (function(config){
  * @method  contains
  * @description checks if a list contains a value
  * @public
- * @param  {array/object} list  
+ * @param  {array/object/sting} list  
  * @param  {stirng} needel
  * @return {boolean} 
  */
 		contains : function(list, needel){
+			if(typeof list === 'string'){
+				return ~list.indexOf(needel);
+			}
 			return !!Mold.find(list, function(element){
 				if(element == needel){
 					return true;
@@ -1826,8 +1830,11 @@ Mold.addDNA({
 		global.Mold = Mold;
 		Mold.ready(function(){
 			var mainScript = Mold.getMainScript();
+
 			if(mainScript){
 				Mold.load({ name : mainScript });
+			}else{
+				throw new Error('Startseed is not defined!')
 			}
 		});
 	}else{
@@ -1837,6 +1844,6 @@ Mold.addDNA({
 }());
 
 Mold.onlog(function(type, test){
-	console.log(type, test);
+	//console.log(type, test);
 });
 

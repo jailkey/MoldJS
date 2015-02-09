@@ -1,8 +1,11 @@
+
+
 Seed({
 		name : "Mold.Lib.CLI",
 		dna : "static",
 		include : [
-			'Mold.Lib.Event'
+			'Mold.Lib.Event',
+			{ Promise : 'Mold.Lib.Promise' }
 		]
 	},
 	function(){
@@ -10,12 +13,85 @@ Seed({
 		var _that = this,
 			_commands = [];
 
+		process.stdin.setEncoding('utf8');
+			
 		Mold.mixin(this, new Mold.Lib.Event(this));
 
 		if(!Mold.isNodeJS){
 			throw Error("You can use Mold.Lib.CLI only with NodeJS!");
 		}
 
+		//CLI interface
+		
+		var cliInterface = {
+		/**
+		 * @method showError
+		 * @description shows an errormessage
+		 * @param  {string} error a string with a message
+		 */
+			showError : function(error){
+				console.log(this.COLOR_RED + error + this.COLOR_RESET)
+			},
+		/**
+		 * @method write 
+		 * @description show message 
+		 * @param  {string} message [description]
+		 * @return {[type]}         [description]
+		 */
+			write : function(message){
+				process.stdout.write(message)
+				return this;
+			},
+		/**
+		 * @method read
+		 * @description read standard in
+		 * @param  {Function} callback will be executed if the user press Enter
+		 * @return {object} this
+		 */
+			read : function(callback){
+				
+				process.stdin.on('data', function(chunk) {
+					var buf = new Buffer(chunk);
+					callback(buf.toString());
+				});
+
+				return this;
+			},
+			form : function(form){
+				/*
+				{
+					label : "Hallo sag was:",
+					input : {
+						type : 'text',
+						validate : 'required',
+						messages : {
+							error : "Is not valid!",
+							success : "Supi!"
+						}
+					}
+				}*/
+			},
+			key : function(){
+
+			},
+			exit : function(){
+				process.exit(0);
+				return this;
+			},
+			COLOR_RESET : "\033[0m",
+			COLOR_BLACK : "\033[0;30m",
+			COLOR_RED : "\033[0;31m",
+			COLOR_GREEN : "\033[0;32m",
+			COLOR_YELLOW : "\033[0;33m",
+			COLOR_BLUE : "\033[0;34m",
+			COLOR_PURPLE : "\033[0;35m",
+			COLOR_CYAN : "\033[0;36m",
+			COLOR_WHITE : "\033[0;37m",
+			SYMBOLE_TRUE : "✓",
+			SYMBOLE_FALSE : "✗"
+		}
+
+		//CLI private methodes
 		var _getCommand = function(name){
 			return Mold.find(_commands, function(value){
 				if(value.command === name){
@@ -73,10 +149,6 @@ Seed({
 		}
 
 
-		var _showError = function(error){
-			console.log("\033[0;31m" + error + "\033[0m")
-		}
-
 		var _getCommandHelp = function(commandObject){
 			var help = "\nMold command help '\033[1;35m" + commandObject.command + "\033[0m'\n";
 			
@@ -87,7 +159,7 @@ Seed({
 			help += "\n";
 
 			Mold.each(commandObject.parameter, function(value, index){
-				help += " \033[0;36m" + index + "\033[0m  \t" + value.description + "\n";
+				help += cliInterface.COLOR_CYAN + index + cliInterface.COLOR_RESET +"  \t" + value.description + "\n";
 			});
 			console.log(help + "\n")
 		}
@@ -97,7 +169,7 @@ Seed({
 			var commandObject = _getCommand(e.data.command);
 
 			if(!commandObject){
-				_showError("command '" + e.data.command + "' not found!");
+				cliInterface.showError("command '" + e.data.command + "' not found!");
 				return;
 			}
 
@@ -106,7 +178,7 @@ Seed({
 				return;
 			}
 
-			commandObject.execute.call(Mold, e.data.parameter);
+			commandObject.execute.call(Mold, e.data.parameter, cliInterface);
 			//console.log("e", e.data.command, e.data.parameter)
 		})
 
@@ -136,19 +208,7 @@ Seed({
 		
 			 */
 			addCommand : function(command){
-				_commands.push(command);
-			},
-
-			/**
-			 * @method showError
-			 * @description shows an errormessage
-			 * @param  {string} error a string with a message
-			 */
-			showError : function(error){
-				_showError(error);
-			},
-			showMessage : function(message){
-				console.log(message)
+				_commands.push(command, this);
 			}
 		}
 	}

@@ -341,6 +341,11 @@ var Mold = (function(config){
 
 	var _preProcess = function(input, seedName, dna, callback){
 		if(typeof input === "function"){
+			if(_isNodeJS){
+				//inject scope if Mold run under NodeJs
+				input = Mold.injectBefore(input, " Mold.mixin(this, Mold.getScope()); ");
+			}
+	
 			//convert code to string
 			var code = input.toString(),
 				scriptName = seedName.split('.').join('/')+'.js';
@@ -352,6 +357,8 @@ var Mold = (function(config){
 			//split function into parameter an code
 			var pattern = new RegExp("function\\s*\(([\\s\\S]*?)\)\\s*\{([\\s\\S]*?)\}$", "g"),
 				matches = pattern.exec(code);
+
+			
 
 			if(matches){
 				//replace comments
@@ -908,6 +915,29 @@ var Mold = (function(config){
 		onlog : function(callback){
 			var identifier = (Mold.cue.get("onlog")) ? "onlog" + Mold.cue.get("onlog").length : "onlog" + 0;
 			Mold.cue.add("onlog", identifier, callback);
+		},
+/**
+ * @methode getScope
+ * @description returns an object with the current scope
+ * @return {object} the current scope
+ */
+		getScope : function(){
+			if(_isNodeJS){
+				return {
+					require : require,
+					global : global,
+					__filename : __filename,
+					__dirname : __dirname,
+					module : module,
+					exports : exports,
+					Buffer : Buffer,
+					setTimeout : setTimeout,
+					clearTimeout : clearTimeout,
+					setInterval : setInterval,
+					clearInterval : clearInterval
+				}
+			}
+			return this;
 		},
 /**
  * This callback is displayed as part of the Requester class.
@@ -1730,7 +1760,7 @@ Mold.addDNA({
 Mold.addDNA({ 
 	name :  "static", 
 	create : function(seed) {
-		return  seed.func();
+		return  seed.func.call();
 	}
 });
 
@@ -1847,3 +1877,6 @@ Mold.onlog(function(type, test){
 	//console.log(type, test);
 });
 
+if(Mold.isNodeJS){
+	module.exports = Mold;
+}

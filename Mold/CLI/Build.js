@@ -7,7 +7,7 @@ Seed({
 	},
 	{
 		command : "build",
-		description : "Builds a Mold app by the specified repos and seeds.",
+		description : "Builds a Mold app by the specified repositories and seeds.",
 		parameter : {
 			'-conf' : {
 				'description' : 'Path to configuration file.'
@@ -22,8 +22,17 @@ Seed({
 				'description' : 'Path to the main seed of the app'
 			}
 		},
-		execute : function(parameter){
+		execute : function(parameter, cli){
 			console.log("executed", parameter)
+
+			cli
+				.write('Schreib was:')
+				.read(function(data){
+					cli.write("I got some data: " + cli.COLOR_GREEN + cli.SYMBOLE_TRUE + cli.COLOR_RESET + data +  " ")
+
+					//cli.exit()
+					
+				});
 		}
 	}
 )

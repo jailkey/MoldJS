@@ -1,0 +1,24 @@
+{
+  "name": "mold-js",
+  "description": "MoldJS structure and pattern framework",
+  "version": "0.0.1",
+  "author": "Jan Kaufmann",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jailkey/MoldJS"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "keywords" : [
+    "pattern",
+    "framework",
+    "mvc"
+  ],
+  "preferGlobal": true,
+  "main": "Mold.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT"
+}

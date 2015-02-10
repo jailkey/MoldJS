@@ -101,51 +101,47 @@ Seed({
 		}
 
 		var init = function(){
+
+			var params = {},
+				name = '',
+				values = [];
+
 			process.argv.forEach(function (val, index, argumentList) {
+				
+				if(index > 1){
 
-				if(Mold.startsWith(val, '-mold-param=')){
-
-					var input = val.replace("-mold-param=", ""),
-						inputParams = input.split(","),
-						params = {},
-						name = '',
-						values = [],
-						command = Mold.trim(inputParams[0]);
-
-					inputParams.forEach(function(paramValue , index){
-
-						if(index > 0){
-							var value = Mold.trim(paramValue);
-							
-							if(Mold.startsWith(value, "-")){
-								if(name){
-									params[name] = values.join(" ");
-									values = [];
-								}
-								name = value.substring(1, value.length);
-								if(Mold.contains(name, '=')){
-									var parts = name.split("=");
-									name = Mold.trim(parts[0]);
-									if(parts[1]){
-										values.push(Mold.trim(parts[1]));
-									}
-								}
-							}else{
-								if(name && Mold.trim(value) !== "="){
-									value = value.replace("=", "");
-									values.push(Mold.trim(value));
-								}
+					if(index === 2){
+						command = Mold.trim(val);
+					}
+				
+					var value = Mold.trim(val);
+					
+					if(Mold.startsWith(value, "-")){
+						if(name){
+							params[name] = values.join(" ");
+							values = [];
+						}
+						name = value.substring(1, value.length);
+						if(Mold.contains(name, '=')){
+							var parts = name.split("=");
+							name = Mold.trim(parts[0]);
+							if(parts[1]){
+								values.push(Mold.trim(parts[1]));
 							}
 						}
-					});
+					}else{
+						if(name && Mold.trim(value) !== "="){
+							value = value.replace("=", "");
+							values.push(Mold.trim(value));
+						}
+					}
 
 					if(name){
 						params[name] = values.join(" ");
 					}
-
-					_that.trigger('command', { command : command, parameter : params})
 				}
 			});
+			_that.trigger('command', { command : command, parameter : params})
 		}
 
 

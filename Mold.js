@@ -233,17 +233,32 @@ var Mold = (function(config){
 				}
 
 			});
+
+			if(!output){
+				output = "->Mold.Lib.CLI";
+			}
+
 			if(!_config.externalRepository){
 				_config.externalRepository =  __dirname  + "/";
 			}
 			if(!_config.localRepository){
-				_config.localRepository =  __dirname  + "/";
+				
+				var fileSystem = require('fs'),
+					localPath = process.cwd() + "/";
+				
+				if(fileSystem.existsSync(localPath + "/Mold")){
+					_config.localRepository =  localPath;
+				}else{
+					_config.localRepository =  __dirname  + "/";
+				}
+
 			}
 
 			if(Mold){
 				Mold.EXTERNAL_REPOSITORY = _config.externalRepository;
 				Mold.LOCAL_REPOSITORY = _config.localRepository;
 			}
+
 			return output;
 		}else{
 

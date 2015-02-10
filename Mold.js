@@ -223,21 +223,21 @@ var Mold = (function(config){
 						throw new Error("You can not use -extrepo without repositiory path!");
 					}
 				}
-				if(argumentList.length >= 2){
-					output = argumentList[argumentList.length-1];
-
-					var fs =  require('fs');
+				if(val === "-seed"){
 					
-				}else{
-					throw new Error("Main seed is not defined!");
+					if(argumentList[index+1]){
+						output = argumentList[index+1]
+					}else{
+						throw new Error("Main seed is not defined!");
+					}	
 				}
 
 			});
 			if(!_config.externalRepository){
-				_config.externalRepository = "./";
+				_config.externalRepository =  __dirname  + "/";
 			}
 			if(!_config.localRepository){
-				_config.localRepository = "./";
+				_config.localRepository =  __dirname  + "/";
 			}
 
 			if(Mold){
@@ -1863,8 +1863,6 @@ Mold.addDNA({
 
 			if(mainScript){
 				Mold.load({ name : mainScript });
-			}else{
-				throw new Error('Startseed is not defined!')
 			}
 		});
 	}else{

@@ -95,8 +95,8 @@ Seed({
 										//handle external scripts here
 									}else{
 									
-										var newPath = ((rule.isExternal) ? Mold.EXTERNAL_REPOSITORY : path) + rule.file;
-										var loader = _loadSeeds(newPath, collection);
+										var newPath = ((rule.isExternal) ? Mold.EXTERNAL_REPOSITORY : path);
+										var loader = _loadSeeds(newPath, rule.file, collection);
 										includedSeeds.push(loader);
 										loader.then(function(data){
 											collection = collection.concat(data)
@@ -118,6 +118,7 @@ Seed({
 										onloaderror(err)
 									})
 								}else{
+
 									collection.push({
 										name : infos.name,
 										file : path + file,

@@ -10,6 +10,7 @@ Seed({
 		var local = Mold.LOCAL_REPOSITORY;
 		var external = Mold.EXTERNAL_REPOSITORY;
 		var fileSystem = require("fs");
+		var _that = this;
 
 		this.publics = {
 			seedExists : function(seedName, isExternal){
@@ -23,14 +24,15 @@ Seed({
 			addSeed : function(seedName, code, isExternal, overwrite){
 				var path = ((isExternal) ? external : local) + seedName.replace(".", "/") + ".js";
 
-				return new Promise(function(success, error){
-					var exists =  this.seedExists(seedName, isExternal);
+				return new Mold.Lib.Promise(function(success, error){
+					var exists =  _that.seedExists(seedName, isExternal);
 					if(overwrite || !exists){
 						fileSystem.writeFile(path, code, function(err) {
 							if(err){
 								error(err);
+								return;
 							}else{
-								var message = (exists) ? "Seed " + seedName + " updated!" : "Seed " + seedName + " added to " + path + "!";
+								var message = (exists) ? "Seed " + seedName + " successfully updated!" : "Seed " + seedName + " successfully added to " + path + "!";
 								success(message);
 							}
 						});

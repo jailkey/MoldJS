@@ -20,7 +20,6 @@ Seed({
 		var _changeState = function(state, value){
 			
 			if ( _state === state ) {
-				return;
 				throw Error("can't transition to same state: " + state);
 			}
 
@@ -28,7 +27,6 @@ Seed({
 				_state === "fulfilled" 
 				|| _state === "rejeced" 
 			) {
-				return;
 				throw Error("can't transition from current state: " + state);
 			}
 

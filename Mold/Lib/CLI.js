@@ -34,6 +34,7 @@ Seed({
 			showError : function(error){
 				console.log(this.COLOR_RED + error + this.COLOR_RESET)
 			},
+			warn : this.showError,
 		/**
 		 * @method write 
 		 * @description show message 

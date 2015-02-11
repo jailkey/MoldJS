@@ -34,18 +34,37 @@ Seed({
 		
 			return new Mold.Lib.Promise(function(onsuccess, onerror){
 				if(_isLocalPath(path)){
-
+					if(!fileSystem.existsSync(path)){
+						onerror("File " + path + " does not exist!");
+						return;
+					}
+					fileSystem.readFile(path, function (err, data) {
+						
+						if(!data){
+							onerror("The File: " + path + " is Empty!")
+						}else {
+							var buf = new Buffer(data);
+							if(err){
+								onerror(err);
+								return;
+							}else{
+								onsuccess.call(null,  buf.toString());
+							}
+						}
+					});
 				}else{
 
 					request.get(path , function (error, response, body) {
 						if(response.statusCode == 404){
-							onerror.call(null, response.statusCode)
+							onerror.call(null, "File not found: " + path + "!" );
+							return;
 						}
 						if (!error && response.statusCode == 200) {
 							onsuccess.call(null, body);
 							
 						}else{
 							if(onerror){
+								console.log("on error")
 								onerror.call(null, response.statusCode)
 							}
 						}
@@ -60,7 +79,8 @@ Seed({
 				collection = [];
 			}
 
-			return new Promise(function(onsuccess, onerror){
+			return new Promise(function(onsuccess, onloaderror){
+
 				_that.load(path + file)
 					.success(function(code){
 
@@ -68,44 +88,52 @@ Seed({
 							
 							if(infos.header){
 								var includes = Mold.getDependencies(infos.header);
-								var includedSeeds = []
+								var includedSeeds = [];
 								Mold.each(includes, function(value){
 									var rule =  Mold.getLoadingRule({ name : value});
 									if(rule.isScript){
 										//handle external scripts here
 									}else{
-										path = ((rule.isExternal) ? Mold.EXTERNAL_REPOSITORY : path) + rule.file;
-										//repoHandler.seedExist(rule.seedName)
-
-										includedSeeds.push(_loadSeeds(path, collection));
+									
+										var newPath = ((rule.isExternal) ? Mold.EXTERNAL_REPOSITORY : path) + rule.file;
+										var loader = _loadSeeds(newPath, collection);
+										includedSeeds.push(loader);
+										loader.then(function(data){
+											collection = collection.concat(data)
+										})
 									}
 								
 								});
 								if(includes.length){
-									console.log(includedSeeds)
-									/*
+									
 									new Promise().all(includedSeeds).then(function(){
-										console.log("Promis all")
-									})*/
+										collection.push({
+											name : infos.name,
+											file : file,
+											exists : fileSystem.existsSync(file),
+											code : code
+										})
+										onsuccess(collection)
+									}).fail(function(err){
+										onloaderror(err)
+									})
 								}else{
 									collection.push({
 										name : infos.name,
-										file : file,
-										exists : fileSystem.existsSync(file),
+										file : path + file,
+										exists : fileSystem.existsSync(path + file),
 										code : code
 									})
 									onsuccess(collection)
 								}
 							}else{
-								onerror("Seed header not found! " + file)
+								onloaderror("Seed header not found! " + file)
 							}
-							
-							console.log("Seed " + file + " loaded!");
 							
 						})
 					})
 					.fail(function(err){
-						onerror(err);
+						onloaderror(err);
 					});
 			});
 		}
@@ -123,22 +151,14 @@ Seed({
 					}
 				});
 			},
+			copyInfo : function(path, seed){
+				seed = seed.replace(".", "/") + ".js";
+				return _loadSeeds(path, seed);
+			},
 			copy : function(path, seed, to, options){
 				options = options || {};
 				var withoutDependencies = options.withoutDependencies;
-				seed = seed.replace(".", "/") + ".js";
-
-				_loadSeeds(path, seed)
-					.then(function(message){
-						console.log("message", message)
-					})
-					.fail(function(){
-						console.log("fail", fail)
-					});
 				
-				return new Promise(function(onsuccess, onerror){
-					
-				});
 
 				//var infos = this.info(from)
 

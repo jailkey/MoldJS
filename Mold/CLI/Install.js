@@ -42,7 +42,18 @@ Seed({
 			}
 
 			
-			seedHandler.copy(repo, parameter.name);
+			seedHandler.copyInfo(repo, parameter.name).then(function(info){
+				cli.write("\nCheck dependenies:\n")
+				Mold.each(info, function(value){
+					console.log("length", value.length)
+					if(value.exists){
+						cli.write(cli.COLOR_GREEN + value.name + " is all ready installed!" + cli.COLOR_RESET);
+					}
+					console.log("copyInfo", value.exists);
+				})
+			}).fail(function(err){
+				cli.showError(err)
+			});
 		}
 	}
 );

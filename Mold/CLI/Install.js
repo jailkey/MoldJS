@@ -3,14 +3,15 @@ Seed({
 		dna : "cli",
 		include : [
 			"Mold.DNA.CLI",
-			"Mold.Tools.SeedHandler"
+			"Mold.Tools.SeedHandler",
+			"Mold.Tools.RepoHandler"
 		]
 	},
 	{
 		command : "install",
 		description : "Install seed from the given repository",
 		parameter : {
-			'-g' : {
+			'--g' : {
 				'description' : 'Install the seed global'
 			},
 			'-repository' : {
@@ -18,13 +19,15 @@ Seed({
 			},
 			'-name' : {
 				'description' : 'Path to the repository'
-			}
+			},
+			'--without-dependencies' : "Install the seed without dependencies"
 		},
 		execute : function(parameter, cli){
 
 			var fileSystem = require("fs");
 			var repo = 'http://localhost/MoldTestRepo/' || parameter.repository;
 			var seedHandler = new Mold.Tools.SeedHandler();
+			var repoHandler = new Mold.Tools.RepoHandler();
 
 			var methodes = {
 				isSeedInstalled : function(seedName){
@@ -43,14 +46,31 @@ Seed({
 
 			
 			seedHandler.copyInfo(repo, parameter.name).then(function(info){
-				cli.write("\nCheck dependenies:\n")
+				var existing = {};
+				var notExisting = [];
+				cli.write("\nInstall "+parameter.name+" with dependencies:\n")
 				Mold.each(info, function(value){
-					console.log("length", value.length)
-					if(value.exists){
-						cli.write(cli.COLOR_GREEN + value.name + " is all ready installed!" + cli.COLOR_RESET);
+					if(value.exists && !existing[value.name]){
+						cli.write(cli.COLOR_YELLOW + "  Skip " + value.name + ", it is all ready installed!" + cli.COLOR_RESET + "\n");
+						existing[value.name] = true;
 					}
-					console.log("copyInfo", value.exists);
-				})
+					if(!value.exists){
+						notExisting.push(value);
+					}
+				});
+				Mold.each(notExisting, function(val){
+
+					cli.write("  Try to install " + val.name + "! \n");
+
+					repoHandler.addSeed(val.name, val.code, false).then(function(success){
+						cli.write(cli.COLOR_GREEN + success + cli.COLOR_RESET + "\n");
+					}).fail(function(err){
+						cli.showError(err)
+					})
+					
+				});
+			;
+
 			}).fail(function(err){
 				cli.showError(err)
 			});

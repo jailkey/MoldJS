@@ -3,12 +3,18 @@
 Seed({
 		name : "Mold.Lib.CLI",
 		dna : "static",
+		platform : 'node',
 		include : [
 			'Mold.Lib.Event',
 			{ Promise : 'Mold.Lib.Promise' }
 		]
 	},
 	function(){
+
+		if(!Mold.isNodeJS){
+			throw Error("You can use Mold.Lib.CLI only with NodeJS!");
+		}
+
 
 		var _that = this,
 			_commands = [];
@@ -17,12 +23,8 @@ Seed({
 			
 		Mold.mixin(this, new Mold.Lib.Event(this));
 
-		if(!Mold.isNodeJS){
-			throw Error("You can use Mold.Lib.CLI only with NodeJS!");
-		}
 
 		//CLI interface
-		
 		var cliInterface = {
 		/**
 		 * @method showError
@@ -104,13 +106,18 @@ Seed({
 
 			var params = {},
 				name = '',
-				values = [];
+				values = [],
+				commadPos = 2;
 
 			process.argv.forEach(function (val, index, argumentList) {
 				
-				if(index > 1){
+				if(val === "-seed" || val === "-repo" | val === "-extrepo"){
+					commadPos += 2;
+				}
 
-					if(index === 2){
+				if(index >= commadPos){
+
+					if(index === commadPos){
 						command = Mold.trim(val);
 					}
 				

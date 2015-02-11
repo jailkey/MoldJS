@@ -438,6 +438,54 @@ var Mold = (function(config){
 		SEED_STATUS_PREPROZESSING : '--preprozessing--',
 		seedList  : [],
 		stopExecution : false,
+	/**
+	 * @method getDependencies
+	 * @description returns all Depencies from a seed header in a list
+	 * @param  {[type]} header [description]
+	 * @return {[type]}        [description]
+	 */
+		getDependencies : function(header){
+
+			var loadingproperties = Mold.getLoadingproperties(),
+				dependencies = [],
+				subSeeds = [],
+				imports = [],
+				that = [];
+
+			var parseDependencies = function(dependency){
+				var dep = [],
+					sub = [];
+
+				if(typeof dependency === "object"){
+					Mold.each(dependency, function(element){
+						if(Mold.isArray(element)){
+							var parsedSub = parseDependencies(element);
+							sub = sub.concat(parsedSub.dep);
+							sub = sub.concat(parsedSub.sub);
+						}else{
+							dep.push(element);
+						}
+					});
+				}else{
+					dep.push(dependency);
+				}
+				return { dep : dep, sub : sub};
+			}
+
+			Mold.each(loadingproperties, function(property){
+				if(header[property]){
+					imports = imports.concat(_getImports(header[property]));
+					header[property] = _removeImports(header[property]);
+					var parsed = parseDependencies(header[property]);
+					dependencies = dependencies.concat(parsed.dep);
+					subSeeds = subSeeds.concat(parsed.sub);
+				}
+			});
+			
+			dependencies = dependencies.concat(subSeeds);
+		
+			return dependencies;
+		},
 
 /**
 * @namespace Mold

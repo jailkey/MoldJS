@@ -15,10 +15,10 @@ Seed({
 	},
 	function(){
 
-		var request = require('request');
-		var fileSystem = require('fs');
-		var _that = this;
-		var repoHandler = new Mold.Tools.RepoHandler();
+		var request = require('request'),
+			fileSystem = require('fs'),
+			_that = this,
+			repoHandler = new Mold.Tools.RepoHandler();
 
 		Mold.mixin(this, new Mold.Lib.Event(this));
 
@@ -29,6 +29,8 @@ Seed({
 			}
 			return true
 		}
+
+
 		//Load Seed
 		var _loadSeed = function(path){
 		
@@ -64,13 +66,34 @@ Seed({
 							
 						}else{
 							if(onerror){
-								console.log("on error")
-								onerror.call(null, response.statusCode)
+								onerror.call(null, "HTTP Error: " + response.statusCode + " - on: " + path);
 							}
 						}
 					});
 				}
 			});
+		}
+
+		var _addToCollection = function(value, collection){
+			
+			if(Mold.isArray(value)){
+				Mold.each(value, function(element){
+					collection = _addToCollection(element, collection);
+				})
+				return collection;
+			}
+
+			var test = Mold.find(collection, function(check){
+				if(check.name === value.name){
+					return true;
+				}
+			});
+
+			if(!test){
+				collection.push(value)
+			}
+
+			return collection;
 		}
 
 		var _loadSeeds = function(path, file, collection){
@@ -99,32 +122,31 @@ Seed({
 										var loader = _loadSeeds(newPath, rule.file, collection);
 										includedSeeds.push(loader);
 										loader.then(function(data){
-											collection = collection.concat(data)
+											_addToCollection(data, collection)
+											//collection = collection.concat(data)
 										})
 									}
 								
 								});
 								if(includes.length){
-									
 									new Promise().all(includedSeeds).then(function(){
-										collection.push({
+										collection = _addToCollection({
 											name : infos.name,
 											file : file,
 											exists : fileSystem.existsSync(file),
 											code : code
-										})
+										}, collection)
 										onsuccess(collection)
 									}).fail(function(err){
 										onloaderror(err)
 									})
 								}else{
-
-									collection.push({
+									collection = _addToCollection({
 										name : infos.name,
 										file : path + file,
-										exists : fileSystem.existsSync(path + file),
+										exists : fileSystem.existsSync(file),
 										code : code
-									})
+									}, collection)
 									onsuccess(collection)
 								}
 							}else{
@@ -141,6 +163,14 @@ Seed({
 
 		this.publics = {
 			load : _loadSeed,
+
+		/**
+		 * @method  info
+		 * @description  returns infos about the given seed
+		 * @param  {string} path     path to the seed / seed code
+		 * @param  {boolean} fromCode if true, path will parsed as code string
+		 * @return {promise} returns a promise
+		 */
 			info : function(path, fromCode){
 				return new Mold.Lib.Promise(function(success, error){
 					if(fromCode){
@@ -152,15 +182,21 @@ Seed({
 					}
 				});
 			},
-			copyInfo : function(path, seed){
-				seed = seed.replace(".", "/") + ".js";
+		/**
+		 * @method infos
+		 * @description returns infos about a seed and it dependencies
+		 * @param  {string} path the path to the seed.
+		 * @param  {string} seed name of the seed
+		 * @return {promise} returns a promise
+		 */
+			infos : function(path, seed){
+				seed = Mold.getSeedPath(seed);
 				return _loadSeeds(path, seed);
 			},
 			copy : function(path, seed, to, options){
 				options = options || {};
 				var withoutDependencies = options.withoutDependencies;
 				
-
 				//var infos = this.info(from)
 
 			}

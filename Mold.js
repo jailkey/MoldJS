@@ -602,10 +602,10 @@ var Mold = (function(config){
 * @methode some
 * @desc iterates through an array until the specified callback returns false
 * @public
-* @return (boolean) returns true if the callback function returns true for each element, otherwise it returns false; 
 * @param (Object) collection - the list
 * @param (function) iterator - a callback function
 * @param (object) context - context Object
+* @return (boolean) returns true if the callback function returns true for each element, otherwise it returns false; 
 **/
 		some : function(collection, iterator, context){
 			var result = false;
@@ -1047,6 +1047,11 @@ var Mold = (function(config){
 		getRawSeed : function(name){
 			return _createdMold[name];
 		},
+
+		getSeedPath : function(name){
+			return name.split(".").join("/") + ".js"
+		},
+
 /**
 * @methode getSeedChainName
 * @desc Returns the seed chain from the seed object without the root object

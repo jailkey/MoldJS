@@ -20,50 +20,58 @@ Seed({
 			'-name' : {
 				'description' : 'Path to the repository'
 			},
-			'--without-dependencies' : "Install the seed without dependencies"
+			'--without-dependencies' : {
+				'description' : 'Install the seed without dependencies'
+			},
+			'--overwrite' : {
+				'description' : 'Overwrite existing seeds'
+			}
 		},
 		execute : function(parameter, cli){
 
-			var fileSystem = require("fs");
-			var repo = 'http://localhost/MoldTestRepo/' || parameter.repository;
-			var seedHandler = new Mold.Tools.SeedHandler();
-			var repoHandler = new Mold.Tools.RepoHandler();
+			var fileSystem = require("fs"),
+				repo = parameter.repository || 'http://www.moldjs.de/repo/',
+				seedHandler = new Mold.Tools.SeedHandler(),
+				targetRepo = false,
+				overwrite = Mold.is(parameter['-overwrite']),
+				globalInstall = Mold.is(parameter['-g']),
+				repoHandler = new Mold.Tools.RepoHandler();
 
-			var methodes = {
-				isSeedInstalled : function(seedName){
-
-				}
-			}
 
 			if(!parameter.name){
 				cli.showError("-name parameter must be set!");
 				return false;
 			}
 
-			if(parameter.repository){
-				repo = repository
+
+
+			if(globalInstall){
+				targetRepo = Mold.EXTERNAL_REPOSITORY;
+			}else{
+				targetRepo = Mold.LOCAL_REPOSITORY;
 			}
 
 			
-			seedHandler.copyInfo(repo, parameter.name).then(function(info){
-				var existing = {};
-				var notExisting = [];
-				cli.write("\nInstall "+parameter.name+" with dependencies:\n")
+			seedHandler.infos(repo, parameter.name).then(function(info){
+				
+				var existing = {},
+					toAdd = [];
+
+				cli.write("\nInstall "+parameter.name+" with dependencies into: " + targetRepo + "\n");
+				cli.write("Overwrite existing \n")
 				Mold.each(info, function(value){
-					if(value.exists && !existing[value.name]){
-						cli.write(cli.COLOR_YELLOW + "  Skip " + value.name + ", it is all ready installed!" + cli.COLOR_RESET + "\n");
+					if(value.exists && !existing[value.name] && !overwrite){
+						cli.write(cli.COLOR_YELLOW + "  Skip " + value.name + ", it is already installed!" + cli.COLOR_RESET + "\n");
 						existing[value.name] = true;
-					}
-					if(!value.exists){
-						notExisting.push(value);
+					}else{
+						toAdd.push(value);
 					}
 				});
-				Mold.each(notExisting, function(val){
 
-					cli.write("  Try to install " + val.name + "! \n");
+				Mold.each(toAdd, function(val){
 
-					repoHandler.addSeed(val.name, val.code, false).then(function(success){
-						cli.write(cli.COLOR_GREEN + success + cli.COLOR_RESET + "\n");
+					repoHandler.addSeed(val.name, val.code, globalInstall, overwrite).then(function(success){
+						cli.write("  " +cli.COLOR_GREEN + success + cli.COLOR_RESET + "\n");
 					}).fail(function(err){
 						cli.showError(err)
 					})

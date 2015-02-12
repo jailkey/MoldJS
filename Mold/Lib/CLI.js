@@ -149,7 +149,9 @@ Seed({
 					}
 				}
 			});
-			_that.trigger('command', { command : command, parameter : params})
+			if(command){
+				_that.trigger('command', { command : command, parameter : params})
+			}
 		}
 
 
@@ -186,9 +188,17 @@ Seed({
 			//console.log("e", e.data.command, e.data.parameter)
 		})
 
+		var fileSystem = require('fs');
+
 		setTimeout(function(){
-			Mold.load({ name : "Mold.CLI.*"}).bind(function(){
-				init();
+			Mold.load({ name : "->Mold.CLI.*"}).bind(function(){
+				if(fileSystem.existsSync(Mold.LOCAL_REPOSITORY + "Mold/CLI/*.js")){
+					Mold.load({ name : "Mold.CLI.*"}).bind(function(){
+						init();
+					});
+				}else{
+					init();
+				}
 			});
 		}, 10);
 

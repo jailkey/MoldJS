@@ -9,7 +9,7 @@ Seed({
 			"Mold.Tools.RepoHandler"
 		],
 		npm : {
-			"request" : ">=2.50.0"
+			"request" : ">=2.5.0",
 		}
 
 	},
@@ -116,6 +116,9 @@ Seed({
 									var rule =  Mold.getLoadingRule({ name : value});
 									if(rule.isScript){
 										//handle external scripts here
+										if(rule.isVendor){
+
+										}
 									}else{
 									
 										var newPath = ((rule.isExternal) ? Mold.EXTERNAL_REPOSITORY : path);
@@ -123,7 +126,6 @@ Seed({
 										includedSeeds.push(loader);
 										loader.then(function(data){
 											_addToCollection(data, collection)
-											//collection = collection.concat(data)
 										})
 									}
 								
@@ -132,6 +134,7 @@ Seed({
 									new Promise().all(includedSeeds).then(function(){
 										collection = _addToCollection({
 											name : infos.name,
+											header : infos.header,
 											file : file,
 											exists : fileSystem.existsSync(file),
 											code : code
@@ -143,6 +146,7 @@ Seed({
 								}else{
 									collection = _addToCollection({
 										name : infos.name,
+										header : infos.header,
 										file : path + file,
 										exists : fileSystem.existsSync(file),
 										code : code

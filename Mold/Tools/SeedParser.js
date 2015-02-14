@@ -29,6 +29,7 @@ Seed({
 			name : result.header.name,
 			dna : result.header.dna,
 			version : result.header.version,
+			npm : result.header.npm,
 			header : result.header
 		}
 	}

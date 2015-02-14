@@ -1741,9 +1741,7 @@ Mold.addLoadingRule("external", function(seed){
 
 Mold.addLoadingRule("standard", function(seed){
  	if(
- 		seed.name.indexOf("->") === -1 
- 		&& seed.name.indexOf("http:") === -1
- 		&& seed.name.indexOf("https:") === -1
+ 		Mold.startsWith(seed.name, "Mold")
  	 ){
  		var path = Mold.LOCAL_REPOSITORY,
  			seedName = seed.name,
@@ -1777,8 +1775,7 @@ Mold.addLoadingRule("external_script", function(seed){
  		|| Mold.startsWith(seed.name, "https:")
  	 ){
  		var path = seed.name,
- 			seedName = seed.name,
- 			fileParts = seedName.split(".");
+ 			seedName = seed.name;
 		
 		return { path : '', file : seed.name, isExternal : false, seedName: seedName, isScript : true }
  	}else{
@@ -1786,19 +1783,20 @@ Mold.addLoadingRule("external_script", function(seed){
  	}
  });
 
-Mold.addSeedNameCleaner("standard", function(seedName){
-	if(Mold.startsWith(seedName, "->")){
-		seedName = seedName.slice(2, seedName.length);
-	}
-	if(seedName.indexOf("->") > -1){
-		if(seedName.indexOf("->") === 0){
-			seedName = seedName.split("->")[0];
-		}else{
-			seedName = seedName.split("->")[1];
-		}
-	}
-	return seedName;
-});
+Mold.addLoadingRule("vendor_script", function(seed){
+ 	if( 
+ 		Mold.startsWith(seed.name, "/vendor")
+ 		|| Mold.startsWith(seed.name, "vendor")
+ 	 ){
+ 		var path = seed.name,
+ 			seedName = seed.name;
+		
+		return { path : '', file : seed.name, isExternal : false, isVendor : true, seedName: seedName, isScript : true }
+ 	}else{
+ 		return false;
+ 	}
+ });
+
 
 
 Mold.addDNA({ 

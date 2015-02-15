@@ -18,11 +18,32 @@ Seed({
 
 
 		var _that = this,
-			_commands = [];
+			_commands = [],
+			readline = require('readline'),
+			fs = require("fs"),
+			_reader = false,
+			_readerMethod = false;
 
 		process.stdin.setEncoding('utf8');
 			
 		Mold.mixin(this, new Mold.Lib.Event(this));
+
+
+
+
+		var _initReader = function(onclose, completer){
+			if(_reader){
+				_reader.close();
+			}
+			_reader = readline.createInterface({
+				input: process.stdin,
+				output: process.stdout,
+				completer : completer,
+			});
+			
+			return _reader;
+		}
+
 
 
 		//CLI interface
@@ -52,13 +73,18 @@ Seed({
 		 * @param  {Function} callback will be executed if the user press Enter
 		 * @return {object} this
 		 */
-			read : function(callback){
+			read : function(question, callback, completer){
 				
-				process.stdin.on('data', function(chunk) {
-					var buf = new Buffer(chunk);
-					callback(buf.toString());
-				});
+				question = question || "";
+				var reader = _initReader(function(){
+					//console.log("on close")
+				}, completer)
 
+				reader.question(question, function(data){
+					callback(data, reader)
+
+				})
+				
 				return this;
 			},
 			createForm : function(fields){
@@ -84,14 +110,71 @@ Seed({
 				process.exit(0);
 				return this;
 			},
-			COLOR_RESET : "\033[0m",
+			completer : {
+				default : function(line){
+					return [[], line];
+				},
+				yesno :  function(line){
+					var completions = ['yes', 'no'];
+					var hits = completions.filter(function(c) { return c.indexOf(line) == 0 });
+
+  					return [hits.length ? hits : completions, line]
+				},
+				filesystem : function(line){
+					line = Mold.trim(line);
+					if(line !== ""){
+
+						var path = Mold.trim(line.substr(0, line.lastIndexOf("/"))),
+							lineParts = line.split("/"),
+							searchString = lineParts[lineParts.length -1],
+							searchPath = path,
+							hits = [];
+
+						if(!Mold.startsWith(line, "/")){
+							searchPath = process.cwd() + "/" + path;
+						}else{
+							searchPath = "/" + path;
+						}
+						if(fs.existsSync(searchPath)){
+							var result = fs.readdirSync(searchPath);
+							hits = result.filter(function(entry) {  
+								return Mold.startsWith(entry, searchString) 
+							});
+
+							if(Mold.startsWith(line, "/")){
+								Mold.each(hits, function(value, index){
+									hits[index] = "/" + value;
+								});
+							}
+							
+							if(path != "" ){
+								Mold.each(hits, function(value, index){
+									if(Mold.endsWith(path, "/") || Mold.startsWith(value, "/")){
+										hits[index] = path + value;
+									}else{
+										hits[index] = path + "/" + value;
+									}
+								})
+							}
+							if(!hits.length){
+								hits = result;
+							}
+						}
+						
+						return  [hits, line];
+					}else{
+						return  [[], line];
+					}
+				}
+			},
+			COLOR_RESET : "\u001b[39m", //"\033[0m",
 			COLOR_BLACK : "\033[0;30m",
-			COLOR_RED : "\033[0;31m",
+			COLOR_RED : "\u001b[31m",//"\033[0;31m",
 			COLOR_GREEN : "\033[0;32m",
 			COLOR_YELLOW : "\033[0;33m",
 			COLOR_BLUE : "\033[0;34m",
 			COLOR_PURPLE : "\033[0;35m",
-			COLOR_CYAN : "\033[0;36m",
+			COLOR_CYAN : "\u001b[36m",//"\033[0;36m",
 			COLOR_WHITE : "\033[0;37m",
 			SYMBOLE_TRUE : "✓",
 			SYMBOLE_FALSE : "✗"

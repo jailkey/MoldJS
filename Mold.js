@@ -367,7 +367,7 @@ var Mold = (function(config){
 			
 			//delete unnecessary stuff 
 			code = code.substring(0, code.lastIndexOf("}")+1);
-			code = code.replace("anonymous", "");
+			code = code.replace(/anonymous/g, "");
 
 			//split function into parameter an code
 			var pattern = new RegExp("function\\s*\(([\\s\\S]*?)\)\\s*\{([\\s\\S]*?)\}$", "g"),
@@ -1536,9 +1536,10 @@ var Mold = (function(config){
 				reg = new RegExp("(function\\s*\([\\s\\S]*?\)\\s*\{)([\\s\\S]*)");
 			
 			helperClass.prototype = superClass.prototype;
-			
+			subClass = subClass.toString().replace("anonymous", "");
 			if(reg.test(subClass)){
 				var parameter = RegExp.$2.replace(")","").replace("(", "").replace(" ", "").split(","); 
+
 				var newConstructor = "\n\t this."+superclassname+".constructor.apply(this, arguments); \n"
 				if(config && config.sourceURL){
 					newConstructor += "\n\t\/\/#sourceURL="+config.sourceURL+"\n";

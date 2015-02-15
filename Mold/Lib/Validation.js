@@ -11,12 +11,18 @@ Seed({
 		}
 
 		_validations["number"] = function(value){
-			//console.log(value, "test number")
 			return !isNaN(parseFloat(value)) && isFinite(value);
 		}
 
 		_validations["required"] = function(value){
 			return (value === "") ? false : true;
+		}
+
+		_validations["yesno"] = function(value){
+			if(value === "yes" || value === "no"){
+				return true;
+			}
+			return false;
 		}
 
 		return {

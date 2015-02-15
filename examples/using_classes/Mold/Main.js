@@ -7,7 +7,7 @@ Seed({
 	},
 	function(){	
 	
-		var instance = new Mold.SubClass();
+		var instance = new Mold.SubClass("TEst", "asdasd");
 
 		instance.superClassMethod();
 

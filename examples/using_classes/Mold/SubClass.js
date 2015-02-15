@@ -3,7 +3,8 @@ Seed({
 		dna : "class",
 		extend : "Mold.SuperClass"
 	},
-	function(){
+	function(testone, testtwo){
+	
 
 		this.publics = {
 			subClassMethod : function(){

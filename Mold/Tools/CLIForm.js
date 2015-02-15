@@ -18,50 +18,54 @@ Seed({
 		Mold.mixin(this, new Mold.Lib.Event(this));
 
 		var _executeField = function(field){
-			return new Mold.Lib.Promise(function(success, error){
-				_cli.write(field.label);
-				_cli.read(function(data){
-					console.log("readed", data)
-					if(field.input.validate){
+			var readFunc = function(data, reader){
+		
+				data = Mold.trim(data);
+				
+				_collected[field.input.name] = data;
+				if(field.input.validate){
 
-						var validation = Validation.get(field.input.validate)
-						if(validation && validation(data)){
-							_collected[field.input.name] = data;
-							if(field.input.message.success){
-								if(typeof field.input.message.success === "function"){
-									_cli.write(field.input.message.success(data));
-								}else{
-									_cli.write(field.input.message.success);
-								}
+					var validation = Validation.get(field.input.validate);
+					if(validation && validation(data)){
+						
+						if(field.input.messages.success){
+							if(typeof field.input.messages.success === "function"){
+								_cli.write(field.input.messages.success(data) + "\n");
+							}else{
+								_cli.write(field.input.messages.success + "\n");
+							}
 
-								
-							}
-							if(field.input.onsuccess){
-								field.input.onsuccess(_that, data);
-							}
-							success(data);
-						}else{
-							if(field.input.message.error){
-								if(typeof field.input.message.error === "function"){
-									_cli.write(field.input.message.error(data));
-								}else{
-									_cli.write(field.input.message.error);
-								}
-							}
-							if(field.input.onsuccess){
-								field.input.onsuccess(_that, data);
-							}
-							error(data)
 						}
-					}else{
 						if(field.input.onsuccess){
-							field.input.onsuccess(_that, data);
+							field.input.onsuccess.call(_that, data, reader)
 						}
-						success(data);
+					
+					}else{
+						
+						if(field.input.messages.error){
+							if(typeof field.input.messages.error === "function"){
+								_cli.showError(field.input.messages.error(data));
+							}else{
+								_cli.showError(field.input.messages.error);
+							}
+						}
+						
+						_that.repeat();
+						
 					}
-					_that.trigger("input", { data : data} );
-				});
-			})
+				}else{
+					if(field.input.onsuccess){
+						field.input.onsuccess.call(_that, data, reader);
+					}
+					success(data);
+				}
+				_that.trigger("input", { data : data} );
+			}
+			_cli.write("\n");
+			_cli.read(field.label + " ", function(data, reader){
+				readFunc(data, reader);
+			}, _cli.completer[field.input.type] || _cli.completer.default);
+		
 		}
 
 		this.publics = {
@@ -71,15 +75,21 @@ Seed({
 			getData : function(){
 				return _collected;
 			},
+			exit : _cli.exit,
 			start : function(){
 				_count = -1;
 				return this.next();
+			},
+			repeat : function(){
+				var field = _fields[_count];
+				_executeField(field);
 			},
 			previous : function(){
 				_count--;
 				if(_count >= 0){
 					var field = _fields[_count];
-					return _executeField(field);
+					_executeField(field);
+					return true;
 				}else{
 					this.trigger("start");
 					return false;
@@ -89,7 +99,8 @@ Seed({
 				_count = (pos) ? _count + pos : _count + 1;
 				if(_fields.length > _count){
 					var field = _fields[_count];
-					return _executeField(field);
+					_executeField(field);
+					return true;
 				}else{
 					this.trigger("end");
 					return false;

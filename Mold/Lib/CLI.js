@@ -6,6 +6,7 @@ Seed({
 		platform : 'node',
 		include : [
 			'Mold.Lib.Event',
+			'Mold.Tools.CLIForm',
 			{ Promise : 'Mold.Lib.Promise' }
 		]
 	},
@@ -60,19 +61,21 @@ Seed({
 
 				return this;
 			},
-			form : function(form){
+			createForm : function(fields){
 				/*
-				{
+				[{
 					label : "Hallo sag was:",
 					input : {
+						name : 'test',
 						type : 'text',
 						validate : 'required',
 						messages : {
 							error : "Is not valid!",
-							success : "Supi!"
+							success : "Supi! | function"
 						}
 					}
-				}*/
+				}]*/
+				return  new Mold.Tools.CLIForm(this, fields);
 			},
 			key : function(){
 

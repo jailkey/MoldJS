@@ -3,7 +3,8 @@ Seed({
 		dna : 'package',
 		include : [
 			"Mold.CLI.Build",
-			"Mold.CLI.Install"
+			"Mold.CLI.Install",
+			"Mold.CLI.Project"
 		]
 	}
 )

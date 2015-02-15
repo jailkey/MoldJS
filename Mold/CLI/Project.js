@@ -20,37 +20,47 @@ Seed({
 					label : "Do you wont to work with to repositorys (yes/no)?",
 					input : {
 						name : 'repocount',
-						type : 'text',
+						type : 'yesno',
 						validate : 'yesno',
 						messages : {
-							error : "please answer the question with yes or no!",
+							error : "Please answer the question with yes or no!",
 							success : function(data){
 								if(data === "yes"){
-									return "Ok  lets work with two repository"
+									return "Ok lets work with two repositories"
 								}
 							}
 						},
-						onsuccess : function(form, data){
-							form.next(2);
+						onsuccess : function(data){
+							if(data === "no"){
+								this.next(2);
+							}else{
+								this.next();
+							}
 						}
 					}
 				},
 				{
 					label : "Path to your local repository?",
 					input : {
-						name : 'test',
-						type : 'text',
-						validate : 'required',
+						name : 'localrepo',
+						type : 'filesystem',
 						messages : {
 							error : "Is not valid!",
-							success : "Supi! | function"
+							success : "Merci!"
+						},
+						onsuccess : function(){
+							console.log("ONSUCCESEE MESSAGE 2");
+							this.next();
 						}
 					}
-				},
-				{
-
 				}
 			])
+
+			form.on("end", function(){
+				console.log("end")
+				console.log("formvalues", form.getData());
+				form.exit();
+			})
 
 			form.start();
 		}

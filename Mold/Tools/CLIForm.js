@@ -21,25 +21,28 @@ Seed({
 			var readFunc = function(data, reader){
 		
 				data = Mold.trim(data);
+
+
+				var success = function(data){
+					if(field.input.messages.success){
+						if(typeof field.input.messages.success === "function"){
+							_cli.write(field.input.messages.success(data) + "\n");
+						}else{
+							_cli.write(field.input.messages.success + "\n");
+						}
+
+					}
+					if(field.input.onsuccess){
+						field.input.onsuccess.call(_that, data, reader)
+					}
+				}
 				
 				_collected[field.input.name] = data;
 				if(field.input.validate){
 
 					var validation = Validation.get(field.input.validate);
 					if(validation && validation(data)){
-						
-						if(field.input.messages.success){
-							if(typeof field.input.messages.success === "function"){
-								_cli.write(field.input.messages.success(data) + "\n");
-							}else{
-								_cli.write(field.input.messages.success + "\n");
-							}
-
-						}
-						if(field.input.onsuccess){
-							field.input.onsuccess.call(_that, data, reader)
-						}
-					
+						success(data);
 					}else{
 						
 						if(field.input.messages.error){
@@ -54,9 +57,6 @@ Seed({
 						
 					}
 				}else{
-					if(field.input.onsuccess){
-						field.input.onsuccess.call(_that, data, reader);
-					}
 					success(data);
 				}
 				_that.trigger("input", { data : data} );
@@ -84,11 +84,20 @@ Seed({
 				var field = _fields[_count];
 				_executeField(field);
 			},
-			previous : function(){
-				_count--;
+			previous : function(pos){
+				_count = (pos) ? _count - pos : _count - 1;
 				if(_count >= 0){
 					var field = _fields[_count];
 					_executeField(field);
+					if(field.condition){
+						if(field.condition()){
+							_executeField(field);
+						}else{
+							this.previous();
+						}
+					}else{
+						_executeField(field);
+					}
 					return true;
 				}else{
 					this.trigger("start");
@@ -99,7 +108,15 @@ Seed({
 				_count = (pos) ? _count + pos : _count + 1;
 				if(_fields.length > _count){
 					var field = _fields[_count];
-					_executeField(field);
+					if(field.condition){
+						if(field.condition()){
+							_executeField(field);
+						}else{
+							this.next();
+						}
+					}else{
+						_executeField(field);
+					}
 					return true;
 				}else{
 					this.trigger("end");

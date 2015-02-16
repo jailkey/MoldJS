@@ -87,29 +87,47 @@ Seed({
 				
 				return this;
 			},
+		/**
+		 * @method  createForm 
+		 * @description creates a cli form
+		 * @param  {array} fields an array with the field definition
+		 * @return {object}  returns an instace of Mold.Tool.CLIForm
+		 * @description 
+		 *
+	     *	[{
+		 *    	label : "some question?:",
+		 *     	input : {
+		 *      	name : 'path',
+		 *       	type : 'filesystem',
+		 *        	validate : 'required',
+		 *         	messages : {
+		 *          	error : "Is not valid!",
+		 *           	success : function(data){
+		 *           		if(data === 1){
+		 *           			return "yuhu one!"
+		 *           		}
+		 *           	}
+		 *          }
+		 *      }
+		 *   }]
+		 */
 			createForm : function(fields){
-				/*
-				[{
-					label : "Hallo sag was:",
-					input : {
-						name : 'test',
-						type : 'text',
-						validate : 'required',
-						messages : {
-							error : "Is not valid!",
-							success : "Supi! | function"
-						}
-					}
-				}]*/
 				return  new Mold.Tools.CLIForm(this, fields);
 			},
-			key : function(){
-
-			},
+		/**
+		 * @method  exit
+		 * @description exits the cli
+		 * @return {[type]} [description]
+		 */
 			exit : function(){
 				process.exit(0);
 				return this;
 			},
+		/**
+		 * complete
+		 * @description a set off auto complete functions
+		 * @type {Object}
+		 */
 			completer : {
 				default : function(line){
 					return [[], line];
@@ -167,16 +185,29 @@ Seed({
 					}
 				}
 			},
+		/**
+		 * @method  addCompleter
+		 * @description adds a custome completer
+		 * @param {string}   name of the completer
+		 * @param {Function} callback completer function
+		 */
+			addCompleter : function(name, callback){
+				this.completer[name] = callback;
+			},
+		/**
+		 * @description colors and symboles you could use to format your cli output
+		 * @type {String}
+		 */
 			COLOR_RESET : "\u001b[39m", //"\033[0m",
 			COLOR_BLACK : "\033[0;30m",
 			COLOR_RED : "\u001b[31m",//"\033[0;31m",
-			COLOR_GREEN : "\033[0;32m",
+			COLOR_GREEN : "\u001b[32m",
 			COLOR_YELLOW : "\033[0;33m",
 			COLOR_BLUE : "\033[0;34m",
 			COLOR_PURPLE : "\033[0;35m",
 			COLOR_CYAN : "\u001b[36m",//"\033[0;36m",
 			COLOR_WHITE : "\033[0;37m",
-			SYMBOLE_TRUE : "✓",
+			SYMBOLE_TRUE : "\u001b[32m" + "✓" + "\u001b[39m",
 			SYMBOLE_FALSE : "✗"
 		}
 
@@ -289,24 +320,33 @@ Seed({
 		}, 10);
 
 		return {
-			/**
-			 * @method addCommand
-			 * @description adds a new CLI Command to Mold
-			 * @param {object} [command] an object with the command
-			 * @example
-				{
-					command : 'name of the command',
-					parameter : {
-						'-name' : {
-							'description' : 'description value',
-						}
-					},
-					execute : function(parameter){
-						
+		/**
+		 * @method executeCommand
+		 * @description excute the specified command
+		 * @param  {string} command   the command
+		 * @param  {object} parameter command parameter
+		 */
+			executeCommand : function(command, parameter){
+				this.trigger('command', { command : command, parameter : parameter});
+			},
+		/**
+		 * @method addCommand
+		 * @description adds a new CLI Command to Mold
+		 * @param {object} [command] an object with the command
+		 * @example
+			{
+				command : 'name of the command',
+				parameter : {
+					'-name' : {
+						'description' : 'description value',
 					}
+				},
+				execute : function(parameter, cli){
+					
 				}
-		
-			 */
+			}
+	
+		 */
 			addCommand : function(command){
 				_commands.push(command, this);
 			}

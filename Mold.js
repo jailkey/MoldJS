@@ -83,16 +83,15 @@ var Mold = (function(config){
 		return seed.name.substring(0, seed.name.lastIndexOf("."));
 	};
 	
-	var _isSeedAdded = function(target){
-		
-		var cleanedName = Mold.cleanSeedName(target);
+	var _isSeedAdded = function(target, parent){
+		var cleanedName = Mold.cleanSeedName(target, parent);
 		return ( _createdMold[ cleanedName ] ) ? true : false;
 	};
 	
-	var _onlySubSeeds = function(seedList){
+	var _onlySubSeeds = function(seedList, parent){
 		var output = true;
 		Mold.each(seedList, function(seed){
-			if(typeof seed === "string" && !_isSeedAdded(seed)){
+			if(typeof seed === "string" && !_isSeedAdded(seed, parent)){
 				output = false;
 				return Mold.EXIT;
 			}
@@ -101,13 +100,13 @@ var Mold = (function(config){
 		return output;
 	}
 	
-	var _areSeedsAdded = function(included){
+	var _areSeedsAdded = function(included, parent){
 		
 		var output = true;
 
 		Mold.each(included, function(value){
-			var seedName = Mold.cleanSeedName(value);
-			if(! _isSeedAdded(seedName)){
+			var seedName = Mold.cleanSeedName(value, parent);
+			if(! _isSeedAdded(seedName, parent)){
 				output =  false;
 				return Mold.EXIT;
 			}
@@ -295,8 +294,8 @@ var Mold = (function(config){
 	}
 
 
-	var _loadSubSeeds = function(seedList, seedName){
-		if(_onlySubSeeds(seedList)){
+	var _loadSubSeeds = function(seedList, seedName, parent){
+		if(_onlySubSeeds(seedList, parent)){
 			var subSeedList = [];
 			Mold.each(seedList, function(entry){
 				if(Mold.isArray(entry)){
@@ -1106,9 +1105,9 @@ var Mold = (function(config){
 			Mold.cue.add("seednamecleaner", name, action)
 		},
 
-		cleanSeedName : function(seedName){
+		cleanSeedName : function(seedName, parent){
 			Mold.each(Mold.cue.getType("seednamecleaner"), function(action){
-				seedName = action.call(null, seedName);
+				seedName = action.call(null, seedName, parent);
 			});
 			return seedName;
 		},
@@ -1145,7 +1144,7 @@ var Mold = (function(config){
 							seed[property] = _removeImports(seed[property]);
 
 							if(typeof seed[property] === "object"){
-								startCreating = _areSeedsAdded(seed[property]);
+								startCreating = _areSeedsAdded(seed[property], seed);
 
 								if(!startCreating){
 									Mold.each(seed[property], function(element){
@@ -1153,16 +1152,16 @@ var Mold = (function(config){
 											seed[property] = _loadSubSeeds(seed[property], seed.name);
 										}else{
 											if(!_Mold[element]){
-												Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false });
+												Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false, parent : seed });
 											}
 										}
 									});
 								}
 							}else{
 
-								startCreating = _isSeedAdded(seed[property]);
+								startCreating = _isSeedAdded(seed[property], seed);
 								if(!startCreating){
-									Mold.load({ name : seed[property], isExternal : _externalSeeds[seed.name] || false });
+									Mold.load({ name : seed[property], isExternal : _externalSeeds[seed.name] || false, parent : seed });
 								}
 							}
 						}
@@ -1206,7 +1205,7 @@ var Mold = (function(config){
 							if(seed.status !== Mold.SEED_STATUS_PREPROZESSING){
 								seed.status = Mold.SEED_STATUS_PREPROZESSING;
 								//import seeds
-								seed.func = Mold.importSeeds(seed.func, seed.imports);
+								seed.func = Mold.importSeeds(seed.func, seed.imports, seed);
 
 								var initSeed = function(compiled){
 									Mold.seedList.push(_pathes[seed.name]);
@@ -1479,15 +1478,14 @@ var Mold = (function(config){
 * @param (Function) target - the target seed
 * @param (array) method - an array of objects
 **/
-		importSeeds : function(target, imports){
+		importSeeds : function(target, imports, parent){
 			if(imports.length){
 				var importString = "";
 				Mold.each(imports, function(seed){
 					Mold.each(seed, function(value, key){
-						importString += " var "+key+" = "+Mold.cleanSeedName(value)+";\n";
+						importString += " var "+key+" = "+Mold.cleanSeedName(value, parent)+";\n";
 					});
 				});
-
 				return Mold.injectBefore(target, importString);
 			}else{
 				return target;
@@ -1768,6 +1766,45 @@ Mold.addSeedNameCleaner("standard", function(seedName){
 	}
 	return seedName;
 });
+
+
+Mold.addLoadingRule("relative", function(seed){
+ 	if(
+ 		Mold.startsWith(seed.name, ".")
+ 	 ){
+
+ 	 	var parentParts = seed.parent.name.split("."),
+ 	 		parts = seed.name.split(".");
+
+ 	 	parentParts.pop();
+ 	 	parts.shift()
+ 	 	parts = parentParts.concat(parts);
+ 	 	seed.name = parts.join(".");
+
+ 		var path = Mold.LOCAL_REPOSITORY,
+ 			seedName = seed.name,
+			file = parts.join("/") + ".js";
+		
+		return { path : path, file : file, isExternal : false, seedName: seedName }
+ 	}else{
+ 		return false;
+ 	}
+ });
+
+
+Mold.addSeedNameCleaner("relative", function(seedName, parent){
+	if(Mold.startsWith(seedName, ".")){
+		var parentParts = parent.name.split("."),
+ 	 		parts = seedName.split(".");
+ 	 	parentParts.pop();
+ 	 	parts.shift();
+ 	 	parts = parentParts.concat(parts);
+ 	 	seedName = parts.join(".");
+	}
+	return seedName;
+});
+
+
 
 
 Mold.addLoadingRule("external_script", function(seed){

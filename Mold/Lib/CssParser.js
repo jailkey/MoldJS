@@ -15,29 +15,50 @@ Seed({
 			_that = this,
 			_contents = "",
 			_fileCounter = 0,
+			_fileLen = _files.length,
 			_parsedContent = false;
 
-		Mold.each(_files, function(file){
-			if(Mold.isNode(file)){
-				var file = new Mold.Lib.File(file.getAttribute('href'));
+		var _getImports = function(content, parentPath){
+			var imports = [];
+			var path = parentPath.substr(0, parentPath.lastIndexOf('/')) + "/";
+			content.replace(/@import(.*?);/gi, function(found, parts){
+				imports.push(path + parts.replace(/[\(|\)|\"|\"| ]/g, "").replace(/url/g, ""));
+			});
+			return imports;
+		}
 
+		var _getFiles = function(files){
+			var path, file;
+			Mold.each(files, function(file){
+				if(Mold.isNode(file)){
+					path = file.getAttribute('href');
+					file = new Mold.Lib.File(path);
+				}else{
+					path = file;
+					file = new Mold.Lib.File(path);
+				}
 				file.content(function(content){
+					var imports = _getImports(content, path);
+
+					_fileLen += imports.length;
+					_getFiles(imports);
 					_fileCounter++;
 					_contents += content;
 
-					if(_fileCounter === _files.length){
+					if(_fileCounter === _fileLen){
 						_that.trigger("ready");
 					}
 				});
 
 				file.error(function(){
 					_fileCounter++;
-					if(_fileCounter === _files.length){
+					if(_fileCounter === _fileLen){
 						_that.trigger("error");
 					}
 				});
-			}
-		});
+			
+			});
+		}
 
 		var _parseProperty = function(value){
 			
@@ -77,6 +98,7 @@ Seed({
 			
 			return 0;
 		}
+
 		var counter = 0;
 
 		var _parseContent = function(content){
@@ -85,9 +107,6 @@ Seed({
 				rule,
 				ruleContent;
 
-
-
-	
 			while(nextBracked > -1){
 				rule = content.substring(0, nextBracked);
 				counter++;
@@ -135,7 +154,6 @@ Seed({
 						if(name === property){
 							var elements = document.querySelectorAll(selector);
 							Mold.each(elements, function(element, elementNAme){
-								
 								output.push({ element : element, properties : selected.properties });
 							});
 						}
@@ -145,9 +163,10 @@ Seed({
 			return output;
 		}
 
+		_getFiles(_files);
+
 		this.publics = {
 			getElementsByStyleProperty : function(property){
-				//var propertys = _contents.split(/)
 				return _getElementsByStyleProperty(_parsedContent, property)
 			}
 		}

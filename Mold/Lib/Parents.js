@@ -4,9 +4,6 @@ Seed (
 		dna : "class",
 		author : "Jan Kaufmann",
 		description : "",
-		include : [
-		
-		],
 		version : 0.1
 	},
 	function(){

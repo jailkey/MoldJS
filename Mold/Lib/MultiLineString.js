@@ -19,7 +19,6 @@ Seed({
 			output = output.replace(/    /g, '\t');
 
 			output = output.replace(/\$\{(.*?)\}/g, function(templateString, prop){
-				console.log("DOUND", prop, templateVars[prop], templateVars)
 				return templateVars[prop] || "";
 			});
 

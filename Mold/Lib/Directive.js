@@ -150,14 +150,13 @@ Seed({
 				}else if(collection.attribute){
 
 					var collectedAttributes = (Mold.isArray(collection.attribute)) ? collection.attribute : [collection.attribute]
-
 					Mold.each(collectedAttributes, function(selectedAttribute){
 
 						
 						if(!scope.getAttribute(selectedAttribute)){
 							scope[selectedAttribute] = false;
 						}
-						var attribute = scope[selectedAttribute];
+						var attribute = Mold.is(scope[selectedAttribute]) ? scope[selectedAttribute] : scope.getAttribute(selectedAttribute);
 						
 						/*
 						if(!attribute){
@@ -165,7 +164,6 @@ Seed({
 						}*/
 						var attributeName = selectedAttribute.name || selectedAttribute;
 						output[attributeName] = attribute;
-
 						if(watchable){
 
 							_watch(scope, function(mutation){
@@ -175,6 +173,7 @@ Seed({
 									&& mutation.attributeName === attributeName
 								){
 									output[attributeName] = mutation.target.getAttribute(attributeName);
+
 									output.trigger("attribute.changed", { name: attributeName, mutation : mutation})
 								}
 							});
@@ -198,6 +197,7 @@ Seed({
 					if(directive.seed){
 
 						if(directive.collect){
+
 							var collection = _collect(directive.scope, directive.collect, Mold.mixin({}, new Mold.Lib.Event({})), directive.watchable);
 						}
 
@@ -337,7 +337,7 @@ Seed({
 				}else{
 					node = element;
 				}
-			
+				
 				directive.apply(
 					node,
 					element,

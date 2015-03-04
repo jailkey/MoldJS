@@ -56,7 +56,7 @@ Seed({
 			}			
 			return this;
 		}
-				
+
 		controller = Mold.extend(controllerPrototype, controller,{
 			superClassName : "rootclass",
 			sourceURL : name

@@ -37,18 +37,24 @@ Seed({
 					path = file;
 					file = new Mold.Lib.File(path);
 				}
-				file.content(function(content){
-					var imports = _getImports(content, path);
 
-					_fileLen += imports.length;
-					_getFiles(imports);
-					_fileCounter++;
-					_contents += content;
+				var callback = function(){
+					var currentPath = path;
+					return function(content){
+						var imports = _getImports(content, currentPath);
 
-					if(_fileCounter === _fileLen){
-						_that.trigger("ready");
+						_fileLen += imports.length;
+						_getFiles(imports);
+						_fileCounter++;
+						_contents += content;
+
+						if(_fileCounter === _fileLen){
+							_that.trigger("ready");
+						}
 					}
-				});
+				}();
+
+				file.content(callback);
 
 				file.error(function(){
 					_fileCounter++;

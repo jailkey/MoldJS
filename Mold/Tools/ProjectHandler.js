@@ -27,7 +27,7 @@ Seed({
 			if(config.serverlocalrepo){
 				projectData['server'] = {
 					"local-repository" : config.serverlocalrepo,
-					"external-repositor" : config.serverglobalrepo,
+					"external-repository" : config.serverglobalrepo,
 					"main-seed" : config.servermainseed
 				}
 			}
@@ -35,7 +35,7 @@ Seed({
 			if(config.clientlocalrepo){
 				projectData['client'] = {
 					"local-repository" : config.clientlocalrepo,
-					"external-repositor" : config.clientglobalrepo,
+					"external-repository" : config.clientglobalrepo,
 					"main-seed" : config.clientmainseed
 				}
 			}

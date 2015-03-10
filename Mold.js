@@ -1384,6 +1384,7 @@ var Mold = (function(config){
 			rule = false;
 		
 		Mold.find(loadingRules, function(selectedRule){
+
 			var result = selectedRule.call(null, seed);
 			if(result){
 

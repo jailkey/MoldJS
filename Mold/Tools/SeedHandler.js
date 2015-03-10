@@ -5,8 +5,7 @@ Seed({
 		include : [
 			"Mold.Tools.SeedParser",
 			{ Promise : "Mold.Lib.Promise"},
-			"Mold.Lib.Event",
-			"Mold.Tools.RepoHandler"
+			"Mold.Lib.Event"
 		],
 		npm : {
 			"request" : ">=2.5.0",
@@ -17,19 +16,17 @@ Seed({
 
 		var request = require('request'),
 			fileSystem = require('fs'),
-			_that = this,
-			repoHandler = new Mold.Tools.RepoHandler();
+			_that = this;
 
 		Mold.mixin(this, new Mold.Lib.Event(this));
-
 
 		var _isLocalPath = function(path){
 			if(Mold.startsWith(path, "http:") || Mold.startsWith(path, "https:")){
 				return false;
 			}
-			return true
+			return true;
 		}
-
+		
 
 		//Load Seed
 		var _loadSeed = function(path){
@@ -55,8 +52,12 @@ Seed({
 						}
 					});
 				}else{
-
 					request.get(path , function (error, response, body) {
+
+						if(!response){
+							onerror.call(null, "Unkown response problem with: " + path + "!" );
+						}
+
 						if(response.statusCode == 404){
 							onerror.call(null, "File not found: " + path + "!" );
 							return;
@@ -70,6 +71,7 @@ Seed({
 							}
 						}
 					});
+
 				}
 			});
 		}
@@ -96,7 +98,9 @@ Seed({
 			return collection;
 		}
 
-		var _loadSeeds = function(path, file, collection){
+		var _loadSeeds = function(path, file, target, collection){
+
+			target = target || "";
 
 			if(!collection){
 				collection = [];
@@ -112,17 +116,19 @@ Seed({
 							if(infos.header){
 								var includes = Mold.getDependencies(infos.header);
 								var includedSeeds = [];
+
 								Mold.each(includes, function(value){
-									var rule =  Mold.getLoadingRule({ name : value});
+									var rule =  Mold.getLoadingRule({ name : value, parent : { name: infos.name}});
+
 									if(rule.isScript){
 										//handle external scripts here
 										if(rule.isVendor){
 
 										}
 									}else{
-									
+										
 										var newPath = ((rule.isExternal) ? Mold.EXTERNAL_REPOSITORY : path);
-										var loader = _loadSeeds(newPath, rule.file, collection);
+										var loader = _loadSeeds(newPath, rule.file, target, collection);
 										includedSeeds.push(loader);
 										loader.then(function(data){
 											_addToCollection(data, collection)
@@ -130,16 +136,18 @@ Seed({
 									}
 								
 								});
+
 								if(includes.length){
 									new Promise().all(includedSeeds).then(function(){
 										collection = _addToCollection({
 											name : infos.name,
 											header : infos.header,
 											file : file,
-											exists : fileSystem.existsSync(file),
+											exists : fileSystem.existsSync(target + file),
 											code : code
 										}, collection)
 										onsuccess(collection)
+
 									}).fail(function(err){
 										onloaderror(err)
 									})
@@ -148,9 +156,10 @@ Seed({
 										name : infos.name,
 										header : infos.header,
 										file : path + file,
-										exists : fileSystem.existsSync(file),
+										exists : fileSystem.existsSync(target + file),
 										code : code
 									}, collection)
+
 									onsuccess(collection)
 								}
 							}else{
@@ -178,9 +187,12 @@ Seed({
 			info : function(path, fromCode){
 				return new Mold.Lib.Promise(function(success, error){
 					if(fromCode){
+						
 						success.call(null, new Mold.Tools.SeedParser(path))
 					}else{
+						
 						_loadSeed(path).then(function(data){
+
 							success.call(null,  new Mold.Tools.SeedParser(data))
 						})
 					}
@@ -193,9 +205,9 @@ Seed({
 		 * @param  {string} seed name of the seed
 		 * @return {promise} returns a promise
 		 */
-			infos : function(path, seed){
+			infos : function(path, seed, target){
 				seed = Mold.getSeedPath(seed);
-				return _loadSeeds(path, seed);
+				return _loadSeeds(path, seed, target);
 			},
 			copy : function(path, seed, to, options){
 				options = options || {};

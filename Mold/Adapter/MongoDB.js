@@ -1,5 +1,5 @@
 Seed({
-		name : "Mold.Adapter.MongoDB"
+		name : "Mold.Adapter.MongoDB",
 		dna : "class",
 		include : [
 			"Mold.Lib.Event"
@@ -22,6 +22,7 @@ Seed({
 				this.send(_restpath+id, false, { method : "DELETE"});
 			},
 			add : function(data){
+			}
 		}	
 	}
 )

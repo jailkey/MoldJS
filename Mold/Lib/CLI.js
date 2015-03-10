@@ -28,9 +28,6 @@ Seed({
 			
 		Mold.mixin(this, new Mold.Lib.Event(this));
 
-
-
-
 		var _initReader = function(onclose, completer){
 			if(_reader){
 				_reader.close();
@@ -327,7 +324,20 @@ Seed({
 		 * @param  {object} parameter command parameter
 		 */
 			executeCommand : function(command, parameter){
-				this.trigger('command', { command : command, parameter : parameter});
+
+				var commandObject = _getCommand(command);
+
+				if(!commandObject){
+					cliInterface.showError("command '" + command + "' not found!");
+					return;
+				}
+
+				if(Mold.is(parameter.help)){
+					_getCommandHelp(commandObject);
+					return;
+				}
+		
+				return commandObject.execute.call(Mold.getScope(), parameter, cliInterface);
 			},
 		/**
 		 * @method addCommand

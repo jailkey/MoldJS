@@ -10,10 +10,13 @@ Seed({
 			"semver" : "*",
 		}
 	},
-	function(){
+	function(repoPath){
 
-		var local = Mold.LOCAL_REPOSITORY,
-			external = Mold.EXTERNAL_REPOSITORY,
+		if(!repoPath){
+			throw new Error("Path to repository is not defined!")
+		}
+
+		var repoPath = repoPath,
 			fileSystem = require("fs"),
 			npm = require("npm"),
 			semver = require("semver"),
@@ -34,24 +37,20 @@ Seed({
 		}
 
 		this.publics = {
-			seedExists : function(seedName, isExternal){
+			seedExists : function(seedName){
 				var seedPath = Mold.getSeedPath(seedName);
-				if(isExternal){
-					return fileSystem.existsSync(external + seedPath);
-				}else{
-					return fileSystem.existsSync(local + seedPath);
-				}
+				return fileSystem.existsSync(repoPath + seedPath);
 			},
 			createSeedPath : _createSeedPath,
-			addSeed : function(seedName, code, isExternal, overwrite){
+			addSeed : function(seedName, code, overwrite){
 				
-				var path = ((isExternal) ? external : local),
+				var path = repoPath,
 					seedPath = Mold.getSeedPath(seedName);
 
 				_createSeedPath(seedPath, path);
 
 				return new Mold.Lib.Promise(function(success, error){
-					var exists =  _that.seedExists(seedName, isExternal);
+					var exists =  _that.seedExists(seedName);
 		
 					if(overwrite || !exists){
 						fileSystem.writeFile(path + seedPath, code, function(err) {

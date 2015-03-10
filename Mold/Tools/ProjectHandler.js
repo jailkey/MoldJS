@@ -53,22 +53,57 @@ Seed({
 			return JSON.stringify(projectData, null, "\t");
 		}
 
-		_createDir = function(path, parts){
+		var _createIndexHTML = function(localRepo, globalRepo, mainSeed){
+			var indexContent = MultiLineString(function(){/*|
+				<!doctype html>
+					<html>
+						<head>
+							<meta charset="utf-8">
+							<title>MoldJS App</title>
+							<script data-mold-main="${mainSeed}"
+								data-mold-repository="${localRepo}"
+								data-mold-external-repository="${globalRepo}"
+								data-mold-cache="off"
+								data-mold-debug="on"
+								src="${globalRepo}/Mold.js" type="text/javascript"
+							></script>
+						</head>
+						<body>
+
+						</body>
+					</html>
+			|*/},{
+				mainSeed : mainSeed,
+				globalRepo : globalRepo,
+				localRepo : localRepo
+			})
+
+			fileSystem.writeFile("index.html", indexContent, function(err) {
+				if(err) {
+					throw new Error(err);
+				} else {
+					console.log("\u001b[32m" + "index.html successfully created!" +  "\u001b[39m");
+				}
+			}); 
+
+		}
+
+		var _createDir = function(path, parts){
 			var dirPath = "";
 			var chmod = 0744;
 
 			for(var i = 0; i < parts.length - 1; i++){
 				dirPath += parts[i] + "/";
+				console.log("dirPath", dirPath);
 				if(!fileSystem.existsSync(path + dirPath)){
 					fileSystem.mkdirSync(path + dirPath, chmod)
 				}
 			}
 		}
 
-		_createDirectorysProject = function(path, config){
+		var _createDirectorysProject = function(path, config){
 			var dirPropertys = ['serverlocalrepo', 'serverglobalrepo', 'clientlocalrepo', 'clientglobalrepo'];
 			Mold.each(dirPropertys, function(value){
-				console.log("value", value)
 				if(config[value]){
 					_createDir(path, config[value].split("/"));
 				}
@@ -76,15 +111,16 @@ Seed({
 		}
 
 
-		_createSeed = function(path, type, name){
+		var _createSeed = function(path, type, name){
 
-			var seedCode = MultiLineString(function(){/*|
+			var seedCode =  MultiLineString(function(){/*|
 				Seed({
 				        name : "${seedName}",
 				        dna : "${seedType}"
 				    },
 				    function(){
 				        //put in your start code
+				        console.log("hello world!")
 				    }
 				)
 			|*/},{
@@ -92,10 +128,11 @@ Seed({
 				seedType : type
 			});
 
-			var parts = name.split(".");
-			var seedName = parts[parts.length -1];
-			var file = path + name.replace(/\./g, "/") + ".js";
-			parts.pop();
+			var parts = name.split("."),
+				seedName = parts[parts.length -1],
+				file = path + name.replace(/\./g, "/") + ".js";
+			//parts.pop();
+
 			_createDir(path, parts);
 			if(!fileSystem.existsSync(file)){
 				fileSystem.writeFileSync(file, seedCode);
@@ -103,13 +140,33 @@ Seed({
 		}
 
 
-		_checkGlobalRepo = function(path){
+		var _checkGlobalRepo = function(path){
+			var executed = [];
 			if(!fileSystem.existsSync(path + "/Lib")){
-				console.log("Install ")
-				Mold.Lib.CLI.executeCommand("install", {
 
-				});
+			
+				executed.push(Mold.Lib.CLI.executeCommand("install", {
+					"name" : "Mold.Lib.*",
+					"target" : path
+				}));
+
+				executed.push(Mold.Lib.CLI.executeCommand("install", {
+					"name" : "Mold.DNA.*",
+					"target" : path
+				}));
+				
+				executed.push(Mold.Lib.CLI.executeCommand("install", {
+					"name" : "Mold.Adapter.*",
+					"target" : path
+				}));
+			
+				executed.push(Mold.Lib.CLI.executeCommand("install", {
+					"name" : "Mold.Defaults.*",
+					"target" : path
+				}))
 			}
+			var promise = new Mold.Lib.Promise();
+			return promise.all(executed);
 		}
 
 
@@ -143,27 +200,45 @@ Seed({
 				if(!Mold.endsWith(path, "/")){
 					path += "/";
 				}
-
+				var collect = [];
 				return new Mold.Lib.Promise(function(success, error){
 
 					var projectFile = _getProjectFile(name, config);
-					console.log("config", config)
 					_createDirectorysProject(path, config);
-
+					
 					if(config["clientlocalrepo"]){
 						_createSeed(path + config["clientlocalrepo"].replace("Mold", ""), "action", config["clientmainseed"]);
+						collect.push(_checkGlobalRepo(config["clientglobalrepo"]))
 					}
 
 					if(config["serverlocalrepo"]){
 						_createSeed(path + config["serverlocalrepo"].replace("Mold", ""), "action", config["servermainseed"]);
 					}
-					
-					console.log("projectfile", projectFile)
+
+
+					_createIndexHTML(config["clientlocalrepo"], config["clientglobalrepo"], config["clientmainseed"])
+
 					if(projectFile instanceof Error){
 						error(result);
 						return;
+					}else{
+						fileSystem.writeFile("mold.project.json", projectFile, function(err) {
+							if(err) {
+								error(err);
+							} else {
+								console.log("\u001b[32m" + "mold.project.json successfully created!" +  "\u001b[39m");
+							}
+						});
 					}
 
+					new Mold.Lib.Promise()
+							.all(collect)
+							.then(function(value){
+								success(value);
+							})
+							.fail(function(error){
+								error(error);
+							})
 
 				});
 			},

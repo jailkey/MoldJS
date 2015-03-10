@@ -14,7 +14,6 @@ Seed({
 				+ "	return result;"
 				+ "})()";
 		
-
 		var result = vm.runInThisContext(code);
 
 		if(result.length > 1){

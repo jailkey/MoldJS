@@ -50,14 +50,16 @@ Seed({
 			});
 
 
+
+
 			var form = cli.createForm([
 				{
-					label : "What is the name of yout application?",
+					label : "What is the name of your application?",
 					input : {
 						name : 'appname',
 						validate : 'required',
 						messages : {
-							error : "Please add the name of your application!",
+							error : "Please enter the name of your application!",
 							success : function(data){
 								return "The name of yout application is " +cli.COLOR_CYAN + data  + cli.COLOR_RESET + ". " + cli.SYMBOLE_TRUE
 							}
@@ -99,7 +101,11 @@ Seed({
 							}
 						},
 						onsuccess : function(data){
-							this.next();
+							if(data === "yes"){
+								this.next(6);
+							}else{
+								this.next();
+							}
 						}
 					}
 				},
@@ -108,7 +114,7 @@ Seed({
 					condition : clientCondition,
 					label : "Path to your global client repository? (if you build a client only app, make sure the repo is accessible over http(s))",
 					input : {
-						name : 'clientglobalerepo',
+						name : 'clientglobalrepo',
 						type : 'filesystem',
 						messages : {
 							success : function(data){
@@ -157,7 +163,7 @@ Seed({
 					condition : serverCondition,
 					label : "Path to your global server repository?",
 					input : {
-						name : 'serverglobalerepo',
+						name : 'serverglobalrepo',
 						type : 'filesystem',
 						messages : {
 							success : function(data){
@@ -202,7 +208,7 @@ Seed({
 					}
 				}
 			]);
-
+			var http = require("http");
 			form.on("end", function(){
 
 				var data = form.getData();
@@ -210,14 +216,14 @@ Seed({
 				if(data.autogenerate){
 					
 					var clientDefault = {
-						"clientglobalrepo" : "global/Mold/",
-						"clientlocalrepo" : "client/Mold/",
+						"clientglobalrepo" : "global/",
+						"clientlocalrepo" : "client/",
 						"clientmainseed" : "Mold.Main"
 					}
 
 					var serverDefault = {
-						"serverglobalrepo" : "global/Mold/",
-						"serverlocalrepo" : "server/Mold/",
+						"serverglobalrepo" : "global/",
+						"serverlocalrepo" : "server/",
 						"servermainseed" : "Mold.Main"
 					}
 
@@ -234,12 +240,16 @@ Seed({
 							break;
 					}
 				}
-
-
+				
 				var projectHandler = new Mold.Tools.ProjectHandler();
 
-				projectHandler.create(data.appname, path, data)
-				form.exit();
+				projectHandler
+					.create(data.appname, path, data)
+					.then(function(){
+						form.exit();
+					})
+					
+				
 			})
 
 			form.start();

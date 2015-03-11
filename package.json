@@ -1,7 +1,7 @@
 {
   "name": "mold-js",
   "description": "MoldJS structure and pattern framework",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "author": "Jan Kaufmann",
   "repository": {
     "type": "git",

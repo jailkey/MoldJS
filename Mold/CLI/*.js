@@ -1,11 +1,11 @@
 Seed({
-		name : "Mold.CLI.*",
-		dna : 'package',
-		include : [
-			".Build",
-			".Install",
-			".Project",
-			".Packages"
-		]
-	}
-)
+	name : 'Mold.CLI.*',
+	dna : 'package',
+	include : [
+		".Build",
+		".Install",
+		".Packages",
+		".Project",
+		".Start"
+]
+});

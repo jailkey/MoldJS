@@ -21,7 +21,8 @@ Seed({
 			PROJECT_FILE_NAME = "mold.project.json",
 			fileSystem = require("fs"),
 			request =  require("request"),
-			wrench = require('wrench');
+			wrench = require('wrench'),
+			pathes = require('path');
 
 
 
@@ -123,7 +124,7 @@ Seed({
 			var dirPropertys = ['serverlocalrepo', 'serverglobalrepo', 'clientlocalrepo', 'sharedrepo'];
 			Mold.each(dirPropertys, function(value){
 				if(config[value] && _isLocalPath(config[value])){
-					_createDir(path, config[value].split("/"));
+					_createDir(pathes.normalize(path), config[value].split("/"));
 				}
 			});
 		}
@@ -148,8 +149,10 @@ Seed({
 
 			var parts = name.split("."),
 				seedName = parts[parts.length -1],
-				file = path + name.replace(/\./g, "/") + ".js";
+				path = pathes.normalize(path),
+				file = pathes.normalize(path + name.replace(/\./g, "/") + ".js");
 			//parts.pop();
+
 
 			_createDir(path, parts);
 			if(!fileSystem.existsSync(file)){
@@ -229,6 +232,16 @@ Seed({
 					path += "/";
 				}
 				var collect = [];
+				
+				if(_isLocalPath(config.serverlocalrepo)){
+					config.serverlocalrepo = pathes.normalize(config.serverlocalrepo);
+				}
+				if(_isLocalPath(config.clientlocalrepo)){
+					config.clientlocalrepo = pathes.normalize(config.clientlocalrepo);
+				}
+				if(_isLocalPath(config.sharedrepo)){
+					config.sharedrepo = pathes.normalize(config.sharedrepo);
+				}
 				return new Mold.Lib.Promise(function(success, error){
 
 					var projectFile = _getProjectFile(name, config);
@@ -257,24 +270,23 @@ Seed({
 						error(result);
 						return;
 					}else{
-						fileSystem.writeFile(PROJECT_FILE_NAME, projectFile, function(err) {
+						fileSystem.writeFile(pathes.normalize(PROJECT_FILE_NAME), projectFile, function(err) {
 							if(err) {
 								error(err);
 							} else {
 								console.log("\u001b[32m" + "mold.project.json successfully created!" +  "\u001b[39m");
-								fileSystem.chmodSync(PROJECT_FILE_NAME, 0755);
+								fileSystem.chmodSync(pathes.normalize(PROJECT_FILE_NAME), 0755);
 							}
 						});
 					}
 					if(config["clientlocalrepo"]){
-
-						wrench.chmodSyncRecursive(config["clientlocalrepo"], 0755);
+						wrench.chmodSyncRecursive(pathes.normalize(config["clientlocalrepo"]), 0755);
 					}
 					if(config["serverlocalrepo"]){
-						wrench.chmodSyncRecursive(config["serverlocalrepo"], 0755);
+						wrench.chmodSyncRecursive(pathes.normalize(config["serverlocalrepo"]), 0755);
 					}
 					if(_isLocalPath(config["sharedrepo"])){
-						wrench.chmodSyncRecursive(config["sharedrepo"], 0755 );
+						wrench.chmodSyncRecursive(pathes.normalize(config["sharedrepo"]), 0755 );
 					}
 					if(collect.length){
 						new Mold.Lib.Promise()

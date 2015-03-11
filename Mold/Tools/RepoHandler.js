@@ -20,6 +20,7 @@ Seed({
 			fileSystem = require("fs"),
 			npm = require("npm"),
 			semver = require("semver"),
+			pathes = require("path"),
 			_that = this;
 
 		var _createSeedPath = function(seedName, path, chmod){
@@ -30,8 +31,8 @@ Seed({
 
 			for(var i = 0; i < parts.length - 1; i++){
 				seedPath += parts[i] + "/";
-				if(!fileSystem.existsSync(path + seedPath)){
-					fileSystem.mkdirSync(path + seedPath, chmod)
+				if(!fileSystem.existsSync(pathes.normalize(path + seedPath))){
+					fileSystem.mkdirSync(pathes.normalize(path + seedPath), chmod)
 				}
 			}
 		}
@@ -39,7 +40,7 @@ Seed({
 		this.publics = {
 			seedExists : function(seedName){
 				var seedPath = Mold.getSeedPath(seedName);
-				return fileSystem.existsSync(repoPath + seedPath);
+				return fileSystem.existsSync(pathes.normalize(repoPath + seedPath));
 			},
 			createSeedPath : _createSeedPath,
 			addSeed : function(seedName, code, overwrite){
@@ -53,7 +54,7 @@ Seed({
 					var exists =  _that.seedExists(seedName);
 		
 					if(overwrite || !exists){
-						fileSystem.writeFile(path + seedPath, code, function(err) {
+						fileSystem.writeFile(pathes.normalize(path + seedPath), code, function(err) {
 							if(err){
 								error(err);
 								return;

@@ -22,7 +22,8 @@ Seed({
 			readline = require('readline'),
 			fs = require("fs"),
 			_reader = false,
-			_readerMethod = false;
+			_readerMethod = false,
+			pathes = require('path');
 
 		process.stdin.setEncoding('utf8');
 			
@@ -307,8 +308,8 @@ Seed({
 
 		setTimeout(function(){
 			Mold.load({ name : "->Mold.CLI.*"}).bind(function(){
-			
-				if(fileSystem.existsSync(Mold.LOCAL_REPOSITORY + "Mold/CLI/*.js")){
+
+				if(fileSystem.existsSync(pathes.normalize(Mold.LOCAL_REPOSITORY + "Mold/CLI/*.js"))){
 					Mold.load({ name : "Mold.CLI.*"}).bind(function(){
 						init();
 					});

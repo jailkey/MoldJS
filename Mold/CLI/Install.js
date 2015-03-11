@@ -46,7 +46,8 @@ Seed({
 				targetRepo = false,
 				overwrite = Mold.is(parameter['-overwrite']),
 				globalInstall = Mold.is(parameter['-g']),
-				promise = new Mold.Lib.Promise();
+				promise = new Mold.Lib.Promise(),
+				pathes = require('path');
 
 
 			if(!parameter.name){

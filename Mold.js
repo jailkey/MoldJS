@@ -1283,7 +1283,8 @@ var Mold = (function(config){
 			return {
 				require : function(file){
 					if(_isNodeJS){
-						return require(file);
+						var pathes = require("path");
+						return require(pathes.normalize(file));
 					}
 					return false;
 				},
@@ -1309,7 +1310,8 @@ var Mold = (function(config){
 				}
 				if(nodePath.existsSync(path)){
 					_pathes[seedConf.seedName] = path;
-					var testMold = require(path);
+					var pathes = require("path");
+					var testMold = require(pathes.normalize(path));
 					
 				}else{
 					throw new Error("File not found "+path+"!");

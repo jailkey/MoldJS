@@ -18,7 +18,8 @@ Seed({
 		execute : function(parameter, cli){
 			var fs = require("fs"),
 				currentDir = process.cwd(),
-				files = fs.readdirSync(currentDir),
+				pathes = require("path"),
+				files = fs.readdirSync(pathes.normalize(currentDir)),
 				collected = [];
 
 			var _getMoldName = function(currentDir){
@@ -38,7 +39,7 @@ Seed({
 				throw new Error("no mold path found, are you shure that the current dir is inside a mold repo?")
 			}
 			Mold.each(files, function(value){
-				if(Mold.endsWith(value, ".js") && !Mold.startsWith(value, '*')){
+				if(Mold.endsWith(value, ".js") && !Mold.startsWith(value, '*') && !Mold.startsWith(value, '_')){
 					//value
 					console.log("Add file to package: " + value);
 					collected.push("." + value.replace(".js", ""));

@@ -432,6 +432,7 @@ var Mold = (function(config){
 
 		EXTERNAL_REPOSITORY : _config.externalRepository,
 		LOCAL_REPOSITORY : config.localRepository,
+		SOURCE_REPOSITORY : config.sourceRepositiory  || 'http://cdn.moldjs.de/',
 		EXIT : '--exitoperation--',
 		SEED_STATUS_LOADED : '--dependencies-loaded--',
 		SEED_STATUS_PREPROZESSING : '--preprozessing--',
@@ -1382,7 +1383,7 @@ var Mold = (function(config){
  	getLoadingRule : function(seed){
  		var loadingRules = Mold.cue.getType("loadingrules"),
 			rule = false;
-		
+
 		Mold.find(loadingRules, function(selectedRule){
 
 			var result = selectedRule.call(null, seed);

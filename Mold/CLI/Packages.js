@@ -52,7 +52,7 @@ Seed({
 					"\tinclude : " + JSON.stringify(collected, null, "\t\t") + "\n" +
 					"});"
 			
-			fs.writeFile("*.js", packageFile, function(err) {
+			fs.writeFile("_.js", packageFile, function(err) {
 				if(err) {
 					throw new Error(err);
 				} else {

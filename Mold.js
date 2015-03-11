@@ -1730,6 +1730,7 @@ Mold.addLoadingRule("external", function(seed){
 
  		var path = Mold.EXTERNAL_REPOSITORY,
  			seedName = seed.name.split("->")[1],
+ 			seedName = seedName.replace("*", "_"),
 			fileParts = seedName.split("."),
 			file = fileParts.join("/") + ".js";
 
@@ -1746,6 +1747,7 @@ Mold.addLoadingRule("standard", function(seed){
  	 ){
  		var path = Mold.LOCAL_REPOSITORY,
  			seedName = seed.name,
+ 			seedName = seedName.replace("*", "_"),
  			fileParts = seedName.split("."),
 			file = fileParts.join("/") + ".js";
 		
@@ -1766,6 +1768,7 @@ Mold.addSeedNameCleaner("standard", function(seedName){
 			seedName = seedName.split("->")[1];
 		}
 	}
+	seedName = seedName.replace("*", "_");
 	return seedName;
 });
 
@@ -1785,6 +1788,7 @@ Mold.addLoadingRule("relative", function(seed){
 
  		var path = Mold.LOCAL_REPOSITORY,
  			seedName = seed.name,
+ 			seedName = seedName.replace("*", "_"),
 			file = parts.join("/") + ".js";
 		
 		return { path : path, file : file, isExternal : false, seedName: seedName }
@@ -1802,6 +1806,7 @@ Mold.addSeedNameCleaner("relative", function(seedName, parent){
  	 	parts.shift();
  	 	parts = parentParts.concat(parts);
  	 	seedName = parts.join(".");
+ 	 	seedName = seedName.replace("*", "_");
 	}
 	return seedName;
 });

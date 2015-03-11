@@ -6,10 +6,12 @@ Seed({
 		include : [
 			"Mold.Lib.Promise",
 			"Mold.Lib.CLI",
-			{ MultiLineString : "Mold.Lib.MultiLineString" }
+			{ MultiLineString : "Mold.Lib.MultiLineString" },
+			"Mold.Lib.Async"
 		],
 		npm : {
 			"request" : ">=2.5.0",
+			"wrench" : "*"
 		}
 			
 	},
@@ -18,7 +20,8 @@ Seed({
 		var BREAK = "\n",
 			PROJECT_FILE_NAME = "mold.project.json",
 			fileSystem = require("fs"),
-			request =  require("request");
+			request =  require("request"),
+			wrench = require('wrench');
 
 
 
@@ -30,11 +33,11 @@ Seed({
 			}
 
 			projectData['name'] = name;
+			projectData['version'] = "0.0.1";
 
 			if(config.serverlocalrepo){
 				projectData['server'] = {
 					"local-repository" : config.serverlocalrepo,
-					"external-repository" : config.serverglobalrepo,
 					"main-seed" : config.servermainseed
 				}
 			}
@@ -42,10 +45,11 @@ Seed({
 			if(config.clientlocalrepo){
 				projectData['client'] = {
 					"local-repository" : config.clientlocalrepo,
-					"external-repository" : config.clientglobalrepo,
 					"main-seed" : config.clientmainseed
 				}
 			}
+
+			projectData['shared'] =  config.sharedrepo;
 			
 			if(config.debug){
 				projectData['debug-mode'] = "on"
@@ -60,6 +64,14 @@ Seed({
 			return JSON.stringify(projectData, null, "\t");
 		}
 
+		var _isLocalPath = function(path){
+			if(Mold.startsWith(path, "http:") || Mold.startsWith(path, "https:")){
+				return false;
+			}
+			return true;
+		}
+		
+
 		var _createIndexHTML = function(localRepo, globalRepo, mainSeed){
 			var indexContent = MultiLineString(function(){/*|
 				<!doctype html>
@@ -72,7 +84,7 @@ Seed({
 								data-mold-external-repository="${globalRepo}"
 								data-mold-cache="off"
 								data-mold-debug="on"
-								src="${globalRepo}/Mold.js" type="text/javascript"
+								src="${globalRepo}Mold.js" type="text/javascript"
 							></script>
 						</head>
 						<body>
@@ -101,7 +113,6 @@ Seed({
 
 			for(var i = 0; i < parts.length - 1; i++){
 				dirPath += parts[i] + "/";
-				console.log("dirPath", dirPath);
 				if(!fileSystem.existsSync(path + dirPath)){
 					fileSystem.mkdirSync(path + dirPath, chmod)
 				}
@@ -109,9 +120,9 @@ Seed({
 		}
 
 		var _createDirectorysProject = function(path, config){
-			var dirPropertys = ['serverlocalrepo', 'serverglobalrepo', 'clientlocalrepo', 'clientglobalrepo'];
+			var dirPropertys = ['serverlocalrepo', 'serverglobalrepo', 'clientlocalrepo', 'sharedrepo'];
 			Mold.each(dirPropertys, function(value){
-				if(config[value]){
+				if(config[value] && _isLocalPath(config[value])){
 					_createDir(path, config[value].split("/"));
 				}
 			});
@@ -149,31 +160,46 @@ Seed({
 
 		var _checkGlobalRepo = function(path){
 			var executed = [];
+			var promise = new Mold.Lib.Promise();
 			if(!fileSystem.existsSync(path + "/Lib")){
 
-			
-				executed.push(Mold.Lib.CLI.executeCommand("install", {
-					"name" : "Mold.Lib.*",
-					"target" : path
-				}));
-
-				executed.push(Mold.Lib.CLI.executeCommand("install", {
-					"name" : "Mold.DNA.*",
-					"target" : path
-				}));
-				
-				executed.push(Mold.Lib.CLI.executeCommand("install", {
-					"name" : "Mold.Adapter.*",
-					"target" : path
-				}));
-			
-				executed.push(Mold.Lib.CLI.executeCommand("install", {
-					"name" : "Mold.Defaults.*",
-					"target" : path
-				}))
+				promise = Mold.Lib.Async.waterfall(
+					function(){
+						return Mold.Lib.CLI.executeCommand("install", {
+							"name" : "Mold.Lib.*",
+							"target" : path
+						});
+					},
+					function(){
+						return Mold.Lib.CLI.executeCommand("install", {
+							"name" : "Mold.DNA.*",
+							"target" : path
+						});
+					},
+					function(){ 
+						return Mold.Lib.CLI.executeCommand("install", {
+							"name" : "Mold.Adapter.*",
+							"target" : path
+						});
+					},
+					function(){
+						return Mold.Lib.CLI.executeCommand("install", {
+							"name" : "Mold.Defaults.*",
+							"target" : path
+						});
+					},
+					function(){
+						return Mold.Lib.CLI.executeCommand("install", {
+							"name" : "Mold.Tools.*",
+							"target" : path
+						});
+					}
+				);
+			}else{
+				promise.reject();
 			}
-			var promise = new Mold.Lib.Promise();
-			return promise.all(executed);
+			
+			return promise;
 		}
 
 
@@ -215,18 +241,22 @@ Seed({
 					
 					if(config["clientlocalrepo"]){
 						_createSeed(path + config["clientlocalrepo"].replace("Mold", ""), "action", config["clientmainseed"]);
-						collect.push(_checkGlobalRepo(config["clientglobalrepo"]))
+						
 					}
 
 					if(config["serverlocalrepo"]){
 						_createSeed(path + config["serverlocalrepo"].replace("Mold", ""), "action", config["servermainseed"]);
 					}
 
+					//only install shared if it is local
+					if(config["sharedrepo"] && _isLocalPath(config["sharedrepo"])){
+						request(Mold.SOURCE_REPOSITORY + 'Mold.js').pipe(fileSystem.createWriteStream(config["sharedrepo"] + 'Mold.js'));
+						collect.push(_checkGlobalRepo(config["sharedrepo"]))
+					}
 
-					_createIndexHTML(config["clientlocalrepo"], config["clientglobalrepo"], config["clientmainseed"]);
-
-				
-				//	request.get('http://mysite.com/doodle.png').pipe(resp)
+					if(config["clientlocalrepo"]){
+						_createIndexHTML(config["clientlocalrepo"], config["sharedrepo"], config["clientmainseed"]);
+					}
 
 					if(projectFile instanceof Error){
 						error(result);
@@ -240,15 +270,28 @@ Seed({
 							}
 						});
 					}
+					if(config["clientlocalrepo"]){
 
-					new Mold.Lib.Promise()
-							.all(collect)
-							.then(function(value){
-								success(value);
-							})
-							.fail(function(error){
-								error(error);
-							})
+						wrench.chmodSyncRecursive(config["clientlocalrepo"], 0755);
+					}
+					if(config["serverlocalrepo"]){
+						wrench.chmodSyncRecursive(config["serverlocalrepo"], 0755);
+					}
+					if(_isLocalPath(config["sharedrepo"])){
+						wrench.chmodSyncRecursive(config["sharedrepo"], 0755 );
+					}
+					if(collect.length){
+						new Mold.Lib.Promise()
+								.all(collect)
+								.then(function(value){
+									success(value);
+								})
+								.fail(function(error){
+									error(error);
+								})
+					}else{
+						success("Project successfully created!");
+					}
 
 				});
 			},

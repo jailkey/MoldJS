@@ -187,12 +187,6 @@ Seed({
 							"name" : "Mold.Defaults.*",
 							"target" : path
 						});
-					},
-					function(){
-						return Mold.Lib.CLI.executeCommand("install", {
-							"name" : "Mold.Tools.*",
-							"target" : path
-						});
 					}
 				);
 			}else{

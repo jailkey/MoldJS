@@ -7,13 +7,20 @@ Seed({
 			"Mold.Lib.Promise",
 			"Mold.Lib.CLI",
 			{ MultiLineString : "Mold.Lib.MultiLineString" }
-		]
+		],
+		npm : {
+			"request" : ">=2.5.0",
+		}
+			
 	},
 	function(){
 
 		var BREAK = "\n",
 			PROJECT_FILE_NAME = "mold.project.json",
-			fileSystem = require("fs");
+			fileSystem = require("fs"),
+			request =  require("request");
+
+
 
 		var _getProjectFile = function(name, config){
 			var projectData = {};
@@ -216,13 +223,16 @@ Seed({
 					}
 
 
-					_createIndexHTML(config["clientlocalrepo"], config["clientglobalrepo"], config["clientmainseed"])
+					_createIndexHTML(config["clientlocalrepo"], config["clientglobalrepo"], config["clientmainseed"]);
+
+				
+				//	request.get('http://mysite.com/doodle.png').pipe(resp)
 
 					if(projectFile instanceof Error){
 						error(result);
 						return;
 					}else{
-						fileSystem.writeFile("mold.project.json", projectFile, function(err) {
+						fileSystem.writeFile(PROJECT_FILE_NAME, projectFile, function(err) {
 							if(err) {
 								error(err);
 							} else {

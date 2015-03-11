@@ -41,7 +41,7 @@ Seed({
 
 			var fileSystem = require("fs"),
 				npm = require("npm"),
-				repo = parameter.repository || 'http://cdn.moldjs.de/',
+				repo = parameter.repository || Mold.SOURCE_REPOSITORY,
 				seedHandler = new Mold.Tools.SeedHandler(),
 				targetRepo = false,
 				overwrite = Mold.is(parameter['-overwrite']),

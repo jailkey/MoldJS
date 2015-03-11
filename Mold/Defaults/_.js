@@ -1,5 +1,5 @@
 Seed({
-	name : 'Mold.Defaults.*',
+	name : 'Mold.Defaults._',
 	dna : 'package',
 	include : [
 		".TemplateDirectives"

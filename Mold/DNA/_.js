@@ -1,5 +1,5 @@
 Seed({
-	name : 'Mold.DNA.*',
+	name : 'Mold.DNA._',
 	dna : 'package',
 	include : [
 		".CLI",

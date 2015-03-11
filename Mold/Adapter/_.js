@@ -1,5 +1,5 @@
 Seed({
-	name : 'Mold.Adapter.*',
+	name : 'Mold.Adapter._',
 	dna : 'package',
 	include : [
 		".LocalStore",

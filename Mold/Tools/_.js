@@ -1,5 +1,5 @@
 Seed({
-	name : 'Mold.Tools.*',
+	name : 'Mold.Tools._',
 	dna : 'package',
 	include : [
 		".CLIForm",

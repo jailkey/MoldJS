@@ -307,6 +307,7 @@ Seed({
 
 		setTimeout(function(){
 			Mold.load({ name : "->Mold.CLI.*"}).bind(function(){
+			
 				if(fileSystem.existsSync(Mold.LOCAL_REPOSITORY + "Mold/CLI/*.js")){
 					Mold.load({ name : "Mold.CLI.*"}).bind(function(){
 						init();

@@ -1,5 +1,5 @@
 Seed({
-	name : 'Mold.Lib.*',
+	name : 'Mold.Lib._',
 	dna : 'package',
 	include : [
 		".Ajax",

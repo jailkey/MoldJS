@@ -1,5 +1,5 @@
 Seed({
-	name : 'Mold.CLI.*',
+	name : 'Mold.CLI._',
 	dna : 'package',
 	include : [
 		".Build",

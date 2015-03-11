@@ -44,6 +44,8 @@ Seed({
 			},
 			createSeedPath : _createSeedPath,
 			addSeed : function(seedName, code, overwrite){
+
+				seedName = seedName.replace("*", "_");
 				
 				var path = repoPath,
 					seedPath = Mold.getSeedPath(seedName);

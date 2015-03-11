@@ -39,7 +39,7 @@ Seed({
 							}
 						}
 					})
-					var regExp = new RegExp("\t{" + shortest + "}(.*?)", "g");
+					var regExp = new RegExp("^\t{" + shortest + "}(.*?)", "g");
 					output = "";
 					lines.forEach(function(value){
 						output += value.replace(regExp, "") + "\n";

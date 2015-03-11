@@ -28,7 +28,8 @@
   "dependencies": {
     "request": ">=2.5.0",
     "wrench": "latest",
-    "npm": ">=2.0.0"
+    "npm": ">=2.0.0",
+    "semver" : "latest",
   },
   "license": "MIT"
 }

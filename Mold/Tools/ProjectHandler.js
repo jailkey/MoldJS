@@ -111,7 +111,9 @@ Seed({
 		var _createDir = function(path, parts){
 			var dirPath = "";
 			var chmod = 0744;
-
+			if(!fileSystem.existsSync(pathes.normalize(path))){
+				fileSystem.mkdirSync(pathes.normalize(path), chmod);
+			}
 			for(var i = 0; i < parts.length - 1; i++){
 				dirPath += parts[i] + "/";
 				if(!fileSystem.existsSync(pathes.normalize(path + dirPath))){

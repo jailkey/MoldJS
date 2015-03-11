@@ -155,6 +155,7 @@ Seed({
 			if(!fileSystem.existsSync(file)){
 				fileSystem.writeFileSync(file, seedCode);
 			}
+			fileSystem.chmodSync(file, 0755);
 		}
 
 
@@ -261,6 +262,7 @@ Seed({
 								error(err);
 							} else {
 								console.log("\u001b[32m" + "mold.project.json successfully created!" +  "\u001b[39m");
+								fileSystem.chmodSync(PROJECT_FILE_NAME, 0755);
 							}
 						});
 					}

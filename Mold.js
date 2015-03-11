@@ -1303,14 +1303,15 @@ var Mold = (function(config){
 			if(_isNodeJS){
 				
 				var nodePath = require('fs'),
+					pathes = require("path"),
 					pathStart = path.substring(0, 2);
 
 				if(pathStart !== "./" && pathStart !== ".." && path.substring(0, 1) !== "/"){
 					path = "./"+path;
 				}
-				if(nodePath.existsSync(path)){
-					_pathes[seedConf.seedName] = path;
-					var pathes = require("path");
+				if(nodePath.existsSync(pathes.normalize(path))){
+					_pathes[seedConf.seedName] = pathes.normalize(path);
+					
 					var testMold = require(pathes.normalize(path));
 					
 				}else{

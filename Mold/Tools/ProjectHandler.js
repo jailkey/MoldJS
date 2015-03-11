@@ -114,8 +114,8 @@ Seed({
 
 			for(var i = 0; i < parts.length - 1; i++){
 				dirPath += parts[i] + "/";
-				if(!fileSystem.existsSync(path + dirPath)){
-					fileSystem.mkdirSync(path + dirPath, chmod)
+				if(!fileSystem.existsSync(pathes.normalize(path + dirPath))){
+					fileSystem.mkdirSync(pathes.normalize(path + dirPath), chmod)
 				}
 			}
 		}
@@ -154,9 +154,9 @@ Seed({
 			//parts.pop();
 
 
-			_createDir(path, parts);
-			if(!fileSystem.existsSync(file)){
-				fileSystem.writeFileSync(file, seedCode);
+			_createDir(pathes.normalize(path), parts);
+			if(!fileSystem.existsSync(pathes.normalize(file))){
+				fileSystem.writeFileSync(pathes.normalize(file), seedCode);
 			}
 			fileSystem.chmodSync(file, 0755);
 		}
@@ -165,7 +165,7 @@ Seed({
 		var _checkGlobalRepo = function(path){
 			var executed = [];
 			var promise = new Mold.Lib.Promise();
-			if(!fileSystem.existsSync(path + "/Lib")){
+			if(!fileSystem.existsSync(pathes.normalize(path + "/Lib"))){
 
 				promise = Mold.Lib.Async.waterfall(
 					function(){

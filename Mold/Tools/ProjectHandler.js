@@ -114,7 +114,9 @@ Seed({
 			if(!fileSystem.existsSync(pathes.normalize(path))){
 				fileSystem.mkdirSync(pathes.normalize(path), chmod);
 			}
-			for(var i = 0; i < parts.length - 1; i++){
+			
+
+			for(var i = 0; i < parts.length; i++){
 				dirPath += parts[i] + "/";
 				if(!fileSystem.existsSync(pathes.normalize(path + dirPath))){
 					fileSystem.mkdirSync(pathes.normalize(path + dirPath), chmod)

@@ -222,6 +222,7 @@ Seed({
 			var params = {},
 				name = '',
 				values = [],
+				command = false,
 				commadPos = 2;
 
 			process.argv.forEach(function (val, index, argumentList) {

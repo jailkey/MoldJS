@@ -66,6 +66,8 @@ Seed({
 			}
 			
 
+			parameter.name = parameter.name.replace("*", "_");
+			
 			seedHandler.infos(repo, parameter.name, targetRepo).then(function(info){
 				
 				var existing = {},

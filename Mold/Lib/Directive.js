@@ -6,7 +6,8 @@ Seed({
 			"Mold.Lib.Controller",
 			"Mold.Lib.CssParser",
 			"Mold.Lib.Element",
-			"Mold.Lib.Info"
+			"Mold.Lib.Info",
+			"Mold.Lib.DomObserver"
 		]
 	},
 	function(){
@@ -36,18 +37,28 @@ Seed({
 		*/
 	
 		var _watchList = [];
+		
+		var _isInWatchList = function(element){
+			return !!Mold.find(_watchList, function(selected){
+				if(selected === element){
+					return true;
+				}
+				return false;
+			})
+		}
+
+		
 		var _watch = function(element, callback){
-			if(Mold.Lib.Info.isSupported("mutationObserver")){
-				var observer = new MutationObserver(function(mutations){
-					Mold.each(mutations, function(mutation){
-						callback.call(this, mutation);
-					});
+			
+			if(!_isInWatchList(element)){
+				var test = Mold.Lib.DomObserver.observeElement(element);
+				test.on("element.changed", function(e){
+					callback.call(this, e.data.mutation);
+					
 				});
-				observer.observe(element, { attributes: true, childList: true, characterData: true })
 				_watchList.push(element);
-			}else{
-				throw "Your Browser does not support MutationObserver!"
 			}
+			
 		}
 
 		var _collectChilds = function(elements, collection, elementName, output, watchable){
@@ -165,7 +176,6 @@ Seed({
 						var attributeName = selectedAttribute.name || selectedAttribute;
 						output[attributeName] = attribute;
 						if(watchable){
-
 							_watch(scope, function(mutation){
 
 								if(

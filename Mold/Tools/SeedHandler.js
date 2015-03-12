@@ -30,9 +30,10 @@ Seed({
 
 		//Load Seed
 		var _loadSeed = function(path){
-		
+			
 			return new Mold.Lib.Promise(function(onsuccess, onerror){
 				if(_isLocalPath(path)){
+					
 					if(!fileSystem.existsSync(path)){
 						onerror("File " + path + " does not exist!");
 						return;

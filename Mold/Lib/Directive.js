@@ -372,7 +372,11 @@ Seed({
 					var elements = scope.getElementsByTagName(directive.name);
 					break;
 				case "attribute":
-					var elements = scope.querySelectorAll("["+directive.name+"]");
+					if(directive.value){
+						var elements = scope.querySelectorAll('['+directive.name+'~="' + directive.value + '\"]');
+					}else{
+						var elements = scope.querySelectorAll("["+directive.name+"]");
+					}
 					break;
 				case "class":
 					var elements = scope.getElementsByClassName(directive.name);
@@ -412,7 +416,6 @@ Seed({
 								node = element;
 								break;
 						}
-						
 						directive.apply(
 							node,
 							element,

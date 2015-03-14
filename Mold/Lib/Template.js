@@ -120,6 +120,7 @@ Seed({
 
 			var addDirectives = function(){
 				Mold.each(Mold.Defaults.TemplateDirectives, function(directive){
+					console.log("add directive")
 					Mold.Lib.Directive.add(
 						directive,
 						target,

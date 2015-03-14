@@ -567,8 +567,11 @@ var Mold = (function(config){
  * @param  {function} callback  method will called on each entry, given paramter is the entry value           
  */
 	eachShift : function(collection, callback){
-		if(!collection){
+		if(!Mold.isArray(collection)){
 			return false;
+		}
+		if(typeof callback !== "function"){
+			throw new Error("eachShift needs a callback ")
 		}
 		while(collection.length){
 			var selected = collection.shift();
@@ -1770,8 +1773,13 @@ Mold.addSeedNameCleaner("standard", function(seedName){
 		}else{
 			seedName = seedName.split("->")[1];
 		}
+
 	}
-	seedName = seedName.replace("*", "_");
+
+	if(seedName.replace){
+		seedName = seedName.replace("*", "_");
+	}
+	
 	return seedName;
 });
 

@@ -14,12 +14,13 @@ Seed({
 
 		var _directives = [],
 			_directivesIndex = {},
-			_that = this,
 			_cache = {},
+			_events = {},
 			doc = (Mold.isMoldJS) ? false : document;
 			cssParser = new Mold.Lib.CssParser(document);
 
-		Mold.mixin(this, new Mold.Lib.Event(this));
+		//Mold.mixin(this, new Mold.Lib.Event(this));
+			_events = new Mold.Lib.Event(_events);
 
 		/*
 			Directive Exampel
@@ -198,12 +199,12 @@ Seed({
 			}
 			return output;
 		}
-
+		
 		var _add = function(directive, scope, fromtemplate){
 			if(!directive._id){
 				directive._id = Mold.getId();
 			}
-		
+
 			directive.apply = function(node, element, template, index, style){
 				
 				if(!element.hasDirective || !element.hasDirective(directive._id)){
@@ -273,9 +274,9 @@ Seed({
 
 			_directives.push(directive);
 			_directivesIndex[directive.at] = _directivesIndex[directive.at] || {};
-			_directivesIndex[directive.at][directive.name] = _directives[_directives.length -1];
-		
-			_that.trigger("directive.added", {
+			_directivesIndex[directive.at][directive.name] = _directivesIndex[directive.at][directive.name] || [];
+			_directivesIndex[directive.at][directive.name].push(_directives[_directives.length -1]);
+			_events.trigger("directive.added", {
 				directive : directive,
 				scope : scope,
 				template : fromtemplate
@@ -319,6 +320,8 @@ Seed({
 				template = false,
 				styleAttributes = false;
 
+
+
 			Mold.each(_directives, function(directive){
 
 				if(element.nodeType !== 1){
@@ -339,6 +342,7 @@ Seed({
 					&&!element.getAttribute(directive.name)
 					|| (directive.value && directive.value !== element.getAttribute(directive.name))
 				){
+
 					return false;
 				}
 					
@@ -371,10 +375,10 @@ Seed({
 		}
 
 
-		this.on("directive.added", function(e){
-			
+		_events.on("directive.added", function(e){
 			var directive = e.data.directive,
 				scope = e.data.scope || document;
+
 
 			switch(directive.at){
 				case "element":
@@ -405,6 +409,8 @@ Seed({
 				default:
 					break;
 			}
+
+			
 			if(elements && elements.length){
 				
 				var index = 0,
@@ -455,18 +461,22 @@ Seed({
 		});
 
 
-
+		Mold.Lib.Observer.on("create.element", function(e){
+			_appendElement(e.data.element);
+			_appendStyleProperty(e.data.element);
+		})
 
 		return {
-			on : this.on,
-			trigger : this.trigger,
+			on : _events.on,
+			trigger : _events.trigger,
 			appendElement : _appendElement,
 			add : function(directive, scope, template){
-				
+				/*
 				if(!directive.overwrite){
-					directive = this.get(directive.at, directive.name) || directive;
-				}
+					directive = this.get(directive.at, directive.name. directive.value) || directive;
+				}*/
 				if(directive.at !== "style-property"){
+
 					_add(directive, scope, template);
 					
 				}else{
@@ -475,7 +485,8 @@ Seed({
 					});
 				}
 			},
-			get : function(type, name){
+			
+			get : function(type, name, value){
 				name = name.toLowerCase();
 				if(_directivesIndex[type] && _directivesIndex[type][name]){
 					return _directivesIndex[type][name];

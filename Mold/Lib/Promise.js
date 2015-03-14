@@ -82,7 +82,7 @@ Seed({
 						
 						callbackObject.promise.changeState("rejected", error);
 						
-						throw error;
+						throw error.stack;
 					}
 				}
 			});

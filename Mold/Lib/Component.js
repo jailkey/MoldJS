@@ -37,14 +37,6 @@ Seed({
 
 				
 
-				if(directive.at === "attribute"){
-					new Mold.Lib.Event(document).on("attribute.modified", function(e){
-						if(e.data.attr === directive.name){
-							//Mold.Lib.Directive.add(directive, document);
-						}
-					});
-				}
-
 			},
 			files : function(file){
 				if(file && file.length > 0){

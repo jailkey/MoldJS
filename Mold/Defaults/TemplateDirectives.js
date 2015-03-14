@@ -11,7 +11,7 @@ Seed({
 			at : "attribute",
 			name : "mold-event",
 			action : function(node, element, template, index){
-
+				console.log("EVENT FOUND", element)
 				var handler =  node.nodeValue.split(":")[0],
 					moldEvent = node.nodeValue.split(":")[1],
 					template = new Mold.Lib.Element(element).getTemplate();

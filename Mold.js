@@ -626,7 +626,7 @@ var Mold = (function(config){
 
 
 		filter : function(collection, iterator, context){
-			if(Array.prototype.filter){
+			if(Array.prototype.filter && Mold.isArray(collection)){
 				return collection.filter(iterator);
 			}
 			var result = [];

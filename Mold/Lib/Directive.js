@@ -333,7 +333,12 @@ Seed({
 					return false;
 				}
 
-				if(directive.at === "attribute" && element.getAttribute &&!element.getAttribute(directive.name)){
+				if(
+					directive.at === "attribute" 
+					&& element.getAttribute 
+					&&!element.getAttribute(directive.name)
+					|| (directive.value && directive.value !== element.getAttribute(directive.name))
+				){
 					return false;
 				}
 					

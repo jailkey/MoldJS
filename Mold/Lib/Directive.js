@@ -49,15 +49,18 @@ Seed({
 
 		
 		var _watch = function(element, callback){
-			
-			if(!_isInWatchList(element)){
-				var test = Mold.Lib.DomObserver.observeElement(element);
-				test.on("element.changed", function(e){
-					callback.call(this, e.data.mutation);
-					
-				});
+			//if(!_isInWatchList(element)){
+				var that = this;
+				var selected = Mold.Lib.DomObserver.observe(element,  { childList: false, characterData : false, subtree : true});
+				selected
+					.on("element.inserted", function(e){
+						callback.call(that, e.data.mutation);
+					})
+					.on("attribute.changed", function(e){
+						callback.call(that, e.data.mutation);
+					})
 				_watchList.push(element);
-			}
+			//}
 			
 		}
 
@@ -108,7 +111,7 @@ Seed({
 					if(watchable){
 
 						_watch(scope, function(mutation){
-						
+							
 							if(mutation.type === "childList"){
 								Mold.each(mutation.addedNodes, function(selectedNode){
 									if(
@@ -176,14 +179,15 @@ Seed({
 						var attributeName = selectedAttribute.name || selectedAttribute;
 						output[attributeName] = attribute;
 						if(watchable){
+							
 							_watch(scope, function(mutation){
-
+							
 								if(
-									mutation.type === "attributes" 
+									mutation.type === "attributes"
 									&& mutation.attributeName === attributeName
 								){
 									output[attributeName] = mutation.target.getAttribute(attributeName);
-
+									output.trigger(attributeName + ".changed", { name: attributeName, mutation : mutation})
 									output.trigger("attribute.changed", { name: attributeName, mutation : mutation})
 								}
 							});
@@ -201,7 +205,7 @@ Seed({
 			}
 		
 			directive.apply = function(node, element, template, index, style){
-
+				
 				if(!element.hasDirective || !element.hasDirective(directive._id)){
 					directive.scope = element;
 					if(directive.seed){
@@ -432,15 +436,21 @@ Seed({
 			}
 		});
 
+		var bodyElement = new Mold.Lib.Element(document.body);
+		Mold.Lib.DomObserver.observe(bodyElement, { childList: false, characterData : false, subtree : true});
 
-		Mold.Lib.Observer.sub("create.element", function(e){
-			_appendElement(e.data.element);
+		bodyElement.on("attribute.changed", function(e){
+			_appendElement(e.data.mutation.target);
+			_appendStyleProperty(e.data.mutation.target);
 		});
 
-		new Mold.Lib.Event(document).on("DOMNodeInserted", function(e){
-			_appendElement(e.target);
-			_appendStyleProperty(e.target);
+		bodyElement.on("element.inserted", function(e){
+			_appendElement(e.data.mutation.target);
+			_appendStyleProperty(e.data.mutation.target);
 		});
+
+
+
 
 		return {
 			on : this.on,

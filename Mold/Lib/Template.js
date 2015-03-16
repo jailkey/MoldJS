@@ -17,9 +17,10 @@ Seed({
 			"Mold.Lib.Document"
 		]
 	},
-	function(content){
+	function(content, config){
 
 		var that = this,
+			_config = config || {},
 			_templateContent = "",
 			_shadowTemplate = false,
 			_compiledTemplate = false,
@@ -352,28 +353,37 @@ Seed({
 			}
 		}
 
-		if(typeof content === "function"){
-			
-			_templateContent = content.toString().replace(/(^function\s*\(\)\s*\{\s*\/\*\|)([\s\S]*)(\|\*\/\s*\})$/g, function(){
-				return arguments[2];
-			});
 
-			//Safari Bugfix 
-			_templateContent = _templateContent.replace(/^function\s*\(\)\s*\{\s*\/\*\|/g, '');
-			_templateContent = _templateContent.replace(/\|\*\/\s*\}$/g, '');
-
-			_templateContent = _templateContent.replace(/ style=/g, 'mold-style=');
-	
-			_contentType = "string";
-			_compiledTemplate = _parseTemplate(_templateContent);
+		if(config.parseAsString){
+			_shadowTemplate = {}
+			_compiledTemplate = Mold.Lib.TreeFactory.parseString(_shadowTemplate, content);
 			this.trigger("ready");
-		}else if(Mold.isNode(content)){
-			_templateContent = content;
-			_contentType = "node"
-			_compiledTemplate = _parseElement(_templateContent);
 		}else{
-			console.log("is nothing")
+			if(typeof content === "function"){
+				
+				_templateContent = content.toString().replace(/(^function\s*\(\)\s*\{\s*\/\*\|)([\s\S]*)(\|\*\/\s*\})$/g, function(){
+					return arguments[2];
+				});
+
+				//Safari Bugfix 
+				_templateContent = _templateContent.replace(/^function\s*\(\)\s*\{\s*\/\*\|/g, '');
+				_templateContent = _templateContent.replace(/\|\*\/\s*\}$/g, '');
+
+				_templateContent = _templateContent.replace(/ style=/g, 'mold-style=');
+		
+				_contentType = "string";
+				_compiledTemplate = _parseTemplate(_templateContent);
+				this.trigger("ready");
+			}else if(Mold.isNode(content)){
+				_templateContent = content;
+				_contentType = "node"
+				_compiledTemplate = _parseElement(_templateContent);
+			}else{
+				console.log("is nothing")
+			}
 		}
+
+
 	
 
 		
@@ -467,6 +477,9 @@ Seed({
 * @return (node)  returns the parsed Template
 **/
 			get : function(){
+				if(_config.parseAsString){
+					return _shadowTemplate.nodeValue;
+				}
 				return _shadowTemplate;
 			},
 			getFirst : function(){

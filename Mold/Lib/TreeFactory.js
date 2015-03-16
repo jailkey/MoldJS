@@ -6,7 +6,8 @@ Seed({
 		include : [
 			"Mold.Lib.DomPointer",
 			"Mold.Lib.DomLessPointer",
-			"Mold.Lib.Event"
+			"Mold.Lib.Event",
+			"Mold.Lib.Tree"
 		],
 		nodeInclude : [
 			"Mold.Lib.Document"
@@ -16,13 +17,10 @@ Seed({
 
 		var _shadowTemplate = false,
 			_compiledTemplate = false,
-			that = this,
-			_directive = Mold.Lib.TemplateDirective,
 			_doc = false,
 			_testMode = false,
 			undefined;
-
-		Mold.mixin(this, new Mold.Lib.Event(this))
+			
 
 		if(Mold.isNodeJS || _testMode){
 			_doc = new Mold.Lib.Document();
@@ -364,7 +362,7 @@ Seed({
 			}
 		}
 
-		var that = this;
+
 		
 		var _parseDomTree = function(node, tree, template, element, index){
 
@@ -480,6 +478,12 @@ Seed({
 			return tree;
 		}
 
+		var _parseString = function(node, content, template){
+			node.nodeValue = content;
+			var _root = new Mold.Lib.Tree("root", false, false, false, template);
+			return _parseDomLessTree(node,  _root, _root);
+		}
+
 		var _parseDomLessTree = function(node, tree, mainTree){
 			var content = node.nodeValue;
 			var result = content.split(/(\{\{.*?\}\})/gm);
@@ -539,19 +543,6 @@ Seed({
 		}
 
 
-		var _parseFromTo = function(fromNode, toNode, tree){
-			var nextNode = fromNode;
-			while(nextNode != null){
-				_parseDomTree(nextNode, tree, this);
-				if(nextNode === toNode){
-					nextNode = null;
-					break;
-				}
-				nextNode = nextNode.nextSibling;
-			}
-
-		}
-
 
 		var _parseCollection = function(collection, tree, template, index){
 			var i = 0,
@@ -575,12 +566,9 @@ Seed({
 			getCleanName : _cleanVarName,
 			preParseTemplate : _preParseTemplate,
 			parseStringContent : _parseStringContent,
+			parseString : _parseString,
 			parseCollection : _parseCollection,
-			parseDomFromTro : _parseFromTo,
-			parseDomTree : _parseDomTree,
-			on : function(action, callback){
-				that.on(action, callback)
-			}
+			parseDomTree : _parseDomTree
 		}
 	}
 )

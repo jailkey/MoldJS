@@ -497,7 +497,7 @@ var Mold = (function(config){
 
 		trim : function(phrase){
 			if(Mold.is(phrase)){
-				phrase = phrase.replace(/\n*/gm, "");
+				phrase = phrase.replace(/(\r\n|\n|\r)/gm, "");
 				phrase = phrase.replace(/^\s+|\s+$/g, "");
 			}
 			return phrase;

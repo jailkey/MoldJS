@@ -56,12 +56,10 @@ describe("Test Mold.Lib.Model", function(){
 			style.append({
 				test : "#ff0000"
 			});
+
 			var backgroundColor = window.getComputedStyle(document.querySelector(".test")).backgroundColor;
-			expect(Mold.Lib.Color.rgbToHex(backgroundColor)).toEqual("#efefef");
-
-		}
-
-
+			expect(Mold.Lib.Color.rgbToHex(backgroundColor)).toEqual("#ff0000");
+		});
 
 	});
 

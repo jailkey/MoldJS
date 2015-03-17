@@ -7,7 +7,7 @@ Seed({
 			"Mold.Lib.Template",
 			"Mold.Lib.Color",
 			{ Element : ".Element" }
-		]
+		] 
 	},
 	function(rules, data){
 
@@ -182,9 +182,5 @@ Seed({
 			}
 		}
 
-	}
-	//Test
-	test : function(seed){
-		
 	}
 )

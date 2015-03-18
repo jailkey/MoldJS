@@ -45,6 +45,9 @@ Seed({
 			markSeedAsLoaded : function(seedName, seed){
 				_loadedSeeds[seedName] = seed;
 			},
+			removeSeed : function(seedName){
+				delete _loadedSeeds[seedName];
+			},
 			setEventObject : function(events){
 				_events = events;
 			},
@@ -291,7 +294,8 @@ Seed({
 					data : {
 						param : parameter,
 						request : _request,
-						response : _response,
+						rawResponse : _response,
+						response : _response._moldResponse || false,
 						session : _session,
 						next : _next || function(){}
 					}
@@ -314,7 +318,8 @@ Seed({
 						
 						if(typeof route === "function"){
 							if(parameter){
-								route(parameter);
+								var trigger = this.buildTrigger(parameter);
+								route(trigger);
 							}else{
 								route();
 							}
@@ -337,11 +342,13 @@ Seed({
 							that.loadSeed(route, parameter, trigger);
 						}
 					}
+					return true;
 				}else{
 					console.log("no route found")
 					if(!Mold.isNodeJS){
 						//Mold.log("Error", { code : 10, dnaname: "urlrouter", error : "No route found! " +_seed.name+ " "});
 					}
+					return false;
 				}
 			}
 		}

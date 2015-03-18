@@ -3,7 +3,6 @@ Seed({
 		dna : "class"
 	},
 	function(name, action, conf){
-
 		var _config = conf;
 
 		this.publics = {

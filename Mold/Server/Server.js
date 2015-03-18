@@ -11,7 +11,8 @@ Seed(
 			"Mold.Server.Middleware",
 			"Mold.Lib.Header",
 			"Mold.Server.Response",
-			"Mold.Lib.Path"
+			"Mold.Lib.Path",
+			"Mold.Server.Middlewares.Router"
 		],
 		description : "",
 		version : 0.1
@@ -87,7 +88,6 @@ Seed(
 			
 
 			}catch(e){
-				console.log("Fehler", e);
 				throw e;
 			}
 		}
@@ -109,6 +109,7 @@ Seed(
 				res.addFile = function(file){
 					res._moldResponse.addFile(file);
 				}
+				res.redirect = res._moldResponse.redirect;
 				next();
 			}, "start");
 
@@ -124,7 +125,7 @@ Seed(
 					e.data.response.addFile(normalize(queryPath));
 					e.data.next();
 				}
-				var shared = new Mold.Router(sharedRoute);
+				var shared = new Mold.Server.Middlewares.Router(sharedRoute);
 				_use(shared, "start");
 			}
 

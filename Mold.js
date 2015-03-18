@@ -436,8 +436,25 @@ var Mold = (function(config){
 		EXIT : '--exitoperation--',
 		SEED_STATUS_LOADED : '--dependencies-loaded--',
 		SEED_STATUS_PREPROZESSING : '--preprozessing--',
+		PROJECT_FILE_NAME : "mold.project.json",
 		seedList  : [],
 		stopExecution : false,
+
+		getProjectFile : function(){
+			if(_isNodeJS){
+				var currentDir = process.cwd(),
+					fs = require("fs");
+
+				if(!fs.existsSync(currentDir + "/" + Mold.PROJECT_FILE_NAME)){
+					throw new Error("Can not find " + currentDir + "/" + Mold.PROJECT_FILE_NAME + " file!\n" );
+					return;
+				}			
+					
+				var config = require(currentDir + "/" + Mold.PROJECT_FILE_NAME);
+				return config;
+			}
+			return false;
+		},
 	/**
 	 * @method getDependencies
 	 * @description returns all Depencies from a seed header in a list

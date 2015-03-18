@@ -5,6 +5,11 @@
 		"local-repository": "",
 		"main-seed": "Mold.Main"
 	},
+	"client": {
+		"local-repository": "client/",
+		"shared-alias" : "shared/",
+		"main-seed": "Mold.Main"
+	},
 	"shared": "../../../",
 	"caching": "on"
 }

@@ -13,7 +13,7 @@ Seed({
 		},
 		createBy : "new",
 		create : function(seed) {
-			var target = Mold.createChain(Mold.getSeedChainName(seed));
+			
 			if(seed.func){
 				var controllerCode = seed.func;
 			}else if (seed.controller){

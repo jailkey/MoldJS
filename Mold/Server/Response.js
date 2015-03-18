@@ -24,11 +24,31 @@ Seed({
 			_fs = require("fs"),
 			_data = false;
 
-		var _setStatus = function(name){
-			if(Mold.isNumber(name)){
+		var _setStatus = function(name, conf){
+			//console.log("isNumber")
+			if(typeof +name === "number"){
 				_status = name;
 			}else{
+
 				_status = _header.getStatusCode(name);
+			}
+		
+			if(conf){
+				if(Mold.startsWith(_status, "3")){
+					_redirect(_status, conf);
+				}
+			}
+		}
+
+		var _redirect = function(type, url){
+				console.log("redirect", url)
+			_isRedirect = url;
+			_addHeader('Location', url);
+			_hasContent = false;
+			if(typeof +type !== "number"){
+				_status(_header.getStatusCode(type));
+			}else{
+				_status = type;
 			}
 		}
 
@@ -43,28 +63,22 @@ Seed({
 		}
 
 		this.publics = {
-			setStatus : function(name){
-				_setStatus(name);
+			setStatus : function(name, conf){
+				_setStatus(name, conf);
 			},
 			fileNotFound : function(){
-				_status = 404;
+				if(_status == 200){
+					_status = 404;
+				}
 			},
 			redirect : function(type, url){
-				_isRedirect = url;
-				_addHeader('Location', url);
-				if(typeof +type !== "number"){
-					_header.getStatusCode(type);
-				}else{
-					_status = type;
-				}
-				
+
+				_redirect(type, url);
 			},
 			addData : function(data, type){
-				console.log("add data", data, type)
 				if(!type && Mold.isObject(data)){
 					data = JSON.stringify(data);
 					_mimeType = _header.getMimeType("json");
-					console.log("GET MIME", _mimeType)
 				}else{
 					_mimeType = _header.getMimeType(type);
 				}
@@ -72,17 +86,16 @@ Seed({
 			},
 			addFile : function(filepath){
 				if(_fs.existsSync(filepath)){
-					console.log("add file", filepath)
 					_setData(_fs.readFileSync(filepath), _mime.lookup(filepath));
 				}else{
 					_status =  404;
 				}
 			},
 			create  : function(){
-
+				console.log("STATUS", _status)
 
 				if(!_hasContent){
-					_result.writeHead(_status);
+					_result.writeHead(_status, _headerParameter);
 				}else{
 					if(_mimeType){
 						_status = _header.getStatusCode("ok");

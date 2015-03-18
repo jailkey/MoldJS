@@ -44,6 +44,17 @@ Seed({
 				}
 
 				return false;
+			},
+			getRelativePathName : function(path){
+				path = path.replace("http://", "").replace("https://", "");
+				if(Mold.startsWith(path, "/")){
+					path = path.substring(1, path.length);
+
+				}
+				if(Mold.contains(path, "?")){
+					path = path.split("?")[0]
+				}
+				return path;
 			}
 		}
 	}

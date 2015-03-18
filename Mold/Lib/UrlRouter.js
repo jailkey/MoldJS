@@ -336,10 +336,24 @@ Seed({
 								});
 							}
 						}else if(route.substring(0,4) === "Mold"){
+
 							parameter = parameter || {};
 							parameter.eventHandler = _events;
 							var trigger = this.buildTrigger(parameter);
 							that.loadSeed(route, parameter, trigger);
+
+						}else if(/^[234]0[0-9]/.test(route)){
+							console.log("redirect gefunden")
+
+							var parts =  route.split("->"),
+								statusCode = Mold.trim(parts[0]),
+								url = (parts[1]) ? Mold.trim(parts[1]) : false;
+				
+
+							if(_response._moldResponse){
+								_response._moldResponse.setStatus(statusCode, url);
+								_next();
+							}
 						}
 					}
 					return true;

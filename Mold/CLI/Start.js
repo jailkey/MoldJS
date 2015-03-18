@@ -31,7 +31,7 @@ Seed({
 				return;
 			}
 			
-			if(config.server["local-repository"]){
+			if(Mold.is(config.server["local-repository"])){
 				Mold.LOCAL_REPOSITORY = currentDir + "/" + config.server["local-repository"];
 			}else{
 				cli.showError("Local Server repository is not defined!\n" );
@@ -39,8 +39,13 @@ Seed({
 			}
 
 			if(config.shared && !Mold.Lib.Path.isHTTP(config.shared)){
-				Mold.EXTERNAL_REPOSITORY = config.shared;
+				if(!Mold.Lib.Path.isAbsolute(config.shared)){
+					Mold.EXTERNAL_REPOSITORY = currentDir +config.shared;
+				}else{
+					Mold.EXTERNAL_REPOSITORY = config.shared;
+				}
 			}
+
 
 			Mold.load({ name : config.server["main-seed"]}).bind(function(){
 				console.log(cli.COLOR_GREEN + "Seed " + config.server["main-seed"] + " successfully started!" + cli.COLOR_RESET);

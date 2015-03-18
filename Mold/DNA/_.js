@@ -9,7 +9,6 @@ Seed({
 		".ExternalLib",
 		".Interface",
 		".Model",
-		".Plugin",
 		".SessionRouter",
 		".UrlRouter",
 		".View"

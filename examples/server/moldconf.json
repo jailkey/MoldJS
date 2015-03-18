@@ -1,7 +1,0 @@
-{
-	"name" : "server example",
-	"moldjs" : "../../Mold.js",
-	"repo" : "",
-	"extrepo" : "../../",
-	"main" : "Mold.Main"
-}

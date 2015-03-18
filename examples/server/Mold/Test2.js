@@ -12,7 +12,8 @@ Seed({
 		this.actions = {
 			"@GET" : function(e){
 				console.log("trigger get TEST 2");
-				e.data.response.addData({ test : "blablub"});
+				//e.data.response.addData({ test : "blablub"});
+				e.data.response.redirect(302, "/")
 				e.data.next();
 			},
 			"@POST" : function(e){

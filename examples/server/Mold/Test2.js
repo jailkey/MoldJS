@@ -7,15 +7,17 @@ Seed({
 
 	},
 	function(){
-		console.log("Test2", arguments)
+		//console.log("Test2", arguments)
 
 		this.actions = {
 			"@GET" : function(e){
 				console.log("trigger get TEST 2");
+				e.data.response.addData({ test : "blablub"});
 				e.data.next();
 			},
-			"@POST" : function(data){
+			"@POST" : function(e){
 				console.log("trigger post TEST 2");
+				e.data.next();
 			}
 		}
 	}

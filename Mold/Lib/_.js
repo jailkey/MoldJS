@@ -4,11 +4,9 @@ Seed({
 	include : [
 		".Ajax",
 		".CLI",
-		".CORS",
 		".CSS",
 		".Canvas",
 		".CanvasNode",
-		".Coder",
 		".Color",
 		".Component",
 		".Controller",

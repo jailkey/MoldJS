@@ -58,6 +58,8 @@ Seed(
 					var session = Mold.Server.Session.create(req);
 					var sequenze = new Mold.Lib.Sequence();
 
+				
+
 					session.data.set('location', {
 						pathname : req.url.split("?")[0],
 						search : (req.url.split("?").length > 1) ? req.url.split("?")[1] : "" ,
@@ -83,7 +85,14 @@ Seed(
 						});
 					});
 
-				}).listen(port, ip);
+				}).listen(port, ip, function(){
+
+					//reset user process user if startet with sudo to avoid running nodejs with root permissions
+					var uid = parseInt(process.env.SUDO_UID);
+				    if (uid){
+				    	process.setuid(uid);
+				    }
+				});
 
 			
 

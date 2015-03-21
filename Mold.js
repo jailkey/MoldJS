@@ -835,7 +835,7 @@ var Mold = (function(config){
 				
 		},
 
-		
+
 
 		getMainScript : _getMainScript,
 /**
@@ -1142,6 +1142,26 @@ var Mold = (function(config){
 
 		addSeed : function(seed){
 
+			//check platform
+			if(seed.platform){
+				var _reject = function(seed){
+					_Mold[seed.name] = { name : seed.name};
+					_createdMold[seed.name] = seed;
+					seed.loaded = true;
+					if( typeof _Mold[seed.name].loader  === "object" ){
+						console.log("FIRE LOAD")
+						_Mold[seed.name].loader.loaded();
+					}
+				}
+				if(_isNodeJS && (seed.platform === "browser" || seed.platform === "client")){
+					_reject(seed);
+					return;
+				}else if(!_isNodeJS && (seed.platform === "node" || seed.platform === "server")){
+					_reject(seed);
+					return;
+				}
+			}
+
 			if(!seed.loaded){
 				seed.loaded = true;
 				if(seed.events){
@@ -1152,6 +1172,9 @@ var Mold = (function(config){
 			}
 
 			if(seed){
+				if(!seed.name){
+					throw new Error("seed name is not defined!");
+				}
 				//Checks if all dependencies will be loaded
 				if(seed.status !== Mold.SEED_STATUS_LOADED){
 					var loadingproperties = Mold.getLoadingproperties();
@@ -1173,6 +1196,7 @@ var Mold = (function(config){
 											seed[property] = _loadSubSeeds(seed[property], seed.name);
 										}else{
 											if(!_Mold[element]){
+
 												Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false, parent : seed });
 											}
 										}
@@ -1187,7 +1211,7 @@ var Mold = (function(config){
 							}
 						}
 					});
-
+			
 
 					//If the seed has to wait for the DNA a callback will be added
 					if(startCreating){

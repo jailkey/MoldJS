@@ -1,6 +1,17 @@
 Seed({
 		name : "Mold.Lib.Sanitize",
-		dna : "class"
+		dna : "class",
+		include : [
+			"Mold.Tools.Test.Unit"
+		],
+		test : function(seed){
+			console.log("start test ->");
+			describe("create seed " + seed.name + " and test public methodes" , function(){
+				var san = new Sanitize();
+
+
+			});
+		}
 	},
 	function(){
 
@@ -12,7 +23,9 @@ Seed({
 		var _exploitsEntrys = [
 			"javascript:",
 			"vbscript:",
-			"livescript:"
+			"livescript:",
+			"expression",
+			"behavior:"
 		]
 
 		var _eventHandler = [

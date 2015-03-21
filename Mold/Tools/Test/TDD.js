@@ -4,9 +4,10 @@ Seed({
 	},
 	function(test){
 
+		//test root object
 		var _rootTest = {
 			type : "root",
-			description : "root testing",
+			description : "test root",
 			action : function(){},
 			parent : parent || false,
 			error : false,
@@ -14,11 +15,16 @@ Seed({
 			children : []
 		}
 
-		var _parent = null;
-		var _reporter = [];
-		var _timeOut = 1000;
+		var _parent = null,
+			_reporter = [],
+			_timeOut = 1000;
 
-
+		/**
+		 * _hasFunctionParameter
+		 * @description checks if a function has parameter
+		 * @param  {function}  func the function
+		 * @return {Boolean} return true or false
+		 */
 		var _hasFunctionParameter = function(func){
 
 			func = func.toString();
@@ -75,15 +81,6 @@ Seed({
 		}
 
 		var _it = function(description, action){
-			//console.log("it", _parent)
-			/*
-			var exec = function(done){
-				if(typeof done === "function"){
-					action.call(this)
-				}else{
-					action.call(this);
-				}
-			}*/
 			_addTest("it", description, action, _parent);
 		}
 
@@ -93,6 +90,16 @@ Seed({
 				description = '';
 			}
 			_addTest("before", description, action, _parent);
+		}
+
+		
+
+		var _beforeEach = function(description, action){
+			if(typeof description === "function"){
+				action = description
+				description = '';
+			}
+			_addTest("beforeEach", description, action, _parent);
 		}
 
 		var _after = function(description, action){
@@ -127,6 +134,15 @@ Seed({
 			test.action.call(context, withTimeout);
 		}
 
+		/**
+		 * _nextChild
+		 * @description 
+		 * @param  {[type]} parent     [description]
+		 * @param  {[type]} level      [description]
+		 * @param  {[type]} context    [description]
+		 * @param  {[type]} testsReady [description]
+		 * @return {[type]}            [description]
+		 */
 		var _nextChild = function(parent, level, context, testsReady){
 			level = level || 0;
 
@@ -161,8 +177,23 @@ Seed({
 
 			}
 
+			//executed after before rules are executed
 			var afterBefore = function(){
-			
+				var beforeEach = _getTestByType("beforeEach", parent.children);
+				if(beforeEach){
+					console.log("EXEC BEFORE EACH")
+					_execute(beforeEach, parent, context,  function(){
+							afterBeforeEach()
+						}, 
+						testsReady
+					);
+				}else{
+					afterBeforeEach();
+				}
+			}
+
+			//execute after the before each rule
+			var afterBeforeEach = function(){
 				if(
 					parent.children[level].type === "describe"
 					|| parent.children[level].type === "it"
@@ -172,15 +203,15 @@ Seed({
 					ready()
 				}
 			}
-		
+			
 			if(level === 0){
 				var before = _getTestByType("before", parent.children);
 				if(before){
 					_execute(before, parent, context, function(){
-						afterBefore()
-					},
-					testsReady);
-					
+							afterBefore()
+						},
+						testsReady
+					);
 				}else{
 					afterBefore()
 				}
@@ -188,13 +219,24 @@ Seed({
 				afterBefore();
 			}
 			
-			
 
 		}
 
+
+		/**
+		 * _execute
+		 * @description executes a test
+		 * @param  {[type]} test       [description]
+		 * @param  {[type]} parent     [description]
+		 * @param  {[type]} context    [description]
+		 * @param  {[type]} ready      [description]
+		 * @param  {[type]} testsReady [description]
+		 * @return {[type]}            [description]
+		 */
 		var _execute = function(test, parent, context, ready, testsReady){
 			_parent = test;
 
+			//if describe renew context
 			if(test.type === "describe"){
 				context = {};
 			}
@@ -209,7 +251,6 @@ Seed({
 				ready();
 			}
 
-
 			try {
 				var result = true;
 				test.success = true;
@@ -217,9 +258,16 @@ Seed({
 				if(_hasFunctionParameter(test.action)){
 					_execAsync(test, context, execReady);
 				}else{
-					test.action.call(context);
-					execReady();
+					var result = test.action.call(context);
+					console.log("EXEC", test.name)
+					if(result && typeof result.then === "function"){
+						result.then(execReady);
+					}else{
+						execReady();
+					}
+					
 				}
+
 			}catch(e){
 				result = e;
 				test.success = false;
@@ -228,16 +276,22 @@ Seed({
 
 		}
 
-	
+		/**
+		 * _run run test
+		 * @return {void} [description]
+		 */
 		var _run = function(){
 			_nextChild(_rootTest, 0, {}, function(){
-				console.log("TESTS READY");
 				_report(_rootTest);
 			})
-			
-			
 		}
-
+		/**
+		 * _objectEqual 
+		 * @description compares two objects
+		 * @param  {obejct} input  [description]
+		 * @param  {object} target [description]
+		 * @return {boolean} return true if both objects are equal
+		 */
 		var _objectEqual = function(input, target){
 			var output = true;
 			Mold.each(input, function(inputValue, inputName){
@@ -393,12 +447,21 @@ Seed({
 		}
 
 		this.publics = {
+			timeout : function(timeout){
+				_timeOut = timeout
+			},
+			addExpect : function(name, value){
+				_expect[name] = value;
+			},
 			before : _before,
+			beforeEach : _beforeEach,
 			after : _after,
 			test : _test,
 			addTest : _addTest,
 			describe : _describe,
+			xdescribe : function(){},
 			it : _it,
+			xit : function(){},
 			run : _run,
 			expect : _expect,
 			addReporter : _addReporter

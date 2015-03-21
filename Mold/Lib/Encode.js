@@ -46,9 +46,9 @@ Seed({
 					return new Buffer(input, 'base64').toString('utf8');
 				}
 				if(!window.atob){
-					return input
+					return input;
 				}
-				return  decodeURIComponent(escape(window.atob( input ))
+				return  decodeURIComponent(escape(window.atob( input )));
 			}
 		}
 	}

@@ -12,10 +12,12 @@ Seed({
 		simpleUnit.addReporter(new Mold.Tools.Test.ConsoleReporter());
 		simpleUnit.test(function(){
 			describe("My First Test", function(){
-
+				this.peter = "hans"
 				var test = "";
-				before("before testing", function(done){
+				
+				beforeEach("before each testing", function(done){
 					test = "to was rein"
+					console.log("before each", this.peter)
 					done();
 				})
 
@@ -26,6 +28,8 @@ Seed({
 				})
 				
 				describe("My sub Test", function(){
+					this.hans = "peter";
+					
 					it("sub sub Test something", function(){
 						var hasn;
 						expect(hasn).toBeDefined();
@@ -49,7 +53,6 @@ Seed({
 				if(typeof rawSeed.test === "function"){
 					
 
-					
 				}
 			}
 		});

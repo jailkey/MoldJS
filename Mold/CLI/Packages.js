@@ -48,7 +48,7 @@ Seed({
 
 			var packageFile =
 					"Seed({\n"+
-					"\tname : '" + name + ".*',\n" +
+					"\tname : '" + name + "._',\n" +
 					"\tdna : 'package',\n" +
 					"\tinclude : " + JSON.stringify(collected, null, "\t\t") + "\n" +
 					"});"

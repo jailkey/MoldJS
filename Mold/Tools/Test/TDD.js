@@ -1,9 +1,13 @@
 Seed({
 		name : "Mold.Tools.Test.TDD",
-		dna : "class"
+		dna : "class",
+		include : [
+			"Mold.Lib.Sequence",
+			"Mold.Lib.Event"
+		]
 	},
 	function(test){
-
+		"use strict";
 		//test root object
 		var _rootTest = {
 			type : "root",
@@ -17,7 +21,22 @@ Seed({
 
 		var _parent = null,
 			_reporter = [],
+			_that = this,
 			_timeOut = 1000;
+
+		Mold.mixin(this, new Mold.Lib.Event(this));
+
+		var _now = function(){
+			if(performance){
+				return performance.now();
+			}else{
+				if(Date.now){
+					return Date.now();
+				}else{
+					return Date().getTime();
+				}
+			}
+		}
 
 		/**
 		 * _hasFunctionParameter
@@ -58,7 +77,9 @@ Seed({
 		 * 	parent : object,
 		 * }
 		 */
+		var _testCounter = 0;
 		var _addTest = function(type, description, action, parent){
+			_testCounter++;
 			var test = {
 				type : type,
 				description : description,
@@ -66,14 +87,41 @@ Seed({
 				parent : parent || false,
 				error : false,
 				success : false,
-				children : [],
-				parent : parent || false
+				children : []
 			}
 			if(parent){
 				parent.children.push(test);
 			}else{
 				_rootTest.children.push(test)
 			}
+		}
+
+		var _spys = {};
+		var _spyOn = function(object, method){
+
+			var spyApi = {
+				name : "spy",
+				hasBeenCalled : false,
+				arguments : false,
+				object : object,
+				method : method,
+				returnValue : null
+			}
+
+			var oldFunc = object[method];
+			//console.log("create spy", object, method)
+			object[method] = function(getspy){
+				if(getspy === "--getspy"){
+					return spyApi;
+				}
+				spyApi.hasBeenCalled = true;
+				spyApi.arguments = arguments;
+				if(spyApi.returnValue !== null){
+					return spyApi.returnValue;
+				}
+				return oldFunc.apply(null, arguments);
+			}
+			return _expect(object[method]);
 		}
 
 		var _describe = function(description, action){
@@ -110,6 +158,14 @@ Seed({
 			_addTest("after", description, action, _parent);
 		}
 
+		var _afterEach = function(description, action){
+			if(typeof description === "function"){
+				action = description
+				description = '';
+			}
+			_addTest("afterEach", description, action, _parent);
+		}
+
 		var _getTestByType = function(type, children){
 			return Mold.find(children, function(value){
 				if(value.type === type){
@@ -119,6 +175,14 @@ Seed({
 			})
 		}
 
+		/**
+		 * _execAsync
+		 * @description executes a test ansychonous
+		 * @param  {object}   test
+		 * @param  {object}   context 
+		 * @param  {function} callback 
+		 * @return {void} 
+		 */
 		var _execAsync = function(test, context, callback){
 			var timeout = setTimeout(function(){
 				test.success = false;
@@ -127,6 +191,7 @@ Seed({
 			}, _timeOut);
 
 			var withTimeout = function(){
+				//console.log("CALL", test.description, callback.toString())
 				callback.call(context);
 				clearTimeout(timeout);
 			}
@@ -134,91 +199,84 @@ Seed({
 			test.action.call(context, withTimeout);
 		}
 
+		var _isTestContext = function(test){
+			var contexts = ["it", "describe"];
+			return Mold.contains(contexts, test.type)
+		}
+
 		/**
 		 * _nextChild
 		 * @description 
-		 * @param  {[type]} parent     [description]
-		 * @param  {[type]} level      [description]
-		 * @param  {[type]} context    [description]
-		 * @param  {[type]} testsReady [description]
-		 * @return {[type]}            [description]
+		 * @param  {object} parent     [description]
+		 * @param  {number} level      [description]
+		 * @param  {object} context    [description]
+		 * @param  {function} testsReady [description]
+		 * @return {void}            [description]
 		 */
 		var _nextChild = function(parent, level, context, testsReady){
-			level = level || 0;
+			
 
 			if(!parent.children[level]){
-				return "ready";
+				return;
 			}
-			//exec after execution
-			var ready = function(){
+			level = level || 0;
 
-				if(parent.children.length -1 > level){
-					level++;
+			var currentTest = parent.children[level],
+				sequence = new Mold.Lib.Sequence();
+		
 
-					_nextChild(parent, level, context, testsReady);
-				}else{
+			sequence
+				.step(function(next){
+					if(level === 0){
+						var before = _getTestByType("before", parent.children);
 
-					var after = _getTestByType("after", parent.children);
-					if(after){
-						//after.action.call(context);
-						_execute(after, parent, context, function(){
-							if(!parent.parent){
-								testsReady();
-							}
-						},
-						testsReady);
+						if(before){
+							_execute(before, parent, context, next, testsReady);
+							return;
+						}else{
+							next();
+						}
 					}else{
-						if(!parent.parent){
-							testsReady();
+						next();
+					}
+				})
+				.step(function(next){
+					var beforeEach = _getTestByType("beforeEach", parent.children);
+					if(beforeEach && _isTestContext(currentTest)){
+						_execute(beforeEach, parent, context,  next, testsReady );
+						return;
+					}else{
+						next();
+					}
+				})
+				.step(function(next){
+					if(_isTestContext(currentTest)){
+		
+						_execute(parent.children[level], parent, context, next, testsReady);
+						return;
+					}else{
+						next();
+					}
+				})
+				.step(function(next){
+					var afterEachValue = _getTestByType("afterEach", parent.children);
+					if(afterEachValue && _isTestContext(currentTest)){
+						_execute(afterEachValue, parent, context, next, testsReady, false);
+						//return;
+					}else{
+						next();
+					}
+				})
+				.step(function(next){
+					if(parent.children.length -1 === level){
+						var after = _getTestByType("after", parent.children);
+						if(after && _isTestContext(currentTest)){
+							_execute(after, parent, context, function(){}, testsReady);
 						}
 					}
-					
-				}
-
-			}
-
-			//executed after before rules are executed
-			var afterBefore = function(){
-				var beforeEach = _getTestByType("beforeEach", parent.children);
-				if(beforeEach){
-					console.log("EXEC BEFORE EACH")
-					_execute(beforeEach, parent, context,  function(){
-							afterBeforeEach()
-						}, 
-						testsReady
-					);
-				}else{
-					afterBeforeEach();
-				}
-			}
-
-			//execute after the before each rule
-			var afterBeforeEach = function(){
-				if(
-					parent.children[level].type === "describe"
-					|| parent.children[level].type === "it"
-				){
-					_execute(parent.children[level], parent, context, ready, testsReady);
-				}else{
-					ready()
-				}
-			}
-			
-			if(level === 0){
-				var before = _getTestByType("before", parent.children);
-				if(before){
-					_execute(before, parent, context, function(){
-							afterBefore()
-						},
-						testsReady
-					);
-				}else{
-					afterBefore()
-				}
-			}else{
-				afterBefore();
-			}
-			
+					level++;
+					_nextChild(parent, level, context, testsReady);	
+				});
 
 		}
 
@@ -233,33 +291,46 @@ Seed({
 		 * @param  {[type]} testsReady [description]
 		 * @return {[type]}            [description]
 		 */
-		var _execute = function(test, parent, context, ready, testsReady){
+		var _executeCounter = 0;
+		var _startExecutionCounter = 0;
+		var _execute = function(test, parent, context, ready, testsReady, stopCheckingChilds){
 			_parent = test;
-
 			//if describe renew context
 			if(test.type === "describe"){
 				context = {};
 			}
-
+			_startExecutionCounter++;
 			context = context || {};
+			var startTime = _now();
 
+			//check childs after execution
 			var execReady = function(){
-
-				if(_parent && _parent.children.length){
+				var endTime = _now();
+				test.executionTime = endTime - startTime;
+				if(_parent && _parent.children.length && !stopCheckingChilds){
 					_nextChild(_parent, 0, context, testsReady)
 				}
+				
+				
 				ready();
+				_executeCounter++;
+				if(_executeCounter > _startExecutionCounter){
+				//	console.log("----------------->",_startExecutionCounter,  _executeCounter, _testCounter)
+					//trigger ready if all tests are executed
+					_that.trigger("tests.ready", { count : _testCounter });
+				}
 			}
 
 			try {
 				var result = true;
 				test.success = true;
 
+				//exex async
 				if(_hasFunctionParameter(test.action)){
 					_execAsync(test, context, execReady);
 				}else{
+				//exec sync
 					var result = test.action.call(context);
-					console.log("EXEC", test.name)
 					if(result && typeof result.then === "function"){
 						result.then(execReady);
 					}else{
@@ -269,9 +340,12 @@ Seed({
 				}
 
 			}catch(e){
+				//if error occurs write it to result;
 				result = e;
 				test.success = false;
 				test.error = e;
+				
+				execReady();
 			}
 
 		}
@@ -281,14 +355,15 @@ Seed({
 		 * @return {void} [description]
 		 */
 		var _run = function(){
-			_nextChild(_rootTest, 0, {}, function(){
+			_that.on("tests.ready", function(){
 				_report(_rootTest);
-			})
+			});
+			_nextChild(_rootTest, 0, {});
 		}
 		/**
 		 * _objectEqual 
 		 * @description compares two objects
-		 * @param  {obejct} input  [description]
+		 * @param  {object} input  [description]
 		 * @param  {object} target [description]
 		 * @return {boolean} return true if both objects are equal
 		 */
@@ -316,6 +391,13 @@ Seed({
 			return output;
 		}
 
+		/**
+		 * _expect 
+		 * @description liste of expections
+		 * @param  {mixed} input
+		 * @param  {boolean} negate
+		 * @return {object} retuns the api methodes
+		 */
 		var _expect = function(input, negate){
 			var undefined;
 			var api =  {
@@ -395,6 +477,40 @@ Seed({
 						throw new Error("'" +input + "' is" +((negate) ? " not" : "")+ " defined!");
 					}
 				},
+				toBePromise : function(){
+					if(
+						(!negate && typeof input.then === "function")
+						|| (negate && typeof input.then !== "function")
+					){
+						return _expect(input);
+					}else{
+						throw new Error("'" +input + "' is" +((negate) ? " not" : "")+ " a promise!");
+					}
+				},
+				toBeInstanceOf : function(value){
+					if(typeof value === "string" && Mold.startsWith(value, "Mold.")){
+						if(
+							(!negate && input.instanceOf && input.instanceOf === value)
+							|| (!negate && input.className && input.className === value)
+							|| (negate && input.instanceOf && input.instanceOf !== value)
+							|| (negate && input.className && input.className !== value)
+						){
+							return _expect(input);
+						}else{
+							throw new Error("'" +input + "' is" +((negate) ? " not" : "")+ " a instanceof " + value + " !");
+						}
+					}else{
+						if(
+							(!negate && input instanceof value)
+							|| (negate && !input instanceof value)
+						){
+							return _expect(input);
+						}else{
+							throw new Error("'" +input + "' is" +((negate) ? " not" : "")+ " a instanceof " + value + " !");
+						}
+					}
+
+				},
 				toContain : function(value){
 					if(
 						(!negate && Mold.contains(input, value))
@@ -406,16 +522,112 @@ Seed({
 					}
 				},
 				toBeLessThan : function(value){
-
+					if(
+						(!negate && (+input < value))
+						|| (negate && (+input >= value))
+					){
+						return _expect(input);
+					}else{
+						throw new Error("'" +input + "' " +((negate) ? " not" : "")+ " contains " + value +  "!");
+					}
 				},
 				toBeGreaterThan : function(value){
+					if(
+						(!negate && (+input > value))
+						|| (negate && (+input <= value))
+					){
+						return _expect(input);
+					}else{
+						throw new Error("'" +input + "' " +((negate) ? " not" : "")+ " contains " + value +  "!");
+					}
+				},
+				toBeCloseTo : function(value, precision){
+					if(
+						(
+							!negate && (value + precision) > input
+							&&  (value - precision) < input
+						)
+						|| (
+							negate && (value + precision) < input
+							&&  (value - precision) > input
+						)
+					){
+						return _expect(input);
+					}else{
+						throw new Error("'" +input + "' is " +((negate) ? " not" : "")+ " not close to " + value +  "!");
+					}
 
 				},
-				toBeCloseTo : function(value){
-
+				toThrow : function(){
+					if(!negate){
+						try {
+							input.call();
+						}catch(e){
+							return _expect(input);
+						}finally{
+							throw new Error("'" +input + "' do not " +((negate) ? " not" : "")+ " throw an error " +  "!");
+						}
+					}
+					if(negate){
+						try {
+							input.call();
+						}catch(e){
+							throw new Error("'" +input + "' " +((negate) ? " not" : "")+ " throw an error " +  "!");
+						}finally{
+							return _expect(input);
+						}
+					}
 				},
-				toThrow : function(value){
+				toHaveBeenCalled : function(){
+					var spy = false;
+					if((spy = input.call(null, "--getspy"))){
+						if(spy.name === "spy"){
+							if(
+								(!negate && spy.hasBeenCalled)
+								|| (negate && !spy.hasBeenCalled)
+							){
+								return _expect(input);
+							}else{
+								throw new Error("'" +spy.method + "'  has " + (negate ? "" : "not ") + "been called!");
+							}
+							
+						}
+					}
+					throw new Error("Use a spy to spy method execution!");
+					
+				},
+				toHaveBeenCalledWith : function(){
+					var spy = false;
+					if((spy = input.call(null, "--getspy"))){
+						if(spy.name === "spy"){
+							var argumentTest = true;
+							var argumentsArray = [];
+							Mold.each(arguments, function(args, i){
+								if(spy.arguments[i] !== args){
+									argumentTest = false;
+								}
+								argumentsArray.push(args);
+							})
+							if(
+								(!negate && spy.hasBeenCalled && argumentTest)
+								|| (negate && !argumentTest)
+							){
+								return _expect(input);
+							}else{
 
+								throw new Error("'" +spy.method + "'  has " + (negate ? "" : "not ") + "been called with arguments '" + argumentsArray.join(", ") + "'!");
+							}
+						}
+					}
+					throw new Error("Use a spy to spy method execution!");
+				},
+				returnValue : function(value){
+					var spy = false;
+					if((spy = input.call(null, "--getspy"))){
+						spy.returnValue = value;
+						return _expect(input);
+					}
+					throw new Error("Use a spy to spy method execution!");
 				}
 				
 			}
@@ -423,19 +635,40 @@ Seed({
 				api.not = _expect(input, true);
 			}
 
+			Object.defineProperty(api, 'and', {
+				get: function() {
+					return _expect(input, negate);;
+				}
+			});
+
 			return api;
 		}
 
+		/**
+		 * _reporte
+		 * @description adds the report to all reporters
+		 * @return {[type]} [description]
+		 */
 		var _report = function(){
 			Mold.each(_reporter, function(reporter){
 				reporter.addResult(_rootTest);
 			});
 		}
-
+		/**
+		 * _addReporter
+		 * @description  adds a reporter
+		 * @param {object} a reporter object
+		 */
 		var _addReporter = function(report){
 			_reporter.push(report);
 		}
 
+		/**
+		 * _test
+		 * @description adds a complete testsuit
+		 * @param  {function} testFunction 
+		 * @return {void} 
+		 */
 		var _test = function(testFunction){
 			var interfaceString = "";
 			Mold.each(this, function(value, name){
@@ -454,8 +687,10 @@ Seed({
 				_expect[name] = value;
 			},
 			before : _before,
+			spyOn : _spyOn,
 			beforeEach : _beforeEach,
 			after : _after,
+			afterEach : _afterEach,
 			test : _test,
 			addTest : _addTest,
 			describe : _describe,

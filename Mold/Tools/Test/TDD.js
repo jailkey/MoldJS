@@ -183,8 +183,18 @@ Seed({
 		 * @param  {function} callback 
 		 * @return {void} 
 		 */
+		
+		var _timeoutList = {};
+		var _clearTimeout = function(test){
+			var timeout = test.type + test.description;
+			if(_timeoutList[timeout]){
+				clearTimeout( _timeoutList[timeout]);
+				delete _timeoutList[timeout];
+			}
+		}
+
 		var _execAsync = function(test, context, callback){
-			var timeout = setTimeout(function(){
+			_timeoutList[test.type + test.description] = setTimeout(function(){
 				test.success = false;
 				test.error = "Timeout in '" + (test.description ? test.description : test.type )+  "'!";
 				callback.call(context);
@@ -193,7 +203,7 @@ Seed({
 			var withTimeout = function(){
 				//console.log("CALL", test.description, callback.toString())
 				callback.call(context);
-				clearTimeout(timeout);
+				_clearTimeout(test);
 			}
 
 			test.action.call(context, withTimeout);
@@ -311,11 +321,10 @@ Seed({
 					_nextChild(_parent, 0, context, testsReady)
 				}
 				
-				
 				ready();
 				_executeCounter++;
-				if(_executeCounter > _startExecutionCounter){
-				//	console.log("----------------->",_startExecutionCounter,  _executeCounter, _testCounter)
+				//console.log("----------------->",_startExecutionCounter,  _executeCounter, _testCounter)
+				if(_executeCounter >= _startExecutionCounter){
 					//trigger ready if all tests are executed
 					_that.trigger("tests.ready", { count : _testCounter });
 				}
@@ -344,7 +353,7 @@ Seed({
 				result = e;
 				test.success = false;
 				test.error = e;
-				
+				_clearTimeout(test)
 				execReady();
 			}
 
@@ -426,6 +435,7 @@ Seed({
 							throw new Error("'" + input + "' is" +((negate) ? " not" : "")+ " not equal " + value);
 						}
 					}
+					throw new Error("wrong toEqual value function ord object expected!");
 				},
 				toMatch : function(match){
 					if(
@@ -670,13 +680,20 @@ Seed({
 		 * @return {void} 
 		 */
 		var _test = function(testFunction){
-			var interfaceString = "";
+			
+			var interfaceString = "",
+				args = [];
+			
+			for(var i = 1; i < arguments.length; i++){
+				args.push(arguments[i]);
+			}
+
 			Mold.each(this, function(value, name){
 				interfaceString += "var " + name + " = this['" + name +"'];\n";
 			});
 
 			var theTest = Mold.injectBefore(testFunction, interfaceString);
-			theTest.call(this);
+			theTest.apply(this, args);
 		}
 
 		this.publics = {

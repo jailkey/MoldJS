@@ -26,10 +26,11 @@ Seed({
 
 		var _iterateResult = function(result, level){
 			Mold.each(result.children, function(child){
+				var time = " - " + Math.round(child.executionTime) + "ms";
 				if(child.description){
-					_info(child.description, level);
+					_info(child.description + time, level);
 				}else{
-					_info(child.type, level)
+					_info(child.type + time, level);
 				}
 				if(child.success){
 					_success("Test successfully!", level + 1);
@@ -47,6 +48,7 @@ Seed({
 		this.publics = {
 			addResult : function(result){
 				_iterateResult(result, 0);
+				
 			}
 		}
 	}

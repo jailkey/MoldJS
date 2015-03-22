@@ -4,12 +4,34 @@ Seed({
 		include : [
 			"Mold.Tools.Test.Unit"
 		],
-		test : function(seed){
-			console.log("start test ->");
-			describe("create seed " + seed.name + " and test public methodes" , function(){
-				var san = new Sanitize();
+		test : function(Sanitize){
+			describe("Test Mold.Lib.Sanitize" , function(){
+				var san = false;
+
+				it("create instace", function(){
+					console.log("test")
+					san  = new Sanitize();
+					//done();
+				})
+
+				it(".whitelist()", function(){
+					var result = san.whitelist("abcde", "aed");
+					expect(result).toBe("ade");
+				})
+				
+
+				it(".blacklist()", function(){
+					var result = san.blacklist("abcde", "aed");
+					expect(result).toBe("bc");
+				})
+
+				it(".url()", function(){
+					var result = san.url('/hans/"testmann/?@asd/.)(&)%$nas');
+					expect(result).toBe("/hans/testmann/?asd/.&nas");
+				})
 
 
+				
 			});
 		}
 	},
@@ -41,14 +63,18 @@ Seed({
 			"onStart", "onStop", "onStorage", "onSyncRestored", "onSubmit", "onTimeError", "onTrackChange", "onUndo", "onUnload", "onURLFlip", "seekSegmentTime"
 		]
 
-
-
-		var _removeNonWhitlistedChars = function(string, list){
-			 return str.replace(new RegExp('[^' + list + ']+', 'g'), '');
+		var _maskRegExp = function(str){
+			 return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 		}
 
-		var _removeBlacklistedChars = function(string, list){
-			 return str.replace(new RegExp('[' + list + ']+', 'g'), '');
+		var _removeNonWhitlistedChars = function(str, list){
+			list = _maskRegExp(list);
+			return str.replace(new RegExp('[^' + list + ']+', 'g'), '');
+		}
+
+		var _removeBlacklistedChars = function(str, list){
+			list = _maskRegExp(list);
+			return str.replace(new RegExp('[' + list + ']+', 'g'), '');
 		}
 
 		var _removeXSSExploits = function(html){
@@ -67,10 +93,10 @@ Seed({
 		return {
 
 			whitelist : function(chars, list){
-				return _removeNonWhitlistedChars(string, list);
+				return _removeNonWhitlistedChars(chars, list);
 			},
 			blacklist : function(chars, list){
-				return _removeBlacklistedChars(string, list);
+				return _removeBlacklistedChars(chars, list);
 			},
 			url : function(url){
 				return _removeNonWhitlistedChars(url, _standardChars + _standardNumbers + _urlChars);

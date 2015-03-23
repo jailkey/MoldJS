@@ -397,8 +397,11 @@ var Mold = (function(config){
 				
 					if(_config.debug){
 						var codeString = 'function('+((parameter.join) ? parameter.join(',') : parameter)+') {' + outputCode + ' }';
+
+
 						_createCompiledSeed(scriptName, codeString, callback);
 					}else{
+
 						callback.call(this, new Function(parameter, outputCode))
 					}
 					
@@ -1149,7 +1152,6 @@ var Mold = (function(config){
 					_createdMold[seed.name] = seed;
 					seed.loaded = true;
 					if( typeof _Mold[seed.name].loader  === "object" ){
-						console.log("FIRE LOAD")
 						_Mold[seed.name].loader.loaded();
 					}
 				}
@@ -1556,6 +1558,7 @@ var Mold = (function(config){
 				var parameter = matches[2];
 
 				parameter = parameter.replace("(", "").replace(")", "");
+				parameter = parameter.replace(/anonymous/g, "");
 				var objectEnd = matches[3];
 				if(objectEnd){
 					var newCode = "\n"+code+"\n"+objectEnd;
@@ -1924,6 +1927,13 @@ Mold.addDNA({
 	name :  "static", 
 	create : function(seed) {
 		return  seed.func.call();
+	}
+});
+
+Mold.addDNA({ 
+	name :  "test", 
+	create : function(seed) {
+		return  seed.func;
 	}
 });
 

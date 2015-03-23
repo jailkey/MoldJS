@@ -36,7 +36,24 @@ Seed({
 					"orientation" : !!window.DeviceOrientationEvent,
 					"speechSynthesis" : window.speechSynthesis,
 					"touch" : !!('ontouchstart' in window),
-					"range" : !!window.Range
+					"range" : !!window.Range,
+					"generator" : function(){
+						try {
+							eval("(function*(){})()");
+							return true;
+						} catch(e){
+							return false;
+						}
+					}(),
+					"yield" : function(){
+						try {
+							eval("(function(){ yield test; })()");
+							return true;
+						} catch(e){
+
+							return false;
+						}
+					}()
 
 				}
 			}else{

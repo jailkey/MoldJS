@@ -11,12 +11,18 @@ Seed({
 		
 		Mold.addPostProcessor("unittest", function(createdSeed, rawSeed){
 			if(rawSeed.test){
+				var simpleUnit = new Mold.Tools.Test.TDD();
+				simpleUnit.addReporter(new Mold.Tools.Test.ConsoleReporter());
+					
 				if(typeof rawSeed.test === "function"){
-
-					var simpleUnit = new Mold.Tools.Test.TDD();
-					simpleUnit.addReporter(new Mold.Tools.Test.ConsoleReporter());
 					simpleUnit.test(rawSeed.test, createdSeed);
 					simpleUnit.run();
+				}else if(Mold.startsWith(rawSeed.test, "Mold.")){
+					Mold.load({ name : rawSeed.test}).bind(function(){
+						var testSeed = Mold.getSeed(rawSeed.test);
+						simpleUnit.test(testSeed, createdSeed);
+						simpleUnit.run();
+					});
 				}
 			}
 		});

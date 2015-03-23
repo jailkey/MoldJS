@@ -16,7 +16,7 @@ Seed({
 			_directivesIndex = {},
 			_cache = {},
 			_events = {},
-			doc = (Mold.isMoldJS) ? false : document;
+			doc = (Mold.isMoldJS) ? false : document,
 			cssParser = new Mold.Lib.CssParser(document);
 
 		//Mold.mixin(this, new Mold.Lib.Event(this));

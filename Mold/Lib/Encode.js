@@ -1,6 +1,9 @@
 Seed({
 		name : "Mold.Lib.Encode",
-		dna : "static"
+		dna : "static",
+		include : [
+			"Mold.Lib.HTMLEntitys"
+		]
 	},
 	function(){
 		
@@ -19,12 +22,20 @@ Seed({
 							.replace(/</g, '\<')
 							.replace(/>/g, '\>');
 			},
+			encodeHTMLEntities : function(markup){
+				return Mold.Lib.HTMLEntitys.encode(markup);
+			},
+			decodeHTMLEntities : function(markup){
+				return Mold.Lib.HTMLEntitys.decode(markup);
+			},
 			convertSpecialChars : function(input){
 				input = input.replace(/<br>/g, "\n");
 				return input;
 			},
 			decodeUnicode : function(input){
-				return unescape(JSON.parse('"' + input.replace('"', '\\"')) + '"');
+				input = input.replace(/"/g, '\\\"');
+				console.log("inout", input)
+				return unescape(JSON.parse('"' + input + '"'));
 			},
 			encodeURl : function(input){
 				return encodeURIComponent(input);

@@ -7,7 +7,8 @@ Seed({
 			"Mold.Lib.Tree",
 			"Mold.Lib.TreeFactory",
 			"Mold.Lib.Event",
-			"Mold.Lib.TemplateFilter"
+			"Mold.Lib.TemplateFilter",
+			"Mold.Lib.Sanitize"
 		],
 		browserInclude : [
 			"Mold.Lib.Directive",
@@ -93,14 +94,8 @@ Seed({
 
 		var _applyToDom = function(template){
 			_shadowTemplate =  _doc.createElement("div"); //_doc.createDocumentFragment();
-			_container = _doc.createElement("div");
-			_container.innerHTML = template;
-		
-			while (_container.hasChildNodes()) {
-				var templateElement = _container.firstChild;
-
-  				_shadowTemplate.appendChild(_container.removeChild(_container.firstChild))
-			}
+			var sanitizer =  new Mold.Lib.Sanitize();
+			_shadowTemplate.innerHTML = sanitizer.html(template);
 			_shadowTemplate.moldTemplate = that;
 			_target = _shadowTemplate;
 		}
@@ -354,7 +349,7 @@ Seed({
 		}
 
 
-		if(config.parseAsString){
+		if(_config.parseAsString){
 			_shadowTemplate = {}
 			_compiledTemplate = Mold.Lib.TreeFactory.parseString(_shadowTemplate, content);
 			this.trigger("ready");

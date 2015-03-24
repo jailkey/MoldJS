@@ -96,6 +96,9 @@ Seed({
 					if(subnode){
 						var lastNode = _getLastShadowNode(_subnodes);
 						if(_parentElement){
+							if(!_parentElement.parentElement && _lastShadowNode.parentElement){
+								_parentElement = _lastShadowNode.parentElement;
+							}
 							_parentElement.insertBefore(subnode, _lastShadowNode);
 						}
 						_subnodes.push(subnode);

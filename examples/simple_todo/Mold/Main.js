@@ -44,7 +44,6 @@ Seed(
 
 		template
 			.on("add.entry", function(e){
-
 				if(e.data.listdata && e.data.listdata.entry !== ""){
 					model.data.list.push({ entry : e.data.listdata.entry })
 					model.data.error = false;

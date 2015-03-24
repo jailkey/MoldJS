@@ -2,7 +2,7 @@ Seed({
 		name : "Mold.Lib.Sanitize",
 		dna : "class",
 		include : [
-			"Mold.Tools.Test.Unit",
+		//	"Mold.Tools.Test.Unit",
 			"Mold.Lib.Encode"
 		],
 		test : "Mold.Test.Lib.Sanitize"
@@ -47,18 +47,6 @@ Seed({
 		var _removeBlacklistedChars = function(str, list){
 			list = _maskRegExp(list);
 			return str.replace(new RegExp('[' + list + ']+', 'g'), '');
-		}
-
-		var _removeXSSExploits = function(html){
-
-		}
-
-		var _removeEventhandler = function(html){
-
-		}
-
-		var _sanitzeAttributeUrls = function(){
-
 		}
 
 		var _removeAllLineBreaks = function(value){

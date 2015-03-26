@@ -1,13 +1,15 @@
 Seed({
 		name : "Mold.Lib.CSS",
 		dna : "class",
+		platform : "browser",
 		include : [
 			"Mold.Lib.Event",
 			"Mold.Lib.MultiLineString",
 			"Mold.Lib.Template",
 			"Mold.Lib.Color",
 			{ Element : ".Element" }
-		] 
+		],
+		test : "Mold.Test.Lib.CSS"
 	},
 	function(rules, data){
 
@@ -82,7 +84,6 @@ Seed({
 							}else{
 								throw new Error("no deleteRule method found!")
 							}
-							console.log("delete rule")
 							return true;
 						}
 						return rules[y];
@@ -95,7 +96,6 @@ Seed({
 		var _handleSheets = function(selector, styleSheet, mode){
 			var styleSheetList = document.styleSheets;
 			for(var i = 0; i < styleSheetList.length; i++){
-				console.log(styleSheetList[i] === styleSheet)
 				if(
 					!styleSheet 
 					|| styleSheetList[i] === styleSheet 

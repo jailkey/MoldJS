@@ -8,7 +8,8 @@ Seed (
 			"Mold.Lib.DomNode",
 			"Mold.Lib.DomParser"
 		],
-		version : 0.1
+		version : 0.1,
+		test : "Mold.Test.Lib.Document"
 	},
 	function(markup){
 		

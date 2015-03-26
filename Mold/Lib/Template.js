@@ -116,7 +116,6 @@ Seed({
 
 			var addDirectives = function(){
 				Mold.each(Mold.Defaults.TemplateDirectives, function(directive){
-					console.log("add directive")
 					Mold.Lib.Directive.add(
 						directive,
 						target,
@@ -204,7 +203,6 @@ Seed({
 
 
 		var _addData = function(template, data, bind){
-
 				Mold.each(template, function(element, name){
 
 					if(data[name] != undefined){
@@ -244,6 +242,7 @@ Seed({
 							})
 						}else{
 							element.setValue(data[name])
+
 							if(bind){
 								data.on("property.change."+name, function(e){
 									element.setValue(e.data.value)

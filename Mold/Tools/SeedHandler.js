@@ -5,7 +5,8 @@ Seed({
 		include : [
 			"Mold.Tools.SeedParser",
 			{ Promise : "Mold.Lib.Promise"},
-			"Mold.Lib.Event"
+			"Mold.Lib.Event",
+			{ MultiLineString : "Mold.Lib.MultiLineString" }
 		],
 		npm : {
 			"request" : ">=2.5.0",
@@ -16,6 +17,7 @@ Seed({
 
 		var request = require('request'),
 			fileSystem = require('fs'),
+			pathes = require('path'),
 			_that = this;
 
 		Mold.mixin(this, new Mold.Lib.Event(this));
@@ -230,8 +232,22 @@ Seed({
 				//var infos = this.info(from)
 
 			},
-			create : function(path, name, dna){
-				var dnaOptions = Mold.getDNA(name);
+			/**
+			 * create
+			 * @description creates a seed in the current dire
+			 * @param  {string} name the (full) name of the seed
+			 * @param  {string} dna  the dna of the seed
+			 * @return {[type]}      [description]
+			 */
+			create : function(name, dna){
+
+				var dnaOptions = Mold.getDNA(dna),
+					path = process.cwd(),
+					parts = name.split("."),
+					toReplace = name.replace(/\./g, "/").replace("/" + parts[parts.length - 1], "");
+		
+				path = path.replace(toReplace, "");
+
 				if(dnaOptions.generate){
 					if(typeof dnaOptions.generate !== "function" ){
 						throw new Error("dna options.generate must be a MultiLineString function")
@@ -259,7 +275,15 @@ Seed({
 					});
 				}
 
-				console.log("add to path")
+				return new Promise(function(success, error){
+					fileSystem.writeFile(pathes.normalize(path + "/" + name.replace(/\./g, "/") + ".js"), seedCode, function(err) {
+						if(err) {
+							error(err)
+						} else {
+							success();
+						}
+					}); 
+				})
 			}
 		}
 	}

@@ -1934,7 +1934,17 @@ Mold.addDNA({
 	name :  "test", 
 	create : function(seed) {
 		return  seed.func;
-	}
+	},
+	generate : function(){/*|
+		Seed({
+				name : "${seedName}",
+				dna : "${seedDna}"
+			},
+			function(Test){
+	
+			}
+		);
+	|*/}
 });
 
 Mold.addDNA({ 

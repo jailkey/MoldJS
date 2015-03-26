@@ -1,5 +1,5 @@
 Seed({
-		name : "Mold.Tools.Test.TDD",
+		name : "Mold.Tools.Test.Tester",
 		dna : "class",
 		include : [
 			"Mold.Lib.Sequence",
@@ -197,12 +197,17 @@ Seed({
 			_timeoutList[test.type + test.description] = setTimeout(function(){
 				test.success = false;
 				test.error = "Timeout in '" + (test.description ? test.description : test.type )+  "'!";
-				callback.call(context);
+				if(callback){
+					callback.call(context);
+				}
 			}, _timeOut);
 
 			var withTimeout = function(){
 				//console.log("CALL", test.description, callback.toString())
-				callback.call(context);
+				if(callback){
+					callback.call(context);
+				}
+				callback = null;
 				_clearTimeout(test);
 			}
 
@@ -378,23 +383,32 @@ Seed({
 		 */
 		var _objectEqual = function(input, target){
 			var output = true;
+			if(input === target){
+				return true;
+			}
 			Mold.each(input, function(inputValue, inputName){
-				Mold.each(target, function(targetValue, targetName){
-					if(Mold.isArray(inputValue) || Mold.isObject(inputValue)){
-						output = _objectEqual(inputValue, targetValue);
-					}
+				var targetValue = target[inputName];
+				if(Mold.isArray(inputValue) || Mold.isObject(inputValue)){
+
+					output = _objectEqual(inputValue, targetValue);
+				}else{
+					
 					if(typeof inputValue === "function"){
-						if(inputValue.toString() !== targetValue.toString()){
+
+						if(inputValue.toString() === targetValue.toString()){
+							
 							output = false;
 							return Mold.EXIT;
 						}
 					}else{
-						if(inputValue !== targetValue){
+						if(inputValue === targetValue){
 							output = false;
 							return Mold.EXIT;
 						}
 					}
-				})
+				}
+				
+			
 			});
 
 			return output;
@@ -435,7 +449,7 @@ Seed({
 							throw new Error("'" + input + "' is" +((negate) ? " not" : "")+ " not equal " + value);
 						}
 					}
-					throw new Error("wrong toEqual value function ord object expected!");
+					return api.toBe(value);
 				},
 				toMatch : function(match){
 					if(

@@ -36,13 +36,13 @@ Seed({
 
 			var seedName = seedHandler.getCurrentSeedPath() + "." +parameter.name;
 
-			seedHandler.create(parameter.name + ".js", seedName, parameter.dna);
-
-			console.log("SEED Succefully created", parameter.name+ ".js")
-
-/*
-			cli
-				.write('Schreib was:')*/
+			seedHandler.create(seedName, parameter.dna)
+				.then(function(){
+					cli.ok("seed " + seedName + " succefully created!\n");
+				})
+				.fail(function(err){
+					cli.fail("dna of the new seed is needed! \n");
+				});
 				
 		}
 	}

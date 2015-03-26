@@ -55,6 +55,7 @@ Seed({
 				console.log(this.COLOR_RED + error + this.COLOR_RESET)
 			},
 			warn : this.showError,
+			fail : this.showError,
 		/**
 		 * @method write 
 		 * @description show message 
@@ -63,6 +64,16 @@ Seed({
 		 */
 			write : function(message){
 				process.stdout.write(message)
+				return this;
+			},
+		/**
+		 * @method ok 
+		 * @description show ok message 
+		 * @param  {string} message [description]
+		 * @return {[type]}         [description]
+		 */
+			ok : function(message){
+				process.stdout.write(this.COLOR_GREEN + message + this.COLOR_RESET)
 				return this;
 			},
 		/**

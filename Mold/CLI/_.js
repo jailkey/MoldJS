@@ -3,6 +3,7 @@ Seed({
 	dna : 'package',
 	include : [
 		".Build",
+		".Generate",
 		".Install",
 		".Packages",
 		".Project",

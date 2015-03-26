@@ -5,7 +5,7 @@ Seed({
 		platform : 'node',
 		include : [
 			"Mold.Lib.Promise",
-			"Mold.Lib.CLI",
+			//"Mold.Lib.CLI",
 			{ MultiLineString : "Mold.Lib.MultiLineString" },
 			"Mold.Lib.Async"
 		],
@@ -306,6 +306,32 @@ Seed({
 					}
 
 				});
+			},
+			info : function(){
+				var currentDir = process.cwd() + "/",
+					parts = currentDir.split("/").reverse(),
+					testedPath = "",
+					output = {
+						projectFile : false,
+						projectPath : false
+					};
+
+				Mold.each(parts, function(value, name){
+				
+					testedPath = pathes.normalize(value + "/" + testedPath);
+					var selectedPath = pathes.normalize(currentDir.replace(testedPath, ""));
+					var testPath = pathes.normalize(selectedPath + "/" + Mold.PROJECT_FILE_NAME);
+					if(fileSystem.existsSync(testPath)){
+						output.projectFile =  require(testPath);
+						output.projectPath = pathes.normalize(selectedPath + "/");
+						return Mold.EXIT;
+					}
+					
+				});
+
+				return output;
+
+				
 			},
 			edit : function(property, value){
 

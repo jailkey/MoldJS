@@ -3,7 +3,8 @@ Seed({
 		dna : "class",
 		include : [
 			"Mold.Lib.DomParser"
-		]
+		],
+		test : "Mold.Test.Lib.DomNode"
 	},
 	function(type, name){
 

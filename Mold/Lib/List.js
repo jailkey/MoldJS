@@ -5,6 +5,7 @@ Seed({
 		include : [
 			"Mold.Lib.Event"
 		],
+        test : "Mold.Test.Lib.List",
         compiler : {
             disableWrapping : true
         }
@@ -115,10 +116,11 @@ Seed({
     		var value = _array[0];
     		var value = _array[_array.length -1];
     		_array.oldShift();
-            var len = (_array.length > 0 ) ? _array.length -1 : 0;
+            var len = (_array.length > 0 ) ? _array.length : 0;
+            
     		_array.trigger("list.item.remove", {
                 length : len,
-                index : len, 
+                index : (len > 0) ? len -1 : 0, 
                 value : false,
                 oldValue : value
             });

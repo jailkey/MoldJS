@@ -177,6 +177,19 @@ Seed({
 
 		this.publics = {
 			load : _loadSeed,
+			getCurrentSeedPath : function(){
+				var currentDir = process.cwd(),
+					parts = currentDir.split("/"),
+					output = [];
+
+				Mold.each(parts, function(value){
+					if(value === "Mold" || output.length){
+						output.push(value);
+					}
+				});
+
+				return output.join(".");
+			},
 
 		/**
 		 * @method  info
@@ -216,6 +229,37 @@ Seed({
 				
 				//var infos = this.info(from)
 
+			},
+			create : function(path, name, dna){
+				var dnaOptions = Mold.getDNA(name);
+				if(dnaOptions.generate){
+					if(typeof dnaOptions.generate !== "function" ){
+						throw new Error("dna options.generate must be a MultiLineString function")
+					}
+					var seedCode =  MultiLineString(
+							dnaOptions.generate,
+							{
+								seedName : name,
+								seedDna : dna
+							}
+						);
+				}else{
+					var seedCode =  MultiLineString(function(){/*|
+						Seed({
+						        name : "${seedName}",
+						        dna : "${seedDna}"
+						    },
+						    function(){
+						      
+						    }
+						)
+					|*/},{
+						seedName : name,
+						seedDna : dna
+					});
+				}
+
+				console.log("add to path")
 			}
 		}
 	}

@@ -2,7 +2,7 @@ Seed({
 		name : "Mold.Tools.Test.Unit",
 		dna : "action",
 		include : [
-			"Mold.Tools.Test.TDD",
+			"Mold.Tools.Test.Tester",
 			"Mold.Tools.Test.ConsoleReporter"
 		]
 	},
@@ -11,7 +11,7 @@ Seed({
 		
 		Mold.addPostProcessor("unittest", function(createdSeed, rawSeed){
 			if(rawSeed.test){
-				var simpleUnit = new Mold.Tools.Test.TDD();
+				var simpleUnit = new Mold.Tools.Test.Tester();
 				simpleUnit.addReporter(new Mold.Tools.Test.ConsoleReporter());
 					
 				if(typeof rawSeed.test === "function"){

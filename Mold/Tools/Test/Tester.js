@@ -4,7 +4,8 @@ Seed({
 		include : [
 			"Mold.Lib.Sequence",
 			"Mold.Lib.Event"
-		]
+		],
+		test : "Mold.Test.Lib.Tester"
 	},
 	function(test){
 		"use strict";

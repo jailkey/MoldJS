@@ -33,6 +33,11 @@ Seed({
 				name : "Mold.Lib.*"
 			}).bind(function(){
 				//console.log("Package loaded!")
+				Mold.load({
+					name : "Mold.Tools.Test.*"
+				}).bind(function(){
+				
+				});
 			});
 		}
 

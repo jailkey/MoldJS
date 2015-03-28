@@ -1,7 +1,8 @@
 "use strict";
 Seed({
 		name : "Mold.Lib.Promise",
-		dna : "class"
+		dna : "class",
+		test : "Mold.Test.Lib.Promise"
 	},
 	function(setup){
 

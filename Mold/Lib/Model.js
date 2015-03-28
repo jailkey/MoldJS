@@ -7,7 +7,8 @@ Seed({
 			"Mold.Lib.Event",
 			"Mold.Lib.List",
 			"Mold.Lib.Validation"
-		]
+		],
+		test : "Mold.Test.Lib.Model"
 	},
 	function(config){
 
@@ -37,6 +38,7 @@ Seed({
 			var validationError = _notValid(element, data[name], "property");
 			
 			if(validationError){
+
 				if(data.on){
 
 					var result = data.trigger("validation.error", { 
@@ -73,6 +75,7 @@ Seed({
 
 
 				var validationError = _notValid(element, arguments[2], "property");
+
 				if(validationError){
 					
 					var result = data.trigger("validation.error", { 
@@ -243,7 +246,9 @@ Seed({
 
 		var _notValid = function(model, value, type){
 			var output = false;
+
 			if(_isValidation){
+				
 				switch(type){
 					case "property" :
 						var valids = model.split("|");

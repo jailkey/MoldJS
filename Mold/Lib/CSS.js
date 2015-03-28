@@ -15,7 +15,7 @@ Seed({
 
 		var _openinBrackets = "{{",
 			_closingBrackets = "}}",
-			_cssContent = Mold.Lib.MultiLineString(rules),
+			_cssContent = false,
 			_styles = {},
 			_styleElement = new Mold.Lib.Element("style");
 
@@ -29,7 +29,11 @@ Seed({
 			return /\{/g.test(value);
 		}
 
-		var _template = new Mold.Lib.Template(_cssContent, { parseAsString : true});
+		if(rules){
+			_cssContent = Mold.Lib.MultiLineString(rules);
+			var _template = new Mold.Lib.Template(_cssContent, { parseAsString : true});
+		}
+
 
 		var _parseStyles = function(content){
 			var block, styles = {};
@@ -67,26 +71,41 @@ Seed({
 
 		var _handleRules = function(sheet, selector, mode){
 			var rules = sheet.cssRules || sheet.rules;
+
 			if(rules){
 				for(var y = 0; y < rules.length; y++){
-					if(
-						(
-							rules[y].conditionText 
-							&& Mold.trim(rules[y].conditionText.replace(/\s/g, "")) ==  Mold.trim(selector.replace(/@media/g, "").replace(/\s/g, ""))
-						)
-						|| (rules[y].selectorText === selector)
-					){
-						if(mode === "delete"){
-							if(sheet.deleteRule){
-								sheet.deleteRule(y);
-							}else if(sheet.removeRule){
-								sheet.removeRule(y);
-							}else{
-								throw new Error("no deleteRule method found!")
-							}
-							return true;
+					
+					if(rules[y].styleSheet){
+						var subRuleResult;
+						if((subRuleResult = _handleRules(rules[y].styleSheet, selector, mode))){
+							return subRuleResult;
 						}
-						return rules[y];
+					}else{
+					
+						var selectors = [];
+
+						if(rules[y].selectorText){
+							selectors = rules[y].selectorText.split(",");
+						}else if(rules[y].conditionText){
+							selectors = [ Mold.trim(rules[y].conditionText.replace(/\s/g, "")) ];
+							selector = Mold.trim(selector.replace(/@media/g, "").replace(/\s/g, ""));
+						}
+
+						for(var z = 0; z < selectors.length; z++){
+							if(Mold.trim(selectors[z]) == selector){
+								if(mode === "delete"){
+									if(sheet.deleteRule){
+										sheet.deleteRule(y);
+									}else if(sheet.removeRule){
+										sheet.removeRule(y);
+									}else{
+										throw new Error("no deleteRule method found!")
+									}
+									return true;
+								}
+								return rules[y];
+							}
+						}
 					}
 				}
 			}

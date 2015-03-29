@@ -71,7 +71,6 @@ Seed({
 
 		var _handleRules = function(sheet, selector, mode){
 			var rules = sheet.cssRules || sheet.rules;
-
 			if(rules){
 				for(var y = 0; y < rules.length; y++){
 					
@@ -185,6 +184,9 @@ Seed({
 
 		this.publics = {
 			getRule : _getRule,
+			getTemplate : function(){
+				return _template.get();
+			},
 			bind : function(data){
 				_template.bind(data);
 				_apply();

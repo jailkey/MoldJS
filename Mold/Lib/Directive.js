@@ -180,7 +180,6 @@ Seed({
 						var attributeName = selectedAttribute.name || selectedAttribute;
 						output[attributeName] = attribute;
 						if(watchable){
-							
 							_watch(scope, function(mutation){
 							
 								if(

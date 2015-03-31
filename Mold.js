@@ -543,7 +543,7 @@ var Mold = (function(config){
 * @param (function) iterator - a callback function
 * @param (object) context - optional context Object
 **/
-		each : function(collection, iterator, context){
+		each : function(collection, iterator, context, debug){
 			var i = 0;
 			if(collection == null || collection === false) { return false; }
 
@@ -566,8 +566,11 @@ var Mold = (function(config){
 				var keys = Mold.keys(collection),
 					len = keys.length;
 				
+
+
 				for(; i < len; i++){
 					if(!(Mold.isNodeList(collection) && keys[i] === "length")){
+						
 						if(
 							Mold.is(collection[keys[i]]) 
 							&& iterator.call(context, collection[keys[i]], keys[i], collection) === Mold.EXIT
@@ -1691,7 +1694,7 @@ var Mold = (function(config){
 		    return newObj;
 		},
 
-		watch : function(obj, property, callback){
+		watch : function(obj, property, callback, handleAsObject){
 
 			if(Object.prototype.watch && !Mold.isNode(obj)){
 				obj.watch(property, callback);
@@ -1702,7 +1705,7 @@ var Mold = (function(config){
 				
 				/*use mutation observer for HTML elements*/
 				
-				if(Mold.isNode(obj)){
+				if(Mold.isNode(obj) && !handleAsObject){
 				
 					if(!!window.MutationObserver){
 						var observer = new MutationObserver(function(mutations) {

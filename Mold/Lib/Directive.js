@@ -210,6 +210,16 @@ Seed({
 					directive.scope = element;
 					if(directive.seed){
 
+						if(!element.hasDirective){
+							element.hasDirective = function(id){
+								return  Mold.contains(element.directives, id);
+							}
+						}
+						if(!element.directives){
+							element.directives = [];
+						}
+						element.directives.push(directive._id)
+
 						if(directive.collect){
 
 							var collection = _collect(directive.scope, directive.collect, Mold.mixin({}, new Mold.Lib.Event({})), directive.watchable);
@@ -247,15 +257,7 @@ Seed({
 							directive.instance.trigger("scope");
 						}
 					}
-					if(!element.hasDirective){
-						element.hasDirective = function(id){
-							return  Mold.contains(element.directives, id);
-						}
-					}
-					if(!element.directives){
-						element.directives = [];
-					}
-					element.directives.push(directive._id)
+					
 					if(directive.action){
 
 						directive.action.call(directive, node, element, template, index);
@@ -381,7 +383,7 @@ Seed({
 
 			switch(directive.at){
 				case "element":
-					var elements = scope.getElementsByTagName(directive.name);
+					var elements = scope.querySelectorAll(directive.name);
 					break;
 				case "attribute":
 					if(directive.value){

@@ -71,6 +71,7 @@ Seed({
 
 		var _handleRules = function(sheet, selector, mode){
 			var rules = sheet.cssRules || sheet.rules;
+			var singelQuoteSelector = selector.replace(/\"/g, "'");
 			if(rules){
 				for(var y = 0; y < rules.length; y++){
 					
@@ -91,7 +92,11 @@ Seed({
 						}
 
 						for(var z = 0; z < selectors.length; z++){
-							if(Mold.trim(selectors[z]) == selector){
+							var trimedSelector = Mold.trim(selectors[z]);
+							if(
+								trimedSelector == selector 
+								|| trimedSelector === singelQuoteSelector
+							){
 								if(mode === "delete"){
 									if(sheet.deleteRule){
 										sheet.deleteRule(y);
@@ -152,8 +157,10 @@ Seed({
 
 
 		var _apply = function(){
+
 			var style = _parseStyles(_template.get());
 			var ruleCount = 0;
+
 			Mold.each(style, function(value, rule){
 				 _deleteRule(rule, _sheet);
 
@@ -174,7 +181,11 @@ Seed({
 				}else{
 					throw new Error("something went wrong until style parsing!");
 				}
-				_sheet.insertRule(ruleString, ruleCount);
+				
+				if(_sheet.insertRule){
+					_sheet.insertRule(ruleString, ruleCount);
+				}
+		
 				ruleCount++;
 			})
 			//

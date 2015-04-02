@@ -705,6 +705,40 @@ var Mold = (function(config){
 			return result;
 		},
 
+		reduce : function(collection, iterator, initialValue, context){
+
+			var output = false,
+				previousValue = initialValue || undefined;
+
+			if(Array.prototype.reduce && Mold.isArray(collection)){
+				return collection.reduce(iterator, initialValue);
+			}
+			Mold.each(collection, function(currentValue, index){
+				if(!Mold.is(previousValue)){
+					previousValue = currentValue;
+				}
+				output = iterator.call(context, previousValue, currentValue, index, collection);
+				previousValue = output;
+			})
+			return output;
+		},
+
+		reduceList : function(collection, iterator, initialValue, context){
+			var output = false, 
+				previousValue = { index : false, value : initialValue || false };
+
+			Mold.each(collection, function(currentValue, index){
+				if(!previousValue){
+					previousValue = currentValue;
+				}
+				if(iterator.call(context, previousValue.value, currentValue, index, collection)){
+					output = { index : index, value : currentValue };
+					previousValue = output;
+				}
+			})
+			return output;
+		},
+
 /**
 * @namespace Mold
 * @methode keys

@@ -5,9 +5,28 @@ Seed({
 	function(){
 
 		var _features = {};
+		var helperInputElement = false;
+			
+		if(!Mold.isNodeJS){
+			helperInputElement = document.createElement("input");
+		}
+
+		var _detectInputType = function(type){
+			if(helperInputElement){
+				helperInputElement.setAttribute("type", type);
+				if(helperInputElement.type === "text"){
+					return false;
+				}
+				var testValue = "soma??estring-p0ijs9";
+				helperInputElement.value = testValue;
+				return !(helperInputElement.value === testValue);
+			}
+			return false;
+		}
 
 		var _detectFeatures = function(){
 			var checker = false;
+			
 			if(!Mold.isNodeJS){
 				_features = {
 					"history" : !!(window.history && history.pushState),
@@ -53,8 +72,21 @@ Seed({
 
 							return false;
 						}
-					}()
-
+					}(),
+					"input-date" : _detectInputType("date"),
+					"input-date" : _detectInputType("date"),
+					"input-datetime" : _detectInputType("datetime"),
+					"input-datetime-local" : _detectInputType("datetime-local"),
+					"input-month" : _detectInputType("month"),
+					"input-week" : _detectInputType("week"),
+					"input-time" : _detectInputType("time"),
+					"input-color" : _detectInputType("color"),
+					"input-number" : _detectInputType("number"),
+					"input-range" : _detectInputType("range"),
+					"input-email" : _detectInputType("email"),
+					"input-search" : _detectInputType("search"),
+					"input-url" : _detectInputType("url"),
+					"input-tel" : _detectInputType("tel")
 				}
 			}else{
 				_features = {}

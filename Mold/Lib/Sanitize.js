@@ -2,7 +2,6 @@ Seed({
 		name : "Mold.Lib.Sanitize",
 		dna : "class",
 		include : [
-		//	"Mold.Tools.Test.Unit",
 			"Mold.Lib.Encode"
 		],
 		test : "Mold.Test.Lib.Sanitize"

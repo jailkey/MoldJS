@@ -2,23 +2,15 @@ Seed({
 		name : "Mold.Main",
 		dna : "action",
 		include : [
-			"external->Mold.Lib.Component",
 			"Mold.Test"
 		]
 	},
 	function(){
-		var component = new Mold.Lib.Component("Mold.Test");
+		console.log("component loaded")
 
-		component.on("files.loaded", function(){
-			console.log("ALL FILES Loaded");
-		});
+		var imageList = document.createElement("x-imagelist");
+		document.body.appendChild(imageList);
 
-		component.on("files.error", function(){
-			console.log("FILES KONNTEN NICHT geladen werden")
-		});
-
-		component.files("logo.png");
-		component.files("stressed_linen.png");
-		component.files("test.css");
+		imageList.setAttribute("show", "0")
 	}
 );

@@ -31,7 +31,7 @@ gestartet werden.
 
 ## Installation (manuell clientseitig)
 Um Mold zu installieren, https://github.com/jailkey/MoldJS/archive/master.zip runterlanden, im root Verzeichnis der Anwendung z.B. in den Ordner shared entpacken und folgendermaßen einbinden:
-``
+```
 	<script type="text/javascript" 
 			src="app/Mold.js"
 			data-mold-main="Mold.Main"

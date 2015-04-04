@@ -181,10 +181,8 @@ Seed({
 			load : function(async){
 				_fileLen = _files.length;
 				if(async){
-					console.log("load async");
 					return _loadAsync();
 				}
-				console.log("load synce")
 				return _loadSync();
 			
 			}

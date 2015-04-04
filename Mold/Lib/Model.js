@@ -18,7 +18,8 @@ Seed({
 			_adapter = config.adapter,
 			_dataId =  false,
 			_registerd = [],
-			_isValidation = false;
+			_isValidation = false,
+			_resetInvalidValue = false;
 
 		Mold.mixin(this, new Mold.Lib.Event(this));
 		Mold.mixin(_data, new Mold.Lib.Event(_data));
@@ -39,6 +40,13 @@ Seed({
 			var validationError = _notValid(element, data[name], "property");
 			if(validationError){
 
+				if(_resetInvalidValue){
+					var defaultValue = Mold.Lib.Validation.getDefault(validationError);
+					if(Mold.is(defaultValue)){
+						 data[name] = defaultValue;
+					}
+				}
+
 				if(data.on){
 
 					var result = data.trigger("validation.error", { 
@@ -50,7 +58,7 @@ Seed({
 					});
 
 				}
-				console.log("trigger validation error", that)
+
 				that.trigger("validation.error", { 
 					error : validationError,
 					value : data[name],
@@ -257,6 +265,7 @@ Seed({
 							var validate = Mold.Lib.Validation.get(validation);
 							if(validate){
 								if(!validate(value)){
+
 									output =  validation;
 								}
 							}
@@ -290,6 +299,7 @@ Seed({
 		
 		var _add = function(model, data){
 
+
 			//Mold.each(data, function(element, name){
 			
 				if(Mold.isArray(data)){
@@ -320,6 +330,9 @@ Seed({
 
 
 		var _clean = function(model){
+			//disable validation while cleanup
+			var validationState = _isValidation;
+			_isValidation = false;
 			if(Mold.isArray(model)){
 				model.remove();
 			}else if(Mold.isObject(model)){
@@ -333,6 +346,7 @@ Seed({
 					}
 				})
 			}
+			_isValidation = validationState;
 		}
 
 		var _refresh = function(){
@@ -364,9 +378,12 @@ Seed({
 			data : _data,
 			validation : function(state){
 				_isValidation = state;
+				_resetInvalidValue = state;
+			},
+			resetInvalidValue : function(state){
+				_resetInvalidValue = state;
 			},
 			isValid : function(){
-
 			},
 /**
  * save  saves the model
@@ -398,7 +415,11 @@ Seed({
 					throw "Can not load data without adapter!"
 				}
 				_dataId = id;
-				return _adapter.load(id);
+				var promise = _adapter.load(id);
+				/*	promise.then(function(newData){
+					_update(_data, newData);
+				});*/
+				return promise;
 			},
 
 /**

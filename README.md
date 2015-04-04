@@ -1,7 +1,3 @@
-MoldJS
-======
-//JavaScript structure and pattern framework
-
 # Einleitung
 MoldJS wurde entwickelt um Strukturen und Muster in deinem Projekt abzubilden, durch diverse Erweiterungen ist es zu einem komplexen MVC Framework herangewachsen.
 Der Kern von MoldJS bildet ein Modulsystem (ähnlich AMD) das es ermöglicht einzelne Module nach unterschiedlichen Mustern auszuführen, Abhängigkeiten zu managen und zu injizieren. 
@@ -31,6 +27,7 @@ gestartet werden.
 
 ## Installation (manuell clientseitig)
 Um Mold zu installieren, https://github.com/jailkey/MoldJS/archive/master.zip runterlanden, im root Verzeichnis der Anwendung z.B. in den Ordner shared entpacken und folgendermaßen einbinden:
+
 ```
 	<script type="text/javascript" 
 			src="app/Mold.js"
@@ -38,6 +35,7 @@ Um Mold zu installieren, https://github.com/jailkey/MoldJS/archive/master.zip ru
 			data-mold-repository="app/"
 	></script>
 ```
+
 Die angegebenen Attribute konfigurieren Mold so das alle Seeds (Module) im Ordner app/ gesucht werden.
 data-mold-main weist MoldJS an als erstes die Datei /app/Mold/Main.js zu laden, diese hat in den meisten Fällen die dna 'action', 'app', oder 'urlrouter' so das sie gleich ausgeführt wird.
 Mehr dazu später.
@@ -73,7 +71,7 @@ Der Header des Seed muss die Eigenschaft 'name' enthalten, diese beschreibt sowo
 #### DNA
 Im Header jedes Seeds muss ausserdem die Eigenschaft 'dna' gesetzt werden, die DNA eines Seeds beschreibt den Code, sie definiert wie der Code ausgeführt wird, testet ob er einem bestimmten Muster entspricht, oder injiziert Abhängigkeiten.
 
-```
+```javascript
 //File: Mold/Test.js
 
 Seed({
@@ -92,7 +90,7 @@ Seed({
 Um Abhängigkeiten dynamisch nachzuladen und sich dabei nicht um die Synchronisation kümmern zu müssen, kann im Header die Eigenschaft 'include' gesetzt werden.
 Über sie lassen sich sowohl andere Seeds als auch externe Script und Plugins nachladen. Zum Abbilden der Abhängigkeiten zwischen externen Dateien, z.B. jQuery, und jQuery Plugins, kann die include Anweisung auch verschachtelt werden. 
 
-```
+```javascript
 //File: Mold/Test.js
 
 Seed({
@@ -107,10 +105,12 @@ Seed({
 	}
 )
 ```
+
+
 *Im Beispiel wird mit dem Ausführen des Codes gewartet bis der Seed Mold.Dependency geladen ist.*
 
 
-```
+```javascript
 //File: Mold/WithjQuery.js
 
 Seed({
@@ -137,7 +137,7 @@ Seed({
 #### Dependency Injection
 Für abhängige Seeds besteht die Möglichkeit sie direkt in den Code injizieren zu lassen. Dafür muss der abhängige Seed sich in einem Objekt befinden, der Name der Eigenschaft bestimmt den Variablen Namen, der nachher innerhalb des Codes mit der gewünschten Abhängigkeit zur Verfügung steht.
 
-```
+```javascript
 //Mold/TestWithInjection.js
 Seed({
 		name : "Mold.TestWithInjection",
@@ -162,7 +162,7 @@ Die Definition einer Klasse gestaltet sich wie folgt: Die gesamte Klasse wird in
 Um von anderen Klassen zu erben kann in dem Header des Seeds die Eigenschaft 'extends' gesetzt werden. Diese muss als Inhalt den Namen des Seeds, von dem geerbt werden soll enthalten.
 
 
-```
+```javascript
 //Mold/SubClass.js
 Seed({
 		name : "Mold.SubClass",
@@ -219,10 +219,11 @@ Seed({
 
 ### Controller
 Controller können dazu eingesetzt werden den Ablauf des Programms zu steuern, zwischen Komponenten zu vermitteln und auf Ereignisse zu reagieren.
-Ein Controller wird über die DNA 'controller' definiert. (Die DNA muss über den den Seed ->Mold.DNA.Controller geladen werden damit sie zur Verfügung steht, da sie nicht im Mold Core vorhanden ist.) Controller haben besondere Eigenschaften, so können über die Eigenschaft this.actions alle globalen und controllerspezifischen Events abgefangen werden. Ausserdem können andern Komponenten der Anwendung sich über die Methode this.register an einem Controller registrieren, so dass der Controller auch ihre Komponenten-Events abfangen kann.
+Ein Controller wird über die DNA 'controller' definiert. (Die DNA muss über den den Seed ->Mold.DNA.Controller geladen werden damit sie zur Verfügung steht, da sie nicht im Mold Core vorhanden ist.)
+Controller haben besondere Eigenschaften, so können über die Eigenschaft this.actions alle globalen und controllerspezifischen Events abgefangen werden. Ausserdem können andern Komponenten der Anwendung sich über die Methode this.register an einem Controller registrieren, so dass der Controller auch ihre Komponenten-Events abfangen kann.
 Eine neue Controller Instanz kann mit new erzeugt werden.
 
-```
+```javascript
 Seed(
 	{
 		name : 'Mold.TestController',
@@ -264,7 +265,7 @@ In einer Route können Platzhalter für bestimmte Teile einer Url vergeben werde
 
 
 
-```
+```javascript
 Seed(
 	{ 
 		name : "Mold.Main",
@@ -283,7 +284,7 @@ Seed(
 *Zuerst definieren wir einen Seed als url Router, dann den passenden Controller dazu:*
 
 
-```
+```javascript
 Seed(
 	{ 
 		name : "Mold.MainController",
@@ -319,7 +320,7 @@ Ein Mold-Model bietet die Möglichkeit ein Datenstruktur zu erstellen, zu validi
 
 Ein Model in Mold kann über den Konstruktor Mold.Lib.Model, oder über eine Model DNA erzeugt werden. In diesem Beispiel wird der Model Konstruktor verwendet:
 
-```
+```javascript
 Seed(
 	{ 
 		name : "Mold.MainController",
@@ -348,7 +349,7 @@ Seed(
 
 Ist das Model angelegt kann es über das Objekt "data" mit Daten gefüllt werden:
 
-```
+```javascript
 model.data.list.on("list.item.add", function(e){
 	console.log("Ein Element wurde zu liste hinzugefügt: ", e.data.value.entry)
 })
@@ -361,7 +362,7 @@ model.data.list.push({ entry : 'mein erster Eintrag'});
 
 Wollen wir das der Inhalt der dem Model zugefügt wird vorher validiert wird können wir die Model-Validierung aktivieren:
 
-```
+```javascript
 model.validation(true);
 model.on("validation.error", function(e){
 	console.log("Validierungs Fehler", e.data.name, e.data.error);
@@ -374,7 +375,7 @@ model.data.list.push({ entry : 5});
 
 Falls ein default Value für den Typ der Validierung vorhanden ist, wir der Wert des Models auf diesen Inhalt zurückgesetzt:
 
-```
+```javascript
 console.log(model.data.list[1].entry)
 ```
 
@@ -385,7 +386,7 @@ Oft kann es notwenig sein das Model persistent zu speichern, deshalb kann kann b
 Im Frontend stehen das 'LocalStorage' und das 'Rest' Adapter zur Verfügung. Ist ein Adapter konfiguriert verfügt das Model über die Methoden 'load' und 'save'.
 Als der 'save' Methode kann, der 'load' Methode muss der Parameter 'id' übergeben werden, der den Datensatz identifiziert. Wird der Methode 'save' keine Parameter übergeben wird eine eindeutige ID generiert.
 
-```
+```javascript
 model
 	.save("meine-id")
 	.then(function(){
@@ -397,7 +398,7 @@ model
 ```
 *Speichert das model unter 'meine-id' ab. Im Beispiel ist LocalStorage als Adapter konfiguriert, die Daten werden also im Browser gespeichert. Wäre das Rest Adapter eingerichtet, würde ein POST Request an den Service gesendet*
 
-```
+```javascript
 model
 	.load("meine-id")
 	.then(function(){
@@ -412,7 +413,7 @@ model
 Mold enthält eine eigene kleine Templateengine, im Gegensatz zu vielen andern ist sie nicht String sondern DOM basiert. Das heißt es werden Pointer auf Dom-Elemente gespeichert, über die nachher auf Elemente zugegriffen werden kann. Templates können wie Models über eine Eigene DNA oder einen Konstruktor erzeugt werden. Dem Konstruktor des Template kann entweder eine String eine Url, oder eine Multiline Funktion mitgegeben werden. Die Template Syntax ist frei von Logik und orientiert sich an der Syntax von "Mustache.js". Details dazu gibt es in der Funktionsreferenz.
 Hier ein kleines Beispiel Konstruktor und Multiline Funktion:
 	
-```
+```javascript
 Seed(
 	{ 
 		name : "Mold.TestTemplate",
@@ -442,7 +443,7 @@ Seed(
 Um den erstellten Baum des Templates anzeigen zu lassen bzw. zu manipulieren kann die Methode 'tree' genutzt werden. Das manipulieren der Daten über die Template Nodes ist allerdings relative umständlich weshalb vereinfachte Methoden zur Verfügung stehen.
 Über '.append' kann z.B. einfach ein Datenobjekt an das Template übergeben werden.
 
-```
+```javascript
 template.append({
 	list : [
 		{ myproperty : "One"},
@@ -456,7 +457,7 @@ template.append({
 In diesem Beispiel werden drei Elemente in die Liste 'list' eingefügt. Das erzeugte HTML sieht danach so aus:
 
 
-```
+```javascript
 	<div>
 		One
 	</div>
@@ -476,7 +477,7 @@ Effektiv arbeiten Templates ins besondere mit Models zusammen, dazu gibt es die 
 Komponenten werden im Mold über die DNA 'component' erzeugt. Mit ihnen können neue Domelemente erzeugt und vorhandene manipuliert werden, um sie zu erzeugen gibt es in Mold ähnlich wie in Angular Direktiven.
 Eine Komponente kann z.B. wie folgt aussehen:
 
-```
+```javascript
 Seed({
 		name : "Mold.Test",
 		dna : "component",
@@ -544,7 +545,7 @@ Da der Komponenten-Controller eine Instanz von Mold.Lib.Controller ist und über
 ##Alles zusammen (Beispiel ToDo MVC)
 Um zu verstehen wie alles zusammen arbeiten gibt es hier eine kleine Beispiel Applikation:
 
-```
+```javascript
 //Filename Mold/Todo.js
 Seed(
 	{ 
@@ -615,7 +616,7 @@ Seed(
 		template.bind(model);
 		template.bind(error);
 		
-		//eventual vorhandene Daten laden
+		//eventuel vorhandene Daten laden
 		model.load("my-todo");
 
 		//das Template am Controller registrieren damit die Events im Controller abgefangen werden können
@@ -641,8 +642,8 @@ Seed(
 					error.data.error = false;
 					
 					//Wenn Daten hinzugefügt wurden wird das Model gespeichert
-					
 					model.save();
+					
 				}else{
 					error.data.error = "The field is empty!"
 				}
@@ -651,14 +652,13 @@ Seed(
 				
 				// Wird das löschen Ereignis ausgelöst kann mit der Methode .splice 
 				// einfach das Element aus der Liste gelöscht werden.
-				
 				model.data.list.splice(e.data.element.getAttribute('index'), 1);
 				model.save();
 			},
 			"@delete.all" : function(e){
 				
-				//soll alles gelöscht werden kann einfach die Methode .remove genutzt werden
-				
+				// soll alles gelöscht werden kann einfach 
+				// die Methode .remove aufgerufen werden 
 				model.data.list.remove();
 				model.save();
 			}	
@@ -672,7 +672,6 @@ Handelt es sich um größere Komponenten sollten sowohl Template als auch Model 
 
 
  
-
 
 
 

@@ -42,7 +42,7 @@ Seed(
 			|*/
 		});
 
-		//create model
+		//create model for data
 		var model = new Mold.Lib.Model({
 			properties : {
 				list : [
@@ -50,14 +50,22 @@ Seed(
 						entry : "string",
 						color : "string"
 					}
-				],
-				error : "string"
+				]
 			},
 			adapter : new Mold.Adapter.LocalStore()
 		});
 
+		var error = new Mold.Lib.Model({
+			properties : {
+				error : "string"
+			}
+		})
+
 		//bind model on template
 		template.bind(model);
+
+		//bind error model
+		template.bind(error);
 
 		model.load("my-todo");
 
@@ -75,10 +83,10 @@ Seed(
 						entry : e.data.listdata.entry,
 						color : Mold.Lib.Color.randomColor()
 					})
-					model.data.error = false;
+					error.data.error = false;
 					model.save();
 				}else{
-					model.data.error = "The field is empty!"
+					error.data.error = "The field is empty!"
 				}
 			},
 			"@delete.entry" : function(e){

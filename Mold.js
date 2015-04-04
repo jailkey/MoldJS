@@ -524,10 +524,16 @@ var Mold = (function(config){
 		},
 
 		startsWith : function(phrase, search){
+			if(!phrase.slice){
+				return false;
+			}
 			return phrase.slice(0, search.length) === search;
 		},
 
 		endsWith : function(phrase, search){
+			if(!phrase.slice){
+				return false;
+			}
 			return phrase.slice(phrase.length - search.length) === search;
 		},
 
@@ -803,6 +809,29 @@ var Mold = (function(config){
 				return true;
 			}
 		},
+
+
+		isNumber : function(value){
+			if(typeof +value === "number"){
+				return true;
+			}
+			return false;
+		},
+
+		isString : function(value){
+			if(typeof value === "string"){
+				return true;
+			}
+			return false;
+		},
+
+		isFunction : function(value){
+			if(typeof value === "function"){
+				return true;
+			}
+			return false;
+		},
+
 
 /**
 * @namespace Mold

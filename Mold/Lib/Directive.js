@@ -205,10 +205,9 @@ Seed({
 			}
 
 			directive.apply = function(node, element, template, index, style){
-				
 				if(!element.hasDirective || !element.hasDirective(directive._id)){
 					directive.scope = element;
-					console.log("add directive", element.hasDirective)
+					
 					if(!element.hasDirective){
 						element.hasDirective = function(id){
 							return  Mold.contains(element.directives, id);
@@ -220,8 +219,6 @@ Seed({
 					element.directives.push(directive._id)
 					if(directive.seed){
 
-						
-						
 
 						if(directive.collect){
 
@@ -338,7 +335,6 @@ Seed({
 			var cacheName = element.nodeName,
 				template = false,
 				styleAttributes = false;
-
 
 
 			Mold.each(_directives, function(directive){
@@ -469,6 +465,15 @@ Seed({
 		var bodyElement = new Mold.Lib.Element(document.body);
 		Mold.Lib.DomObserver.observe(bodyElement, { childList: false, characterData : false, subtree : true});
 
+		var _appendSubElements = function(element){
+			for(var i = 0, len = element.childNodes.length; i < len; i++){
+				if(element.childNodes[i].nodeType === 1){
+					_appendElement(element.childNodes[i]);
+					_appendSubElements(element.childNodes[i]);
+				}
+			}
+		}
+
 		bodyElement.on("attribute.changed", function(e){
 			_appendElement(e.data.mutation.target);
 			_appendStyleProperty(e.data.mutation.target);
@@ -476,6 +481,7 @@ Seed({
 
 		bodyElement.on("element.inserted", function(e){
 			_appendElement(e.data.mutation.target);
+			_appendSubElements(e.data.mutation.target);
 			_appendStyleProperty(e.data.mutation.target);
 		});
 

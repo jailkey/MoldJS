@@ -1133,6 +1133,10 @@ var Mold = (function(config){
 		getLoadingproperties : function(){
 			return Mold.cue.getType("loadingproperty");
 		},
+
+		isExternalSeed : function(name){
+			return !!_externalSeeds[name];
+		},
 /**
 * @methode getSeed
 * @desc Returns a seed specified by name

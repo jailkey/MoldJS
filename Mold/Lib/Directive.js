@@ -208,17 +208,20 @@ Seed({
 				
 				if(!element.hasDirective || !element.hasDirective(directive._id)){
 					directive.scope = element;
+					console.log("add directive", element.hasDirective)
+					if(!element.hasDirective){
+						element.hasDirective = function(id){
+							return  Mold.contains(element.directives, id);
+						}
+					}
+					if(!element.directives){
+						element.directives = [];
+					}
+					element.directives.push(directive._id)
 					if(directive.seed){
 
-						if(!element.hasDirective){
-							element.hasDirective = function(id){
-								return  Mold.contains(element.directives, id);
-							}
-						}
-						if(!element.directives){
-							element.directives = [];
-						}
-						element.directives.push(directive._id)
+						
+						
 
 						if(directive.collect){
 
@@ -245,7 +248,22 @@ Seed({
 						}else{
 							var seed = new Mold.Lib.Controller(directive.seed);
 						}
-						directive.instance = new seed(scope, new Mold.Lib.Element(element), collection);
+						directive.instance = new seed(scope, new Mold.Lib.Element(element), collection, directive.component);
+						if(directive.register){
+							switch(directive.register){
+								case 'collection':
+									directive.instance.register(collection);
+									break;
+								case 'component':
+									directive.instance.register(directive.component);
+									break;
+								case 'all':
+									directive.instance.register(collection);
+									directive.instance.register(directive.component);
+									break;
+
+							}
+						}
 						if(directive.instance.scope){
 							if(directive.replace) {
 								directive.replaceElement(directive.instance.scope);

@@ -29,10 +29,12 @@ Seed({
 				throw new Error("No controller given for component "+seed.name+"!");
 			}
 			Mold.each(seed.directives, function(directive){
+				directive.component = component;
+				directive.register = seed.register;
 				component.directive(directive);
 			});
 			if(seed.files){
-				component.files(seed.func.files);
+				component.files(seed.files);
 			}
 			return component;
 		}

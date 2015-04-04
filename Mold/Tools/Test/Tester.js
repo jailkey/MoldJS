@@ -103,20 +103,20 @@ Seed({
 			var spyApi = {
 				name : "spy",
 				hasBeenCalled : false,
-				arguments : false,
+				arguments : [],
 				object : object,
 				method : method,
 				returnValue : null
 			}
 
 			var oldFunc = object[method];
-			//console.log("create spy", object, method)
+
 			object[method] = function(getspy){
 				if(getspy === "--getspy"){
 					return spyApi;
 				}
 				spyApi.hasBeenCalled = true;
-				spyApi.arguments = arguments;
+				spyApi.arguments.push(arguments);
 				if(spyApi.returnValue !== null){
 					return spyApi.returnValue;
 				}
@@ -204,7 +204,6 @@ Seed({
 			}, _timeOut);
 
 			var withTimeout = function(){
-				//console.log("CALL", test.description, callback.toString())
 				if(callback){
 					callback.call(context);
 				}
@@ -329,9 +328,7 @@ Seed({
 				
 				ready();
 				_executeCounter++;
-				//console.log("----------------->",_startExecutionCounter,  _executeCounter, _testCounter)
 				if(_executeCounter >= _startExecutionCounter){
-					//trigger ready if all tests are executed
 					_that.trigger("tests.ready", { count : _testCounter });
 				}
 			}
@@ -387,6 +384,7 @@ Seed({
 			if(input === target){
 				return true;
 			}
+
 			Mold.each(input, function(inputValue, inputName){
 				var targetValue = target[inputName];
 				if(Mold.isArray(inputValue) || Mold.isObject(inputValue)){
@@ -396,13 +394,13 @@ Seed({
 					
 					if(typeof inputValue === "function"){
 
-						if(inputValue.toString() === targetValue.toString()){
+						if(inputValue.toString() !== targetValue.toString()){
 							
 							output = false;
 							return Mold.EXIT;
 						}
 					}else{
-						if(inputValue === targetValue){
+						if(inputValue !== targetValue){
 							output = false;
 							return Mold.EXIT;
 						}
@@ -426,17 +424,22 @@ Seed({
 			var undefined;
 			var api =  {
 				toBe : function(value){
-					input = (negate) ? !input : input;
-					if(input === value){
+			
+					if(
+						!negate && input === value
+						|| negate && input !== value
+					){
 						return _expect(input);
 					}else{
-						throw new Error(input + " is " +((negate) ? "not " : "")+ "not equal " + value);
+						throw new Error(input + " is " +((negate) ? "not " : "")+ "not to be " + value);
 					}
 				},
 				toEqual : function(value){
-					input = (negate) ? !input : input;
 					if(typeof value === "function"){
-						if(input.toString() === value.toString()){
+						if(
+							!negate && input.toString() === value.toString()
+							|| negate && input.toString() !== value.toString()
+						){
 							return _expect(input);
 						}else{
 							throw new Error("'" + input + "' is" +((negate) ? " not" : "")+ " not equal " + value);
@@ -444,15 +447,21 @@ Seed({
 					}
 
 					if(typeof value === "object"){
-						if(_objectEqual(input, value)){
+						if(
+							!negate && _objectEqual(input, value)
+							|| negate && !_objectEqual(input, value)
+						){
 							return _expect(input);
 						}else{
-							throw new Error("'" + input + "' is" +((negate) ? " not" : "")+ " not equal " + value);
+							throw new Error("'" + input.toString() + "' is" +((negate) ? " not" : "")+ " not equal " + value.toString());
 						}
 					}
 					return api.toBe(value);
 				},
 				toMatch : function(match){
+					if(Mold.isString(match)){
+						match = new RegExp(match, "g");
+					}
 					if(
 						(!negate && match.test(input))
 						|| (negate && !match.test(input))
@@ -496,6 +505,16 @@ Seed({
 					if(
 						(!negate && !input)
 						|| (negate && input)
+					){
+						return _expect(input);
+					}else{
+						throw new Error("'" +input + "' is" +((negate) ? " not" : "")+ " defined!");
+					}
+				},
+				toBeTruthy  : function(){
+					if(
+						(!negate && input)
+						|| (negate && !input)
 					){
 						return _expect(input);
 					}else{
@@ -567,19 +586,19 @@ Seed({
 					}
 				},
 				toBeCloseTo : function(value, precision){
+					input = +input;
+					value = +value;
 					if(
 						(
-							!negate && (value + precision) > input
-							&&  (value - precision) < input
+							!negate && Math.abs(input - value) < precision
 						)
 						|| (
-							negate && (value + precision) < input
-							&&  (value - precision) > input
+							negate && Math.abs(input - value) > precision
 						)
 					){
 						return _expect(input);
 					}else{
-						throw new Error("'" +input + "' is " +((negate) ? " not" : "")+ " not close to " + value +  "!");
+						throw new Error("'" +input + "' is " +((negate) ? " not" : "")+ " not close to " + value +  "!(" + precision + ")");
 					}
 
 				},
@@ -587,17 +606,43 @@ Seed({
 					if(!negate){
 						try {
 							input.call();
+							throw new Error("'" +input + "' do not throw an error " +  "!");
 						}catch(e){
 							return _expect(input);
-						}finally{
-							throw new Error("'" +input + "' do not " +((negate) ? " not" : "")+ " throw an error " +  "!");
 						}
 					}
 					if(negate){
 						try {
 							input.call();
 						}catch(e){
-							throw new Error("'" +input + "' " +((negate) ? " not" : "")+ " throw an error " +  "!");
+							throw new Error("'" +input + "' throw an error " +  "!");
+						}finally{
+							return _expect(input);
+						}
+					}
+				},
+				toThrowError : function(){
+					if(!negate){
+						try {
+							input.call();
+							throw new Error("'" +input + "' do not throw an error " +  "!");
+						}catch(e){
+							if(e instanceof Error){
+								return _expect(input);
+							}else{
+								throw new Error("'" +input + "' do not throw an error " +  "!");
+							}
+						}
+					}
+					if(negate){
+						try {
+							input.call();
+						}catch(e){
+							if(e instanceof Error){
+								throw new Error("'" +input + "' throw an error " +  "!");
+							}else{
+								return _expect(input);
+							}
 						}finally{
 							return _expect(input);
 						}
@@ -625,14 +670,27 @@ Seed({
 					var spy = false;
 					if((spy = input.call(null, "--getspy"))){
 						if(spy.name === "spy"){
+
 							var argumentTest = true;
 							var argumentsArray = [];
-							Mold.each(arguments, function(args, i){
-								if(spy.arguments[i] !== args){
-									argumentTest = false;
+							var testArgs = arguments;
+
+							Mold.some(spy.arguments, function(spyargs){
+								argumentTest = true;
+								Mold.each(testArgs, function(args, i){
+									if(spyargs[i] !== args){
+										argumentTest = false;
+									}
+									argumentsArray.push(args);
+
+								});
+					
+								if(argumentTest){
+									return true;
 								}
-								argumentsArray.push(args);
-							})
+
+							});
+							
 							if(
 								(!negate && spy.hasBeenCalled && argumentTest)
 								|| (negate && !argumentTest)

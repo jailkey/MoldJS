@@ -10,14 +10,14 @@ Mold lässt sich einfach über npm installieren. Es sollte global installiert we
 	npm install -g mold-js
 ```
 
-Nach dem das npm Paket installiert ist, kann mit dem Befehl 'mold' eine neues Projekt erzeugt werden. Falls das Projekt rein clientseitig entwickeln muss es in einem Order angelegt werden der über http erreichbar ist.
+Nach dem das npm Paket installiert ist, kann mit dem Befehl 'mold' eine neues Projekt erzeugt werden. Falls das Projekt rein clientseitig entwickelt wird, muss es in einem Order angelegt werden der über http erreichbar ist.
 Ein Projekt wird mit folgendem Befehl erzeugt:
 
  ```
  	mold project
  ```
-Das Kommando startet einen Generator der die wichtigsten Projekt Informationen abfragt.
-Ist das Projekt fertig installiert kann es (so fern clientseitig) über den Browser aufgerufen werden.
+Das Kommando startet einen Generator der die wichtigsten Projekt Informationen abfragt.  
+Ist das Projekt fertig installiert kann es (so fern clientseitig) über den Browser aufgerufen werden.  
 Wurde auch ein serverseitiger Teil erzeugt kann dieser mit dem Befehl:
 
 ```
@@ -36,7 +36,7 @@ Um Mold zu installieren, https://github.com/jailkey/MoldJS/archive/master.zip ru
 	></script>
 ```
 
-Die angegebenen Attribute konfigurieren Mold so das alle Seeds (Module) im Ordner app/ gesucht werden.
+Die angegebenen Attribute konfigurieren Mold so das alle Seeds (Module) im Ordner app/ gesucht werden.  
 data-mold-main weist MoldJS an als erstes die Datei /app/Mold/Main.js zu laden, diese hat in den meisten Fällen die dna 'action', 'app', oder 'urlrouter' so das sie gleich ausgeführt wird.
 Mehr dazu später.
 
@@ -60,7 +60,7 @@ Seeds aus dem externen repository können innerhalb der app per '->' geladen wer
 ### Mold Core
 Der Mold Core Code ist der minimum Code geladen werden muss, er ist in einer Datei (Mold.js) zusammengefasst. 
 Er bietet  Funktionalität um Mold Module (Seeds) nachzuladen, zu parsen und in andere Module zu injecten.
-Ausserdem werden grundlegende Methoden der funktionalen- und der objektorientierten- Programmierung angeboten. 
+Ausserdem werden grundlegende Methoden der funktionalen- und der objektorientierten- Programmierung angeboten.   
 Zusätzlich gibt es eine Reihe von test- und überwachungs- Methoden, die die Programmierung erleichtern, bzw. ein reaktive Programmierung möglich machen.
 
 ### Seeds
@@ -157,8 +157,8 @@ Seed({
 *Hier wird der Seed "Mold.Dependency" geladen und in die Variable myClass injiziert, danach ist er im aktuellen Seed verfügbar*
 
 ### Klassen
-Eine Klasse unter Mold besteht aus einem Seed mit der DNA 'class'. Sie können von anderen Klassen erben und sind instanzierbar.
-Die Definition einer Klasse gestaltet sich wie folgt: Die gesamte Klasse wird in einer Funktion definiert, alle Eigenschaften und Funktionen die nicht mit this. bzw. this.publics exportiert werden sind privat.
+Eine Klasse unter Mold besteht aus einem Seed mit der DNA 'class'. Sie können von anderen Klassen erben und sind instanzierbar.  
+Die Definition einer Klasse gestaltet sich wie folgt: Die gesamte Klasse wird in einer Funktion definiert, alle Eigenschaften und Funktionen die nicht mit this. bzw. this.publics exportiert werden sind privat.  
 Um von anderen Klassen zu erben kann in dem Header des Seeds die Eigenschaft 'extends' gesetzt werden. Diese muss als Inhalt den Namen des Seeds, von dem geerbt werden soll enthalten.
 
 
@@ -219,7 +219,7 @@ Seed({
 
 ### Controller
 Controller können dazu eingesetzt werden den Ablauf des Programms zu steuern, zwischen Komponenten zu vermitteln und auf Ereignisse zu reagieren.
-Ein Controller wird über die DNA 'controller' definiert. (Die DNA muss über den den Seed ->Mold.DNA.Controller geladen werden damit sie zur Verfügung steht, da sie nicht im Mold Core vorhanden ist.)
+Ein Controller wird über die DNA 'controller' definiert. (Die DNA muss über den den Seed ->Mold.DNA.Controller geladen werden damit sie zur Verfügung steht, da sie nicht im Mold Core vorhanden ist.)  
 Controller haben besondere Eigenschaften, so können über die Eigenschaft this.actions alle globalen und controllerspezifischen Events abgefangen werden. Ausserdem können andern Komponenten der Anwendung sich über die Methode this.register an einem Controller registrieren, so dass der Controller auch ihre Komponenten-Events abfangen kann.
 Eine neue Controller Instanz kann mit new erzeugt werden.
 
@@ -260,7 +260,7 @@ Um das Routing über die URL zu nutzen kann ein Seed mit der dna 'urlrouter' erz
 Dieser erwartet im Code Teil eine JSON Objekt mit der Route als Schlüssel und der Action als Inhalt.
 Als Inhalt kann eine Funktion, oder ein Event angegeben werden. Beides wird ausgeführt wenn die Route auf die URL passt.
 Das Event '@ready' kann zusätzlich mit deinem Seed verknüpft werden, dieser wird beim ausführen der Route geladen.
-Auf diese Weise lassen sich einfach bestimmte Bereiche einer Webseite dann dynamisch nachladen wenn sie benötigt werden.
+Auf diese Weise lassen sich einfach bestimmte Bereiche einer Webseite dann dynamisch nachladen wenn sie benötigt werden.  
 In einer Route können Platzhalter für bestimmte Teile einer Url vergeben werden. Mit ':' wird ein Abschnitt bis zum nächsten '/' definiert. Mit '*' der gesamte Bereiche nach dem Sternchen.Der Platzhalter wird von einem Namen gefolgt der das spätere Zugreifen auf den Inhalt ermöglicht. Die gesammelten Url Daten werden als Parameter an das rout-Event übergeben.
 
 
@@ -305,11 +305,11 @@ Seed(
 ```
 *Der Controller wird sofort bei Aufruf der Url geladen und instanziert, hängen wir z.B. #login/hans/action/5 an die Url wird danach das Event "@doaction" gefeuert. Auf der Konsole wird 'doaction hans 5' ausgegeben.*
 
-Um spezielle Routen fest zu legen können folgende Einstellungen vorgenommen werden:
+Routen können folgendermaßen spezfiziert werden:
 
-Beginnt eine Route mit / wird sie auf den ersten Teil der Url angewandt,
-Beginnt die Route mit ? trifft sie nur auf die Parameter einer Url zu
-Beginnt sie mit einem # auf alles was nach dem Hash kommt
+* Beginnt eine Route mit / wird sie auf den ersten Teil der Url angewandt,
+* Beginnt die Route mit ? trifft sie nur auf die Parameter einer Url zu
+* Beginnt sie mit einem # auf alles was nach dem Hash kommt
 
 Wird Mold auf Serverseite genutzt ist es zusätzliche möglich die Http Methoden der URL anzugeben.
 Sie müssen groß geschrieben werden, also PUT POST GET DELETE.
@@ -360,7 +360,7 @@ model.data.list.push({ entry : 'mein erster Eintrag'});
 
 *Die Liste lässt sich wie ein normales Array behandeln, allerdings lösen alle Aktionen ein Ereignis aus, so das beliebig auf das Ändern der Daten reagiert werden kann*
 
-Wollen wir das der Inhalt der dem Model zugefügt wird vorher validiert wird können wir die Model-Validierung aktivieren:
+Wollen wir das der Inhalt der dem Model zugefügt wird validieren, können wir die Model-Validierung aktivieren:
 
 ```javascript
 model.validation(true);
@@ -382,7 +382,7 @@ console.log(model.data.list[1].entry)
 *Es wird dein leerer String ausgegeben da der invalide Eintrag zurückgesetzt wird.*
 
 
-Oft kann es notwenig sein das Model persistent zu speichern, deshalb kann kann bei der Initialisierung über die Eigenschaft 'adapter', ein Persistenz Adapter festgelegt werden.
+Oft kann es notwendig sein das Model persistent zu speichern, deshalb kann kann bei der Initialisierung über die Eigenschaft 'adapter', ein Persistenz Adapter festgelegt werden.   
 Im Frontend stehen das 'LocalStorage' und das 'Rest' Adapter zur Verfügung. Ist ein Adapter konfiguriert verfügt das Model über die Methoden 'load' und 'save'.
 Als der 'save' Methode kann, der 'load' Methode muss der Parameter 'id' übergeben werden, der den Datensatz identifiziert. Wird der Methode 'save' keine Parameter übergeben wird eine eindeutige ID generiert.
 
@@ -410,7 +410,8 @@ model
 (Zum Modelverhalten im Backend wird es später noch einen Artikel geben.)
 
 ### Templates
-Mold enthält eine eigene kleine Templateengine, im Gegensatz zu vielen andern ist sie nicht String sondern DOM basiert. Das heißt es werden Pointer auf Dom-Elemente gespeichert, über die nachher auf Elemente zugegriffen werden kann. Templates können wie Models über eine Eigene DNA oder einen Konstruktor erzeugt werden. Dem Konstruktor des Template kann entweder eine String eine Url, oder eine Multiline Funktion mitgegeben werden. Die Template Syntax ist frei von Logik und orientiert sich an der Syntax von "Mustache.js". Details dazu gibt es in der Funktionsreferenz.
+Mold enthält eine eigene kleine Templateengine, im Gegensatz zu vielen andern ist sie nicht String sondern DOM basiert. Dass heißt es werden Pointer auf Dom-Elemente gespeichert, über welche nachher auf die Elemente zugegriffen werden kann. 
+Templates können wie Models über eine Eigene DNA oder einen Konstruktor erzeugt werden. Dem Konstruktor des Template kann entweder eine String eine Url, oder eine Multiline Funktion mitgegeben werden. Die Template Syntax ist frei von Logik und orientiert sich an der Syntax von "Mustache.js". Details dazu gibt es in der Funktionsreferenz.  
 Hier ein kleines Beispiel Konstruktor und Multiline Funktion:
 	
 ```javascript
@@ -440,7 +441,7 @@ Seed(
 
 *Es wird ein Template aus einer Multiline Funktion erzeugt.*
 
-Um den erstellten Baum des Templates anzeigen zu lassen bzw. zu manipulieren kann die Methode 'tree' genutzt werden. Das manipulieren der Daten über die Template Nodes ist allerdings relative umständlich weshalb vereinfachte Methoden zur Verfügung stehen.
+Um den erstellten Baum des Templates anzeigen zu lassen bzw. zu manipulieren kann die Methode 'tree' genutzt werden. Das Manipulieren der Daten über die Template Nodes ist allerdings relative umständlich weshalb vereinfachte Methoden zur Verfügung stehen.
 Über '.append' kann z.B. einfach ein Datenobjekt an das Template übergeben werden.
 
 ```javascript
@@ -470,11 +471,11 @@ In diesem Beispiel werden drei Elemente in die Liste 'list' eingefügt. Das erze
 
 ```
 
-Effektiv arbeiten Templates ins besondere mit Models zusammen, dazu gibt es die Methode '.bind' die Ein Model an ein Template bindend, dazu später mehr.
+Effektiv arbeiten Templates insbesondere mit Models zusammen, dazu gibt es die Methode '.bind' die ein Model an ein Template bindend, dazu später mehr.
 
 
 ###Komponenten
-Komponenten werden im Mold über die DNA 'component' erzeugt. Mit ihnen können neue Domelemente erzeugt und vorhandene manipuliert werden, um sie zu erzeugen gibt es in Mold ähnlich wie in Angular Direktiven.
+Komponenten werden im Mold über die DNA 'component' erzeugt. Mit ihnen können neue Domelemente erzeugt und vorhandene manipuliert werden, um sie zu erzeugen gibt es in Mold ähnlich wie in Angular Direktiven.  
 Eine Komponente kann z.B. wie folgt aussehen:
 
 ```javascript
@@ -531,19 +532,21 @@ Seed({
 ```
 *Diese Beispiel Komponente wird erzeugt sobald ein Element Namens x-imagelist einem Dokument enthalten ist, oder per document.createElement erzeugt wird.*
 
-Im Detail setzt sich die Komponente wie folgt zusammen:
-Sie hat die DNA 'component' die über den externen Seed Mold.DNA.Component geladen wird. 
-Im header werden über die Eigenschaft files zwei Bilder angegeben die beim Erstellen der Komponente geladen werden.
-Die Eigenschaft 'directives' enthält Direktiven die beschreiben auf welche Elemente die Componente angewandt wird. Eine Direktive enthält zum eine die Beschreibung des Elementes auf das sie angewandt werden soll (Im obigen Fall also Elemente mit dem Namen x-imagelist), zum anderen kann über das collect Objekt angegeben werden welches Informationen über ein Element gesammelt werden sollen. Bei diesem Beispiel das Attribute 'show'. Die Eigenschaft 'watchable' legt fest ob die collection überwacht werden soll. Das heißt falls sich z.B. ein Element Attribute ändert ein Ereignis feuert. 
-Über die Eigenschaft register : 'all' kann festgelegt werden das ob die Collection und die Komponente am Komponenten-Controller automatisch registriert werden.
+Im Detail setzt sich die Komponente wie folgt zusammen:  
 
-Nach dem Headeraufbau folgt der der Komponenten-Controller. Er ist eine normal Controller Instanz die für jedes Element in der Directive erzeugt wird. Ihm werden 4 Parameter übergeben, 'node' die DOM-Node (Element-/ Attributnode) auf die die Directive zutrifft, 'element' das DOM Element (eine Instanz von Mold.Lib.Element), 'collection' ein Objekt mit den gesammelten Daten und 'componente' die Instanz der Komponente mit Methoden und Events um z.B. zu ladende Dateien zu handeln.
+* Sie hat die DNA **'component'** die über den externen Seed Mold.DNA.Component geladen wird. 
+* Im header werden über die Eigenschaft **'files'** zwei Bilder angegeben die beim Erstellen der Komponente geladen werden.
+* Die Eigenschaft **'directives'** enthält Direktiven die beschreiben auf welche Elemente die Componente angewandt wird. Eine Direktive enthält zum eine die Beschreibung des Elementes auf das sie angewandt werden soll (Im obigen Fall also Elemente mit dem Namen **x-imagelist**), zum anderen kann über das collect Objekt angegeben werden welches Informationen über ein Element gesammelt werden sollen. Bei diesem Beispiel das Attribute **'show'**.   
+Die Eigenschaft **'watchable'** legt fest ob die collection überwacht werden soll. Das heißt falls sich z.B. ein Element Attribute ändert ein Ereignis feuert. 
+* Über die Eigenschaft **register : 'all'** kann festgelegt werden das ob die Collection und die Komponente am Komponenten-Controller automatisch registriert werden.
+
+Nach dem Headeraufbau folgt der der Komponenten-Controller. Er ist eine normal Controller Instanz die für jedes Element in der Directive erzeugt wird. Ihm werden 4 Parameter übergeben, **'node'** die DOM-Node (Element-/ Attributnode) auf die die Directive zutrifft, **'element'** das DOM Element (eine Instanz von Mold.Lib.Element), **'collection'** ein Objekt mit den gesammelten Daten und **'componente'** die Instanz der Komponente mit Methoden und Events um z.B. zu ladende Dateien zu handeln.
 
 Da der Komponenten-Controller eine Instanz von Mold.Lib.Controller ist und über register : 'all' collection und component registriert wurden, können in this.action ihre Ereignisse abgefangen werden.
 
 
 ##Alles zusammen (Beispiel ToDo MVC)
-Um zu verstehen wie alles zusammen arbeiten gibt es hier eine kleine Beispiel Applikation:
+Um zu verstehen wie alles zusammen arbeitet, hier eine kleine Beispiel Applikation:
 
 ```javascript
 //Filename Mold/Todo.js

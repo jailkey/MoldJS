@@ -113,6 +113,10 @@ Seed({
 			email : function(){
 				return _removeNonWhitlistedChars(url, _standardChars + _standardNumbers + _emailChars);
 			},
+			text : function(text){
+				text = this.html(text);
+				return Mold.Lib.Encode.encodeHTMLEntities(text);
+			},
 			html : function(markup){
 
 				markup = Mold.Lib.Encode.decodeHTMLEntities(markup);

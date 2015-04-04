@@ -1,69 +1,95 @@
 Seed(
 	{ 
 		name : "Mold.Main",
-		dna : "action",
+		dna : "component",
 		include : [
-			"external->Mold.Lib.Template",
-			"external->Mold.Lib.Model"
+			"->Mold.DNA.Component",
+			"->Mold.Lib.Template",
+			"->Mold.Lib.Model",
+			"->Mold.Lib.Color",
+			"->Mold.Adapter.LocalStore"
+		],
+		directives : [
+			{
+				at : "element",
+				name : "x-todo"
+			}
 		]
 	},
-	function(){
+	function(node, element, collection, component){
 
+
+		//create template
 		var template = new Mold.Lib.Template(function(){
 			/*|
 				<ul class="todo-list">
 					{{#list}}
-						<li>
-							{{entry}}
-							<a href="#" mold-event="click:@delete.entry">delete</a>
+						<li style="color:{{color}};">
+							{{+}}. {{entry}}
+							<a href="#" mold-event="click:@delete.entry" index="{{+}}" value="{{entry}}">delete</a>
 						</li>
 					{{/list}}
 				</ul>
 				<input name="entry" value="" type="text" mold-data="listdata">
 				{{#error}}
-					<br>{{.}}<br>
+					<p class="error">{{.}}</p>
 				{{/error}}
 				<br>
-				<a href="#" mold-event="click:@add.entry">add</a><br>
-				<a href="#" mold-event="click:@delete.all">delete All</a>
+				<div class="actions">
+					<a href="#" mold-event="click:@add.entry">add</a>
+					<a href="#" mold-event="click:@delete.all">delete all</a>
+				</div>
 			|*/
 		});
 
+		//create model
 		var model = new Mold.Lib.Model({
 			properties : {
 				list : [
-					{ entry : "string" }
+					{ 
+						entry : "string",
+						color : "string"
+					}
 				],
 				error : "string"
-			}
+			},
+			adapter : new Mold.Adapter.LocalStore()
 		});
 
-		
-
+		//bind model on template
 		template.bind(model);
 
-		template
-			.on("add.entry", function(e){
+		model.load("my-todo");
+
+		//register template and model at the controller
+		this.register(template);
+
+		//append template to element
+		element.append(template.get());
+
+		//handle events
+		this.actions = {
+			"@add.entry" : function(e){
 				if(e.data.listdata && e.data.listdata.entry !== ""){
-					model.data.list.push({ entry : e.data.listdata.entry })
+					model.data.list.push({ 
+						entry : e.data.listdata.entry,
+						color : Mold.Lib.Color.randomColor()
+					})
 					model.data.error = false;
+					model.save();
 				}else{
 					model.data.error = "The field is empty!"
 				}
-			})
-			.on("delete.entry", function(e){
-				console.log("delete entry", e.data.index)
-				model.data.list.splice(e.data.index, 1);
-			})
-			.on("delete.all", function(e){
+			},
+			"@delete.entry" : function(e){
+				console.log(e.data.element.index);
+				model.data.list.splice(e.data.element.getAttribute('index'), 1);
+				model.save();
+			},
+			"@delete.all" : function(e){
 				model.data.list.remove();
-			})
-
-		
-		template.appendTo(document.querySelector(".template-target"));
-
-
-
-
+				model.save();
+			}	
+		}
 	}
 );

@@ -365,12 +365,10 @@ Seed({
 			that.trigger("update");
 		}
 
-		//var _modelAddContent
-
 		if(_adapter){
 			var that = this;
 			_adapter.on("update", function(e){
-				_update(_data, e.data);
+				_update(_data, e.data.data);
 			})
 		}
 
@@ -416,7 +414,7 @@ Seed({
 				}
 				_dataId = id;
 				var promise = _adapter.load(id);
-				/*	promise.then(function(newData){
+				/*promise.then(function(newData){
 					_update(_data, newData);
 				});*/
 				return promise;

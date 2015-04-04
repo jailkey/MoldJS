@@ -21,17 +21,17 @@ Seed({
 		//add some content
 		template.append({
 			list : [
-				{ myproperty : "some value"},
-				{ myproperty : "some wasad asd"},
-				{ myproperty : "somessssss"}
+				{ myproperty : "One"},
+				{ myproperty : "Two"},
+				{ myproperty : "Three"}
 			]
 		});
 
-		console.log(" template.",  template.tree())
-		console.log("html", template.get().innerHTML)
+		console.log(" template.",  template.tree());
+		console.log("html", template.get().innerHTML);
 
 		//append to document
-		//document.body.appendChild(template.get());
+		document.body.appendChild(template.get());
 
 	
 	}

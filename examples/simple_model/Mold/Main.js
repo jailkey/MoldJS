@@ -2,8 +2,8 @@ Seed({
 		name : "Mold.Main",
 		dna : "action",
 		include : [
-			"external->Mold.Lib.Model",
-			"external->Mold.Adapter.Rest"
+			"->Mold.Lib.Model",
+			"->Mold.Adapter.LocalStore"
 		]
 	},
 	function(){
@@ -18,31 +18,40 @@ Seed({
 				myproperty : "string"
 			},
 			//define how to sync the model
-			adapter : new Mold.Adapter.Rest({ path : "my/rest/route/" })
+			adapter : new Mold.Adapter.LocalStore()
 		});
 
 		//define some events
-		model.data.on("property.change.myproperty", function(e){
-			console.log("Myproperty has change!", "New value is:" + e.data.value);
+		model.data.list.on("list.item.add", function(e){
+			console.log("Item added to list!", "Item value is: " + e.data.value.entry);
 		})
 
 		//trigger the event 
-		model.data.myproperty = "something";
+		model.data.list.push({ entry : "something" });
 
-		//use save() to save the data via the given adapter (in our case it sends a POST-request with models data);
-		model.save();
-
-		//if you want to use validation turn it on
+			//if you want to use validation turn it on
 		model.validation(true);
 
 		//define an event
-		model.data.on("validation.error", function(e){
-			console.log("Validation Error at", e.data.name);
+		model.on("validation.error", function(e){
+			console.log("Validation Error at", e.data);
 		});
 
 		//triggers an error, cause the property validation is string, not number
-		model.data.myproperty = 5;
+		model.data.list.push({ entry : 5 });
+
+		//wrong value will reseted
+		console.log("Value is a empty string:", model.data.list[1].entry);
+
+		//use save() to save the data via the given adapter (in our case it sends a POST-request with models data);
+		model.save("test.data").then(function(id){
+			model.load(id).success(function(data){
+				console.log("e", data)
+			});
+		});
+		
 
 
+		
 	}
 );

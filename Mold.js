@@ -810,6 +810,15 @@ var Mold = (function(config){
 			}
 		},
 
+		isEmpty : function(value){
+			if(Mold.isObject(value)){
+				return !Mold.keys(value).length;
+			}else if(Mold.isArray(value)){
+				return !value.length;
+			}
+			return (value === "");
+		},
+
 
 		isNumber : function(value){
 			if(typeof +value === "number"){
@@ -817,6 +826,7 @@ var Mold = (function(config){
 			}
 			return false;
 		},
+
 
 		isString : function(value){
 			if(typeof value === "string"){

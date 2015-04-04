@@ -219,6 +219,14 @@ Seed({
 			};
 
 			var decode = function(html, options) {
+				if(Mold.isNumber(html)){
+					html = "" + html;
+				}
+
+				if(!Mold.isString(html)){
+					return "";
+				}
+
 				options = merge(options, decode.options);
 				var strict = options.strict;
 				if (strict && regexInvalidEntity.test(html)) {

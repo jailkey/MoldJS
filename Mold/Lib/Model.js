@@ -35,8 +35,8 @@ Seed({
 		}
 	
 		var _createProperty = function(element, name, data){
+
 			var validationError = _notValid(element, data[name], "property");
-			
 			if(validationError){
 
 				if(data.on){
@@ -50,6 +50,7 @@ Seed({
 					});
 
 				}
+				console.log("trigger validation error", that)
 				that.trigger("validation.error", { 
 					error : validationError,
 					value : data[name],
@@ -170,7 +171,6 @@ Seed({
 		}
 
 		var _createObject = function(element, name, data){
-
 			_notValid(element, data[name], "object");
 			if(!data[name]){
 				data[name] = {};
@@ -252,6 +252,7 @@ Seed({
 				switch(type){
 					case "property" :
 						var valids = model.split("|");
+
 						Mold.each(valids, function(validation){
 							var validate = Mold.Lib.Validation.get(validation);
 							if(validate){
@@ -371,19 +372,22 @@ Seed({
  * save  saves the model
  * @param  {[type]} id [description]
  */
-			save : function(){
+			save : function(id){
 				if(!_adapter){
 					throw "Can not save data without adapter!"
 				}
-				
+
 				if(!_dataId){
 					//insert
-					_dataId = _adapter.insert(_data);
+					var promise = _adapter.insert(_data, id);
+					promise.then(function(id){
+						_dataId = id;
+					})
 				}else{
-					_adapter.update(_data, _dataId);
+					var promise = _adapter.update(_data, _dataId);
 				}
 				
-			
+				return promise;
 			},
 /**
  * load loads data by the specified resourceID
@@ -394,7 +398,7 @@ Seed({
 					throw "Can not load data without adapter!"
 				}
 				_dataId = id;
-				_adapter.load(id);
+				return _adapter.load(id);
 			},
 
 /**

@@ -55,6 +55,7 @@ Mold bietet die Möglichkeit mit zwei repositories zu arbeiten, so kann wiederve
 			data-mold-repository="app/"
 	></script>
 ```
+
 Seeds aus dem externen repository können innerhalb der app per '->' geladen werden.
 
 

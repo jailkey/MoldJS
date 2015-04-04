@@ -1,5 +1,5 @@
 Seed({
-		name : "Mold.Test",
+		name : "Mold.TestAll",
 		dna : "class",
 		include : [
 			"Mold.Dependency",

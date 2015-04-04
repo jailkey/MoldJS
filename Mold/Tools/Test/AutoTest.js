@@ -1,5 +1,5 @@
 Seed({
-		name : "Mold.Tools.Test.Unit",
+		name : "Mold.Tools.Test.AutoTest",
 		dna : "action",
 		include : [
 			"Mold.Tools.Test.Tester",
@@ -7,7 +7,6 @@ Seed({
 		]
 	},
 	function(){
-
 		
 		Mold.addPostProcessor("unittest", function(createdSeed, rawSeed){
 			if(rawSeed.test){
@@ -18,7 +17,7 @@ Seed({
 					simpleUnit.test(rawSeed.test, createdSeed);
 					simpleUnit.run();
 				}else if(Mold.startsWith(rawSeed.test, "Mold.")){
-					Mold.load({ name : rawSeed.test}).bind(function(){
+					Mold.load({ name : (Mold.isExternalSeed(rawSeed.name) ? "->" : "") + rawSeed.test }).bind(function(){
 						var testSeed = Mold.getSeed(rawSeed.test);
 						simpleUnit.test(testSeed, createdSeed);
 						simpleUnit.run();
@@ -26,20 +25,6 @@ Seed({
 				}
 			}
 		});
-
-		//if not nodejs run default tests
-		if(!Mold.isNodeJS){
-			Mold.load({
-				name : "Mold.Lib.*"
-			}).bind(function(){
-				//console.log("Package loaded!")
-				Mold.load({
-					name : "Mold.Tools.Test.*"
-				}).bind(function(){
-				
-				});
-			});
-		}
 
 	}
 );

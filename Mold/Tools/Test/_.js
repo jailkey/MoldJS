@@ -4,6 +4,5 @@ Seed({
 	include : [
 		".ConsoleReporter",
 		".Tester",
-		".Unit"
-]
+	]
 });

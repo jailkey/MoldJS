@@ -61,7 +61,7 @@ Seed({
 			if(!Mold.isNodeJS){
 				that.on("after.init", function(){
 					var addDirectives = function(scope){
-						Mold.each(Mold.Defaults.TemplateDirectives, function(directive){		
+						Mold.each(Mold.Defaults.TemplateDirectives, function(directive){
 							directive._id = directive.name +"_"+that._eid;
 							Mold.Lib.Directive.add(
 								directive,
@@ -363,7 +363,7 @@ Seed({
 				_templateContent = _templateContent.replace(/^function\s*\(\)\s*\{\s*\/\*\|/g, '');
 				_templateContent = _templateContent.replace(/\|\*\/\s*\}$/g, '');
 
-				_templateContent = _templateContent.replace(/ style=/g, 'mold-style=');
+				_templateContent = _templateContent.replace(/ style=/g, ' mold-style=');
 		
 				_contentType = "string";
 				_compiledTemplate = _parseTemplate(_templateContent);

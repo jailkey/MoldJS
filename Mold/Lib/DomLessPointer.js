@@ -24,6 +24,9 @@ Seed({
 
 		var _getChildData = function(childs, data){
 			data = data || {};
+			if(!childs){
+				data[_name] = { value : _value};
+			}
 			Mold.each(childs, function(child){				
 				Mold.each(child.pointer, function(pointer, index){
 					if(pointer.className === "Mold.Lib.DomLessPointer" && pointer.getNode() === _node){
@@ -45,7 +48,6 @@ Seed({
 
 		var _setChildValues = function(){
 			var childs = _mainTree.childs[_childIndex];
-			var data = {};
 			var data = _getChildData(childs);
 			var newValue = Mold.Lib.TreeFactory.parseStringContent(_stringValue, data);
 			_node.nodeValue = newValue;
@@ -74,7 +76,6 @@ Seed({
 				_value = value;
 				_setChildValues();
 			},
-			
 			isVisible : function(){
 				return _isVisible;
 			},

@@ -52,7 +52,7 @@ Seed({
 
 						var oname = name;
 						name = "{{"+name+"}}";
-						name = name.replace("^","\\^").replace(/\|/gm, "\\|");
+						name = name.replace("^","\\^").replace(/\|/gm, "\\|").replace(/\+/g, "\\+");
 						expString = '([\\s\\S]*?)('+name+')([\\s\\S]*)';
 						regExp  = new RegExp(expString, "gm");
 						result = regExp.exec(node.nodeValue);
@@ -131,7 +131,7 @@ Seed({
 				if( firstChar !== "#" 
 					&& firstChar !== "$" 
 					&& firstChar != "^" 
-					&& firstChar != "/" 
+					&& firstChar != "/"
 					&& firstChar != ""
 				){
 					return _isVarCache[phrase] = true;
@@ -218,7 +218,7 @@ Seed({
 			if(_valuePathCache[name]){
 				return _valuePathCache[name];
 			}
-			var result = /([\.\/]*)/gm.exec(name);
+			var result = /([\.\/\+]*)/gm.exec(name);
 			if(result && result[1] && result[1] != ""){
 				_valuePathCache[name] = result[1];
 				return result[1]
@@ -304,6 +304,7 @@ Seed({
 				var entry = result[i];
 				if((varName = _containsVar(entry))){
 					var plainName = _cleanVarName(varName);
+
 					if(!ignore){
 
 						if(_isVar(varName)){
@@ -389,7 +390,7 @@ Seed({
 					}
 
 					if(varName){
-						var pointer = _parseDomLessTree(node, tree, tree);
+						var pointer = _parseDomLessTree(node, tree, tree, index);
 					};
 					break;
 
@@ -484,18 +485,23 @@ Seed({
 			return _parseDomLessTree(node,  _root, _root);
 		}
 
-		var _parseDomLessTree = function(node, tree, mainTree){
+		var _parseDomLessTree = function(node, tree, mainTree, index){
 			var content = node.nodeValue;
 			var result = content.split(/(\{\{.*?\}\})/gm);
 			var i = 0, len = result.length;
 			
-			//Mold.each(result, function(varName){
+			
 			for(; i < len; i++){
 				var parent = tree;
 				var varName = result[i];
 				if((varName = _containsVar(varName))){
-				
+
+					var filter = varName.split("|");
+					filter.shift();
+					
 					if(_isVar(varName)){
+
+						
 
 						var pointer = new Mold.Lib.DomLessPointer({
 							name : varName,
@@ -506,8 +512,10 @@ Seed({
 							stringValue : node.nodeValue
 						});
 					
-						var valuePath = _hasValuePath(varName)
-						tree.addChild(varName, pointer, false, valuePath);
+						var valuePath = _hasValuePath(varName);
+
+
+						tree.addChild(varName, pointer, false, valuePath, filter, index);
 						
 					}
 					if(_isBlock(varName) || _isNegativBlock(varName)){
@@ -526,7 +534,7 @@ Seed({
 
 
 						var valuePath = _hasValuePath(varName)
-						var subtree = tree.addChild(cleanName, pointer, false, valuePath);
+						var subtree = tree.addChild(cleanName, pointer, false, valuePath, filter, index);
 						tree = _setOpenedTree(cleanName, subtree);
 
 					}

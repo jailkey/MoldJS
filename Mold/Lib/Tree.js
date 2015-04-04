@@ -55,11 +55,14 @@ Seed({
 		_checkThisValue(_name, _parent);
 
 		var _setValuePath = function(){
+		
 			if(_valuePath){
 				if(_valuePath == "."){
 					_parent.onValue(function(updateValue){
 						that.setValue(updateValue);
 					});
+				}else if(_valuePath == "+"){
+					that.setValue(that.getIndex());
 				}else{
 					if(_index !== false){
 						var countPathes = _valuePath.split("./").length,

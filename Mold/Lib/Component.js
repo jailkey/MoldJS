@@ -12,7 +12,8 @@ Seed({
 
 		var _seed = seed,
 			_that = this,
-			_loader = new Mold.Lib.Loader();
+			_loader = new Mold.Lib.Loader(),
+			_files = [];
 
 		Mold.mixin(this, new Mold.Lib.Event(this));
 
@@ -35,8 +36,6 @@ Seed({
 				directive.seed = _seed;
 				Mold.Lib.Directive.add(directive, document);
 
-				
-
 			},
 			files : function(file){
 				if(file && file.length > 0){
@@ -44,7 +43,13 @@ Seed({
 					if(!_loader.isLoading()){
 						_loader.load();
 					}
+					if(Mold.isArray(file)){
+						_files = _files.concat(file)
+					}else{
+						_files.push(file)
+					}
 				}
+				return _files;
 			}
 		}
 	}

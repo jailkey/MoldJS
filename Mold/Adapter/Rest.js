@@ -13,17 +13,13 @@ Seed({
 		});
 
 		this.on("ajax.get.success", function(e){
-			console.log("data", e.data.json)
 			_that.trigger("update", e.data.json);
 		});
 
 		this.publics = {
-			insert : function(data){
-				var dataString = JSON.stringifiy(data);
-
-				this.send(_restpath+"?rand"+Math.random(), "data="+dataString, { method : "POST" });
-
-				//return id;
+			insert : function(data, id){
+				var dataString = JSON.stringify(data);
+				return this.send(_restpath + ((id) ? id : "") + "?rand"+Math.random(), "data="+dataString, { method : "POST" });
 			},
 			load : function(id){
 				id = id || "";

@@ -1,36 +1,35 @@
 Seed({
 		name : "Mold.Adapter.LocalStore",
 		dna : "class",
-		implements : "Mold.Interface.ModelAdapter",
 		include : [
 			"Mold.Lib.Event",
 			"Mold.Lib.LocalStore"
 		]
 	},
 	function(){
-		
+
 		Mold.mixin(this, new Mold.Lib.Event(this));
 		var _localStore = new Mold.Lib.LocalStore();
+		var _that = this;
 
 		this.publics = {
 			update : function(data, id){
-				console.log("update", id, data)
 				return _localStore.save(data, id);
 			},
 			load : function(id){
-				console.log("load", id)
-				var data =  _localStore.load(id);
-				console.log("load", id, data)
-				this.trigger("update", { data : data, id : id });
-				return data;
+				var promise =  _localStore.load(id);
+
+				promise.then(function(data){
+					_that.trigger("update", { data : data, id : id });
+				})
+				
+				return promise;
 			},
-			insert : function(data){
-				console.log("add data", data)
-				var id =  _localStore.add(data);
-				return id;
+			insert : function(data, id){
+				return _localStore.add(data, id);
 			},
 			remove : function(id){
-				_localStore.remove(id);
+				 return _localStore.remove(id);
 			}
 		}
 	}

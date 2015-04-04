@@ -67,8 +67,8 @@ Seed({
 			return heightsNumber++;
 		}	
 
-		var _add = function(data){
-			var id =  _getUniqueID();
+		var _add = function(data, id){
+			var id =  id || _getUniqueID();
 			_save(data, id);
 			return id;
 		}
@@ -86,7 +86,7 @@ Seed({
 			},
 			load : function(id){
 				return new Mold.Lib.Promise(function(fullfill, reject){
-
+					
 					var data = localStorage.getItem(id);
 					try {
 						var result = JSON.parse(data);
@@ -103,9 +103,10 @@ Seed({
 					fullfill(localStorage.removeItem(id));
 				});
 			},
-			add : function(data){
+			add : function(data, id){
 				return new Mold.Lib.Promise(function(fullfill, reject){
-					fullfill(_add(data));
+					console.log("add with aid", id)
+					fullfill(_add(data, id));
 				});
 			}
 

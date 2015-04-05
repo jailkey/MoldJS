@@ -37,7 +37,26 @@ Seed({
 			}
 		}
 
+		var _iterateThroughDir = function(dir, iterator){
+			var files = fileSystem.readdirSync(pathes.normalize(dir));
+			Mold.each(files, function(file){
+				if(Mold.endsWith(file, ".js")){
+					iterator.call(null, pathes.normalize(dir + "/" +file));
+				}
+				if(fileSystem.lstatSync(pathes.normalize(dir + "/" + file)).isDirectory()){
+					_iterateThroughDir(pathes.normalize(dir + "/" + file), iterator)
+				}
+			});		
+		}
+
 		this.publics = {
+			eachSeed : function(iterator){
+				var path = repoPath;
+				if(!Mold.endsWith(path, "Mold/")){
+					path += "/Mold/"
+				}
+				_iterateThroughDir(path, iterator);
+			},
 			seedExists : function(seedName){
 				var seedPath = Mold.getSeedPath(seedName);
 				return fileSystem.existsSync(pathes.normalize(repoPath + seedPath));

@@ -2,13 +2,11 @@ Seed({
 		name : "Mold.Main",
 		dna : "action",
 		include : [
-			"Mold.MyClass"
-		],
-		test : "Mold.MyTest"
+			"->Mold.Tools.Test.AutoTest",
+			[ "Mold.MyClass" ]
+		]
 	},
 	function(){
-
-
 		
 	}
 );

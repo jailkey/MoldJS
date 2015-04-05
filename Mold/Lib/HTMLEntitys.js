@@ -304,7 +304,6 @@ Seed({
 				'unescape': decode
 			};
 
-		console.log("he", he)
 
 	
 		return he;

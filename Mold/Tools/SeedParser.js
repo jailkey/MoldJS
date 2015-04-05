@@ -27,19 +27,27 @@ Seed({
 		try {
 			result = result[0];
 		}catch(e){
-			result = {
-				header : false
-			}
+			result = false;
 		}
 
-
-		this.publics = {
-			includes : result.header.includes,
-			name : result.header.name,
-			dna : result.header.dna,
-			version : result.header.version,
-			npm : result.header.npm,
-			header : result.header
+		if(result && result.header){
+			this.publics = {
+				includes : result.header.includes,
+				name : result.header.name,
+				dna : result.header.dna,
+				version : result.header.version,
+				npm : result.header.npm,
+				header : result.header
+			}
+		}else{
+			this.publics = {
+				includes : false,
+				name : false,
+				dna : false,
+				version : false,
+				npm : false,
+				header : false
+			}
 		}
 	}
 )

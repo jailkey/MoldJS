@@ -117,10 +117,12 @@ Seed({
 				return Mold.Lib.Encode.encodeHTMLEntities(text);
 			},
 			html : function(markup){
-
+			
 				markup = Mold.Lib.Encode.decodeHTMLEntities(markup);
 				markup = _removeScriptTags(markup);
+		
 				markup = _removeExploidEntrys(markup);
+		
 				markup = _filterLinkAttributes(markup);
 
 				for(var i = 0; i < _eventHandler.length; i++){

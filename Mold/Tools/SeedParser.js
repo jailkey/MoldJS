@@ -4,6 +4,10 @@ Seed({
 		platform : "node"
 	},
 	function(seedString){
+
+		if(!seedString){
+			return false;
+		}
 		
 		var vm = require("vm");
 		
@@ -20,7 +24,13 @@ Seed({
 			throw new Error("handling more then one seed must be implemented!");
 		}
 
-		result = result[0];
+		try {
+			result = result[0];
+		}catch(e){
+			result = {
+				header : false
+			}
+		}
 
 
 		this.publics = {

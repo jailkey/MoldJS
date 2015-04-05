@@ -6,8 +6,6 @@ Seed({
 		]
 	},
 	function(){
-		
-		
 		return {
 			encodeUTF8 : function(raw){
 				return unescape(encodeURIComponent(raw));

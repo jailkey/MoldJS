@@ -32,6 +32,7 @@ Seed({
 				it("remove script injection", function(){
 					var markup = '<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>';
 					var result = san.html(markup);
+					
 					expect(result).toBe("");
 				});
 

@@ -1541,6 +1541,15 @@ var Mold = (function(config){
 		}
 		
 		var seedName = seed.name = rule.seedName;
+
+		if(seed.overwrite && _Mold[seedName]){
+			_Mold[seedName] = false;
+			_externalSeeds[seedName] = false;
+			_createdMold[Mold.cleanSeedName(seedName)] = false;
+			delete _Mold[seedName];
+			delete _externalSeeds[seedName];
+			delete _createdMold[Mold.cleanSeedName(seedName)];
+		}
 		
 		if(rule.isExternal || seed.isExternal){
 			_externalSeeds[seed.name] = seed.isExternal || rule.path;

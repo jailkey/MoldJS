@@ -7,6 +7,7 @@ Seed({
 		".Install",
 		".Packages",
 		".Project",
-		".Start"
+		".Start",
+		".Test"
 ]
 });

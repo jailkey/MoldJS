@@ -316,12 +316,11 @@ Seed({
 		})
 
 		var fileSystem = require('fs');
-
+		
 		setTimeout(function(){
 			Mold.load({ name : "->Mold.CLI._"}).bind(function(){
 				if(fileSystem.existsSync(pathes.normalize(Mold.LOCAL_REPOSITORY + "Mold/CLI/_.js"))){
-					
-					Mold.load({ name : "Mold.CLI._"}).bind(function(){
+					Mold.load({ name : "Mold.CLI._", overwrite : true }).bind(function(){
 						init();
 					});
 				}else{

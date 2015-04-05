@@ -72,8 +72,7 @@ Seed({
 					expect(e.data.length).toEqual(3);
 					done();
 				});
-				
-
+			
 				it("list.item.change event", function(next){
 					testList.on("list.item.change.0", function(e){
 						testList.off("list.item.change.0");
@@ -84,6 +83,7 @@ Seed({
 				})
 		
 				expect(testList.length).toEqual(4);
+
 				testList.shift();
 				expect(testList.length).toEqual(3);
 				expect(testList[0]).toEqual("two");

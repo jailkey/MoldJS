@@ -9,12 +9,12 @@ Seed({
 	},
 	function(test){
 		"use strict";
-		//test root object
+
 		var _rootTest = {
 			type : "root",
 			description : "test root",
 			action : function(){},
-			parent : parent || false,
+			parent : false,
 			error : false,
 			success : false,
 			children : []
@@ -28,7 +28,7 @@ Seed({
 		Mold.mixin(this, new Mold.Lib.Event(this));
 
 		var _now = function(){
-			if(performance){
+			if(typeof performance !== "undefined"){
 				return performance.now();
 			}else{
 				if(Date.now){

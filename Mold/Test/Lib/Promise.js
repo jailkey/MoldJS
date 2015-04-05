@@ -37,13 +37,13 @@ Seed({
 
 			it("test Promise.all rejected", function(done){
 				var testOne = new Mold.Lib.Promise(function(fullfill){
-					window.setTimeout(function(){
+					setTimeout(function(){
 						fullfill();
 					}, 50);
 				});
 
 				var testTwo = new Mold.Lib.Promise(function(fullfill, rejected){
-					window.setTimeout(function(){
+					setTimeout(function(){
 						rejected()
 					}, 100);
 				});

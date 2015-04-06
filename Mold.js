@@ -1595,7 +1595,7 @@ var Mold = (function(config){
 						Mold.checkSeedCue();
 					},
 					false,
-					{ isExternal : seed.isExternal, isScript : rule.isScript, seedName : seedName}
+					{ isExternal : seed.isExternal, isScript : rule.isScript, seedName : seedName, overwrite : seed.overwrite}
 				);
 
 			}

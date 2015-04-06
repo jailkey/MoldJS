@@ -1,7 +1,6 @@
 # Einleitung
-MoldJS wurde entwickelt um Strukturen und Muster in deinem Projekt abzubilden, durch diverse Erweiterungen ist es zu einem komplexen MVC Framework herangewachsen.
-Der Kern von MoldJS bildet ein Modulsystem (ähnlich AMD) das es ermöglicht einzelne Module nach unterschiedlichen Mustern auszuführen, Abhängigkeiten zu managen und zu injizieren. 
-MoldJS läuft sowohl auf dem Client als auch unter NodeJS und ermöglicht eine isomorphe Entwicklung. 
+MoldJS ist ein modulares MVC Webframework, das sowohl auf Server als auch auf dem Client läuft (isomorph). Integriertes Testing und ein Command Line Interface bieten eine komfortable Entwicklung.
+
 
 ## Installation
 Mold lässt sich einfach über npm installieren. Es sollte global installiert werden um das Command Line Interface nutzen zu können.
@@ -25,37 +24,7 @@ Wurde auch ein serverseitiger Teil erzeugt kann dieser mit dem Befehl:
 ```
 gestartet werden.
 
-## Installation (manuell clientseitig)
-Um Mold zu installieren, https://github.com/jailkey/MoldJS/archive/master.zip runterlanden, im root Verzeichnis der Anwendung z.B. in den Ordner shared entpacken und folgendermaßen einbinden:
-
-```html
-	<script type="text/javascript" 
-			src="app/Mold.js"
-			data-mold-main="Mold.Main"
-			data-mold-repository="app/"
-	></script>
-```
-
-Die angegebenen Attribute konfigurieren Mold so das alle Seeds (Module) im Ordner app/ gesucht werden.  
-data-mold-main weist MoldJS an als erstes die Datei /app/Mold/Main.js zu laden, diese hat in den meisten Fällen die dna 'action', 'app', oder 'urlrouter' so das sie gleich ausgeführt wird.
-Mehr dazu später.
-
-
-### Mit zwei Repositories arbeiten
-Mold bietet die Möglichkeit mit zwei repositories zu arbeiten, so kann wiederverwendbarer Code in einem repositiory und anwendungspezifischer Code in einem anderen abgelegt werden.
-
-```html
-	<script type="text/javascript" 
-			src="Mold.js"
-			data-mold-main="Mold.App.Main"
-			data-mold-cache="off" 
-			data-mold-external-repository="shared/" 
-			data-mold-repository="app/"
-	></script>
-```
-
-Seeds aus dem externen repository können innerhalb der app per '->' geladen werden.
-
+##Grundlegendes
 
 ### Mold Core
 Der Mold Core Code ist der minimum Code geladen werden muss, er ist in einer Datei (Mold.js) zusammengefasst. 
@@ -157,8 +126,10 @@ Seed({
 ```
 *Hier wird der Seed "Mold.Dependency" geladen und in die Variable myClass injiziert, danach ist er im aktuellen Seed verfügbar*
 
+## Module
+
 ### Klassen
-Eine Klasse unter Mold besteht aus einem Seed mit der DNA 'class'. Sie können von anderen Klassen erben und sind instanzierbar.  
+Eine Klasse unter Mold besteht aus einem Seed mit der DNA 'class'. Sie kann von anderen Klassen erben und ist instanzierbar.  
 Die Definition einer Klasse gestaltet sich wie folgt: Die gesamte Klasse wird in einer Funktion definiert, alle Eigenschaften und Funktionen die nicht mit this. bzw. this.publics exportiert werden sind privat.  
 Um von anderen Klassen zu erben kann in dem Header des Seeds die Eigenschaft 'extends' gesetzt werden. Diese muss als Inhalt den Namen des Seeds, von dem geerbt werden soll enthalten.
 

@@ -783,9 +783,20 @@ Das serverseitig Testing ist noch einfacher zu händeln als das Testen im Browse
 ```
 mold test
 ```
+Im Erfolgsfall erhalten wird dann folgende Meldung:
+![Test erfolgreich](../images/test_cli_successfull.png)
 
-Zu beachten ist das auf serverseite kein DOM existiert und deshalb alle Test die darauf angewiesen sind fehlschlagen werden, deshalb sollte bei Seeds die nicht serverseitig lauffähig sind im header die Eigenschaft platform : 'browser', gesetzt werden. Dies sorgt dafür das sie bei serverseitigen Tests ignoriert werden. 
-Andersrum, sollten seeds nur auf unter node laufen ein plarform : 'node' erhalten, um nicht clientseitig geladen zu werden.
+Im Fehlerfall sieht sie so aus:
+![Test erfolgreich](../images/test_cli_error.png)
+
+
+Zu beachten ist das auf serverseite kein DOM existiert und deshalb alle Test die darauf angewiesen sind fehlschlagen werden, deshalb sollte bei Seeds die nicht serverseitig lauffähig sind im header die Eigenschaft **platform : 'browser'**, gesetzt werden. Dies sorgt dafür das serverseitige Tests sie ignorieren. 
+Andersrum, sollten Seeds nur unter node laufen ein **platform : 'node'** erhalten, um nicht clientseitig geladen zu werden.
+
+
+
+
+
 
 
 

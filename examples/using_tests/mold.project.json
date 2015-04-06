@@ -1,0 +1,10 @@
+{
+	"name": "TestExample",
+	"version": "0.0.1",
+	"client": {
+		"local-repository": "",
+		"main-seed": "Mold.Main"
+	},
+	"shared": "../../",
+	"caching": "on"
+}

@@ -5,7 +5,7 @@ Seed({
 	},
 	function(){
 
-		var _myValue = 23;
+		var _myValue = 42;
 
 		this.publics = {
 			getValue : function(){

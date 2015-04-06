@@ -236,13 +236,13 @@ Seed({
 				}
 				var collect = [];
 				
-				if(_isLocalPath(config.serverlocalrepo)){
+				if(config.serverlocalrepo && _isLocalPath(config.serverlocalrepo)){
 					config.serverlocalrepo = pathes.normalize(config.serverlocalrepo);
 				}
-				if(_isLocalPath(config.clientlocalrepo)){
+				if(config.clientlocalrepo && _isLocalPath(config.clientlocalrepo)){
 					config.clientlocalrepo = pathes.normalize(config.clientlocalrepo);
 				}
-				if(_isLocalPath(config.sharedrepo)){
+				if(config.sharedrepo && _isLocalPath(config.sharedrepo)){
 					config.sharedrepo = pathes.normalize(config.sharedrepo);
 				}
 				return new Mold.Lib.Promise(function(success, error){

@@ -1437,6 +1437,11 @@ var Mold = (function(config){
 				}
 				if(nodePath.existsSync(pathes.normalize(path))){
 					_pathes[seedConf.seedName] = pathes.normalize(path);
+
+					if(seedConf.overwrite){
+						var name = require.resolve(pathes.normalize(path));
+						delete require.cache[name];
+					}
 					
 					var testMold = require(pathes.normalize(path));
 					

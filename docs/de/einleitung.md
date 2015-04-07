@@ -1,5 +1,5 @@
 # Einleitung
-MoldJS ist ein modulares MVC Webframework, das sowohl auf Server als auch auf dem Client läuft (isomorph). Integriertes Testing und ein Command Line Interface bieten eine komfortable Entwicklung.
+MoldJS ist ein modulares MVC Webframework, das sowohl auf Server als auch auf dem Client ausgeführt werden kann (isomorph). Integriertes Testing und ein Command Line Interface bieten eine komfortable Entwicklung.
 
 
 ## Installation

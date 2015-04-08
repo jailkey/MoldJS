@@ -35,7 +35,7 @@ Seed({
 				console.log("inout", input)
 				return unescape(JSON.parse('"' + input + '"'));
 			},
-			encodeURl : function(input){
+			encodeURL : function(input){
 				return encodeURIComponent(input);
 			},
 			decodeURL : function(input){

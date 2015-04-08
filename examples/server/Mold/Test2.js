@@ -7,19 +7,26 @@ Seed({
 
 	},
 	function(){
-		//console.log("Test2", arguments)
+
 
 		this.actions = {
 			"@GET" : function(e){
 				console.log("trigger get TEST 2");
+
 				//e.data.response.addData({ test : "blablub"});
-				e.data.response.redirect(302, "/")
-				e.data.next();
+			//	e.data.response.redirect(302, "/")
+			//	e.data.next();
 			},
+
 			"@POST" : function(e){
-				console.log("trigger post TEST 2");
+				//console.log("trigger POST TEST 2", e.data.request.body);
+		
+
+				//e.data.response.addData({ test : "blablub"});
+				e.data.response.addData("test", "text")
 				e.data.next();
 			}
 		}
+
 	}
 )

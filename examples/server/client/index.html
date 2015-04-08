@@ -12,7 +12,11 @@
 			></script>
 		</head>
 		<body>
-			<img src="images/test.jpg">
+			<form action="/sendform" method="post" enctype="multipart/form-data">
+				<input type="text" name="mytext">
+				<input type="file" id="fileUpload" name="myfile" />
+				<input type="submit" value="send">
+			</form>
 		</body>
 	</html>
 			

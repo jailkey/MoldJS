@@ -1,1 +1,0 @@
-sudo node Mold.js -repo ./examples/server/ -extrepo ./ Mold.Main

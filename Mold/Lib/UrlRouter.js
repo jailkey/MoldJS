@@ -2,9 +2,11 @@ Seed({
 		name : "Mold.Lib.UrlRouter",
 		dna : "class",
 		author : "Jan Kaufmann",
-		polymorph : true,
+		platform : "isomorph",
 		include : [
-			"Mold.Lib.Observer"
+			"Mold.Lib.Observer",
+			"Mold.Lib.Sequence",
+			"Mold.Defaults.RouteFilter"
 		]
 	},
 	function(routes){
@@ -13,10 +15,11 @@ Seed({
 			_hashes,
 			_routes = routes,
 			_loadedSeeds = {}, 
+			_filter =  [],
 			_request = false,
 			_response = false, 
 			_next = false,
-			_session = false;
+			_session = {};
 		
 		//var _seed = seed;
 		var _events = Mold.Lib.Observer;
@@ -31,6 +34,12 @@ Seed({
 		var _location = (Mold.isNodeJS) ? _location : document.location;
 		
 		var that = this;
+
+		var _addFilter = function(filter){
+			_filter.push(filter);
+		}
+
+		Mold.Defaults.RouteFilter(_addFilter);
 		
 		this.publics =  {
 			setLocation : function(location){
@@ -246,60 +255,62 @@ Seed({
 				return output;
 			},
 			
-			loadSeed : function(route, parameter, trigger){
 
-				Mold.load({ name : route }).bind(function(seedName){
-
-					if(!that.isSeedLoaded(seedName)){
-						
-						var selectedSeed = Mold.getSeed(seedName);
-						var dna = Mold.getDNABySeedName(seedName);
-
-						if(dna.createBy){
-
-							switch(dna.createBy){
-								case "new":
-									if(parameter){
-										var seed = new selectedSeed(parameter);
-									}else{
-										var seed = new selectedSeed();
-									}
-									break;
-								default:
-									break;
-							}
-
-						}
-						that.markSeedAsLoaded(seedName, seed);
-					}
-
-					var selectedSeed = that.getLoadedSeed(seedName);
-					if(trigger){
-						if(typeof selectedSeed.trigger === "function"){
-							
-							if(selectedSeed.actions["@"+trigger.method.toUpperCase()]){
-								selectedSeed.trigger(trigger.method.toUpperCase(), trigger.data);
-							}else{
-								trigger.data.next();
-							}
-						};
-					}
-				});
-			},
-
-			buildTrigger : function(parameter){
+			buildData : function(parameter){
 
 				return {
 					method : _request.method || false,
-					data : {
-						param : parameter,
-						request : _request,
-						rawResponse : _response,
-						response : _response._moldResponse || false,
-						session : _session,
-						next : _next || function(){}
-					}
+					param : parameter,
+					request : _request,
+					rawResponse : _response,
+					response : _response._moldResponse || false,
+					session : _session,
+					handler : _events,
+					next : _next || function(){}
 				}
+			},
+
+
+			/**
+			 *
+			 * {
+			 * 	matcher: function(route){ (expression) }
+			 * 	filter : function(route, data, next){}
+			 * }
+			 */
+
+			addFilter : function(filter){
+				_addFilter(filter);
+			},
+
+			applyRouteFilters : function(route, data, ready){
+
+				if(typeof route === "string"){
+					var routes = route.split("|");
+				}else{
+					var routes = [route];
+				}
+
+				var sequenze = new Mold.Lib.Sequence();
+			
+				Mold.each(routes, function(selected){
+					Mold.each(_filter, function(filter){
+						if(filter.matcher(selected)){
+							sequenze = sequenze.step(function(next){
+								filter.filter(selected, data, next)
+
+							});
+						}
+					})
+					
+				});
+
+				sequenze = sequenze.step(function(){
+					if(_next){
+						console.log("step ready step");
+						ready();
+					}
+				})
 			},
 
 			initRoutes  : function(){
@@ -307,6 +318,7 @@ Seed({
 				_params = _location.search.replace("?", "").split("&"),
 				_hashes = _location.hash.replace("#", "");
 				var foundRoutes = that.parseRoutes(_routes);
+
 				if(foundRoutes.length > 0){
 					for(var i = 0; i < foundRoutes.length; i++){
 						var route = foundRoutes[i];
@@ -315,50 +327,14 @@ Seed({
 							parameter = route.parameter;
 							route = route.route;
 						}
-						
-						if(typeof route === "function"){
-							if(parameter){
-								var trigger = this.buildTrigger(parameter);
-								route(trigger);
-							}else{
-								route();
-							}
-						}else if(route.substring(0,1) === "@"){
-							if(route.indexOf("@ready->") > -1){
-								Mold.ready(function(){
-									that.loadSeed(route.split("@ready->")[1], parameter);
-								});
-							}else{
 
-								Mold.ready(function(){
-									var trigger = that.buildTrigger(parameter);
-									_events.trigger(route.replace("@", ""), trigger.data, { saveTrigger : true });
-								});
-							}
-						}else if(route.substring(0,4) === "Mold"){
-
-							parameter = parameter || {};
-							parameter.eventHandler = _events;
-							var trigger = this.buildTrigger(parameter);
-							that.loadSeed(route, parameter, trigger);
-
-						}else if(/^[234]0[0-9]/.test(route)){
-							console.log("redirect gefunden")
-
-							var parts =  route.split("->"),
-								statusCode = Mold.trim(parts[0]),
-								url = (parts[1]) ? Mold.trim(parts[1]) : false;
-				
-
-							if(_response._moldResponse){
-								_response._moldResponse.setStatus(statusCode, url);
-								_next();
-							}
-						}
+						var data = this.buildData(parameter);
+						this.applyRouteFilters(route, data, _next);
+					
 					}
 					return true;
 				}else{
-					console.log("no route found")
+					//console.log("no route found")
 					if(!Mold.isNodeJS){
 						//Mold.log("Error", { code : 10, dnaname: "urlrouter", error : "No route found! " +_seed.name+ " "});
 					}

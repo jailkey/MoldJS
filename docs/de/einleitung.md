@@ -749,7 +749,7 @@ Das Modul Mold.Tools.Test.AutoTest sollte vor dem Deployment entfernt werden um 
 
 
 ###serverseitiges Testen
-Das serverseitig Testing ist noch einfacher zu händeln als das Testen im Browser. Es wird keine extra Tool dazu benötigt sondern nur eine gültige Mold Projekt Datei (mold.project.json). Ist diese angelegt brauchen wir auf der Konsole nur in das Rootverzeichnis unseres Projektes wechseln und folgendes Kommando ausführen:
+Das serverseitig Testing ist noch einfacher zu händeln als das Testen im Browser. Es wird keine extra Tool dazu benötigt. Wir müssen einfach nur in das root Verzeichnis der Anwendung wechseln die wir testen wollen und auf der Konsole folgendes Kommando ausführen:
 
 ```
 mold test

@@ -1087,13 +1087,17 @@ var Mold = (function(config){
 			if(_isNodeJS){
 				return {
 					require : function(module){
+						var pathes = require("path");
 						try{
-							var result = require(module);
-							return result;
+							return require(module);
 						}catch(e){
-							var pathes = require("path");
-							var path = pathes.normalize(Mold.EXTERNAL_REPOSITORY + "node_modules/" + module);
-							return require(path);
+							try{
+								var path = pathes.normalize(Mold.LOCAL_REPOSITORY + "node_modules/" + module);
+								return require(path);
+							}catch(e){
+								var path = pathes.normalize(Mold.EXTERNAL_REPOSITORY + "node_modules/" + module);
+								return require(path);
+							}
 						}
 					},
 					global : global,

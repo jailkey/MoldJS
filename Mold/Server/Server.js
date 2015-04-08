@@ -15,9 +15,10 @@ Seed(
 			"Mold.Server.Middlewares.Router"
 		],
 		description : "",
-		version : 0.1
+		version : 0.1,
+
 	},
-	function(ip, port, config){
+	function(ip, port, config, startup){
 
 		var config = config || {};
 		
@@ -55,6 +56,7 @@ Seed(
 
 			try{
 				http.createServer(function (req, res) {
+					req.config = config;
 					var session = Mold.Server.Session.create(req);
 					var sequenze = new Mold.Lib.Sequence();
 
@@ -66,22 +68,24 @@ Seed(
 						hash : ""
 					})
 
+					req.session = session;
+
 
 					Mold.each(_middlewares["start"], function(middleware){
 						sequenze = sequenze.step(function(next){
-							middleware.call(null, req, res, session, next);
+							middleware.call(null, req, res, next);
 						});
 					});
 
 					Mold.each(_middlewares["middle"], function(middleware){
 						sequenze = sequenze.step(function(next){
-							middleware.call(null, req, res, session, next);
+							middleware.call(null, req, res, next);
 						});
 					});
 
 					Mold.each(_middlewares["end"], function(middleware){
 						sequenze = sequenze.step(function(next){
-							middleware.call(null, req, res, session, next);
+							middleware.call(null, req, res, next);
 						});
 					});
 
@@ -104,14 +108,14 @@ Seed(
 		var _addStandardMiddleWare = function(){
 			
 			//add repsonse methodes/propertys
-			_use(function(req, res, session, next){
+			_use(function(req, res, next){
 				res._moldResponse  = new Mold.Server.Response(res);
 				next();
 			}, "start");
 
 
 			//Content Methodes
-			_use(function(req, res, session, next){
+			_use(function(req, res, next){
 				res.addData = function(data, type){
 					res._moldResponse.addData(data, type);
 				}
@@ -127,7 +131,6 @@ Seed(
 			if(_sharedClientAlias){
 				var sharedRoute = {}
 				sharedRoute['GET/' + _sharedClientAlias + '*'] = function(e){
-
 					var currentDir = process.cwd(),
 						queryPath = currentDir + _sharedRepo + e.data.request.url.replace("/"+_sharedClientAlias, "");
 
@@ -140,7 +143,7 @@ Seed(
 
 
 			//handle static files
-			_use(function(req, res, session, next){
+			_use(function(req, res, next){
 				if(res._moldResponse.noRoutesFound){
 					if(_clientRepo){
 						var path =  normalize(_clientRepo + Mold.Lib.Path.getRelativePathName(req.url));
@@ -162,7 +165,7 @@ Seed(
 
 
 		//handle end
-			_use(function(req, res, session, next){
+			_use(function(req, res, next){
 				res._moldResponse.create();
 				next();
 			}, "end");

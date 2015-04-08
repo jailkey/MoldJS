@@ -63,6 +63,14 @@ Seed({
 		}
 
 		this.publics = {
+			serverError : function(error){
+				console.log("Server Error", error);
+				if(status){
+					_status = error.status;
+				}else{
+					_status = 500;
+				}
+			},
 			setStatus : function(name, conf){
 				_setStatus(name, conf);
 			},
@@ -72,7 +80,6 @@ Seed({
 				}
 			},
 			redirect : function(type, url){
-
 				_redirect(type, url);
 			},
 			addData : function(data, type){
@@ -82,6 +89,7 @@ Seed({
 				}else{
 					_mimeType = _header.getMimeType(type);
 				}
+				console.log("set data", data, _mimeType);
 				_setData(data, _mimeType);
 			},
 			addFile : function(filepath){
@@ -92,7 +100,6 @@ Seed({
 				}
 			},
 			create  : function(){
-				console.log("STATUS", _status)
 
 				if(!_hasContent){
 					_result.writeHead(_status, _headerParameter);
@@ -107,7 +114,6 @@ Seed({
 						_result.writeHead(_header.getStatusCode("unsupported-media-type"));
 					}
 				}
-				console.log("CREATE", _status);
 				_result.end();
 			}
 		}

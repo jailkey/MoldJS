@@ -12,6 +12,7 @@ Seed({
 
 		var _mimeTypes = [
 			{ 'html' : 'text/html' },
+			{ 'text' : 'text/html' },
 			{ 'js' : 'text/javascript' },
 			{ 'json' : 'application/json' },
 			{ 'css' : 'text/css' },
@@ -79,30 +80,47 @@ Seed({
 			return result;
 		}
 
+		var _parseValue = function(){
+
+		}
+
 		var _parseHeader = function(header){
-			var lines = header.split(/(\r\n|\n)/);
-			
-			Mold.each(lines, function(line){
+
+			if(Mold.isObject(header)){
+				var lines = header;
+			}else{
+				var lines = header.split(/(\r\n|\n)/);
+			}
+
+			Mold.each(lines, function(line, name){
 				line = line.replace(/(\r\n|\n)/, '');
+
 				if(line != ""){
-					var parts = line.split(":"),
-						name = Mold.trim(parts[0]).toLowerCase(),
-						values = parts[1].split(";");
+					if(Mold.isObject(header)){
+						//clean parts
+						_header[name] = Mold.trim(line.split(";")[0]);
+					}else{
+						var parts = line.split(":"),
+							name = Mold.trim(parts[0]).toLowerCase(),
+							values = parts[1].split(";");
 
-					Mold.each(values, function(value){
-						value = Mold.trim(value);
-						switch(name){
-							case 'content-type':
-								if((type = _getType(value) )){
-									_header['content-type'] = value;
-									_header['mime-type'] = value;
-								}
-								break;
-							default:
+							Mold.each(values, function(value){
+							value = Mold.trim(value);
+							switch(name){
+								case 'content-type':
+									if((type = _getType(value) )){
+										_header['content-type'] = value;
+										_header['mime-type'] = value;
+									}
+									break;
+								default:
 
-							
-						}
-					});
+								
+							}
+						});
+					}
+
+					
 				}
 			});
 		}

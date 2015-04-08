@@ -1086,7 +1086,16 @@ var Mold = (function(config){
 		getScope : function(){
 			if(_isNodeJS){
 				return {
-					require : require,
+					require : function(module){
+						try{
+							var result = require(module);
+							return result;
+						}catch(e){
+							var pathes = require("path");
+							var path = pathes.normalize(Mold.EXTERNAL_REPOSITORY + "node_modules/" + module);
+							return require(path);
+						}
+					},
 					global : global,
 					__filename : __filename,
 					__dirname : __dirname,

@@ -8,9 +8,10 @@ Seed({
 	},
 	function(data){
 
-		return function(req, res, session, next){
+		return function(req, res, next){
 
 			var router = new Mold.Lib.UrlRouter(data);
+			var session = req.session;
 			router.setLocation(session.data.get('location'));
 			router.setServerParameter(req, res, session, next);
 

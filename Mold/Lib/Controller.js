@@ -63,6 +63,7 @@ Seed({
 		});
 		
 		return function(){
+			
 			var wrapper = Mold.wrap(controller, function(that){
 				if(that.publics){
 					for(var property in that.publics){

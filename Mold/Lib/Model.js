@@ -329,16 +329,17 @@ Seed({
 		}
 
 
-		var _clean = function(model){
-			//disable validation while cleanup
+		var _clean = function(model, properties){
 			var validationState = _isValidation;
 			_isValidation = false;
-			if(Mold.isArray(model)){
+
+			if(Mold.isArray(properties)){
+				console.log("model.remove", model.remove)
 				model.remove();
-			}else if(Mold.isObject(model)){
-				Mold.each(model, function(item, name){
-					if(Mold.isObject(model[name]) || Mold.isArray(model[name])){
-						_clean(model[name]);
+			}else{
+				Mold.each(properties, function(value, name){
+					if(Mold.isObject(value) || Mold.isArray(value)){
+						_clean(model[name], properties[name]);
 					}else{
 						if(!_protected[name]){
 							model[name] = false;
@@ -360,7 +361,7 @@ Seed({
 		}
 
 		var _update = function(model, data){
-			_clean(model);
+			_clean(model, _properties);
 			_add(model, data);
 			that.trigger("update");
 		}
@@ -372,8 +373,25 @@ Seed({
 			})
 		}
 
+		var _cleanData = function(data, properties){
+			var output = (Mold.isArray(data)) ? [] : {};
+			Mold.each(properties, function(value, name){
+				if(typeof value !== "function" && data[name]){
+					if(Mold.isObject(value) || Mold.isArray(value)){
+						output[name] = _cleanData(data[name], value);
+					}else{
+						output[name] = data[name];
+					}
+				}
+			})
+			return output;
+		}
+
 		this.publics = {
 			data : _data,
+			getId : function(){
+				return _dataId;
+			},
 			validation : function(state){
 				_isValidation = state;
 				_resetInvalidValue = state;
@@ -392,14 +410,16 @@ Seed({
 					throw "Can not save data without adapter!"
 				}
 
+				var data = _cleanData(_data, _properties);
 				if(!_dataId){
 					//insert
-					var promise = _adapter.insert(_data, id);
+					//console.log("save", data)
+					var promise = _adapter.insert(data, id);
 					promise.then(function(id){
 						_dataId = id;
 					})
 				}else{
-					var promise = _adapter.update(_data, _dataId);
+					var promise = _adapter.update(data, _dataId);
 				}
 				
 				return promise;
@@ -418,6 +438,12 @@ Seed({
 					_update(_data, newData);
 				});*/
 				return promise;
+			},
+
+			remove : function(){
+				_data = {};
+				this.data = _data;
+				return _adapter.remove(_dataId);
 			},
 
 /**

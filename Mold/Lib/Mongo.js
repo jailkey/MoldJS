@@ -6,7 +6,7 @@ Seed({
 			"Mold.Lib.Event",
 			{ Promise : "Mold.Lib.Promise" }
 		],
-		test : "Mold.Test.Lib.Mongo",
+		//test : "Mold.Test.Lib.Mongo",
 		npm : {
 			"mongodb" : "latest"
 		}
@@ -79,14 +79,13 @@ Seed({
 				return _query(function(fullfill, reject){
 					var collection = _db.collection(collectionName);
 					if(options){
-						console.log("with options", options)
 						collection.update(where, data, options, _solve(fullfill, reject));
 					}else{
 						collection.update(where, data, _solve(fullfill, reject));
 					}
 				});
 			},
-			remove : function(collectionName, where, ){
+			remove : function(collectionName, where){
 				return _query(function(fullfill, reject){
 					var collection = _db.collection(collectionName);
 					collection.remove(where, _solve(fullfill, reject));

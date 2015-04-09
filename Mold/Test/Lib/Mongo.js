@@ -50,7 +50,6 @@ Seed({
 				database
 					.update("mycollection", { 'hans' : 'peter' }, { $set : { 'hans' : 'klaus' } }, { multi : true })
 					.then(function(data){
-						console.log("update result", data.result)
 						expect(data.result.ok).toBe(1);
 						done();
 					}).fail(function(){

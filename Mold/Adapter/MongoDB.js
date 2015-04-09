@@ -5,8 +5,8 @@ Seed({
 			"Mold.Lib.Event"
 		]
 	},
-	function(){
-
+	function(collection){
+		//var _collection
 
 		this.publics = {
 			save : function(data){

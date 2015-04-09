@@ -23,7 +23,6 @@ Seed({
 
 		var _query = function(callback){
 			return new Promise(function(fullfill, reject){
-				console.log("query", _db)
 				if(_db){
 					callback(fullfill, reject);
 				}else{
@@ -48,23 +47,22 @@ Seed({
 			connect : function(url){
 				return new Promise(function(fullfill, reject){
 					Mongo.connect(url, function(err, db) {
-						  if(err){
-						  	reject(err);
-						  	_events.trigger("connection.error", err);
-						  	return;
-						  }else{
-						  	fullfill(db);
-
-						  	_events.trigger("connection", { db : db});
+						if(err){
+							_events.trigger("connection.error", err);
+							reject(err);
+							return;
+						}else{
 						  	_db = db;
-						  }
+						  	_events.trigger("connection", { db : db});
+						  	fullfill(db);
+						}
 					});
 				});
 			},
 			close : function(){
 				if(_db){
-					//_db.close();
-					//_db = false;
+					_db.close();
+					_db = false;
 					_events.trigger("connection.closed");
 				}
 			},
@@ -73,18 +71,22 @@ Seed({
 			},
 			insert : function(collectionName, data){
 				return _query(function(fullfill, reject){
-					console.log("query")
 					var collection = _db.collection(collectionName);
 					collection.insert(data, _solve(fullfill, reject));
 				})		
 			},
-			update : function(collectionName, data, where){
+			update : function(collectionName, where, data, options){
 				return _query(function(fullfill, reject){
 					var collection = _db.collection(collectionName);
-					collection.update(where, { $set: data }, _solve(fullfill, reject));
+					if(options){
+						console.log("with options", options)
+						collection.update(where, data, options, _solve(fullfill, reject));
+					}else{
+						collection.update(where, data, _solve(fullfill, reject));
+					}
 				});
 			},
-			remove : function(collectionName, where){
+			remove : function(collectionName, where, ){
 				return _query(function(fullfill, reject){
 					var collection = _db.collection(collectionName);
 					collection.remove(where, _solve(fullfill, reject));
@@ -94,6 +96,16 @@ Seed({
 				return _query(function(fullfill, reject){
 					var collection = _db.collection(collectionName);
 					collection.find(where).toArray(_solve(fullfill, reject));
+				});
+			},
+			findOne : function(collectionName, where, projection){
+				return _query(function(fullfill, reject){
+					var collection = _db.collection(collectionName);
+					if(projection){
+						collection.findOne(where, projection, _solve(fullfill, reject));
+					}else{
+						collection.findOne(where, _solve(fullfill, reject));
+					}
 				});
 			},
 			db : function(){

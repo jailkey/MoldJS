@@ -21,7 +21,7 @@ Seed({
 
 				promise.then(function(data){
 					_that.trigger("update", { data : data, id : id });
-				})
+				});
 				
 				return promise;
 			},

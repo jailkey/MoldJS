@@ -3,6 +3,7 @@ Seed({
 		dna : "server",
 		include : [
 			"->Mold.DNA.Server",
+			"->Mold.Lib.Mongo"
 		],
 		config : {
 			ip : '127.0.0.1',
@@ -15,14 +16,21 @@ Seed({
 		routes : {
 			'/test/:name/:id' : 'Mold.Test',
 			'/wasanderes' : 'json|Mold.Test2',
-			'GET/super' :  'Mold.Test|@fireevent',
+			'GET/data/:id' :  'Mold.Test|@get.data',
+			'POST/data' :  'urlencode|Mold.Test|@insert.data',
+			'PUT/data/:id' :  'Mold.Test|@update.data',
+			'DELETE/data/:id' :  'Mold.Test|@delete.data',
 			'/redirect' : '301:/',
 			'/sendform' : 'multipart|Mold.Test2',
 		}
 	},
 	{	
-		startup : function(server){
-			//use for connection database etc.
+		startup : function(shared){
+
+			//use shared object for connection database etc.
+			shared.database = new Mold.Lib.Mongo();
+			shared.database.connect('mongodb://localhost/test');
+	
 			console.log("startup")
 		},
 		process : function(server){

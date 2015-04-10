@@ -12,9 +12,17 @@
 			></script>
 		</head>
 		<body>
-			<form action="/sendform" method="post" enctype="multipart/form-data">
-				<input type="text" name="mytext">
-				<input type="file" id="fileUpload" name="myfile" />
+			<form action="/data" method="post">
+				
+				<label>
+					Vorname: 
+					<input type="text" name="vorname">
+				</label>
+				<label>
+					Nachname:
+					<input type="text" name="nachname">
+				</label>
+
 				<input type="submit" value="send">
 			</form>
 		</body>

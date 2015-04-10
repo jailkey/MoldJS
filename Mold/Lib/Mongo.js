@@ -98,7 +98,11 @@ Seed({
 			find : function(collectionName, where){
 				return _query(function(fullfill, reject){
 					var collection = _db.collection(collectionName);
-					collection.find(where).toArray(_solve(fullfill, reject));
+					if(where){
+						collection.find(where).toArray(_solve(fullfill, reject));
+					}else{
+						collection.find().toArray(_solve(fullfill, reject));
+					}
 				});
 			},
 			findOne : function(collectionName, where, projection){

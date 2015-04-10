@@ -18,7 +18,7 @@ Seed(
 		version : 0.1,
 
 	},
-	function(ip, port, config, startup){
+	function(ip, port, config, shared){
 
 		var config = config || {};
 		
@@ -57,6 +57,7 @@ Seed(
 			try{
 				http.createServer(function (req, res) {
 					req.config = config;
+					req.shared = shared;
 					var session = Mold.Server.Session.create(req);
 					var sequenze = new Mold.Lib.Sequence();
 

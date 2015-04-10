@@ -27,14 +27,13 @@ Seed({
 				throw "Server port is not defined";
 			}
 
-			var startup = {};
+			var shared = {};
 
 			if(seed.func.startup){
-				seed.func.startup(startup);
+				seed.func.startup(shared);
 			}
-
 			
-			var server = new Mold.Server.Server(seed.config.ip, seed.config.port, seed.config, startup);
+			var server = new Mold.Server.Server(seed.config.ip, seed.config.port, seed.config, shared);
 
 			if(seed.routes){
 				server.use(new Mold.Server.Middlewares.Router(seed.routes));

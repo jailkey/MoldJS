@@ -16,10 +16,10 @@ Seed({
 				vorname : "string",
 				nachname : "string"
 			},
-			adapter : new Mold.Adapter.Mongo(shared.database, "firstrest", "_id")
+			adapter : new Mold.Adapter.Mongo(shared.database, "firstrest")
 		});
 
-		var template = new Mold.Lib.Template(function(){/*|
+		var templateDetail = new Mold.Lib.Template(function(){/*|
 			<div>
 				vorname : {{vorname}}
 			</div>
@@ -28,21 +28,51 @@ Seed({
 			</div>
 		|*/})
 
-		template.bind(model);
+		templateDetail.bind(model);
+
+
+		var list = new Mold.Lib.Model({
+			properties : {
+				list : [
+					{
+						vorname : "string",
+						nachname : "string",
+						_id : "number"
+					}
+				]
+			},
+			adapter : new Mold.Adapter.Mongo(shared.database, "firstrest"),
+			list : true
+		})
+
+
+		var listTemplate = new Mold.Lib.Template(function(){/*|
+				<html>
+					<body>
+						<ul>
+							{{#list}}
+								<li><a href="data/{{_id}}"> {{+}}. {{_id}} {{vorname}} {{nachname}} </a></li>
+							{{/list}}
+						</ul>
+					</body>
+				</html>
+		|*/}, { disableSanitizer : true } );
+
+
+		listTemplate.bind(list);
 
 
 		this.actions = {
 
 			"@get.data" : function(e){
-		
+				
 				if(e.data.param.id){
-					console.log("id", e.data.param.id)
+				
 					model
 						.load(e.data.param.id)
 						.then(function(result){
 
-							e.data.response.addData(template.get(), "html");
-							
+							e.data.response.addData(templateDetail.get(), "html");
 							e.data.next();
 						});
 				}else{
@@ -50,12 +80,26 @@ Seed({
 				}
 			},
 
-			"@insert.data" : function(e){
+			"@getall.data" : function(e){
 				
-				console.log(e.data.request.body)
+				list
+					.load()
+					.then(function(result){
+						console.log(result)
+						e.data.response.addData(listTemplate.get(), "html");
+						e.data.next();
+					}).
+					fail(function(err){
+						console.log("Fehler", err)
+					});
+			
+			},
+
+			"@insert.data" : function(e){
 
 				model.data.vorname = e.data.request.body.vorname;
 				model.data.nachname = e.data.request.body.nachname;
+
 				model
 					.save()
 					.then(function(id){

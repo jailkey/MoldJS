@@ -94,8 +94,12 @@ Seed({
 
 		var _applyToDom = function(template){
 			_shadowTemplate =  _doc.createElement("div"); //_doc.createDocumentFragment();
-			var sanitizer =  new Mold.Lib.Sanitize();
-			_shadowTemplate.innerHTML = sanitizer.html(template);
+			if(!_config.disableSanitizer){
+				var sanitizer =  new Mold.Lib.Sanitize();
+				_shadowTemplate.innerHTML = sanitizer.html(template);
+			}else{
+				_shadowTemplate.innerHTML = template;
+			}
 			_shadowTemplate.moldTemplate = that;
 			_target = _shadowTemplate;
 		}
@@ -203,8 +207,8 @@ Seed({
 
 
 		var _addData = function(template, data, bind){
-				Mold.each(template, function(element, name){
 
+				Mold.each(template, function(element, name){
 					if(data[name] != undefined){
 
 						if(Mold.isArray(data[name])){
@@ -414,7 +418,9 @@ Seed({
 				if(!_compiledTemplate){
 					throw "Template not compiled!";
 				}
-				_addData(_compiledTemplate.childs[0], model.data, true);	
+				if(model){
+					_addData(_compiledTemplate.childs[0], model.data, true);
+				}
 				return that;
 			},
 /**

@@ -16,6 +16,7 @@ Seed({
 		var _name = false;
 		var _isConnected = false;
 		var Mongo = require('mongodb').MongoClient;
+		var ObjectId = require('mongodb').ObjectID;
 
 		var _db = false;
 		var _events = new Mold.Lib.Event({});
@@ -72,6 +73,9 @@ Seed({
 			insert : function(collectionName, data){
 				return _query(function(fullfill, reject){
 					var collection = _db.collection(collectionName);
+					if(!data._id){
+						data._id = new ObjectId().toHexString();
+					}
 					collection.insert(data, _solve(fullfill, reject));
 				})		
 			},
@@ -98,6 +102,7 @@ Seed({
 				});
 			},
 			findOne : function(collectionName, where, projection){
+		
 				return _query(function(fullfill, reject){
 					var collection = _db.collection(collectionName);
 					if(projection){

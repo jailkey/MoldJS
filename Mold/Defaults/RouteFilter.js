@@ -41,7 +41,6 @@ Seed({
 					}
 
 					if(data.session.seeds[route]){
-						console.log("get instance")
 						data.handler = data.session.seeds[route];
 						triggerMethodEvent(data.handler, data)
 						next();
@@ -54,9 +53,9 @@ Seed({
 							var dna = Mold.getDNABySeedName(route);
 
 							if(dna.createBy && dna.createBy === "new"){
-								data.handler = new selectedSeed();
+								data.handler = new selectedSeed(data.shared);
 							}else{
-								data.handler = selectedSeed();
+								data.handler = selectedSeed(data.shared);
 							}
 				
 							data.session.seeds[route] = data.handler;

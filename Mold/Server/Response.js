@@ -89,7 +89,6 @@ Seed({
 				}else{
 					_mimeType = _header.getMimeType(type);
 				}
-				console.log("set data", data, _mimeType);
 				_setData(data, _mimeType);
 			},
 			addFile : function(filepath){

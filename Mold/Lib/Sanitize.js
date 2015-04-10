@@ -80,15 +80,17 @@ Seed({
 					var attributes = arguments[1].match(/([\S]+)[\s]*\=/gi),
 						values = arguments[1].split(/[\S]+[\s]*\=/gi);
 
-					for(var y = 0; y < attributes.length; y++){
-						var selectedAttribute = Mold.trim(attributes[y].replace("=", "")).toLowerCase();
-						if(Mold.contains(attrs, selectedAttribute)){
-							var value = values[y + 1];
-							if(Mold.trim(value)){
-								output = output.replace(value, '"' + _filterURL(value) +'" ');
+					if(attributes && attributes.length){
+						for(var y = 0; y < attributes.length; y++){
+							var selectedAttribute = Mold.trim(attributes[y].replace("=", "")).toLowerCase();
+							if(Mold.contains(attrs, selectedAttribute)){
+								var value = values[y + 1];
+								if(Mold.trim(value)){
+									output = output.replace(value, '"' + _filterURL(value) +'" ');
+								}
 							}
 						}
-					}	
+					}
 				}
 				return output;
 			});
@@ -117,6 +119,9 @@ Seed({
 				return Mold.Lib.Encode.encodeHTMLEntities(text);
 			},
 			html : function(markup){
+				if(!markup){
+					return markup;
+				}
 			
 				markup = Mold.Lib.Encode.decodeHTMLEntities(markup);
 				markup = _removeScriptTags(markup);

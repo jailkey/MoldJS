@@ -197,18 +197,20 @@ Seed({
 			},
 			
 			parseRoutes : function (routes, path, output){
+
 				var output = output || [],
 					path = path || "";
 				
 				for(var route in routes){
 					//clean route from method if it is set
 					var cleanRoute = this.removeMethod(route);
+
 					var first = cleanRoute.substring(0,1);
 					switch(first){
 						case "/":
 
 							if(that.isUrl(cleanRoute, _path)){
-
+					
 								path += first;
 								output = that.getNextRoute(routes, route, path, output, "path");
 
@@ -235,7 +237,8 @@ Seed({
 				if( typeof routes[route] === "object"){
 					that.parseRoutes(routes[route], path, output);
 				}else{
-					var parameter = that.getParameter(route, _hashes, _path, type),
+
+					var parameter = that.getParameter(this.removeMethod(route), _hashes, _path, type),
 						method = that.getMethod(route),
 						addRoute = true;
 
@@ -266,6 +269,7 @@ Seed({
 					response : _response._moldResponse || false,
 					session : _session,
 					handler : _events,
+					shared : _request.shared,
 					next : _next || function(){}
 				}
 			},
@@ -307,7 +311,7 @@ Seed({
 
 				sequenze = sequenze.step(function(){
 					if(_next){
-						console.log("step ready step");
+						
 						ready();
 					}
 				})
@@ -320,6 +324,7 @@ Seed({
 				var foundRoutes = that.parseRoutes(_routes);
 
 				if(foundRoutes.length > 0){
+
 					for(var i = 0; i < foundRoutes.length; i++){
 						var route = foundRoutes[i];
 						var parameter = false;

@@ -474,7 +474,11 @@ Seed({
 				if(_config.parseAsString){
 					return _shadowTemplate.nodeValue;
 				}
-				return _shadowTemplate;
+				if(Mold.isNodeJS){
+					return _shadowTemplate.innerHTML;
+				}else{
+					return _shadowTemplate;
+				}
 			},
 			getFirst : function(){
 				return _firstElement();

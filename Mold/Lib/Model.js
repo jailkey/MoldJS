@@ -16,6 +16,8 @@ Seed({
 			_data = {},
 			that = this,
 			_adapter = config.adapter,
+			_list = config.list,
+			_map = false;
 			_dataId =  false,
 			_registerd = [],
 			_isValidation = false,
@@ -24,6 +26,18 @@ Seed({
 		Mold.mixin(this, new Mold.Lib.Event(this));
 		Mold.mixin(_data, new Mold.Lib.Event(_data));
 
+		if(_list){
+			//get map
+			Mold.some(_properties, function(val, name){
+				if(Mold.isArray(val)){
+					_map = name;
+					return true;
+				}
+			});
+			if(!_map){
+				throw new Error("List models needs an array property to store listdata");
+			}
+		}
 
 		var _register = function(instance){
 			_registerd.push(instance);
@@ -334,7 +348,6 @@ Seed({
 			_isValidation = false;
 
 			if(Mold.isArray(properties)){
-				console.log("model.remove", model.remove)
 				model.remove();
 			}else{
 				Mold.each(properties, function(value, name){
@@ -406,19 +419,21 @@ Seed({
  * @param  {[type]} id [description]
  */
 			save : function(id){
+	
 				if(!_adapter){
-					throw "Can not save data without adapter!"
+					throw new Error("Can not save data without adapter!");
 				}
 
 				var data = _cleanData(_data, _properties);
 				if(!_dataId){
 					//insert
-					//console.log("save", data)
+					console.log("isnert", data)
 					var promise = _adapter.insert(data, id);
 					promise.then(function(id){
 						_dataId = id;
 					})
 				}else{
+						console.log("update", data)
 					var promise = _adapter.update(data, _dataId);
 				}
 				
@@ -433,8 +448,9 @@ Seed({
 					throw "Can not load data without adapter!"
 				}
 				_dataId = id;
-				var promise = _adapter.load(id);
-				/*promise.then(function(newData){
+				var promise = _adapter.load(id, _list, _map);
+				/*
+				promise.then(function(newData){
 					_update(_data, newData);
 				});*/
 				return promise;

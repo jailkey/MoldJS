@@ -8,7 +8,7 @@ Seed({
 			{ Promise : "Mold.Lib.Promise" }
 		]
 	},
-	function(database, collection, key){
+	function(database, collection, options){ 
 
 		if(!database){
 			throw new Error("Mold.Adapter.Mongo can't work without database!")
@@ -21,6 +21,9 @@ Seed({
 		Mold.mixin(this, new Mold.Lib.Event(this));
 
 		var _that = this;
+		var _options = options || {};
+
+		var key = _options.key || "_id";
 
 		this.publics = {
 			update : function(data, id){
@@ -28,19 +31,39 @@ Seed({
 				where[key] =  id;
 				return database.update(collection, where, data);
 			},
-			load : function(id){
+			load : function(id, isList, map){
 				var where = false;
 				if(id){
-					where = {};
-					where[key] =  id;
+					if(Mold.isObject(id)){
+						where = id;
+					}else{
+						where = {};
+						where[key] =  id;
+					}
 				}
-				var promise =  database.findOne(collection, where);
+				if(!isList){
+					var promise =  database.findOne(collection, where);
+				}else{
+					var promise =  database.find(collection, where);
+				}
+				return new Promise(function(fullfill, reject){
+					promise.then(function(data){
+						if(Mold.isArray(data)){
+							var list = {}
+							if(map){
+								list[map] = data;
+							}else{
+								list.collection = data;
+							}
 
-				promise.then(function(data){
-					_that.trigger("update", { data : data, id : id });
-				})
-				
-				return promise;
+							_that.trigger("update", { data : list, id : id, isList : true });
+							fullfill(data);
+						}else{
+							_that.trigger("update", { data : data, id : id, isList : false });
+							fullfill(data);
+						}
+					}).fail(reject);
+				});
 			},
 			remove : function(id){
 				if(id){

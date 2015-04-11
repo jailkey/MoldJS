@@ -82,6 +82,9 @@ Seed({
 			redirect : function(type, url){
 				_redirect(type, url);
 			},
+			addHeader : function(property, value){
+				 _addHeader(property, value)
+			},
 			addData : function(data, type){
 				if(!type && Mold.isObject(data)){
 					data = JSON.stringify(data);
@@ -105,6 +108,7 @@ Seed({
 				}else{
 					if(_mimeType){
 						_status = _header.getStatusCode("ok");
+						//_addHeader(_status, _mimeType);
 						_result.writeHead(_status, _mimeType);
 						if(_data){
 							_result.write(_data);

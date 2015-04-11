@@ -164,6 +164,15 @@ Seed(
 				next();
 			}, "end");
 
+			_use(function(req, res, next){
+
+				if(req.session){
+					console.log("session found", req.session)
+					res._moldResponse.addHeader("set-cookie", "mycookie=" + req.session.id);
+				}
+				next();
+			}, "end");
+
 
 		//handle end
 			_use(function(req, res, next){

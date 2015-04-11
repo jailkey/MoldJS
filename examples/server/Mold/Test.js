@@ -10,6 +10,7 @@ Seed({
 
 	},
 	function(shared){
+		console.log("CREATER CONTROLLER")
 
 		var model = new Mold.Lib.Model({
 			properties : {
@@ -51,7 +52,7 @@ Seed({
 					<body>
 						<ul>
 							{{#list}}
-								<li><a href="data/{{_id}}"> {{+}}. {{_id}} {{vorname}} {{nachname}} </a></li>
+								<li><a href="/data/{{_id}}"> {{+}}. {{_id}} {{vorname}} {{nachname}} </a></li>
 							{{/list}}
 						</ul>
 					</body>
@@ -65,7 +66,7 @@ Seed({
 		this.actions = {
 
 			"@get.data" : function(e){
-				
+				console.log("get Data")
 				if(e.data.param.id){
 				
 					model
@@ -81,11 +82,10 @@ Seed({
 			},
 
 			"@getall.data" : function(e){
-				
+				console.log("get  all Data")
 				list
 					.load()
 					.then(function(result){
-						console.log(result)
 						e.data.response.addData(listTemplate.get(), "html");
 						e.data.next();
 					}).

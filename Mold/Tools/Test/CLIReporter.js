@@ -18,6 +18,7 @@ Seed({
 
 		var _error = function(value, level){
 			cli.write(cli.COLOR_RED + _tabsByLevel(level) + "ERROR: " + value + cli.COLOR_RESET + "\n");
+			cli.write(cli.COLOR_RED + _tabsByLevel(level) + "ERROR: " + value.stack + cli.COLOR_RESET + "\n");
 		}
 
 		var _success = function(value, level){

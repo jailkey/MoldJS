@@ -41,7 +41,7 @@ Seed({
 			});
 
 			
-			it("add data to instace", function(){
+			it("add data to instance", function(){
 				template.append({
 					list : [
 						{ 
@@ -59,7 +59,7 @@ Seed({
 			})
 
 
-			it("append model to template", function(){
+			it("bind model and append data", function(){
 				model = new Mold.Lib.Model({
 					properties : {
 						list : [
@@ -75,18 +75,66 @@ Seed({
 
 				template.bind(model);
 				
-				model.update([
-					{ 
-						vorname : "wilfried",
-						nachname : "testman"
-					},
-					{ 
-						vorname : "soso",
-						nachname : "wasauchimmer"
-					}
-				]);
+				model.update({
+					list : [
+						{ 
+							vorname : "wilfried",
+							nachname : "testman"
+						},
+						{ 
+							vorname : "soso",
+							nachname : "wasauchimmer"
+						}
+					]
+				});
+
+			})
+
+			it("append more data to model", function(){
+				model.update({
+					list : [
+						{ 
+							vorname : "Gerd",
+							nachname : "Trude"
+						},
+						{ 
+							vorname : "Frank",
+							nachname : "Schein"
+						}
+					]
+				});
+			})
 
 
+			it("append much more data to model", function(){
+				model.update({
+					list : [
+						{ 
+							vorname : "Friedrich",
+							nachname : "Whilhelm"
+						},
+						{ 
+							vorname : "Karsten",
+							nachname : "Schneider"
+						}
+					]
+				});
+			})
+
+
+		it("append much much more data to model", function(){
+				model.update({
+					list : [
+						{ 
+							vorname : "Friedrich",
+							nachname : "Whilhelm"
+						},
+						{ 
+							vorname : "Karsten",
+							nachname : "Schneider"
+						}
+					]
+				});
 			})
 		})		
 	}

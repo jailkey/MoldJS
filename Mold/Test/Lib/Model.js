@@ -10,8 +10,6 @@ Seed({
 			var isMoldReady = false;
 			var testModel = false;
 
-	
-
 			it("create model", function(){
 				 testModel = new Model({
 				 	properties : {

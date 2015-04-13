@@ -239,7 +239,6 @@ Seed({
 			var currentTest = parent.children[level],
 				sequence = new Mold.Lib.Sequence();
 		
-
 			sequence
 				.step(function(next){
 					if(level === 0){
@@ -309,6 +308,7 @@ Seed({
 		var _executeCounter = 0;
 		var _startExecutionCounter = 0;
 		var _execute = function(test, parent, context, ready, testsReady, stopCheckingChilds){
+
 			_parent = test;
 			//if describe renew context
 			if(test.type === "describe"){
@@ -355,6 +355,7 @@ Seed({
 				//if error occurs write it to result;
 				result = e;
 				test.success = false;
+
 				test.error = e;
 				_clearTimeout(test)
 				execReady();

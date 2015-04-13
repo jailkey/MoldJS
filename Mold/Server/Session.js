@@ -3,34 +3,50 @@ Seed({
 		dna : "static",
 		platform : "node",
 		include : [
-			"Mold.Server.Cookie",
+			"Mold.Lib.Cookie",
 			"Mold.Lib.Event"
 		]
 	},
 	function(){
 
 		var _sessions = {};
+		var _timeout = 100000;
+		var _that = this;
 
 		return  {
-			isSession : function(request){
-				var cookie =  Mold.Server.Cookie.parse(request).sessioncookie;
-				if(request.headers.cookie && cookie){
-					var currentSession = _sessions[cookie];
-					if(currentSession){
-						if(currentSession.ip !== request.connection.remoteAddress){
-							delete _sessions[Mold.Server.Cookie.parse(request).sessioncookie];
-							return false;
+			sessionTimout : function(timeout){
+				_timeout = timeout;
+			},
+			refreshSession : function(sessionId){
+				var currenSession = _sessions[sessionId];
+				if(currenSession){
+					clearTimeout(currentSession.timeout);
+					currentSession.timeout = setTimeout(function(){
+						_that.remove(sessionId);
+					}, _timeout);
+				}
+			},
+			isSession : function(cookieString){
+				if(cookieString){
+					var cookie =  new Mold.Lib.Cookie(cookieString);
+					
+					if(cookie){
+						var sessionId = cookie.get("sessionId")
+						var currentSession = _sessions[sessionId];
+						if(currentSession){
+							return sessionId;
 						}
-						return true;
+						return false;
 					}
-					return false;
 				}
 				return false;
 			},
 			create : function(request){
-				if(!this.isSession(request)){
-					var sessionId = Mold.getId();
-					console.log("IP", request.connection.remoteAddress)
+				var sessionId;
+				if(!(sessionId = this.isSession(request.headers.cookie)) ){
+
+					sessionId = Mold.getId();
+					console.log("create new session", sessionId);
 					_sessions[sessionId] = {
 						id : sessionId,
 						_data : {},
@@ -42,16 +58,23 @@ Seed({
 							get : function(name){
 								return _sessions[sessionId]._data[name];
 							}
-						}
+						},
+						timeout : setTimeout(function(){
+							console.log("Timeout", sessionId);
+							clearTimeout(_sessions[sessionId].timeout);
+							console.log("setRemove", _that.remove)
+							_that.remove(sessionId);
+						}, _timeout)
 					}
 
 					_sessions[sessionId].data.set("userevents", new Mold.Lib.Event({}));
 					return _sessions[sessionId];
 				}else{
-					return _sessions[Mold.Server.Cookie.parse(request).sessioncookie];
+					console.log("session is defined")
+					return _sessions[sessionId];
 				}
 			},
-			delete : function(sessionId){
+			remove : function(sessionId){
 				delete _sessions[sessionId];
 			}
 		}

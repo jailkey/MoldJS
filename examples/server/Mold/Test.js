@@ -82,10 +82,11 @@ Seed({
 			},
 
 			"@getall.data" : function(e){
-				console.log("get  all Data")
+	
 				list
 					.load()
 					.then(function(result){
+						
 						e.data.response.addData(listTemplate.get(), "html");
 						e.data.next();
 					}).

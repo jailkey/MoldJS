@@ -38,8 +38,6 @@ Seed({
 			});
 		}
 
-	   
-
 		_array.oldPush = _array.push;
 		_array.oldPop = _array.pop;
 		_array.oldShift = _array.shift;
@@ -49,8 +47,10 @@ Seed({
 
 
 		var _creatListItem = function(element, parent, name){
+
 			if(Mold.isArray(element)){
 				var oldElement = element;
+			
 				element = new Mold.Lib.List();
 			}else if(Mold.isObject(element)){
 				Mold.each(element, function(subelement, index, value){
@@ -59,9 +59,11 @@ Seed({
 			
 			}
 
+	
+
 			Mold.watch(_array, _array.length -1, function(property, oldValue, newValue){
 				_creatListItem(newValue);
-
+			
 				_array.trigger("list.item.change", { 
 					list: _array,
 					index : property,
@@ -83,9 +85,11 @@ Seed({
 					_array.pop();
 					_array.push(newValue);
 				}
+					//console.log("AFTER TRIGGER", newValue)
 
 				return newValue;
 			});
+
 			return element;
 		}
 
@@ -95,17 +99,21 @@ Seed({
 			var i = 0,
 				len = arguments.length,
 				element = false;
-			
+
 			for(; i < len; i++){
 				element = arguments[i];
-				_array.oldPush(element);
+
 				element = _creatListItem(element);
+
+				_array.oldPush(element);
+
 				_array.trigger("list.item.add", { 
 					length : _array.length,
 					index : _array.length -1,
 					value : element,
 					list : _array
 				});
+				
 			};
 		};
 

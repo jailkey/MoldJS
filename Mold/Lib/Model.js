@@ -17,7 +17,7 @@ Seed({
 			that = this,
 			_adapter = config.adapter,
 			_list = config.list,
-			_map = false;
+			_map = false,
 			_dataId =  false,
 			_registerd = [],
 			_isValidation = false,
@@ -159,17 +159,19 @@ Seed({
 					}
 
 				}).on("list.item.change", function(e){
-
 					if(Mold.isObject(e.data.value) && !Mold.isArray(e.data.value)){
+						
 						 _createListItem(element[0], e.data.index, e.data.value, e.data.list, true);
 					}else{
 						
 					}
+
 					_createModel(element[0], e.data.value);
 				});
 
 			if(listValue){
 				Mold.each(listValue, function(element){
+				
 					data[name].push(element);
 				});
 			}
@@ -247,7 +249,6 @@ Seed({
 			}else if(typeof element === 'function'){
 				_createFunction(element, name, data);
 			}else{
-
 				data = _createProperty(element, name, data);
 			}
 			return data;
@@ -315,9 +316,7 @@ Seed({
 
 
 			//Mold.each(data, function(element, name){
-			
 				if(Mold.isArray(data)){
-					
 					Mold.each(data, function(item){
 						model.push(item);
 					})
@@ -374,6 +373,7 @@ Seed({
 		}
 
 		var _update = function(model, data){
+			
 			_clean(model, _properties);
 			_add(model, data);
 			that.trigger("update");
@@ -426,14 +426,11 @@ Seed({
 
 				var data = _cleanData(_data, _properties);
 				if(!_dataId){
-					//insert
-					console.log("isnert", data)
 					var promise = _adapter.insert(data, id);
 					promise.then(function(id){
 						_dataId = id;
 					})
 				}else{
-						console.log("update", data)
 					var promise = _adapter.update(data, _dataId);
 				}
 				

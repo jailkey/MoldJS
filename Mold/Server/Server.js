@@ -167,8 +167,7 @@ Seed(
 			_use(function(req, res, next){
 
 				if(req.session){
-					console.log("session found", req.session)
-					res._moldResponse.addHeader("set-cookie", "mycookie=" + req.session.id);
+					res._moldResponse.addHeader("Set-Cookie", "sessionId=" + req.session.id);
 				}
 				next();
 			}, "end");

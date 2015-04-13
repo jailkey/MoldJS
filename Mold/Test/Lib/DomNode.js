@@ -22,10 +22,10 @@ Seed({
 				expect(testNode.nodeType).toEqual(1);
 				expect(testNode.nodeValue).toEqual("");
 				expect(testNode.nodeName).toEqual("div");
-				expect(testNode.parentNode).toEqual(false);
-				expect(testNode.nextSibling).toEqual(false);
-				expect(testNode.previousSibling).toEqual(false);
-				expect(testNode.firstChild).toEqual(false);
+				expect(testNode.parentNode).toEqual(null);
+				expect(testNode.nextSibling).toEqual(null);
+				expect(testNode.previousSibling).toEqual(null);
+				expect(testNode.firstChild).toEqual(null);
 				expect(testNode.attributes.length).toEqual(0);
 				expect(testNode.childNodes.length).toEqual(0);
 			})
@@ -40,9 +40,9 @@ Seed({
 			});
 
 			it("test if after .appendChild all properties have the right value", function(){
-				expect(testNode.parentNode).toEqual(false);
-				expect(testNode.nextSibling).toEqual(false);
-				expect(testNode.previousSibling).toEqual(false);
+				expect(testNode.parentNode).toEqual(null);
+				expect(testNode.nextSibling).toEqual(null);
+				expect(testNode.previousSibling).toEqual(null);
 				expect(testNode.firstChild).toEqual(childNode);
 				expect(testNode.lastChild).toEqual(thirdChildNode);
 				expect(testNode.attributes.length).toEqual(0);
@@ -57,7 +57,7 @@ Seed({
 				expect(secondChildNode.parentNode).toEqual(testNode);
 				expect(secondChildNode.nextSibling).toEqual(thirdChildNode);
 				expect(secondChildNode.previousSibling).toEqual(childNode);
-				expect(secondChildNode.firstChild).toEqual(false);
+				expect(secondChildNode.firstChild).toEqual(null);
 				expect(secondChildNode.attributes.length).toEqual(0);
 				expect(secondChildNode.childNodes.length).toEqual(0);
 			});
@@ -67,9 +67,9 @@ Seed({
 			})
 
 			it("test node properties after removeChild", function(){
-				expect(testNode.parentNode).toEqual(false);
-				expect(testNode.nextSibling).toEqual(false);
-				expect(testNode.previousSibling).toEqual(false);
+				expect(testNode.parentNode).toEqual(null);
+				expect(testNode.nextSibling).toEqual(null);
+				expect(testNode.previousSibling).toEqual(null);
 				expect(testNode.firstChild).toEqual(childNode);
 				expect(testNode.lastChild).toEqual(thirdChildNode);
 				expect(testNode.hasChildNodes()).toEqual(true);
@@ -78,11 +78,11 @@ Seed({
 
 			it("test childNode properties after removeChild", function(){
 				expect(thirdChildNode.parentNode).toEqual(testNode);
-				expect(thirdChildNode.nextSibling).toEqual(false);
+				expect(thirdChildNode.nextSibling).toEqual(null);
 				expect(thirdChildNode.previousSibling).toEqual(childNode);
 				expect(childNode.parentNode).toEqual(testNode);
 				expect(childNode.nextSibling).toEqual(thirdChildNode);
-				expect(childNode.previousSibling).toEqual(false);
+				expect(childNode.previousSibling).toEqual(null);
 			});
 
 			it("test .cloneNode", function(){

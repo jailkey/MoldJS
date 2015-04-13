@@ -48,6 +48,7 @@ Seed({
 				}
 				return new Promise(function(fullfill, reject){
 					promise.then(function(data){
+
 						if(Mold.isArray(data)){
 							var list = {}
 							if(map){

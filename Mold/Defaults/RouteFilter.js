@@ -1,7 +1,7 @@
 Seed({
 		name : "Mold.Defaults.RouteFilter",
 		dna : "static",
-		include : [
+		nodeInclude : [
 			{ JsonParser : "Mold.Server.Middlewares.JsonParser" },
 			{ UrlencodingParser : "Mold.Server.Middlewares.UrlencodingParser" },
 			{ Multipart : "Mold.Server.Middlewares.MultipartParser" }

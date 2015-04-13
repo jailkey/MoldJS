@@ -10,16 +10,22 @@ Seed({
 	function(){
 
 		var _sessions = {};
-		var _timeout = 100000;
+		var _timeout = 10000;
 		var _that = this;
+
+		var _remove = function(sessionId){
+			delete _sessions[sessionId];
+		}
 
 		return  {
 			sessionTimout : function(timeout){
 				_timeout = timeout;
 			},
 			refreshSession : function(sessionId){
-				var currenSession = _sessions[sessionId];
-				if(currenSession){
+				var currentSession = _sessions[sessionId];
+			
+				if(currentSession){
+
 					clearTimeout(currentSession.timeout);
 					currentSession.timeout = setTimeout(function(){
 						_that.remove(sessionId);
@@ -34,6 +40,7 @@ Seed({
 						var sessionId = cookie.get("sessionId")
 						var currentSession = _sessions[sessionId];
 						if(currentSession){
+							this.refreshSession(sessionId);
 							return sessionId;
 						}
 						return false;
@@ -46,7 +53,6 @@ Seed({
 				if(!(sessionId = this.isSession(request.headers.cookie)) ){
 
 					sessionId = Mold.getId();
-					console.log("create new session", sessionId);
 					_sessions[sessionId] = {
 						id : sessionId,
 						_data : {},
@@ -62,8 +68,8 @@ Seed({
 						timeout : setTimeout(function(){
 							console.log("Timeout", sessionId);
 							clearTimeout(_sessions[sessionId].timeout);
-							console.log("setRemove", _that.remove)
-							_that.remove(sessionId);
+						
+							_remove(sessionId);
 						}, _timeout)
 					}
 
@@ -75,7 +81,7 @@ Seed({
 				}
 			},
 			remove : function(sessionId){
-				delete _sessions[sessionId];
+				_remove(sessionId);
 			}
 		}
 	}

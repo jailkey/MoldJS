@@ -85,7 +85,6 @@ Seed({
 					_array.pop();
 					_array.push(newValue);
 				}
-					//console.log("AFTER TRIGGER", newValue)
 
 				return newValue;
 			});
@@ -103,9 +102,14 @@ Seed({
 			for(; i < len; i++){
 				element = arguments[i];
 
-				element = _creatListItem(element);
-
-				_array.oldPush(element);
+				if(Mold.isNodeJS){
+					element = _creatListItem(element);
+					_array.oldPush(element);
+				}else{
+					_array.oldPush(element);
+					element = _creatListItem(element);
+				}
+				
 
 				_array.trigger("list.item.add", { 
 					length : _array.length,

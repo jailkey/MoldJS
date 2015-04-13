@@ -2,6 +2,9 @@
 Seed({
 		name : "Mold.Lib.DomPointer",
 		dna : "class",
+		nodeInclude : [
+			"Mold.Lib.Document"
+		],
 		compiler : {
 			//preparsePublics : true
 		}
@@ -22,9 +25,17 @@ Seed({
 			_isVisible = false,
 			_valueStore = false,
 			_filter = config.filter,
-			_childIndex = false;
+			_childIndex = false,
+			_doc = false;
 
 			_node.nodeValue = "";
+
+		if(Mold.isNodeJS){
+			
+			_doc = new Mold.Lib.Document();
+		}else{
+			_doc = document;
+		}
 
 		var _cleanSubnodes = function(){
 			var i = 0, len = _subnodes.length;
@@ -52,7 +63,7 @@ Seed({
 				}else{
 					if(element.parentNode && element !== dontremove){
 						if(!_valueStore){
-							_valueStore = document.createElement("div");
+							_valueStore = _doc.createElement("div");
 						}
 						_valueStore.appendChild(element);
 					}
@@ -67,7 +78,7 @@ Seed({
 				nextNode = node.nextSibling;
 				if(node.parentNode && node !== dontremove){
 					if(!_valueStore){
-						_valueStore = document.createElement("div");
+						_valueStore = _doc.createElement("div");
 					}
 					_valueStore.appendChild(node);
 				}
@@ -82,13 +93,13 @@ Seed({
 
 
 		var _show = function(value){
-
+	
 			if(value.hasChildNodes && value.hasChildNodes()){
 				_subnodes = [];
 				var  subnode = value.firstChild;
 				
 				while(subnode != null){
-				
+					
 					var nextNode = subnode.nextSibling;
 					if(subnode.hasChildNodes()){
 						_show(subnode.childNodes)
@@ -103,7 +114,6 @@ Seed({
 						}
 						_subnodes.push(subnode);
 					}
-
 					subnode = nextNode;
 				}
 			}				
@@ -241,7 +251,6 @@ Seed({
 				_isVisible = true;
 				if(_type === "value"){
 					_addValue(value);
-					
 				}else{
 					_show(_valueStore)
 				}

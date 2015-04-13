@@ -16,7 +16,8 @@ Seed({
 		],
 		nodeInclude : [
 			"Mold.Lib.Document"
-		]
+		],
+		test : "Mold.Test.Lib.Template"
 	},
 	function(content, config){
 
@@ -214,19 +215,20 @@ Seed({
 						if(Mold.isArray(data[name])){
 							if(bind){
 								data[name].on("list.item.add", function(e){
+									
 									var filterResult = true;
 									
 									if(element.filter && element.filter.length){
 										//_applyFilter(element);
 									}
-							
+								
 									//if(filterResult){
 										if(!element.childs[e.data.index]){
 											element.add();
 										}else{
 											element.show();
-											
 										}
+									
 										_addData(element.childs[e.data.index], e.data.value, bind);
 									//}
 									
@@ -380,12 +382,6 @@ Seed({
 				console.log("is nothing")
 			}
 		}
-
-
-	
-
-		
-
 
 
 

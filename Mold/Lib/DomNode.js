@@ -32,21 +32,22 @@ Seed({
 		}
 		
 		if(!_checkNodeType(type)){
-			throw type + " is not a valid node-type"
+			throw new Error(type + " is not a valid node-type");
 		}
 
 		/*standard properties*/
 
 		this.nodeValue = "",
-		this.nodeName = (name) ? name.toLowerCase() : false,
+		this.nodeName = (name) ? name.toLowerCase() : null,
 		this.nodeType = type,
-		this.parentNode = false,
-		this.nextSibling = false,
-		this.previousSibling = false,
-		this.firstChild = false,
-		this.lastChild = false,
-		this.parentElement = false,
+		this.parentNode = null,
+		this.nextSibling = null,
+		this.previousSibling = null,
+		this.firstChild = null,
+		this.lastChild = null,
+		this.parentElement = null,
 		this.attributes = [],
+		this.nodeIdent = Mold.getId(),
 		this.childNodes = [];
 
 
@@ -134,8 +135,15 @@ Seed({
 				return cloneNode;
 			},
 			appendChild : function(child){
+				
+				if(child === this || child.nodeIdent === this.nodeIdent){
+					throw new Error("circular insert!");
+				}
 				if(!child){
-					throw "Can not append child of undefiend!"
+					throw new Error("Can not append child of undefiend!");
+				}
+				if(child.parentNode){
+					child.parentNode.removeChild(child)
 				}
 				child.parentNode = this;
 				this.childNodes.push(child);
@@ -150,6 +158,11 @@ Seed({
 				this.lastChild = child;
 			},
 			insertBefore : function(newChild, referenz){
+
+				if(newChild === this){
+					 throw new Error("circular insert!")
+				}
+
 				var child,
 					index = 0, 
 					len = this.childNodes.length;
@@ -157,7 +170,8 @@ Seed({
 				if(!referenz){
 					this.appendChild(newChild);
 					return true;
-				}	
+				}
+
 
 				for(; index < len; index++){
 					child =  this.childNodes[index];
@@ -191,31 +205,39 @@ Seed({
 						if(i === 0){
 							
 							if(this.childNodes.length > 1){
-								this.firstChild = this.childNodes[ i+1 ];
+								this.firstChild = this.childNodes[ i + 1 ];
 							}else{
-								this.firstChild = false;
+								this.firstChild = null;
 							}
 						}
 						if(this.childNodes[i - 1]){
-							this.childNodes[i - 1].nextSibling = this.childNodes[i + 1];
+							this.childNodes[i - 1].nextSibling = this.childNodes[i + 1] || null;
+
 						}
+
 						if(this.childNodes[i + 1]){
 							this.childNodes[i + 1].previousSibling = this.childNodes[i - 1];
 						}else{
 							if(this.childNodes[i - 1]){
 								this.lastChild = this.childNodes[i - 1];
 							}else{
-								this.lastChild = false;
+								this.lastChild = null;
 							}
 						}
 						this.childNodes.splice(i, 1);
-						child.parentNode = false;
+						child.nextSibling = null;
+						child.previousSibling = null;
+						child.parentNode = null;
 						return child;
 					}
 				}
 				return false;
 			},
 			replaceChild : function(newChild, child){
+				if(child === this){
+					throw new Error("circular insert!");
+				}
+
 				var i = 0, 
 					len = this.childNodes.length;
 
@@ -235,8 +257,9 @@ Seed({
 							this.lastChild = newChild;
 						}
 						this.childNodes.splice(i, 1, newChild);
-
-						child.parentNode = false;
+						child.nextSibling = null;
+						child.previousSibling = null;
+						child.parentNode = null;
 						return true;
 					}
 				}

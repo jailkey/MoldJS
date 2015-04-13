@@ -284,6 +284,7 @@ Seed({
 			},
 
 			show : function(value, index){
+
 				if(index === undefined){
 					_isHidden = false;
 					_showPointerValue(_pointer, value);

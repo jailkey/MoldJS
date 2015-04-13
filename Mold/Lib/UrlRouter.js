@@ -93,7 +93,7 @@ Seed({
 					}
 					
 				});
-				routeRegExp += (replaced || routeRegExp === "/") ? "" : "/" ;
+				routeRegExp += (replaced || routeRegExp === "/") ? "" : "/$" ;
 
 				var hashRegExp = new RegExp(routeRegExp , "gim");
 				

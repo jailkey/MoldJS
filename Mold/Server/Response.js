@@ -25,7 +25,6 @@ Seed({
 			_data = false;
 
 		var _setStatus = function(name, conf){
-			//console.log("isNumber")
 			if(typeof +name === "number"){
 				_status = name;
 			}else{
@@ -41,7 +40,6 @@ Seed({
 		}
 
 		var _redirect = function(type, url){
-				console.log("redirect", url)
 			_isRedirect = url;
 			_addHeader('Location', url);
 			_hasContent = false;
@@ -58,8 +56,15 @@ Seed({
 			_hasContent = true;
 		}
 
-		var _addHeader = function(property, value){
-			_headerParameter[property] = value;
+		var _addHeader = function(property, value, overwrite){
+			if(_headerParameter[property] && !overwrite){
+				if(!Mold.isArray(_headerParameter[property])){
+					_headerParameter[property] = [_headerParameter[property]];	
+				}
+				_headerParameter[property].push(value);
+			}else{
+				_headerParameter[property] = value;
+			}
 		}
 
 		this.publics = {
@@ -102,14 +107,13 @@ Seed({
 				}
 			},
 			create  : function(){
-
 				if(!_hasContent){
 					_result.writeHead(_status, _headerParameter);
 				}else{
 					if(_mimeType){
 						_status = _header.getStatusCode("ok");
-						//_addHeader(_status, _mimeType);
-						_result.writeHead(_status, _mimeType);
+						 _addHeader("content-type", _mimeType);
+						_result.writeHead(_status, _headerParameter);
 						if(_data){
 							_result.write(_data);
 						}
@@ -117,6 +121,8 @@ Seed({
 						_result.writeHead(_header.getStatusCode("unsupported-media-type"));
 					}
 				}
+				console.log("header parameter", _headerParameter)
+
 				_result.end();
 			}
 		}

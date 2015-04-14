@@ -30,6 +30,10 @@ Seed({
 
 			_node.nodeValue = "";
 
+		if(config.shadowDom){
+			console.log(config.shadowDom)
+		}
+
 		if(Mold.isNodeJS){
 			
 			_doc = new Mold.Lib.Document();
@@ -149,25 +153,25 @@ Seed({
 		}
 
 		var _copy = function(nodes, doNotCopy){
-			var newBlock = [];
-			Mold.each(nodes, function(element){
-				if(Mold.isArray(element)){
-					newBlock.push(_copy(element, doNotCopy));
+			var newBlock = [], len = nodes.length, i = 0;
+			for(;i < len; i++){
+				if(Mold.isArray(nodes[i])){
+					newBlock.push(_copy(nodes[i], doNotCopy));
 				}else{
-					if(!doNotCopy || element !== doNotCopy){
-						newBlock.push(element.cloneNode(true));
+					if(!doNotCopy || nodes[i] !== doNotCopy){
+						newBlock.push(nodes[i].cloneNode(true));
 					}
 				}
-			});
+			}
 
 			return newBlock;
 		}
 
 		var _clone = function(node, subnodes, shadowDom){
-
+			var start = process.hrtime();
 			var shadowCopy = shadowDom || (_shadowDom) ? _copy(_shadowDom) : false;
 			var subnodeCopy = subnodes || (_subnodes) ? _copy(shadowCopy)  : false;
-			var lastShadowNode = (subnodeCopy) ? _getLastShadowNode(subnodeCopy) : _lastNode;			
+			var lastShadowNode = (subnodeCopy) ? _getLastShadowNode(subnodeCopy) : _lastNode;	
 
 			var pointer = new Mold.Lib.DomPointer({
 				name : _name,
@@ -179,6 +183,9 @@ Seed({
 				lastNode : _lastNode,
 				subnodes : subnodeCopy
 			});
+
+			var output =  (process.hrtime(start)[1] / 1000000);
+			
 	
 			return pointer;
 		}

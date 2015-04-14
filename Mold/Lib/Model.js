@@ -39,6 +39,8 @@ Seed({
 			}
 		}
 
+		
+
 		var _register = function(instance){
 			_registerd.push(instance);
 		
@@ -159,19 +161,22 @@ Seed({
 					}
 
 				}).on("list.item.change", function(e){
-					if(Mold.isObject(e.data.value) && !Mold.isArray(e.data.value)){
-						
-						 _createListItem(element[0], e.data.index, e.data.value, e.data.list, true);
-					}else{
-						
+					
+					if(e.data.oldValue){
+						Mold.Lib.EventStore.removeEvents(e.data.oldValue);
 					}
 
-					_createModel(element[0], e.data.value);
+					if(Mold.isObject(e.data.value) && !Mold.isArray(e.data.value)){
+						 _createListItem(element[0], e.data.index, e.data.value, e.data.list, true);
+					}else{
+						_createModel(element[0], e.data.value);
+					}
+
+					
 				});
 
 			if(listValue){
 				Mold.each(listValue, function(element){
-				
 					data[name].push(element);
 				});
 			}
@@ -194,12 +199,14 @@ Seed({
 			_createModel(element, value);
 		}
 
+
 		var _createObject = function(element, name, data){
 			_notValid(element, data[name], "object");
 			if(!data[name]){
 				data[name] = {};
 			}
 			Mold.mixin(data[name] , new Mold.Lib.Event(data[name]));
+
 			Mold.watch(data, name, function(e){
 
 				_createModel(element, arguments[2]);

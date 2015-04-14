@@ -45,9 +45,16 @@ Seed (
 				}
 			},
 			removeEvents : function(element){
-				for(var selected in _elementList){
-					if(_elementList[selected].element === element){
-						delete _elementList.splice(selected, 1);
+				if(element){
+					if(element._eid){
+						delete _referenzList[element._eid]; 
+					}
+					var i = 0, len = _elementList.length;
+					this.removeElementTrigger(element);
+					for(; i < len; i++){
+						if(_elementList[i] && _elementList[i].element === element){
+							delete _elementList.splice(i, 1);
+						}
 					}
 				}
 			},
@@ -75,11 +82,20 @@ Seed (
 				return _elementList;
 			},
 			removeTrigger : function(element, event){
-				for(var i = 0; i < _savedTrigger.length; i++){
-					if(_savedTrigger[i].element === element && _savedTrigger[i].event === event){
+				var i = 0, len = _savedTrigger.length;
+
+				for(; i < len; i++){
+					if(_savedTrigger[i] && _savedTrigger[i].element === element && _savedTrigger[i].event === event){
 						_savedTrigger.splice(i, 1);
 					}
 				}
+			},
+			removeElementTrigger : function(element){
+				for(var i = 0; i < _savedTrigger.length; i++){
+					if(_savedTrigger[i].element === element){
+						_savedTrigger.splice(i, 1);
+					}
+				};
 			},
 			saveTrigger : function(element, event, data){
 				this.removeTrigger(element, event);

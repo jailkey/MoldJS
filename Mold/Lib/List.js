@@ -13,6 +13,13 @@ Seed({
 	function(data){
 		
 		var _array = data || [];
+		var _blacklist = [
+			"require", "global", "__filename", "__dirname",
+			"module", "exports", "Buffer", "setTimeout", 
+			"clearTimeout", "setInterval", "clearInterval", 
+			"_eid", "when", "at", "delegate", "bubble", 
+			"once", "on", "off"
+		]
 
 		Mold.mixin(_array, new Mold.Lib.Event(_array));
 
@@ -47,19 +54,19 @@ Seed({
 
 
 		var _creatListItem = function(element, parent, name){
-
 			if(Mold.isArray(element)){
 				var oldElement = element;
 			
 				element = new Mold.Lib.List();
 			}else if(Mold.isObject(element)){
+
 				Mold.each(element, function(subelement, index, value){
-					_creatListItem(subelement, element, index);
+					if(!~_blacklist.indexOf(index)){
+						_creatListItem(subelement, element, index);
+					}
 				})
 			
 			}
-
-	
 
 			Mold.watch(_array, _array.length -1, function(property, oldValue, newValue){
 				_creatListItem(newValue);
@@ -92,7 +99,7 @@ Seed({
 			return element;
 		}
 
-
+		
 		_array.push = function() {
 
 			var i = 0,
@@ -100,16 +107,10 @@ Seed({
 				element = false;
 
 			for(; i < len; i++){
-				element = arguments[i];
-
-				if(Mold.isNodeJS){
-					element = _creatListItem(element);
-					_array.oldPush(element);
-				}else{
-					_array.oldPush(element);
-					element = _creatListItem(element);
-				}
 				
+				element = arguments[i];
+				_array.oldPush(element);
+				element = _creatListItem(element);
 
 				_array.trigger("list.item.add", { 
 					length : _array.length,
@@ -191,19 +192,64 @@ Seed({
 
 			Mold.each(arguments, function(element, index){
 				if(index > 1) {
-					argumentsArray.push(element);
+					if(Mold.isArray(element)){
+						argumentsArray = argumentsArray.concat(element);
+					}else{
+						argumentsArray.push(element);
+					}
 				}
 			});
 
-			_array.oldSplice.apply(this, arguments);
-			var toDelete = len - argumentsArray.length;
-			for(var i = 0; i < toDelete; i++){
-				var outLen = _array.length + toDelete -i;
-				_array.trigger("list.item.remove", {
-					length : _array.length,
-					index : outLen -1,
-					value : false,
-					oldValue : _array[_array.length - (i+1)]
+			var callArgs = [from, len];
+			callArgs = callArgs.concat(argumentsArray);
+			var lenBefore = _array.length;
+
+			//trigger changes
+			var changeLen = from + argumentsArray.length;
+			if(changeLen > lenBefore){
+				changeLen = lenBefore;
+			}
+	
+			for(var i = from; i < changeLen; i++){
+				_array.trigger("list.item.change", {
+					index : i,
+					oldValue : _array[i],
+					value : argumentsArray[i - from],
+					list : _array 
+				});
+
+				_array.trigger("list.item.change."+i, { 
+					index : i,
+					oldValue : _array[i],
+					value : argumentsArray[i - from],
+					list : _array 
+				});
+			}
+
+			var toDelete = len - argumentsArray.length;		
+			for(var i = 0; i < len; i++){
+				var outLen = lenBefore + toDelete -i;
+				if(!argumentsArray[i]){
+					console.log("remove")
+					_array.trigger("list.item.remove", {
+						length : _array.length,
+						index : outLen -1,
+						value : false,
+						oldValue : _array[_array.length - (i+1)]
+					});
+				}
+			}
+			_array.oldSplice.apply(this, callArgs)
+			var lenAfter = _array.length;
+			var toAdd = lenAfter - lenBefore;
+			//moved
+			for(var y = lenBefore; y < lenAfter; y++){
+		
+				_array.trigger("list.item.add", { 
+					length : y + 1,
+					index : y,
+					value : _array[y],
+					list : _array
 				});
 			}
 
@@ -225,9 +271,18 @@ Seed({
 
 		_array.update = function(index, value){
 			if(_array[index]){
-				_array[index] = value;
+				_array.splice(index, 1, value)
 			}else{
 				_array.push(value)
+			}
+		}
+
+		_array.replace = function(newArray){
+			var lenDif = _array.length - newArray.length;
+			_array.splice(0, newArray.length, newArray);
+			
+			for(var i = 0; i < lenDif; i++){
+				_array.pop();
 			}
 		}
 

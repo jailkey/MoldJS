@@ -49,9 +49,10 @@ Seed({
 		this.attributes = [],
 		this.nodeIdent = Mold.getId(),
 		this.childNodes = [];
-
+		this.parentNode = null;
 
 		var _parentNode = false;
+		
 		Object.defineProperty(this, 'parentNode', {
 			get : function() {
 				return _parentNode
@@ -106,7 +107,7 @@ Seed({
 			that.childNodes = newDom.childNodes;
 			that.lastChild = newDom.lastChild;
 		}
-
+		
 		Object.defineProperty(this, 'innerHTML', {
 			get : function() {
 				return _getInnerHTML(this);
@@ -115,6 +116,12 @@ Seed({
 				return _setInnerHTML(markup);
 			}
 		});
+
+		/*
+		var _clone = function(node){
+			var newNode = 
+			for
+		}*/
 		
 
 
@@ -122,16 +129,24 @@ Seed({
 			/*node properties*/
 
 			cloneNode : function(withChildNodes){
+				
 				var cloneNode =  new Mold.Lib.DomNode(this.nodeType, this.nodeName);
 				cloneNode.nodeValue = this.nodeValue;
-				Mold.each(this.attributes, function(attribute){
-					cloneNode.setAttributeNode(attribute.cloneNode());
-				});
+				var len = this.attributes.length, i = 0;
+				for(; i < len; i++){
+					
+					cloneNode.setAttributeNode(this.attributes[i].cloneNode());
+				
+				};
 				if(withChildNodes){
-					Mold.each(this.childNodes, function(child){
-						cloneNode.appendChild(child.cloneNode(true));
-					});
+					var childLength = this.childNodes.length, y = 0;
+		
+					for(; y < childLength; y++){
+						cloneNode.appendChild(this.childNodes[y].cloneNode(true));		
+					}
 				}
+			
+
 				return cloneNode;
 			},
 			appendChild : function(child){

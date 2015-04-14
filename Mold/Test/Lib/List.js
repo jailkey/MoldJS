@@ -136,17 +136,32 @@ Seed({
 
 			
 			});
+			
 
 			it(".splice()", function(done){
 				var addResult = false;
 				testList.on("list.item.remove", function(e){
-					testList.off("list.item.remove")
+					testList.off("list.item.remove");
 					expect(e.data.index).toEqual(6);
-
 					done();
 				});
 				testList.splice(3, 2, "insert");
+			});
 
+
+
+			it(".splice() add some content", function(done){
+				var addResult = false;
+				var countAdded = 0;
+				testList.on("list.item.add", function(e){
+					countAdded++;
+					if(countAdded === 4){
+						testList.off("list.item.add");
+						done();
+					}
+				});
+				
+				testList.splice(1, 0, "insert", "test", "nochwas", "irgendwie");
 
 			});
 

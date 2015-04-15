@@ -10,7 +10,7 @@ Seed({
 	function(){
 
 		var _sessions = {};
-		var _timeout = 10000;
+		var _timeout = 100000;
 		var _that = this;
 
 		var _remove = function(sessionId){

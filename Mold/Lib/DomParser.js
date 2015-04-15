@@ -129,6 +129,7 @@ Seed({
 					actChar = markupPart.charAt(0),
 					nextChar = markupPart.charAt(1),
 					lastChar = false,
+					twoBefore = false,
 					state = "writecharset",
 					lastState = false,
 					lastElement = _root,
@@ -205,7 +206,16 @@ Seed({
 						if(actChar === "\""){
 							state = "searchattributes"
 						}
+					}else if(state === "writecharset"){
+						if(actChar === "{" && nextChar === "{"){
+							_stateEvents.onAddText();
+						}
+						if(twoBefore === "}" && lastChar === "}"){
+							_stateEvents.onAddText();
+						}
 					}
+
+
 
 					if(_states[state]){
 						_states[state](actChar);
@@ -232,7 +242,9 @@ Seed({
 						_stateEvents.onElementEnd();
 					}
 					
+
 					lastState = state;
+					twoBefore = lastChar;
 					lastChar = actChar;
 					actChar = markupPart.charAt(0);
 					nextChar = markupPart.charAt(1);

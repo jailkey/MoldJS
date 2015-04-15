@@ -100,6 +100,7 @@ Seed({
 			return markup;
 		}
 
+
 		var _setInnerHTML = function(markup){
 			var newDom = Mold.Lib.DomParser.parse(markup);
 			that.childNodes = [];
@@ -107,21 +108,36 @@ Seed({
 			that.childNodes = newDom.childNodes;
 			that.lastChild = newDom.lastChild;
 		}
-		
-		Object.defineProperty(this, 'innerHTML', {
-			get : function() {
-				return _getInnerHTML(this);
-			},
-			set : function(markup) {
-				return _setInnerHTML(markup);
-			}
-		});
 
-		/*
-		var _clone = function(node){
-			var newNode = 
-			for
-		}*/
+		var _getOuterHTML = function(){
+			var len = that.attributes.length, i = 0, attributeString = "";
+
+			for(; i  < len; i++){
+				attributeString += " " + that.attributes[i].nodeName + '="' + that.attributes[i].nodeValue + '"'; 
+			}
+
+			return "<" + that.nodeName + attributeString + ">" + _getInnerHTML(that) + "</" + that.nodeName + ">";
+		}
+		
+		if(type === 1 || type ===  9 || type === 11){
+			Object.defineProperty(this, 'innerHTML', {
+				get : function() {
+					return _getInnerHTML(this);
+				},
+				set : function(markup) {
+					return _setInnerHTML(markup);
+				}
+			});
+
+			Object.defineProperty(this, 'outerHTML', {
+				get : function() {
+					return _getOuterHTML(this);
+				},
+				set : function(markup) {
+					throw new Error("setting outerHTML is not implemented!")
+				}
+			});
+		}
 		
 
 

@@ -52,7 +52,7 @@ Seed({
 					<body>
 						<ul>
 							{{#list}}
-								<li><a href="/data/{{_id}}"> {{+}}. {{_id}} {{vorname}} {{nachname}} </a></li>
+								<li> <a> {{+}}. {{_id}} {{vorname}} {{nachname}} </a> </li>
 							{{/list}}
 						</ul>
 					</body>
@@ -66,7 +66,7 @@ Seed({
 		this.actions = {
 
 			"@get.data" : function(e){
-				console.log("get Data")
+		
 				if(e.data.param.id){
 				
 					model
@@ -81,12 +81,31 @@ Seed({
 				}
 			},
 
+			"@get.random" : function(e){
+				var data = [];
+				var count = Math.round(Math.random() * 1000);
+				for(var i = 0; i < 1000; i++){
+					data.push({
+						vorname : "v + "+ Math.random(),
+						nachname : "n " + Math.random()
+					});
+				}
+				
+				var testStart = process.hrtime();
+				list.data.list.replace(data);
+				//listTemplate.append({ list : data });
+				console.log("append data time:" + (process.hrtime(testStart)[1] / 1000000));
+				e.data.response.addData(listTemplate.get(), "html");
+				//e.data.response.addData("ready: " + list.data.list.length, "text");
+				e.data.next();
+			},
+
 			"@getall.data" : function(e){
 	
 				list
 					.load()
 					.then(function(result){
-						
+
 						e.data.response.addData(listTemplate.get(), "html");
 						e.data.next();
 					}).

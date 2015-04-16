@@ -262,7 +262,6 @@ Seed({
 		var _nodeBlockCache = {};
 		var _copyNodeBlock = function(nodes, doNotCopy){
 
-			
 			var newBlock = [];
 			Mold.each(nodes, function(element){
 				
@@ -277,6 +276,32 @@ Seed({
 			});
 			//_nodeBlockCache[nodes] = newBlock;
 			return newBlock;
+		}
+
+		var _copyBlockString = function(nodes, doNotCopy){
+			
+			var newBlock = [];
+			Mold.each(nodes, function(element){
+				
+				if(Mold.isArray(element)){
+					newBlock.push(_copyBlockString(element, doNotCopy));
+				}else{
+
+					if(!doNotCopy || element !== doNotCopy){
+						if(
+							(Mold.isNodeJS && element.hasOwnProperty('outerHTML'))
+							|| (!Mold.isNodeJS && element.outerHTML)
+						){
+							newBlock.push(element.outerHTML);
+						}else{
+							newBlock.push(element.nodeValue);
+						}
+						
+					}
+				}
+			});
+			//_nodeBlockCache[nodes] = newBlock;
+			return newBlock.join("");
 		}
 
 
@@ -364,9 +389,11 @@ Seed({
 		}
 
 
+		var gesammt = 0;
+		var coutner = 0;
 		
 		var _parseDomTree = function(node, tree, template, element, index){
-
+			
 			var varName =  _containsVar(node.nodeValue),
 				nodeName = node.nodeName,
 				nodeType = node.nodeType,
@@ -374,6 +401,8 @@ Seed({
 
 			index = index || 0;
 
+			var startNode = node;
+			coutner++;
 
 			switch(nodeType){
 				//Parse Elementnodes
@@ -423,13 +452,16 @@ Seed({
 							var	subnodes = _getBlockNodes(node, varName),
 								blockType = (_isBlock(varName)) ? "block" : "negativblock",
 								lastNode = _dom.getLastNode(subnodes),
-								shadowDom = _copyNodeBlock(subnodes, lastNode);
+								shadowDom = _copyNodeBlock(subnodes, lastNode),
+								shadowString = _copyBlockString(subnodes, lastNode);
+
 
 							var pointer = new Mold.Lib.DomPointer({
 								name : varName.split("|")[0],
 								type : blockType,
 								node : node,
 								shadowDom : shadowDom,
+								shadowString : shadowString,
 								lastNode : lastNode.nextSibling || lastNode,
 								subnodes : subnodes
 							});
@@ -476,22 +508,23 @@ Seed({
 			}
 			
 			
+			
 			return tree;
 		}
 
-		var _parseString = function(node, content, template){
-			node.nodeValue = content;
-			var _root = new Mold.Lib.Tree("root", false, false, false, template);
-			return _parseDomLessTree(node,  _root, _root);
-		}
-
+	
+		var counterLess = 0;
+		var gesammtLess = 0;
 		var _parseDomLessTree = function(node, tree, mainTree, index){
+	
 			var content = node.nodeValue;
 			var result = content.split(/(\{\{.*?\}\})/gm);
 			var i = 0, len = result.length;
+		
 			
 			
 			for(; i < len; i++){
+
 				var parent = tree;
 				var varName = result[i];
 				if((varName = _containsVar(varName))){
@@ -546,7 +579,7 @@ Seed({
 					}
 				}
 			};
-		
+
 			return tree;
 		}
 
@@ -560,6 +593,7 @@ Seed({
 				if(Mold.isArray(collection[i])){
 					_parseCollection(collection[i], tree, template, index)
 				}else{
+
 					_parseDomTree(collection[i], tree, template, false, index);
 					
 				}
@@ -568,7 +602,11 @@ Seed({
 		}
 
 
-	
+		var _parseString = function(node, content, template){
+			node.nodeValue = content;
+			var _root = new Mold.Lib.Tree("root", false, false, false, template);
+			return _parseDomLessTree(node,  _root, _root);
+		}
 
 		return {
 			getCleanName : _cleanVarName,

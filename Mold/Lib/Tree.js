@@ -1,13 +1,7 @@
 "use strict";
 Seed({
 		name : "Mold.Lib.Tree",
-		dna : "class",
-		include : [
-			"Mold.Lib.Event"
-		],
-		compiler : {
-			preparsePublics : true
-		}
+		dna : "class"
 	},
 	function(name, parent, valuePath, index, template, filter){
 
@@ -177,18 +171,22 @@ Seed({
 		}
 
 
-
+		var alltime= 0;
 		var _clone = function(){
+
+		
 			
-			var newTree = new Mold.Lib.Tree(_name, _parent, _valuePath, 0, _template, _filter),
-				selfPointerClone = _pointer[0].clone(),
+			var newTree = new Mold.Lib.Tree(_name, _parent, _valuePath, 0, _template, _filter);
+			var selfPointerClone = _pointer[0].clone(),
 				index = _childs.length;
 
-				Mold.Lib.TreeFactory.parseCollection(selfPointerClone.subnodes, newTree, template, index, _filter);
-				_childs.push(newTree.childs[0]);
-				_pointer.push(selfPointerClone);
-				
-				selfPointerClone.add();
+			Mold.Lib.TreeFactory.parseCollection(selfPointerClone.subnodes, newTree, template, index, _filter);
+		
+			_childs.push(newTree.childs[0]);
+			_pointer.push(selfPointerClone);
+			
+			selfPointerClone.add();
+
 			return newTree;
 		}
 

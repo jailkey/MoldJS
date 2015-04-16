@@ -18,6 +18,7 @@ Seed({
 			'/wasanderes' : 'json|Mold.Test2',
 			'GET/data/:id' :  'Mold.Test|@get.data',
 			'GET/data' :  'Mold.Test|@getall.data',
+			'GET/random' :  'Mold.Test|@get.random',
 			'POST/data' :  'urlencode|Mold.Test|@insert.data',
 			'PUT/data/:id' :  'Mold.Test|@update.data',
 			'DELETE/data/:id' :  'Mold.Test|@delete.data',

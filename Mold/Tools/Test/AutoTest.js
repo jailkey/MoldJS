@@ -7,7 +7,7 @@ Seed({
 		]
 	},
 	function(){
-		
+
 		Mold.addPostProcessor("unittest", function(createdSeed, rawSeed){
 			if(rawSeed.test){
 				var simpleUnit = new Mold.Tools.Test.Tester();

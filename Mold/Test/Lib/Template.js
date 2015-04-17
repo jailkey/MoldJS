@@ -10,38 +10,40 @@ Seed({
 			var template, model;
 
 			it("create instace", function(){
+
 				template = new Mold.Lib.Template(function(){/*|
-					<html>
-						<body>
-							<ul>
-								{{#list}}
-									<li><a href="/data/{{_id}}"> {{+}}. {{_id}} {{vorname}} {{nachname}} </a></li>
-								{{/list}}
-							</ul>
-						</body>
-					</html>
+					
+					<ul>
+						{{#list}}
+							<li><a href="/data/{{_id}}"> {{+}}. {{_id}} {{vorname}} {{nachname}} </a></li>
+						{{/list}}
+					</ul>
+				
 				|*/}, { disableSanitizer : true } );
 
-
+				
 			})
 
+
+
 			it("add data to instace", function(){
+				var data = [];
+				for(var i = 0; i < 1000; i++){
+					data.push({
+						vorname : "v + "+ Math.random(),
+						nachname : "n " + Math.random()
+					});
+				}
+				
 				template.append({
-					list : [
-						{ 
-							vorname : "hans",
-							nachname : "peter"
-						},
-						{ 
-							vorname : "dieter",
-							nachname : "schmitt"
-						}
-					]
+					list : data
 				});
+
+				document.body.appendChild(template.get())
 			});
 
 			
-			it("add data to instance", function(){
+			xit("add data to instance", function(){
 				template.append({
 					list : [
 						{ 
@@ -59,7 +61,7 @@ Seed({
 			})
 
 
-			it("bind model and append data", function(){
+			xit("bind model and append data", function(){
 				model = new Mold.Lib.Model({
 					properties : {
 						list : [
@@ -90,7 +92,7 @@ Seed({
 
 			})
 
-			it("append more data to model", function(){
+			xit("append more data to model", function(){
 				model.update({
 					list : [
 						{ 
@@ -106,7 +108,7 @@ Seed({
 			})
 
 
-			it("append much more data to model", function(){
+			xit("append much more data to model", function(){
 				model.update({
 					list : [
 						{ 
@@ -122,7 +124,7 @@ Seed({
 			})
 
 
-		it("append much much more data to model", function(){
+			xit("append much much more data to model", function(){
 				model.update({
 					list : [
 						{ 

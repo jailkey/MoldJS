@@ -206,16 +206,18 @@ Seed({
 			}
 		}
 
-
+		var countAddData = 0;
+		var addTime = 0;
 		var _addData = function(template, data, bind){
-
+				countAddData++;
+		
 				Mold.each(template, function(element, name){
 					if(data[name] != undefined){
 
 						if(Mold.isArray(data[name])){
 							if(bind){
 								data[name].on("list.item.add", function(e){
-									
+								
 									var filterResult = true;
 									
 									if(element.filter && element.filter.length){
@@ -225,6 +227,7 @@ Seed({
 									//if(filterResult){
 										if(!element.childs[e.data.index]){
 											element.add();
+											
 										}else{
 											element.show();
 										}
@@ -235,7 +238,8 @@ Seed({
 								}).on("list.item.remove", function(e){
 									element.remove(e.data.index);
 								}).on("list.item.change", function(e){
-									_addData(element.childs[e.data.index], e.data.value, bind)
+									_addData(element.childs[e.data.index], e.data.value, bind);
+									
 								});
 							}
 							Mold.each(data[name], function(selectedData, index){
@@ -247,8 +251,9 @@ Seed({
 								_addData(element.childs[index], selectedData, bind);
 							})
 						}else{
-							element.setValue(data[name])
 
+							element.setValue(data[name]);
+							
 							if(bind){
 								data.on("property.change."+name, function(e){
 									element.setValue(e.data.value)
@@ -259,6 +264,7 @@ Seed({
 					}
 	
 				});
+	
 		}
 
 		var _each = function(element, callback){
@@ -443,6 +449,7 @@ Seed({
 				if(!_compiledTemplate){
 					throw "Template not compiled!";
 				}
+
 				if(model.className && model.className === "Mold.Lib.Model"){
 					_addData(_compiledTemplate.childs[0], model.data, false);	
 				}else{
@@ -477,7 +484,8 @@ Seed({
 					return _shadowTemplate.nodeValue;
 				}
 				if(Mold.isNodeJS){
-					return _shadowTemplate.innerHTML;
+					var html = _shadowTemplate.innerHTML;
+					return html;
 				}else{
 					return _shadowTemplate;
 				}

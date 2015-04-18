@@ -19,7 +19,7 @@ Seed({
 		var _error = function(value, level){
 			console.log("%c" + _tabsByLevel(level) + "ERROR: " + value, "color: #ff0000; font-weight: bold;");
 			if(value.stack){
-				console.log("%c" + _tabsByLevel(level) + "ERROR: " + value.stack, "color: #ff0000; font-weight: bold;");
+				console.log("%c" + _tabsByLevel(level) + "ERROR: " + decodeURIComponent(value.stack), "color: #ff0000; font-weight: bold;");
 			}
 		}
 

@@ -2,7 +2,8 @@ Seed({
 		name : "Mold.Lib.VDom.DomParser",
 		dna : "static",
 		include : [
-			{ StringParser : "Mold.Lib.VDom.StringParser" }
+			{ StringParser : "Mold.Lib.VDom.StringParser" },
+			{ AttrNode : "Mold.Lib.VDom.AttributeNode" }
 		],
 		test : "Mold.Test.Lib.VDom.DomParser"
 	},
@@ -18,11 +19,24 @@ Seed({
 
 		var _doc = document;
 
-		var _parseAttributes = function(attributes){
-			var i = 0, len = attributes.length;
+		var _parseAttributes = function(attributes, parent){
+			var i = 0, len = attributes.length, attributeNodes = {};
 			for(; i < len; i++){
-				console.log("attributes", attributes[i]);
+
+				var selected = attributes[i];
+				var vDom = Mold.Lib.VDom.NodeBuilder(StringParser(selected.nodeValue), true, false, true);
+
+				var newAttribute = new AttrNode({
+					name : "attr" + Mold.getId(),
+					pointer : selected,
+					parent : parent,
+					protoDom : vDom,
+					attributeName : selected.nodeName.toLowerCase()
+				});
+
+				attributeNodes[newAttribute.name] = newAttribute;
 			}
+			return attributeNodes;
 		}
 
 
@@ -30,7 +44,6 @@ Seed({
 
 			Mold.each(objTwo, function(value, name){
 				if(objOne[name]){
-					console.log("claue", name, value)
 					objOne[name].addPointer(value.getPointer());
 				}else{
 					objOne[name] = value;
@@ -50,6 +63,7 @@ Seed({
 				var selected = domNodeCollection[0];
 				
 				switch(selected.nodeType){
+
 					//parse text nodes
 					case 3:
 						var vDom = Mold.Lib.VDom.NodeBuilder( StringParser(selected.textContent) );
@@ -58,17 +72,16 @@ Seed({
 
 					//parse element node
 					case 1:
+						var childResult = [];
+						var attributeResult = [];
+
 						
-						//parse attributes
-						if(selected.attributes){
-							_parseAttributes(selected.attributes);
+
+						//parse childnodes
+						if(selected.childNodes){
+							childResult = childResult.concat(Mold.Lib.VDom.DomParser(selected.childNodes));
 						}
 
-						//parsee childnoes
-						var childResult = [];
-						if(selected.childNodes){
-							childResult = Mold.Lib.VDom.DomParser(selected.childNodes);
-						}
 
 						var name = "dom" + Mold.getId();
 						
@@ -77,6 +90,11 @@ Seed({
 							protoDom : selected,
 							children : childResult[1]
 						});
+
+						//parse attributes
+						if(selected.attributes){
+							vDom.attributes = _parseAttributes(selected.attributes, vDom);
+						}
 			
 						var obj = {};
 						obj[vDom.name] = vDom;
@@ -86,17 +104,18 @@ Seed({
 				}
 
 				//if output is an array add each item to domNodes fragment
-				if(Mold.isArray(selected)){
-					for(;selected.length;){
-						domNodes.appendChild(selected.shift());
+				if(selected.nodeType !== 2){
+					if(Mold.isArray(selected)){
+						for(;selected.length;){
+							domNodes.appendChild(selected.shift());
+						}
+					}else{
+						domNodes.appendChild(selected);
 					}
-				}else{
-					domNodes.appendChild(selected);
 				}
 			}
 		
 
-	
 			return [domNodes, vDomNodes];
 		}
 	}

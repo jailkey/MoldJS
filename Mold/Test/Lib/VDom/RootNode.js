@@ -15,7 +15,7 @@ Seed({
 				});
 				*/
 				node = new RootNode({
-					content : "<ul> {{#mylist}} <li> <div> {{test}}  </div> </li>  {{/mylist}} </ul> asd"
+					content : "<ul> {{#mylist}} <li class=\"in-attribute {{listclass}}\"> <div> {{test}}  </div> </li>  {{/mylist}} </ul> asd"
 				});
 				console.log("parse time", performance.now() - start)
 				console.log(node)
@@ -34,8 +34,8 @@ Seed({
 					data.push({ sublist : { test : Math.random() }})
 				}
 				*/
-				for(var i =0; i < 1000; i++){
-					data.push({  test : Math.random() })
+				for(var i =0; i < 10; i++){
+					data.push({  test : "1 -" + Math.random(), listclass : i + " test" })
 				}
 				
 				node.setData({
@@ -44,7 +44,6 @@ Seed({
 				console.log("set data", performance.now() - start)
 			})
 
-
 			it("render node", function(){
 				var start = performance.now();
 				var result = node.render();
@@ -52,6 +51,40 @@ Seed({
 				console.log("render data", performance.now() - start)
 				document.body.appendChild(result);
 			});
+
+			xit("set twice node data", function(done){
+				window.setTimeout(function(){
+					console.log("more")
+					var start = performance.now();
+					var data = [];
+					/*
+					for(var i =0; i < 1000; i++){
+						data.push({ sublist : { test : Math.random() }})
+					}
+					*/
+					for(var i =0; i < 1000; i++){
+						data.push({  test : "2 -" + Math.random(), listclass : i * 10 + " test"  })
+					}
+					
+					node.setData({
+						mylist : data
+					})
+					console.log("more data", performance.now() - start)
+					done();
+				}, 500);
+			})
+			
+			xit("render twice node", function(){
+				var start = performance.now();
+				var result = node.update();
+				//console.log("result", result)
+				console.log("render data", performance.now() - start)
+			
+			});
+
+
+
+			
 
 
 

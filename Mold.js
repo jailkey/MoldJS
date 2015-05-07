@@ -362,7 +362,8 @@ var Mold = (function(config){
 	
 			//convert code to string
 			var code = input.toString(),
-				scriptName = seedName.split('.').join('/')+'.js';
+				scriptName = seedName.split('.').join('/')+'.js',
+				codeName = seedName.substring(seedName.lastIndexOf(".") + 1, seedName.length);
 			
 			//delete unnecessary stuff 
 			code = code.substring(0, code.lastIndexOf("}")+1);

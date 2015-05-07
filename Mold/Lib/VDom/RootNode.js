@@ -11,6 +11,7 @@ Seed({
 	function(){
 
 		var STATE_RENDER = "render";
+		var STATE_NEW = "new";
 
 		return function RootNode (config){
 		
@@ -30,7 +31,6 @@ Seed({
 			this.state = STATE_RENDER;
 
 			var _data = {};
-
 
 			//Parse content and created children
 			var _parseContent = function(content){
@@ -60,6 +60,12 @@ Seed({
 					fragment.appendChild(child.render());
 				})
 				return fragment;
+			}
+
+			this.update = function(){
+				Mold.each(_that.children, function(child){
+					child.update();
+				})
 			}
 
 			this.clone = function(){

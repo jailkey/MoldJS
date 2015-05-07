@@ -5,6 +5,8 @@ Seed({
 	function(){
 
 		var STATE_RENDER = "render";
+		var STATE_NEW = "new";
+
 		var _doc = document;
 
 		var _createBlockItem = function(block){
@@ -36,22 +38,20 @@ Seed({
 
 			this.nodeType = 2;
 			this.name = config.name || Mold.getId();
-			
 			this.protoDom = config.protoDom;
-		
 			this.content = config.content;
-
 			this.children = config.children || {};
 			this.state = STATE_RENDER;
 			this.pointer = [];
 			this.data = {};
+			this.parent = config.parent || false;
 
 			var _initChildrenFromProtoDom = function(protoDom, output){
+
 				var output = output || {};
 				for(var childName in protoDom){
 					var child = protoDom[childName];
 					if(child.nodeType === 1 || child.nodeType === 2 || child.nodeType === 3){
-
 						output[child.name] = child;
 					}else{
 						if(Mold.isArray(child.children)){
@@ -62,11 +62,15 @@ Seed({
 						}else{
 							_initChildrenFromProtoDom(child.children, output);
 						}
+						if(child.attributes){
+							_initChildrenFromProtoDom(child.attributes, output);
+						}
+
 					}
 				};
 				return output;
 			}
-
+		
 			_that.children = _initChildrenFromProtoDom(this.protoDom);
 		
 			this.addPointer = function(pointers, index){
@@ -155,22 +159,74 @@ Seed({
 				var output = _doc.createDocumentFragment();
 
 				if(Mold.isArray(_that.protoDom)){
-					//Mold.each(_that.protoDom, function(item){
+					var i = 0, len = _that.protoDom.length;
+
+					for(; i < len; i++){
+						var item = _that.protoDom[i];
+
+						for(var childName in item){
+							var child = item[childName];
+							output.appendChild(child.render());
+						};
+					}
+
+				}else{
+
+					for(var childName in _that.protoDom){
+						var child = _that.protoDom[childName];
+						output.appendChild(child.render());
+					}
+				}
+
+				return  output;
+			}
+
+			this.renderString = function(){
+				var output = "";
+
+				if(Mold.isArray(_that.protoDom)){
+					var i = 0, len = _that.protoDom.length;
+
+					for(; i < len; i++){
+						var item = _that.protoDom[i];
+
+						for(var childName in item){
+							var child = item[childName];
+							output += child.renderString();
+						};
+					}
+
+				}else{
+
+					for(var childName in _that.protoDom){
+						var child = _that.protoDom[childName];
+						output += child.renderString();
+					}
+				}
+
+				return  output;
+			}
+
+			this.update = function(){
+
+				if(Mold.isArray(_that.protoDom)){
 					var i = 0, len = _that.protoDom.length;
 					for(; i < len; i++){
 						var item = _that.protoDom[i];
 
-						Mold.each(item, function(child){
-							output.appendChild(child.render());
-						});
+						for(var childName in item){
+							var child = item[childName];
+							child.update();
+						};
 					}
-				}else{
-					Mold.each(_that.protoDom, function(child){
-						output.appendChild(child.render());
-					});
-				}
 
-				return  output;
+				}else{
+
+					for(var childName in _that.protoDom){
+						var child = _that.protoDom[childName];
+						child.update();
+					}
+				}
 			}
 
 		}

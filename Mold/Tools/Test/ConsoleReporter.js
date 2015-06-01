@@ -4,6 +4,27 @@ Seed({
 	},
 	function(){
 
+
+		var _showStack = function(stack){
+			
+			var parts = stack.split('\n');
+			var part = parts[0];
+			var content = decodeURIComponent(part);
+			var contentParts = content.split('\n');
+			var counter = contentParts.pop();
+			var counterParts = counter.split(":");
+			
+			var output = "%c"
+			Mold.each(contentParts, function(part, iterator){
+				if(iterator + 1 === +counterParts[1]){
+					output += "%c" + part + "\n" + "%c";
+				}else{
+					output += part + "\n";
+				}
+			});
+			console.log(output, "color:#000000; background-color:#ffffff;", "color:#ffffff; background-color:#ff0000;", "color:#000000; background-color:#ffffff;");
+		}
+
 		var _tabsByLevel = function(level){
 			var output = "";
 			for(var i = 0; i < level; i++){
@@ -18,8 +39,11 @@ Seed({
 
 		var _error = function(value, level){
 			console.log("%c" + _tabsByLevel(level) + "ERROR: " + value, "color: #ff0000; font-weight: bold;");
+			
 			if(value.stack){
-				console.log("%c" + _tabsByLevel(level) + "ERROR: " + decodeURIComponent(value.stack), "color: #ff0000; font-weight: bold;");
+				
+				_showStack(value.stack)
+				//console.log("%c" + _tabsByLevel(level) + "ERROR: " + decodeURIComponent(value.stack), "color: #ff0000; font-weight: bold;");
 			}
 		}
 

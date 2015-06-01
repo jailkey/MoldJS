@@ -2118,8 +2118,6 @@ Mold.addDNA({
 });
 
 
-
-
 Mold.addDNA({
 	name : "action",
 	create : function(seed){

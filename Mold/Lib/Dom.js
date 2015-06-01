@@ -24,7 +24,6 @@ Seed (
 
 		}
 
-		
 
 		var _getElementByPropertieValue = function(callback, elements){
 			var output = [];

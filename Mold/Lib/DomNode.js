@@ -1,151 +1,159 @@
 Seed({
 		name : "Mold.Lib.DomNode",
-		dna : "class",
+		dna : "static",
 		include : [
 			"Mold.Lib.DomParser"
 		],
 		test : "Mold.Test.Lib.DomNode"
 	},
-	function(type, name){
+	function(){
+		return function Node(type, name){
 
-		var that = this;
+			var that = this;
 
-		/*Errors*/
-		var ERROR;
+			/*Errors*/
+			var ERROR;
 
-		/*node typs*/
-		var nodeTypes = {
-			ELEMENT_NODE : 1,
-			ATTRIBUTE_NODE : 2,
-			TEXT_NODE : 3,
-			DOCUMENT_NODE : 9,
-			DOCUMENT_FRAGMENT_NODE : 11
-		}
-
-		var _checkNodeType = function(type){
-			return Mold.find(nodeTypes, function(value, name){
-				if(type === value || type === name){
-					return true;
-				}
-			})
-			return false;
-		}
-		
-		if(!_checkNodeType(type)){
-			throw new Error(type + " is not a valid node-type");
-		}
-
-		/*standard properties*/
-
-		this.nodeValue = "",
-		this.nodeName = (name) ? name.toLowerCase() : null,
-		this.nodeType = type,
-		this.parentNode = null,
-		this.nextSibling = null,
-		this.previousSibling = null,
-		this.firstChild = null,
-		this.lastChild = null,
-		this.parentElement = null,
-		this.attributes = [],
-		this.nodeIdent = Mold.getId(),
-		this.childNodes = [];
-		this.parentNode = null;
-
-		var _parentNode = false;
-		
-		Object.defineProperty(this, 'parentNode', {
-			get : function() {
-				return _parentNode
-			},
-			set : function(nodeValue) {
-				_parentNode = nodeValue;
-				this.parentElement = nodeValue;
-				return _parentNode;
-			}
-		});
-
-
-
-		switch(type){
-			case 3:
-				this.nodeName = "#text";
-				break;
-			case 9:
-				this.nodeName = "#document";
-				break;
-
-		}
-
-
-		var _getInnerHTML = function(startNode){
-			var markup = "";
-			Mold.each(startNode.childNodes, function(node){
-				if(node.nodeType === 1){
-					markup += "<" + node.nodeName;
-					if(node.attributes.length > 0 ){
-						Mold.each(node.attributes, function(attrNode){
-							markup += " " + attrNode.nodeName + "=\"" + attrNode.nodeValue + "\"";
-						});
-					}
-					markup += ">";
-					if(node.hasChildNodes()){
-						markup += _getInnerHTML(node);
-					}
-					markup += "</" + node.nodeName + ">";
-				}
-				if(node.nodeType === 3){
-					markup += node.nodeValue;
-				}		
-			});
-			return markup;
-		}
-
-
-		var _setInnerHTML = function(markup){
-			var newDom = Mold.Lib.DomParser.parse(markup);
-			that.childNodes = [];
-			that.firstChild = newDom.firstChild;
-			that.childNodes = newDom.childNodes;
-			that.lastChild = newDom.lastChild;
-		}
-
-		var _getOuterHTML = function(){
-			var len = that.attributes.length, i = 0, attributeString = "";
-
-			for(; i  < len; i++){
-				attributeString += " " + that.attributes[i].nodeName + '="' + that.attributes[i].nodeValue + '"'; 
+			/*node typs*/
+			var nodeTypes = {
+				ELEMENT_NODE : 1,
+				ATTRIBUTE_NODE : 2,
+				TEXT_NODE : 3,
+				DOCUMENT_NODE : 9,
+				DOCUMENT_FRAGMENT_NODE : 11
 			}
 
-			return "<" + that.nodeName + attributeString + ">" + _getInnerHTML(that) + "</" + that.nodeName + ">";
-		}
-		
-		if(type === 1 || type ===  9 || type === 11){
-			Object.defineProperty(this, 'innerHTML', {
+			var _checkNodeType = function(type){
+				return Mold.find(nodeTypes, function(value, name){
+					if(type === value || type === name){
+						return true;
+					}
+				})
+				return false;
+			}
+			
+			if(!_checkNodeType(type)){
+				throw new Error(type + " is not a valid node-type");
+			}
+
+			/*standard properties*/
+
+			this.nodeValue = "",
+			this.nodeName = (name) ? name.toLowerCase() : null,
+			this.nodeType = type,
+			this.parentNode = null,
+			this.nextSibling = null,
+			this.previousSibling = null,
+			this.firstChild = null,
+			this.lastChild = null,
+			this.parentElement = null,
+			this.attributes = [],
+			this.nodeIdent = Mold.getId(),
+			this.childNodes = [];
+			this.parentNode = null;
+
+			var _parentNode = false;
+			
+			Object.defineProperty(this, 'parentNode', {
 				get : function() {
-					return _getInnerHTML(this);
+					return _parentNode
 				},
-				set : function(markup) {
-					return _setInnerHTML(markup);
+				set : function(nodeValue) {
+					_parentNode = nodeValue;
+					this.parentElement = nodeValue;
+					return _parentNode;
 				}
 			});
 
-			Object.defineProperty(this, 'outerHTML', {
-				get : function() {
-					return _getOuterHTML(this);
-				},
-				set : function(markup) {
-					throw new Error("setting outerHTML is not implemented!")
+
+
+			switch(type){
+				case 3:
+					this.nodeName = "#text";
+					break;
+				case 9:
+					this.nodeName = "#document";
+					break;
+
+			}
+
+
+			var _getInnerHTML = function(startNode){
+				var markup = "";
+				var i = 0, len = startNode.childNodes.length;
+				for(; i < len; i++){
+					var node = startNode.childNodes[i];
+					if(node.nodeType === 1){
+						markup += "<" + node.nodeName;
+						if(node.attributes.length > 0 ){
+							var x = 0, attrLen = node.attributes.length;
+							for(; x < attrLen; x++){
+								var attrNode = node.attributes[x];
+								markup += " " + attrNode.nodeName + "=\"" + attrNode.nodeValue + "\"";
+							};
+						}
+						markup += ">";
+						if(node.hasChildNodes()){
+							markup += node.innerHTML;
+						}
+						markup += "</" + node.nodeName + ">";
+					}
+					if(node.nodeType === 3){
+						markup += node.nodeValue;
+					}
+					if(node.nodeType === 11){
+						markup += node.getInnerHTML();
+					}
 				}
-			});
-		}
-		
+				return markup;
+			}
 
 
-		this.publics = {
-			/*node properties*/
+			var _setInnerHTML = function(markup){
+				var newDom = Mold.Lib.DomParser.parse(markup);
+				that.childNodes = [];
+				that.firstChild = newDom.firstChild;
+				that.childNodes = newDom.childNodes;
+				that.lastChild = newDom.lastChild;
+			}
 
-			cloneNode : function(withChildNodes){
-				
+			var _getOuterHTML = function(){
+				var len = that.attributes.length, i = 0, attributeString = "";
+
+				for(; i  < len; i++){
+					attributeString += " " + that.attributes[i].nodeName + '="' + that.attributes[i].nodeValue + '"'; 
+				}
+
+				return "<" + that.nodeName + attributeString + ">" + _getInnerHTML(that) + "</" + that.nodeName + ">";
+			}
+			
+			if(type === 1 || type ===  9 || type === 11){
+				Object.defineProperty(this, 'innerHTML', {
+					get : function() {
+						return _getInnerHTML(this);
+					},
+					set : function(markup) {
+						return _setInnerHTML(markup);
+					}
+				});
+
+				Object.defineProperty(this, 'outerHTML', {
+					get : function() {
+						return _getOuterHTML(this);
+					},
+					set : function(markup) {
+						throw new Error("setting outerHTML is not implemented!")
+					}
+				});
+			}
+
+			this.getInnerHTML = function(){
+				return _getInnerHTML(this);
+			}
+			
+			
+			this.cloneNode = function(withChildNodes){
+					
 				var cloneNode =  new Mold.Lib.DomNode(this.nodeType, this.nodeName);
 				cloneNode.nodeValue = this.nodeValue;
 				var len = this.attributes.length, i = 0;
@@ -164,8 +172,9 @@ Seed({
 			
 
 				return cloneNode;
-			},
-			appendChild : function(child){
+			}
+
+			this.appendChild = function(child){
 				
 				if(child === this || child.nodeIdent === this.nodeIdent){
 					throw new Error("circular insert!");
@@ -187,8 +196,9 @@ Seed({
 					this.firstChild = child;
 				}
 				this.lastChild = child;
-			},
-			insertBefore : function(newChild, referenz){
+			}
+
+			this.insertBefore = function(newChild, referenz){
 
 				if(newChild === this){
 					 throw new Error("circular insert!")
@@ -222,8 +232,9 @@ Seed({
 					}
 				}
 				return true;
-			},
-			removeChild : function(child){
+			}
+			
+			this.removeChild = function(child){
 				var i = 0, 
 					len = this.childNodes.length;
 
@@ -263,8 +274,9 @@ Seed({
 					}
 				}
 				return false;
-			},
-			replaceChild : function(newChild, child){
+			}
+			
+			this.replaceChild = function(newChild, child){
 				if(child === this){
 					throw new Error("circular insert!");
 				}
@@ -295,41 +307,46 @@ Seed({
 					}
 				}
 				return false;
-			},
-			hasChildNodes : function(){
+			}
+				
+			this.hasChildNodes = function(){
 				if(this.childNodes.length > 0){
 					return true;
 				}else{
 					return false;
 				}
-			},
-		
-			getAttributeNode : function(name){
+			}
+			
+			this.getAttributeNode = function(name){
 				return Mold.find(this.attributes, function(attribute){
 					if(attribute.nodeName === name.toLowerCase()){
 						return true;
 					}
 				})
-			},
-			getAttribute : function(name){
+			}
+
+			this.getAttribute = function(name){
 				var attributeNode = this.getAttributeNode(name);
 				if(attributeNode){
 					return attributeNode.nodeValue;
 				}
 				return false;
-			},
-			setAttributeNode : function(attribute){
+			}
+
+			this.setAttributeNode = function(attribute){
 				this.attributes.push(attribute);
-			},
-			setAttribute : function(name, value){
+			}
+
+			this.setAttribute = function(name, value){
 				var attribute = this.getAttributeNode(name);
 				if(!attribute){
 					attribute = new Mold.Lib.DomNode(2, name);
 					this.setAttributeNode(attribute);
 				}
 				attribute.nodeValue = value;
-			},
-			removeAttributeNode : function(attribute){
+			}
+
+			this.removeAttributeNode = function(attribute){
 				var i = 0, 
 					len = this.attributes.length;
 
@@ -341,13 +358,13 @@ Seed({
 					}
 				}
 				return false;
-			},
-			removeAttribute : function(name){
+			}
+			this.removeAttribute = function(name){
 				var attribute = this.getAttributeNode(name);
 				if(attribute){
 					this.removeAttributeNode(attribute);
 				}
 			}
-		}
+		}	
 	}
 )

@@ -4,86 +4,72 @@ Seed({
 	},
 	function(){
 
-		return function DomNode (config){
-				var _that = this;
-
-				this.name = config.name;
-				this.nodeType = 6;
-				this.tagName = config.protoDom.tagName || "#text";
-				this.protoDom = config.protoDom;
-				this.children = config.children || {};
-				this.attributes = config.attributes || {};
-				this.data = config.protoDom.nodeValue;
-
-				this.setData = function(data){
-					for(var name in _that.children){
-						_that.children[name].setData(data);
-					}
-					for(var name in _that.attributes){
-						_that.attributes[name].setData(data);
-					}
-				}
-
-				this.clone = function(){
-
-					var newNode =  new Mold.Lib.VDom.DomNode({
-						name : _that.name,
-						tagName : _that.tagName,
-						protoDom : _that.protoDom.cloneNode()
-					});
-
-					for(var name in _that.children){
-						var child = _that.children[name];
-						newNode.children[child.name] = child.clone();
-					}
-
-					for(var name in _that.attributes){
-						var child = _that.attributes[name];
-						newNode.attributes[name] = child.clone();
-						newNode.attributes[child.name].parent = newNode;
-						newNode.attributes[child.name].pointer = newNode.protoDom.getAttributeNode(child.attributeName);
-					}
-						
-					return newNode;
-				}
-
-				this.render = function(){
-					var output = this.protoDom;
-					for(var childName in _that.children){
-						var child = _that.children[childName];
-
-						if(!child.render){
-							console.log("child render is not defined", child)
-						}else{
-							output.appendChild(child.render());
-						}
-					};
-
-					for(var name in _that.attributes){
-						_that.attributes[name].render();
-					}
-					
-
-					return output;
-				}
-
-				this.update = function(){
-					var output = this.protoDom;
+		return function DomNode(config){
+			//°include Mold.Lib.VDom.ProtoNode
 			
-					for(var childName in _that.children){
-						var child = _that.children[childName];
-						
-						child.update();
-						
-					};
+			this.type = DOM_NODE;
+			this.attributes = config.attributes || {};
+			this.domPointer = false; 
+			this.renderDom = this.vdom;
 
-					for(var name in _that.attributes){
-						_that.attributes[name].update();
-					}
-					
-
-					
+			this.onSetData = function(data){
+				for(var name in data){
+					this.children[name].setData(data[name]);
 				}
 			}
+
+			this.clone = function(){
+
+				var newNode =  new DomNode({
+					name : this.name,
+					data : this.data
+				});
+				
+				var i = 0, len = this.vdom.length;
+				
+				for(; i < len; i++){
+					var cloneNode = this.vdom[i].clone();
+					newNode.addNode(cloneNode)
+				}
+
+				for(var name in this.attributes){
+					var cloneNode = this.attributes[name].clone();
+					newNode.addAttribute(cloneNode);
+					
+				}
+				
+				return newNode;
+			}
+
+			this.renderAttribute = function(name){
+				var attr = this.attributes[name];
+				if(attr){
+					var attrValue = attr.render();
+					this.domPointer.setAttribute(name, attrValue);
+				}
+			}
+
+			this.render = function(){
+				
+				if(!this.domPointer){
+					this.domPointer = _doc.createElement(this.name);
+				}
+
+				var i = 0, len = this.renderDom.length;
+				for(; i < len; i++){
+					this.domPointer.appendChild(this.renderDom[i].render());
+				}
+
+				for(var name in this.attributes){
+					var attrValue = this.attributes[name].render();
+					this.domPointer.setAttribute(name, attrValue);
+				}
+
+				return this.domPointer;
+			}
+
+		}
+	
 	}
+	
 )

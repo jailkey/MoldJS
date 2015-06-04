@@ -1,9 +1,14 @@
+
 Seed({
 		name : "Mold.Lib.VDom.StringParser",
 		dna : "static",
-		test : "Mold.Test.Lib.VDom.StringParser"
+		//test : "Mold.Test.Lib.VDom.StringParser",
+		include : [
+			{ NodeBuilder : "Mold.Lib.VDom.NodeBuilder" }
+		]
 	},
 	function(){
+		"use strict";
 
 		var VALUE_NODE = 1;
 		var BLOCK_NODE = 2;
@@ -19,19 +24,24 @@ Seed({
 				i = 0,
 				actChar = false, 
 				lastChar = false,
+				nextChar = false,
+				lastWriteState = false,
 				previousChar = false,
-				writeState = 1,
+				writeState =  "COLLECT",
 				twoBeforeChar = false,
 				twoAfterChar = false,
-				COLLECT = 1,
-				WRITE_VAR = 2,
-				WRITE_MARKUP = 3,
-				NOTHING = 4,
-				WRITE_BLOCK = 5,
-				COLLECT_BLOCK = 6,
+				COLLECT = "COLLECT",
+				WRITE_VAR = "WRITE_VAR",
+				WRITE_MARKUP = "WRITE_MARKUP",
+				NOTHING = "NOTHING",
+				WRITE_BLOCK = "WRITE_BLOCK",
+				COLLECT_BLOCK = "COLLECT_BLOCK",
+				COLLECT_ELEMENT = "COLLECT_ELEMENT",
 				collected = "",
 				START_BRACKEDS = "{{",
 				END_BRACKEDS = "}}",
+				START_ELEMENT = "<",
+				END_ELEMENT = "<",
 				parts = [],
 				blockCounter = 0,
 				nodeType = false,
@@ -98,8 +108,6 @@ Seed({
 					collected += actChar;
 				}
 
-
-
 				if(writeState === WRITE_VAR){
 					parts.push({
 						type : "node",
@@ -145,7 +153,7 @@ Seed({
 			}
 
 	
-			return parts;
+			return new NodeBuilder(parts, true, false, true);
 		}
 	}
 )

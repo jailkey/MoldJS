@@ -1,234 +1,186 @@
+"use strict";
 Seed({
 		name : "Mold.Lib.VDom.BlockNode",
 		dna : "static"
 	},
 	function(){
 
-		var STATE_RENDER = "render";
-		var STATE_NEW = "new";
+		return function BlockNode(config){
+			//°include Mold.Lib.VDom.ProtoNode
+			
+			this.type = BLOCK_NODE;
+			this.domPointer = _doc.createDocumentFragment();
+			this.renderDom = [];
+			this.children = [];
 
-		var _doc = document;
-
-		var _createBlockItem = function(block){
-			var protoDom = {};
-
-			if(Mold.isArray(block.protoDom)){
-				var item = block.protoDom[0];
-			}else{
-				var item = block.protoDom;
-			}
-
-			for(var name in item){
-				var entry = item[name];
-				var clone = entry.clone();
-				protoDom[clone.name] = clone;
-			}
-
-		
-			return protoDom;
-		}
-
-		window.gesamtzeit = 0;
-
-		return  function BlockNode(config){
-
-			var _that = this;
-
-			config = config || {};
-
-			this.nodeType = 2;
-			this.name = config.name || Mold.getId();
-			this.protoDom = config.protoDom;
-			this.content = config.content;
-			this.children = config.children || {};
-			this.state = STATE_RENDER;
-			this.pointer = [];
-			this.data = {};
-			this.parent = config.parent || false;
-
-			var _initChildrenFromProtoDom = function(protoDom, output){
-
-				var output = output || {};
-				for(var childName in protoDom){
-					var child = protoDom[childName];
-					if(child.nodeType === 1 || child.nodeType === 2 || child.nodeType === 3){
-						output[child.name] = child;
+			this.createRenderDom = function(index){
+				var i = 0, len = this.vdom.length;
+				for(; i < len; i++){
+					var selected = this.vdom[i];
+					//if index 0 use pointer to vdom else create new
+					
+					if(index === 0){
+						var newElement = selected;
 					}else{
-						if(Mold.isArray(child.children)){
-							var i = 0, len = child.children.length;
-							for(; i < len; i++){
-								_initChildrenFromProtoDom(child.children[i], output);
-							}
+						var newElement = selected.clone();
+					}
+					
+					if(!this.renderDom[index]){
+						this.renderDom[index] = [];
+					}
+
+					this.renderDom[index].push(newElement)
+				}
+			}
+
+			this.findChild = function(name, dom){
+				var result = false;
+				
+				if(Mold.isArray(dom)){
+					var i = 0, len = dom.length;
+					for(; i < len; i++){
+						var selectedName = dom[i].name;
+						if(selectedName === name){
+							return dom[i];
 						}else{
-							_initChildrenFromProtoDom(child.children, output);
+							var subResult = this.findChild(name, dom[i].vdom);
+							if(!subResult && dom[i].attributes){
+								subResult = this.findChild(name, dom[i].attributes);
+							}
+							if(subResult){
+								return subResult;
+							}
 						}
-						if(child.attributes){
-							_initChildrenFromProtoDom(child.attributes, output);
+					}
+				}else{
+
+					for(var selected in dom){
+						var selectedName = dom[selected].name;
+						if(selectedName === name){
+							return dom[selected];
+						}else{
+							var subResult = this.findChild(name, dom[selected].vdom);
+							if(!subResult && dom[selected].attributes){
+								subResult = this.findChild(name, dom[selected].attributes);
+							}
+							if(subResult){
+								return subResult;
+							}
 						}
+					}
+				}
+			
+				return result; 
+			}
+
+			this.createChildren = function(index){
+				var selected = this.children[0];
+				for(var name in selected){
+					var child = this.findChild(name, this.renderDom[index]);
+
+					if(!this.children[index]){
+						this.children[index] = {};
+					}
+
+					this.children[index][name] = child;
+				}
+			}
+
+			this.removeBlockItem =  function(){
+
+			}
+
+			this.onSetData = function(data){
+
+
+				//handle array
+				if(Mold.isArray(data)){
+					/*
+					if(this.state !== STATE_NEW){
+						if(_oldData.length === data.length){
+							this.state = STATE_NO_CHANGES;
+						}else{
+							this.state = STATE_UPDATE
+						}
+					}*/
+
+					if(!Mold.isArray(this.children)){
+						this.children = [this.children];
+					}
+					var i = 0, len = data.length;
+					for(; i < len; i++){
+						
+						if(!this.renderDom[i]){
+							this.createRenderDom(i);
+						}
+						
+						if(!this.children[i]){
+							this.createChildren(i);
+						}
+						
+						for(var name in data[i]){
+							var selected = this.children[i][name];
+							if(selected){
+								selected.setData(data[i][name]);
+							}
+						}
+					
 
 					}
-				};
-				return output;
-			}
-		
-			_that.children = _initChildrenFromProtoDom(this.protoDom);
-		
-			this.addPointer = function(pointers, index){
-				var pointerList = [];
-				Mold.each(pointers, function(pointer){
-					pointerList.push(pointer);
-				})
-				if(index){
-					this.pointer[index] = pointerList;
 				}else{
-					this.pointer.push(pointerList);
+					//implement data from object
 				}
+
 			}
 
 			this.clone = function(){
-
-				var protoClone = {};
-
-				for(var name in _that.protoDom){
-					var entry = _that.protoDom[name];
-					var cloneEntry = entry.clone();
-					protoClone[cloneEntry.name] = cloneEntry;
-				}
-
-				var clondeNode =  new Mold.Lib.VDom.BlockNode({
-					name : _that.name,
-					content : _that.content,
-					type : _that.nodeType,
-					protoDom : protoClone,
+				var newNode =  new BlockNode({
+					name : this.name,
+					data : this.data
 				});
-			
 
-				clondeNode.children = _initChildrenFromProtoDom(protoClone);
-			
-
-				return clondeNode;
-			}
-
-
-			this.setData = function(data){
-				var start = performance.now();
-				_that.data = data;
-				if(Mold.isArray(_that.data)){
-					if(!Mold.isArray(_that.children)){
-			
-						_that.children = [_that.children];
-						_that.protoDom = [_that.protoDom];
-					}
-
-				
-					var index = 0, len = _that.data.length;
-					for(; index < len; index++){
-						
-						var value = _that.data[index];
-
-						if(!_that.children[index]){
-							var protoDom =  _createBlockItem(_that);
-							_that.protoDom[index] = protoDom;
-							_that.children[index] = _initChildrenFromProtoDom(protoDom);
-							
-						}
-					
-						for(var name in _that.data[index]){
-							if(Mold.is(_that.children[index][name])){
-								_that.children[index][name].setData(_that.data[index][name]);
-							}
-						}
-					}
-
-				}else if(Mold.isObject(_that.data)){
-					for(var name in _that.data){
-						var value = _that.data[name];
-						if(_that.children[name]){
-							_that.children[name].setData(value);
-						}
-					};
-				}else{
-					throw new Error("BlockNodes can only handle object and array data!");
+				for(var name in this.vdom){
+					newNode.addNode(this.vdom[name].clone())
 				}
-				this.state = STATE_RENDER;
-				window.gesamtzeit += performance.now() - start;
+
+				return newNode;
 			}
 
-		
 			this.render = function(){
-				var output = _doc.createDocumentFragment();
-
-				if(Mold.isArray(_that.protoDom)){
-					var i = 0, len = _that.protoDom.length;
-
-					for(; i < len; i++){
-						var item = _that.protoDom[i];
-
-						for(var childName in item){
-							var child = item[childName];
-							output.appendChild(child.render());
-						};
-					}
-
-				}else{
-
-					for(var childName in _that.protoDom){
-						var child = _that.protoDom[childName];
-						output.appendChild(child.render());
+			
+				var i = 0, len = this.renderDom.length;
+				for(; i < len; i++){
+					var selected = this.renderDom[i];
+					var y = 0, subLen = selected.length;
+					for(; y < subLen; y++){
+						//if(this.state !== STATE_NO_CHANGES){
+							this.domPointer.appendChild(selected[y].render());
+						//}else{
+						//	selected[y].render();
+						//}
+							
 					}
 				}
-
-				return  output;
+				this.state = STATE_NO_CHANGES;
+				return this.domPointer;
 			}
+
 
 			this.renderString = function(){
+
+				var i = 0, len = this.renderDom.length;
 				var output = "";
 
-				if(Mold.isArray(_that.protoDom)){
-					var i = 0, len = _that.protoDom.length;
-
-					for(; i < len; i++){
-						var item = _that.protoDom[i];
-
-						for(var childName in item){
-							var child = item[childName];
-							output += child.renderString();
-						};
-					}
-
-				}else{
-
-					for(var childName in _that.protoDom){
-						var child = _that.protoDom[childName];
-						output += child.renderString();
+				for(; i < len; i++){
+					var selected = this.renderDom[i];
+					var y = 0, subLen = selected.length;
+					for(; y < subLen; y++){
+						output += selected[y].renderString();
 					}
 				}
-
-				return  output;
+				return output;
 			}
-
-			this.update = function(){
-
-				if(Mold.isArray(_that.protoDom)){
-					var i = 0, len = _that.protoDom.length;
-					for(; i < len; i++){
-						var item = _that.protoDom[i];
-
-						for(var childName in item){
-							var child = item[childName];
-							child.update();
-						};
-					}
-
-				}else{
-
-					for(var childName in _that.protoDom){
-						var child = _that.protoDom[childName];
-						child.update();
-					}
-				}
-			}
-
 		}
+
 	}
 )

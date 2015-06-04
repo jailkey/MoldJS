@@ -4,65 +4,53 @@ Seed({
 	},
 	function(){
 
-		var TEXT_VALUE = 1;
-		var ITERATOR_VALUE = 2;
-		var PARENT_POINTER = 3;
-
-		var STATE_RENDER = "render";
-		var STATE_NEW = "new";
-
 		return function ValueNode(config){
-
-			config = config || {}
-
-			var _that = this;
-
-			this.nodeType = 1;
-			this.testId = Mold.getId();
-			this.name = config.name || Mold.getId();
-			this.nodeValue = config.nodeValue || "";
-			this.valueType = config.valueType || TEXT_VALUE;
-			this.protoDom = config.protoDom;
-			this.protoString = config.protoString;
-			this.data = config.data || false;
-			this.parent = config.parent || false;
-			this.state = STATE_NEW;
-
+			//°include Mold.Lib.VDom.ProtoNode
+			
+			this.type = VALUE_NODE;
+			this.domPointer = false;
 
 			this.clone = function(){
-				return new Mold.Lib.VDom.ValueNode({
-					name : _that.name,
-					valueType : _that.valueType,
-					nodeValue : _that.nodeValue,
-					valueType : _that.valueType,
-					data : _that.data,
-					protoDom : (_that.protoDom) ? _that.protoDom.cloneNode() : false,
-					protoString : _that.protoString
-				})
-			}
+				var newNode =  new ValueNode({
+					name : this.name,
+					data : this.data,
+					isString : this.isString
+				});
 
-			this.setData = function(data){
-				console.log("set Data", _that.name, data)
-				_that.data = data;
+				return newNode;
 			}
 
 			this.render = function(){
-				_that.nodeValue = _that.data;
-				_that.protoDom.nodeValue = _that.data;
-				return _that.protoDom;
+				if(!this.domPointer){
+					this.domPointer = _doc.createTextNode(this.data);
+				}else{
+					this.domPointer.nodeValue = this.data;
+				}
+				this.state = STATE_NO_CHANGES;
+				return this.domPointer;
 			}
 
 			this.renderString = function(){
-				_that.nodeValue = _that.data;
-				_that.protoString = _that.data;
-				return _that.protoString;
+				return this.data;
 			}
 
-			this.update = function(){
-				_that.nodeValue = _that.data;
-				_that.protoDom.nodeValue = _that.data;
+			this.setDataAndRender = function(data){
+				this.setData(data);
+				
+				if(this.isString){
+					//console.log("this is string", this.parent)
+					if(this.parent.type === ATTRIBUTE_NODE){
+						this.parent.renderAttribute();
+					}else{
+						this.parent.render();
+					}
+				}else{
+					this.render();
+					this.domPointer.nodeValue = this.data;
+				}
+				//this.parent.render();
+
 			}
-			
 		}
 	}
 )

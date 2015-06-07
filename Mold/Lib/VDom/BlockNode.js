@@ -10,6 +10,7 @@ Seed({
 			
 			this.type = BLOCK_NODE;
 			this.domPointer = _doc.createDocumentFragment();
+			this.pointer = [];
 			this.renderDom = [];
 			this.children = [];
 
@@ -91,19 +92,9 @@ Seed({
 			}
 
 			this.onSetData = function(data){
-
-
 				//handle array
-				if(Mold.isArray(data)){
-					/*
-					if(this.state !== STATE_NEW){
-						if(_oldData.length === data.length){
-							this.state = STATE_NO_CHANGES;
-						}else{
-							this.state = STATE_UPDATE
-						}
-					}*/
-
+				if(Mold.isArray(data[this.name])){
+					var data = data[this.name];
 					if(!Mold.isArray(this.children)){
 						this.children = [this.children];
 					}
@@ -120,15 +111,46 @@ Seed({
 						
 						for(var name in data[i]){
 							var selected = this.children[i][name];
+						
 							if(selected){
 								selected.setData(data[i][name]);
 							}
 						}
 					
-
+					}
+				
+					if(_oldData.length > data.length){
+						var dif =  _oldData.length - data.length;
+						this.children.splice(data.length, dif);
+						this.renderDom.splice(data.length, dif);
 					}
 				}else{
 					//implement data from object
+					if(Mold.isObject(data)){
+						if(!this.renderDom[0]){
+							this.createRenderDom(0);
+						}
+						
+						if(!this.children[0]){
+							this.createChildren(0);
+						}
+						
+						for(var name in data){
+							var selected = this.children[0][name];
+							if(selected){
+								selected.setData(data[name]);
+							}
+						}
+
+						//nested data
+						for(var name in data[this.name]){
+							var selected = this.children[0][name];
+							if(selected){
+								selected.setData(data[this.name]);
+							}
+						}
+							
+					}
 				}
 
 			}
@@ -146,21 +168,39 @@ Seed({
 				return newNode;
 			}
 
+			this.removePointer = function(index){
+				var i = 0, len =  this.pointer[index].length;
+
+				for(; i < len; i++){
+					this.pointer[index][i].parentNode.removeChild(this.pointer[index][i]);
+
+				}
+				this.pointer[index] = null;
+			}
+
 			this.render = function(){
 			
+				//remove unused
 				var i = 0, len = this.renderDom.length;
+				var oldLength =  _oldData.length;
+				var y =  len -1;
+
+				for(; y < oldLength; y++){
+					this.removePointer(y);
+				}
+
+				//create new
 				for(; i < len; i++){
 					var selected = this.renderDom[i];
 					var y = 0, subLen = selected.length;
+					this.pointer[i] = [];
 					for(; y < subLen; y++){
-						//if(this.state !== STATE_NO_CHANGES){
-							this.domPointer.appendChild(selected[y].render());
-						//}else{
-						//	selected[y].render();
-						//}
-							
+						var item = selected[y].render();
+						this.domPointer.appendChild(item);
+						this.pointer[i][y] = item;
 					}
 				}
+
 				this.state = STATE_NO_CHANGES;
 				return this.domPointer;
 			}

@@ -35,8 +35,9 @@ Seed({
 			}
 
 			this.setDataAndRender = function(data){
-				this.setData(data);
-				
+				if(data){
+					this.setData(data);
+				}
 				if(this.isString){
 					//console.log("this is string", this.parent)
 					if(this.parent.type === ATTRIBUTE_NODE){

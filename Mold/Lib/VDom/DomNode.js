@@ -14,7 +14,12 @@ Seed({
 
 			this.onSetData = function(data){
 				for(var name in data){
-					this.children[name].setData(data[name]);
+					if(this.children[name].type === BLOCK_NODE){
+						//if type is a blocknode add parent data
+						this.children[name].setData(data);
+					}else{
+						this.children[name].setData(data[name]);
+					}
 				}
 			}
 
@@ -57,6 +62,7 @@ Seed({
 
 				var i = 0, len = this.renderDom.length;
 				for(; i < len; i++){
+
 					this.domPointer.appendChild(this.renderDom[i].render());
 				}
 

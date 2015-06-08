@@ -14,6 +14,8 @@ Seed({
 			this.renderDom = [];
 			this.children = [];
 
+			var _oldRenderLength = 0;
+
 			this.createRenderDom = function(index){
 				var i = 0, len = this.vdom.length;
 				for(; i < len; i++){
@@ -92,6 +94,7 @@ Seed({
 			}
 
 			this.onSetData = function(data){
+				_oldRenderLength = this.renderDom.length;
 				//handle array
 				if(Mold.isArray(data[this.name])){
 					var data = data[this.name];
@@ -125,8 +128,9 @@ Seed({
 						this.renderDom.splice(data.length, dif);
 					}
 				}else{
-					//implement data from object
+					//data from object
 					if(Mold.isObject(data)){
+						
 						if(!this.renderDom[0]){
 							this.createRenderDom(0);
 						}
@@ -134,22 +138,52 @@ Seed({
 						if(!this.children[0]){
 							this.createChildren(0);
 						}
-						
-						for(var name in data){
-							var selected = this.children[0][name];
-							if(selected){
-								selected.setData(data[name]);
-							}
-						}
-
-						//nested data
-						for(var name in data[this.name]){
-							var selected = this.children[0][name];
-							if(selected){
-								selected.setData(data[this.name]);
-							}
-						}
+						if(this.children[0]){
+							for(var name in data){
 							
+								if(Mold.isArray(this.children[0][name])){
+									var childLength = this.children[0][name].length, i = 0;
+									for(; i < childLength; i++){
+										var selected = this.children[0][name][i];
+										if(selected){
+											selected.setData(data[name]);
+										}
+									}
+								}else{
+									var selected = this.children[0][name];
+									if(selected){
+										selected.setData(data[name]);
+									}
+								}
+							}
+
+
+							//nested data
+							for(var name in data[this.name]){
+							
+								if(Mold.isArray(this.children[0][name])){
+									var childLength = this.children[0][name].length, i = 0;
+									for(; i < childLength; i++){
+										var selected = this.children[0][name][i];
+										if(selected){
+											selected.setData(data[this.name]);
+										}
+									}
+								}else{
+									var selected = this.children[0][name];
+									if(selected){
+										console.log("set data and render", data[this.name], selected.name)
+										selected.setData(data[this.name]);
+									}
+								}
+							}
+
+							if(!Mold.is(data[this.name]) || data[this.name] === false){
+						
+								this.renderDom = [];
+								this.children = [];
+							}
+						}
 					}
 				}
 
@@ -172,7 +206,9 @@ Seed({
 				var i = 0, len =  this.pointer[index].length;
 
 				for(; i < len; i++){
-					this.pointer[index][i].parentNode.removeChild(this.pointer[index][i]);
+					if(this.pointer[index][i].parentNode){
+						this.pointer[index][i].parentNode.removeChild(this.pointer[index][i]);
+					}
 
 				}
 				this.pointer[index] = null;
@@ -182,10 +218,10 @@ Seed({
 			
 				//remove unused
 				var i = 0, len = this.renderDom.length;
-				var oldLength =  _oldData.length;
-				var y =  len -1;
+				var y = len;
 
-				for(; y < oldLength; y++){
+				for(; y < _oldRenderLength; y++){
+					console.log("remove", y)
 					this.removePointer(y);
 				}
 

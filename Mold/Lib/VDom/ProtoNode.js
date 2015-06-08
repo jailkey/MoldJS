@@ -32,6 +32,7 @@ Seed({
 		var _that = this;
 		var _oldData = false;
 
+
 		this.children = this.children || {};
 		this.data = config.data || false;
 		this.name = config.name;
@@ -65,7 +66,15 @@ Seed({
 
 				//if current node is not a block-node add child to next block-node
 				if(this.type !== BLOCK_NODE){
-					this.children[child.name] = child;
+
+					if(this.children[child.name]){
+						console.log("zweie node found", child.name);
+						//if there are two nodes with the same name create an array
+						this.children[child.name] = [this.children[child.name]]
+						this.children[child.name].push(child); 
+					}else{
+						this.children[child.name] = child;
+					}
 					var parentBlock = this.parent;
 					if(parentBlock){
 						while(parentBlock.type !== BLOCK_NODE && parentBlock.parent){

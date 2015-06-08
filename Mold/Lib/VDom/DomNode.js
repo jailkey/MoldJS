@@ -14,11 +14,26 @@ Seed({
 
 			this.onSetData = function(data){
 				for(var name in data){
-					if(this.children[name].type === BLOCK_NODE){
-						//if type is a blocknode add parent data
-						this.children[name].setData(data);
+					if(Mold.isArray(this.children[name])){
+						var len = this.children[name].length, i = 0;
+						for(; i < len; i++){
+							if(this.children[name][i].type === BLOCK_NODE){
+								//if type is a blocknode add parent data
+								this.children[name][i].setData(data);
+							}else{
+								this.children[name][i].setData(data[name]);
+							}
+						}
 					}else{
-						this.children[name].setData(data[name]);
+						//console.log("name", name, this.children[name])
+						if(this.children[name]){
+							if(this.children[name].type === BLOCK_NODE){
+								//if type is a blocknode add parent data
+								this.children[name].setData(data);
+							}else{
+								this.children[name].setData(data[name]);
+							}
+						}
 					}
 				}
 			}

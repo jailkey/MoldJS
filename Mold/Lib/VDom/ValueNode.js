@@ -10,6 +10,16 @@ Seed({
 			this.type = VALUE_NODE;
 			this.domPointer = false;
 
+			this.onSetData = function(data){
+				if(Mold.isObject(data)){
+					this.data = data[this.name]
+				}
+
+				if(data === false || !Mold.is(data)){
+					this.data = "";
+				}
+			}
+
 			this.clone = function(){
 				var newNode =  new ValueNode({
 					name : this.name,
@@ -26,7 +36,6 @@ Seed({
 				}else{
 					this.domPointer.nodeValue = this.data;
 				}
-				this.state = STATE_NO_CHANGES;
 				return this.domPointer;
 			}
 
@@ -39,7 +48,6 @@ Seed({
 					this.setData(data);
 				}
 				if(this.isString){
-					//console.log("this is string", this.parent)
 					if(this.parent.type === ATTRIBUTE_NODE){
 						this.parent.renderAttribute();
 					}else{
@@ -49,7 +57,7 @@ Seed({
 					this.render();
 					this.domPointer.nodeValue = this.data;
 				}
-				//this.parent.render();
+			
 
 			}
 		}

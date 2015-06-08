@@ -81,9 +81,7 @@ Seed({
 							var blockNode = new BlockNode({
 								name : name
 							});
-
 							vDom.addNode(blockNode);
-
 							parentNode = vDom;
 							vDom = blockNode;
 
@@ -92,7 +90,7 @@ Seed({
 
 						//Block End
 						if(Mold.startsWith(selected.nodeValue, BLOCK_END)){
-							vDom = parentNode;
+							vDom = vDom.parent;
 							break;
 						}
 
@@ -106,7 +104,7 @@ Seed({
 						if(Mold.startsWith(selected.nodeValue, VALUE)){
 							var name = selected.nodeValue.replace(VALUE, "").replace(END, "");
 							var valueNode = new ValueNode({
-								name : name,
+								name : name
 							});
 
 							vDom.addNode(valueNode);
@@ -128,7 +126,7 @@ Seed({
 		}
 
 		this.dom = _parseNode(_doc, new DomNode({
-			name : "div",
+			name : "root",
 			protoDom : _doc
 		}));
 

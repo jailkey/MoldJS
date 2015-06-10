@@ -13,6 +13,7 @@ Seed({
 			this.pointer = [];
 			this.renderDom = [];
 			this.children = [];
+			this.isNegative = config.isNegative || false;
 
 			var _oldRenderLength = 0;
 
@@ -38,11 +39,12 @@ Seed({
 
 			this.findChild = function(name, dom){
 				var result = false;
-				
 				if(Mold.isArray(dom)){
 					var i = 0, len = dom.length;
+
 					for(; i < len; i++){
 						var selectedName = dom[i].name;
+
 						if(selectedName === name){
 							return dom[i];
 						}else{
@@ -94,6 +96,21 @@ Seed({
 			}
 
 			this.onSetData = function(data){
+				console.log("set data", this.isNegative, data)
+				if(this.isNegative && data[this.name]){
+					data = false;
+				}else if(this.isNegative && (!data || !data[this.name])){
+					
+					if(!data){
+						data = {};
+					}else{
+						data = Mold.mixin({}, data);
+					}
+
+					data[this.name] = "show";
+				}
+				console.log("after set", data)
+
 				_oldRenderLength = this.renderDom.length;
 				//handle array
 				if(Mold.isArray(data[this.name])){
@@ -127,6 +144,10 @@ Seed({
 						this.children.splice(data.length, dif);
 						this.renderDom.splice(data.length, dif);
 					}
+				}else if((!data || !data[this.name]) && data[this.name] !== 0){
+					console.log("reset")
+					this.renderDom = [];
+					this.children = [];
 				}else{
 					//data from object
 					if(Mold.isObject(data)){

@@ -365,6 +365,24 @@ Seed({
 					this.removeAttributeNode(attribute);
 				}
 			}
+
+			this.getElementsByTagName = function(name){
+				var i = 0, len = this.childNodes.length;
+				var output = [];
+			
+				for(; i < len; i++){
+					var selected = this.childNodes[i];
+					if(selected.nodeName && selected.nodeName.toLowerCase() === name.toLowerCase()){
+						output.push(selected)
+					}
+					if(selected.getElementsByTagName){
+						output = output.concat(selected.getElementsByTagName(name));
+					}
+				
+				}
+			
+				return output;
+			}
 		}	
 	}
 )

@@ -13,29 +13,48 @@ Seed({
 			this.renderDom = this.vdom;
 
 			this.onSetData = function(data){
-				for(var name in data){
+				//set to children false if no data is given
+
+				for(var name in this.children){
 					if(Mold.isArray(this.children[name])){
 						var len = this.children[name].length, i = 0;
 						for(; i < len; i++){
 							if(this.children[name][i].type === BLOCK_NODE){
 								//if type is a blocknode add parent data
-								this.children[name][i].setData(data);
+								if(data){
+									this.children[name][i].setData(data);
+								}else{
+									this.children[name][i].setData(false);
+								}
 							}else{
-								this.children[name][i].setData(data[name]);
+								if(data[name]){
+									this.children[name][i].setData(data[name]);	
+								}else{
+									this.children[name][i].setData("");	
+								}
+								
 							}
 						}
 					}else{
-						//console.log("name", name, this.children[name])
-						if(this.children[name]){
-							if(this.children[name].type === BLOCK_NODE){
-								//if type is a blocknode add parent data
+	
+						if(this.children[name].type === BLOCK_NODE){
+							//if type is a blocknode add parent data
+							if(data){
 								this.children[name].setData(data);
 							}else{
+								this.children[name].setData(false);
+							}
+						}else{
+							if(data[name]){
 								this.children[name].setData(data[name]);
+							}else{
+								this.children[name].setData("");
 							}
 						}
+						
 					}
 				}
+				
 			}
 
 			this.clone = function(){

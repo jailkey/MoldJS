@@ -68,7 +68,6 @@ Seed({
 				if(this.type !== BLOCK_NODE){
 
 					if(this.children[child.name]){
-						console.log("zweie node found", child.name);
 						//if there are two nodes with the same name create an array
 						this.children[child.name] = [this.children[child.name]]
 						this.children[child.name].push(child); 
@@ -87,9 +86,9 @@ Seed({
 								if(!parentBlock.children[index]){
 									parentBlock.children[index] = {};
 								}
-								parentBlock.children[index][child.name] = child;
+								parentBlock.children[index][child.name] = this.children[child.name];
 							}else{
-								parentBlock.children[child.name] = child;
+								parentBlock.children[child.name] = this.children[child.name];
 							}
 						}
 					}

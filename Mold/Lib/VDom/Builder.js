@@ -88,17 +88,26 @@ Seed({
 							break;
 						}
 
+						//Block Negativ
+						if(Mold.startsWith(selected.nodeValue, BLOCK_NEGATIV)){
+							var name = selected.nodeValue.replace(BLOCK_NEGATIV, "").replace(END, "");
+							var blockNode = new BlockNode({
+								name : name,
+								isNegative : true
+							});
+							vDom.addNode(blockNode);
+							parentNode = vDom;
+							vDom = blockNode;
+							break;
+						}
+
 						//Block End
 						if(Mold.startsWith(selected.nodeValue, BLOCK_END)){
 							vDom = vDom.parent;
 							break;
 						}
 
-						//Block Negativ
-						if(Mold.startsWith(selected.nodeValue, BLOCK_NEGATIV)){
 
-							break;
-						}
 
 						//Value
 						if(Mold.startsWith(selected.nodeValue, VALUE)){
@@ -112,12 +121,14 @@ Seed({
 						}
 
 						//Standard text
-						var textNode = new TextNode({
-							name : "Text" + Mold.getId(),
-							data : selected.nodeValue
-						});
+						if(Mold.trim(selected.nodeValue)){
+							var textNode = new TextNode({
+								name : "Text" + Mold.getId(),
+								data : selected.nodeValue
+							});
 
-						vDom.addNode(textNode);
+							vDom.addNode(textNode);
+						}
 
 						break;
 				}

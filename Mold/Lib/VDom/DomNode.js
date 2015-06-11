@@ -13,25 +13,29 @@ Seed({
 			this.renderDom = this.vdom;
 
 			this.onSetData = function(data){
-				//set to children false if no data is given
 
+				//set children to false if no data is given
 				for(var name in this.children){
 					if(Mold.isArray(this.children[name])){
 						var len = this.children[name].length, i = 0;
 						for(; i < len; i++){
-							if(this.children[name][i].type === BLOCK_NODE){
+							var selected = this.children[name][i];
+							if(selected.type === BLOCK_NODE){
 								//if type is a blocknode add parent data
 								if(data){
-									this.children[name][i].setData(data);
+									selected.setData(data);
 								}else{
-									this.children[name][i].setData(false);
+									selected.setData(false);
 								}
 							}else{
-								if(data[name]){
-									this.children[name][i].setData(data[name]);	
+								if(selected.hasParentValue && data[selected.parentName] &&  data[selected.parentName][selected.childName]){
+									selected.setData(data[selected.parentName][selected.childName]);
+								}else if(data[name]){
+									selected.setData(data[name]);	
 								}else{
-									this.children[name][i].setData("");	
+									selected.setData("");	
 								}
+								
 								
 							}
 						}
@@ -45,7 +49,10 @@ Seed({
 								this.children[name].setData(false);
 							}
 						}else{
-							if(data[name]){
+							var selected = this.children[name];
+							if(selected.hasParentValue && data[selected.parentName] &&  data[selected.parentName][selected.childName]){
+								selected.setData(data[selected.parentName][selected.childName]);
+							}else if(data[name]){
 								this.children[name].setData(data[name]);
 							}else{
 								this.children[name].setData("");

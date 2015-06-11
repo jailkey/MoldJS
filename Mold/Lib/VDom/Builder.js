@@ -113,7 +113,8 @@ Seed({
 						if(Mold.startsWith(selected.nodeValue, VALUE)){
 							var name = selected.nodeValue.replace(VALUE, "").replace(END, "");
 							var valueNode = new ValueNode({
-								name : name
+								name : name,
+								isPointer : (name === ".") ? true : false
 							});
 
 							vDom.addNode(valueNode);

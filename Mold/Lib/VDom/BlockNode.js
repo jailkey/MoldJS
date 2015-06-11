@@ -91,12 +91,7 @@ Seed({
 				}
 			}
 
-			this.removeBlockItem =  function(){
-
-			}
-
 			this.onSetData = function(data){
-				console.log("set data", this.isNegative, data)
 				if(this.isNegative && data[this.name]){
 					data = false;
 				}else if(this.isNegative && (!data || !data[this.name])){
@@ -109,7 +104,6 @@ Seed({
 
 					data[this.name] = "show";
 				}
-				console.log("after set", data)
 
 				_oldRenderLength = this.renderDom.length;
 				//handle array
@@ -118,9 +112,10 @@ Seed({
 					if(!Mold.isArray(this.children)){
 						this.children = [this.children];
 					}
+
 					var i = 0, len = data.length;
 					for(; i < len; i++){
-						
+
 						if(!this.renderDom[i]){
 							this.createRenderDom(i);
 						}
@@ -128,12 +123,21 @@ Seed({
 						if(!this.children[i]){
 							this.createChildren(i);
 						}
-						
-						for(var name in data[i]){
-							var selected = this.children[i][name];
-						
-							if(selected){
-								selected.setData(data[i][name]);
+						//Handle pointers
+						if(this.children[0]['.']){
+							var y = 0, childLen = this.children.length;
+							this.children[i]['.'].setData(data[i]);
+						}else{
+							for(var name in data[i]){
+								var selected = this.children[i][name];
+							
+								if(selected){
+									if(selected.isPointer){
+										selected.setData(data[i]);
+									}else{
+										selected.setData(data[i][name]);
+									}
+								}
 							}
 						}
 					
@@ -145,10 +149,11 @@ Seed({
 						this.renderDom.splice(data.length, dif);
 					}
 				}else if((!data || !data[this.name]) && data[this.name] !== 0){
-					console.log("reset")
+
 					this.renderDom = [];
 					this.children = [];
 				}else{
+
 					//data from object
 					if(Mold.isObject(data)){
 						
@@ -160,8 +165,8 @@ Seed({
 							this.createChildren(0);
 						}
 						if(this.children[0]){
-							for(var name in data){
-							
+							for(var name in this.children[0]){
+						
 								if(Mold.isArray(this.children[0][name])){
 									var childLength = this.children[0][name].length, i = 0;
 									for(; i < childLength; i++){
@@ -171,9 +176,18 @@ Seed({
 										}
 									}
 								}else{
+
 									var selected = this.children[0][name];
+									//console.log("this.children[0][name]", this.children[0][name], name)
 									if(selected){
-										selected.setData(data[name]);
+										if(selected.hasParentValue){
+											console.log("set parent value")
+											if(data[selected.parentName] && data[selected.parentName][selected.childName]){
+												selected.setData(data[selected.parentName][selected.childName]);
+											}
+										}else{
+											selected.setData(data[name]);
+										}
 									}
 								}
 							}
@@ -187,14 +201,23 @@ Seed({
 									for(; i < childLength; i++){
 										var selected = this.children[0][name][i];
 										if(selected){
-											selected.setData(data[this.name]);
+											if(selected.hasParentValue){
+												selected.setData(data[selected.parentName][selected.childName]);
+											}else{
+												selected.setData(data[this.name]);
+											}
 										}
 									}
 								}else{
 									var selected = this.children[0][name];
+
 									if(selected){
-										console.log("set data and render", data[this.name], selected.name)
-										selected.setData(data[this.name]);
+										if(selected.hasParentValue){
+
+											selected.setData(data[this.parentName][this.childName]);
+										}else{
+											selected.setData(data[this.name]);
+										}
 									}
 								}
 							}
@@ -242,7 +265,6 @@ Seed({
 				var y = len;
 
 				for(; y < _oldRenderLength; y++){
-					console.log("remove", y)
 					this.removePointer(y);
 				}
 

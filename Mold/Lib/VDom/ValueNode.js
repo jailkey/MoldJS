@@ -9,6 +9,16 @@ Seed({
 			
 			this.type = VALUE_NODE;
 			this.domPointer = false;
+			this.isPointer = config.isPointer || false;
+			this.hasParentValue = config.hasParentValue || false;
+			this.parentName = false;
+			this.childName = false;
+
+			if(!this.isPointer && ~this.name.indexOf(".")){
+				this.hasParentValue = true;
+				this.parentName = config.name.split(".")[0];
+				this.childName = config.name.split(".")[1];
+			}
 
 			this.onSetData = function(data){
 				if(Mold.isObject(data)){

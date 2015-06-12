@@ -435,6 +435,26 @@ Seed({
 						throw new Error(input + " is " +((negate) ? "not " : "")+ "not to be " + value);
 					}
 				},
+				toBeObject : function(){
+					if(	
+						!negate && Mold.isObject(input)
+						|| negate && !Mold.isObject(input)
+					){
+						return _expect(input);
+					}else{
+						throw new Error(input + " is " +((negate) ? "not " : "")+ "not an object!")
+					}
+				},
+				toBeArray : function(){
+					if(	
+						!negate && Mold.isObject(input)
+						|| negate && !Mold.isObject(input)
+					){
+						return _expect(input);
+					}else{
+						throw new Error(input + " is " +((negate) ? "not " : "")+ "not an array!")
+					}
+				},
 				toEqual : function(value){
 					if(typeof value === "function"){
 						if(

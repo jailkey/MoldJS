@@ -16,12 +16,16 @@ Seed({
 		parameter : {
 			'-all' : {
 				'description' : 'If set all repos in the project file will be tested.'
+			},
+			'-only' : {
+				'description' : 'Test a specified seed.'
 			}
 		},
 		execute : function(parameter, cli){
 			var fs = require("fs");
 
 			var project = new Mold.Tools.ProjectHandler();
+
 
 			//Test Local Repo
 			var testRepo = function(repo, external){
@@ -31,7 +35,7 @@ Seed({
 						var seedContent = fs.readFileSync(path);
 						if(seedContent !== ""){
 							var info = new Mold.Tools.SeedParser(seedContent);
-							if(info && info.header && info.header.test){
+							if(info && info.header && info.header.test && (!parameter.only || parameter.only === info.header.name)){
 								if(
 									!info.header.platform 
 									|| info.header.platform === "isomorph"

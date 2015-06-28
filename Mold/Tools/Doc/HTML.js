@@ -2,8 +2,10 @@ Seed({
 		name : "Mold.Tools.Doc.HTML",
 		dna : "class",
 		include : [
-			{ Ajax : "Mold.Lib.Ajax" }
-		]
+			{ File : "Mold.Lib.File" },
+			{ Promise : "Mold.Lib.Promise" }	
+		],
+		test : "Mold.Test.Tools.Doc.HTML"
 	},
 	function(url){
 		
@@ -26,7 +28,7 @@ Seed({
 		}
 
 		var _firstWord = function(value){
-			value = value.toLowerCase()
+			value = value.toLowerCase();
 			return value.substring(0, (~value.indexOf(' ')) ? value.indexOf(' ') : value.length );
 		}
 
@@ -71,12 +73,13 @@ Seed({
 			return output;
 		}
 
-		var _parse = function(result){
+		var _parse = function(data){
 			//console.log("data", result.data.data)
-			var parts = result.data.data.split(/\<\!\-\-\/\/([\s\S]*?)\/\/\-\-\>/g);
+			var parts = data.split(/\<\!\-\-\/\/([\s\S]*?)\/\/\-\-\>/g);
 			var parsed = false;
 			var modul = false;
 			var snippet = false;
+			var output = [];
 
 			for(var i = 0; i < parts.length; i++){
 
@@ -86,7 +89,7 @@ Seed({
 					switch(parsed.type){
 						case "modul":
 							modul = new Modul(parsed);
-							_data.push(modul);
+							output.push(modul);
 							break;
 						case "snippet":
 							if(!modul){
@@ -108,22 +111,22 @@ Seed({
 					}
 				}
 			}
-
-			console.log("data", _data)
-			return _data
+			return output;
 		}
 
-		var request = new Ajax();
-
-		request
-			.get(url)
-			.then(function(data){
-				_parse(data);
-			});
+		var file = new File(url);
 
 		this.publics = {
-			getData : function(){
-				return _data;
+			get : function(callback){
+				return new Promise(function(resolve, reject){
+					file
+						.content(function(data){
+							resolve(_parse(data));
+						})
+						.error(function(error){
+							reject(error);
+						});
+				});
 			}
 		}
 	}

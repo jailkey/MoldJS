@@ -109,13 +109,11 @@
 					if(xhr.readyState === 4) {
 
 						var header = new Mold.Lib.Header(xhr.getAllResponseHeaders());
-
+						var data = xhr.response;
 						switch(header.get('content-type')){
 							case "application/json":
 								jsonData = JSON.parse(xhr.response);
-								break;
 							default:
-								data : xhr.response;
 								break;
 						}
 						

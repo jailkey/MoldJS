@@ -2,10 +2,10 @@
 Seed({
 		name : "Mold.Lib.VDom.Builder",
 		dna : "class",
-		test : "Mold.Test.Lib.VDom.Builder",
+		//test : "Mold.Test.Lib.VDom.Builder",
 		include : [
-			"->Mold.Lib.Dom",
-			"->Mold.Tools.Dev.CodeInclude",
+			"Mold.Lib.Dom",
+			"Mold.Tools.Dev.CodeInclude",
 			"Mold.Lib.VDom.ProtoNode",
 			[
 				{ DomNode : "Mold.Lib.VDom.DomNode" },

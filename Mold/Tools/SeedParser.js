@@ -18,6 +18,8 @@ Seed({
 				+ "	return result;"
 				+ "})()";
 		
+		console.log("code", code)
+
 		var result = vm.runInThisContext(code);
 
 		if(result.length > 1){

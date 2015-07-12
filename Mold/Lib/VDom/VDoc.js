@@ -7,6 +7,6 @@ Seed({
 	},
 	function(){
 
-		return document // new Mold.Lib.Dom("<div></div>");
+		return (Mold.isNodeJS) ? new Mold.Lib.Dom("<div></div>") : document;
 	}
 )

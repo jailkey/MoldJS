@@ -5,7 +5,8 @@ Seed({
 			{ BlockNode : "Mold.Lib.VDom.BlockNode" },
 			{ ValueNode : "Mold.Lib.VDom.ValueNode" },
 			{ DomNode : "Mold.Lib.VDom.DomNode" },
-			{ StringNode : "Mold.Lib.VDom.StringNode" }
+			{ StringNode : "Mold.Lib.VDom.StringNode" },
+			"Mold.Lib.VDom.VDoc"
 		]
 	},
 	function(){
@@ -20,7 +21,7 @@ Seed({
 		var STRING_NODE = 8;
 
 		//document
-		var _doc = document;
+		var _doc = Mold.Lib.VDom.VDoc;
 
 		var _createProtoDom = function(content, parent){
 			var containerNode = _doc.createElement('div');

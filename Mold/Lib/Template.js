@@ -17,7 +17,7 @@ Seed({
 		nodeInclude : [
 			"Mold.Lib.Document"
 		],
-		test : "Mold.Test.Lib.Template"
+		//test : "Mold.Test.Lib.Template"
 	},
 	function(content, config){
 

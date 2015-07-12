@@ -624,6 +624,7 @@ Seed({
 
 				},
 				toThrow : function(){
+
 					if(!negate){
 						try {
 							input.call();
@@ -643,6 +644,7 @@ Seed({
 					}
 				},
 				toThrowError : function(){
+
 					if(!negate){
 						try {
 							input.call();
@@ -807,6 +809,7 @@ Seed({
 			describe : _describe,
 			xdescribe : function(){},
 			it : _it,
+			now : _now,
 			xit : function(){},
 			run : _run,
 			expect : _expect,

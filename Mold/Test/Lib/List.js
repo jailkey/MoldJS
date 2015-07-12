@@ -73,7 +73,7 @@ Seed({
 					done();
 				});
 			
-				it("list.item.change event", function(next){
+				xit("list.item.change event", function(next){
 					testList.on("list.item.change.0", function(e){
 						testList.off("list.item.change.0");
 						expect(e.data.index).toEqual(0);
@@ -140,9 +140,10 @@ Seed({
 
 			it(".splice()", function(done){
 				var addResult = false;
-				testList.on("list.item.remove", function(e){
-					testList.off("list.item.remove");
-					expect(e.data.index).toEqual(6);
+				testList.on("list.splice", function(e){
+					testList.off("list.splice");
+					expect(e.data.from).toEqual(3);
+					expect(e.data.data[0]).toBe("insert");
 					done();
 				});
 				testList.splice(3, 2, "insert");
@@ -153,12 +154,11 @@ Seed({
 			it(".splice() add some content", function(done){
 				var addResult = false;
 				var countAdded = 0;
-				testList.on("list.item.add", function(e){
-					countAdded++;
-					if(countAdded === 4){
-						testList.off("list.item.add");
-						done();
-					}
+				testList.on("list.splice", function(e){
+					testList.off("list.splice");
+					expect(e.data.from).toEqual(1);
+					expect(e.data.data.length).toBe(4);
+					done();
 				});
 				
 				testList.splice(1, 0, "insert", "test", "nochwas", "irgendwie");

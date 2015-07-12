@@ -201,6 +201,22 @@ var Mold = (function(config){
 			callback();
 		}
 	};
+
+	var _getProjectFile = function(){
+		if(_isNodeJS){
+			var currentDir = process.cwd(),
+				fs = require("fs");
+
+			if(!fs.existsSync(currentDir + "/" + Mold.PROJECT_FILE_NAME)){
+				return false;
+			}			
+				
+			var config = require(currentDir + "/" + Mold.PROJECT_FILE_NAME);
+
+			return config;
+		}
+		return false;
+	};
 	
 	var _getMainScript = function(){
 		if(_isNodeJS){
@@ -237,9 +253,16 @@ var Mold = (function(config){
 				output = "->Mold.Lib.CLI";
 			}
 
+			var project = _getProjectFile();
 			if(!_config.externalRepository){
-				_config.externalRepository =  __dirname  + "/";
+		
+				if(project && project.shared){
+					_config.externalRepository = process.cwd() + "/" + project.shared;
+				}else{
+					_config.externalRepository =  __dirname  + "/";
+				}
 			}
+
 			if(!_config.localRepository){
 				
 				var fileSystem = require('fs'),
@@ -443,22 +466,8 @@ var Mold = (function(config){
 		PROJECT_FILE_NAME : "mold.project.json",
 		seedList  : [],
 		stopExecution : false,
+		getProjectFile : _getProjectFile,
 
-		getProjectFile : function(){
-			if(_isNodeJS){
-				var currentDir = process.cwd(),
-					fs = require("fs");
-
-				if(!fs.existsSync(currentDir + "/" + Mold.PROJECT_FILE_NAME)){
-					throw new Error("Can not find " + currentDir + "/" + Mold.PROJECT_FILE_NAME + " file!\n" );
-					return;
-				}			
-					
-				var config = require(currentDir + "/" + Mold.PROJECT_FILE_NAME);
-				return config;
-			}
-			return false;
-		},
 	/**
 	 * @method getDependencies
 	 * @description returns all Depencies from a seed header in a list

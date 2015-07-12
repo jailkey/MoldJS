@@ -21,6 +21,18 @@ Seed({
 
 		return {
 			normalize : _normalize,
+			is : function(path){
+				if(typeof path === "string"){
+					if(this.isHTTP || this.isFile){
+						return true;
+					}
+
+					if(!~path.indexOf("\n") && ~path.indexOf("/") && ~path.indexOf(".") && !~path.indexOf("<")){
+						return true;
+					}
+				}
+				return false;
+			},
 			isHTTP : function(path){
 				if(Mold.startsWith(path, "http://") || Mold.startsWith(path, "https://")){
 					return true;

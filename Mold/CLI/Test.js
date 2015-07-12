@@ -30,7 +30,9 @@ Seed({
 			//Test Local Repo
 			var testRepo = function(repo, external){
 				var repo = new Mold.Tools.RepoHandler(Mold.LOCAL_REPOSITORY);
+				
 				repo.eachSeed(function(path){
+					
 					if(fs.existsSync(path)){
 						var seedContent = fs.readFileSync(path);
 						if(seedContent !== ""){
@@ -42,6 +44,7 @@ Seed({
 									|| info.header.platform === "server"
 									|| info.header.platform === "node"
 								){
+									
 									var tester = new Mold.Tools.Test.Tester();
 									tester.addReporter(new Mold.Tools.Test.CLIReporter(cli));
 									Mold
@@ -53,6 +56,7 @@ Seed({
 													tester.run();
 												});
 										})
+									
 								}
 							}
 						}

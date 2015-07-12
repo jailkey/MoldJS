@@ -111,7 +111,6 @@ Seed({
 				element = arguments[i];
 				_array.oldPush(element);
 				element = _creatListItem(element);
-
 				_array.trigger("list.item.add", { 
 					length : _array.length,
 					index : _array.length -1,
@@ -125,7 +124,7 @@ Seed({
 		_array.pop = function(){
 			var value = _array[_array.length -1];
 			var len = (_array.length > 0 ) ? _array.length -1 : 0;
-			
+	
 			_array.trigger("list.item.remove", { 
 				length : len,
 				index : len,
@@ -202,56 +201,17 @@ Seed({
 
 			var callArgs = [from, len];
 			callArgs = callArgs.concat(argumentsArray);
-			var lenBefore = _array.length;
-
-			//trigger changes
-			var changeLen = from + argumentsArray.length;
-			if(changeLen > lenBefore){
-				changeLen = lenBefore;
-			}
-	
-			for(var i = from; i < changeLen; i++){
-				_array.trigger("list.item.change", {
-					index : i,
-					oldValue : _array[i],
-					value : argumentsArray[i - from],
-					list : _array 
-				});
-
-				_array.trigger("list.item.change."+i, { 
-					index : i,
-					oldValue : _array[i],
-					value : argumentsArray[i - from],
-					list : _array 
-				});
-			}
-
-			var toDelete = len - argumentsArray.length;		
-			for(var i = 0; i < len; i++){
-				var outLen = lenBefore + toDelete -i;
-				if(!argumentsArray[i]){
-					console.log("remove")
-					_array.trigger("list.item.remove", {
-						length : _array.length,
-						index : outLen -1,
-						value : false,
-						oldValue : _array[_array.length - (i+1)]
-					});
-				}
-			}
+			
 			_array.oldSplice.apply(this, callArgs)
-			var lenAfter = _array.length;
-			var toAdd = lenAfter - lenBefore;
-			//moved
-			for(var y = lenBefore; y < lenAfter; y++){
-		
-				_array.trigger("list.item.add", { 
-					length : y + 1,
-					index : y,
-					value : _array[y],
-					list : _array
-				});
-			}
+			
+			_array.trigger("list.splice", {
+				from : from,
+				to : from + len,
+				len : len,
+				data : argumentsArray || [],
+				list : _array
+			});
+			
 
 		}
 

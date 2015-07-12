@@ -8,7 +8,7 @@
 	structure and pattern framework
 
  * @author Jan Kaufmann <jan@moldjs.de>
- * @version 0.1.4;
+ * @version 0.0.28;
  *
  *
  */

@@ -17,8 +17,6 @@ Seed({
 				+ " " + seedString + " ;"
 				+ "	return result;"
 				+ "})()";
-		
-		console.log("code", code)
 
 		var result = vm.runInThisContext(code);
 

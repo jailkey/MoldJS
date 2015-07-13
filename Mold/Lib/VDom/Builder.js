@@ -2,24 +2,25 @@
 Seed({
 		name : "Mold.Lib.VDom.Builder",
 		dna : "class",
-		//test : "Mold.Test.Lib.VDom.Builder",
+		test : "Mold.Test.Lib.VDom.Builder",
 		include : [
-			"Mold.Lib.Dom",
-			"Mold.Tools.Dev.CodeInclude",
+			"->Mold.Lib.Dom",
+			"->Mold.Tools.Dev.CodeInclude",
 			"Mold.Lib.VDom.ProtoNode",
 			[
 				{ DomNode : "Mold.Lib.VDom.DomNode" },
 				{ BlockNode : "Mold.Lib.VDom.BlockNode" },
 				{ ValueNode : "Mold.Lib.VDom.ValueNode" },
 				{ TextNode : "Mold.Lib.VDom.TextNode" },
-				{ AttributeNode : "Mold.Lib.VDom.AttributeNode" }
+				{ AttributeNode : "Mold.Lib.VDom.AttributeNode" },
+				{ Doc : "Mold.Lib.VDom.VDoc"}
 			]
 		]
 	},
 	function(content){
 
 		var _dom = new Mold.Lib.Dom(content);
-		var _newDoc = document;
+		var _newDoc = Doc;
 		var _doc = _dom.get();
 		var _template = [];
 
@@ -46,6 +47,30 @@ Seed({
 
 			}
 			
+		}
+
+		var _getFilter = function(name){
+			var filter = {};
+			if(~name.indexOf("|")){
+				var nameParts = name.split("|");
+				name = nameParts.shift();
+				var i = 0, len = nameParts.length;
+
+				for(; i < len; i++){
+					
+					var filterParts = nameParts[i].split(',');
+					var y = 1, paramLength = filterParts.length;
+					var filterName = filterParts[0];
+
+					filter[filterName] = {};
+
+					for(; y < paramLength; y++){
+						var paramParts = filterParts[y].split(":");
+						filter[filterName][paramParts[0]] = (paramParts[1]) ? paramParts[1] : true;
+					}
+				}
+			}
+			return { name : name, filter : filter}
 		}
 		
 		var _parseNode = function(node, vDom, level){
@@ -78,8 +103,11 @@ Seed({
 						if(Mold.startsWith(selected.nodeValue, BLOCK_START)){
 
 							var name = selected.nodeValue.replace(BLOCK_START, "").replace(END, "");
+							
+							var parts = _getFilter(name);
 							var blockNode = new BlockNode({
-								name : name
+								name : parts.name,
+								filter : parts.filter
 							});
 							vDom.addNode(blockNode);
 							parentNode = vDom;
@@ -112,9 +140,11 @@ Seed({
 						//Value
 						if(Mold.startsWith(selected.nodeValue, VALUE)){
 							var name = selected.nodeValue.replace(VALUE, "").replace(END, "");
+							var parts = _getFilter(name);
 							var valueNode = new ValueNode({
-								name : name,
-								isPointer : (name === ".") ? true : false
+								name : parts.name,
+								filter : parts.filter,
+								isPointer : (parts.name === ".") ? true : false
 							});
 
 							vDom.addNode(valueNode);

@@ -12,7 +12,7 @@ Seed({
 			this.domPointer = false; 
 			this.renderDom = this.vdom;
 
-			this.onSetData = function(data){
+			this.onSetData = function(data, bind){
 
 				//set children to false if no data is given
 				for(var name in this.children){
@@ -23,17 +23,17 @@ Seed({
 							if(selected.type === BLOCK_NODE){
 								//if type is a blocknode add parent data
 								if(data){
-									selected.setData(data);
+									selected.setData(data, bind);
 								}else{
-									selected.setData(false);
+									selected.setData(false, bind);
 								}
 							}else{
 								if(selected.hasParentValue && data[selected.parentName] &&  data[selected.parentName][selected.childName]){
-									selected.setData(data[selected.parentName][selected.childName]);
+									selected.setData(data[selected.parentName][selected.childName], bind);
 								}else if(data[name]){
-									selected.setData(data[name]);	
+									selected.setData(data[name], bind);	
 								}else{
-									selected.setData("");	
+									selected.setData("", bind);	
 								}
 								
 								
@@ -44,18 +44,18 @@ Seed({
 						if(this.children[name].type === BLOCK_NODE){
 							//if type is a blocknode add parent data
 							if(data){
-								this.children[name].setData(data);
+								this.children[name].setData(data, bind);
 							}else{
-								this.children[name].setData(false);
+								this.children[name].setData(false, bind);
 							}
 						}else{
 							var selected = this.children[name];
 							if(selected.hasParentValue && data[selected.parentName] &&  data[selected.parentName][selected.childName]){
-								selected.setData(data[selected.parentName][selected.childName]);
+								selected.setData(data[selected.parentName][selected.childName], bind);
 							}else if(data[name]){
-								this.children[name].setData(data[name]);
+								this.children[name].setData(data[name], bind);
 							}else{
-								this.children[name].setData("");
+								this.children[name].setData("", bind);
 							}
 						}
 						
@@ -103,7 +103,6 @@ Seed({
 
 				var i = 0, len = this.renderDom.length;
 				for(; i < len; i++){
-
 					this.domPointer.appendChild(this.renderDom[i].render());
 				}
 

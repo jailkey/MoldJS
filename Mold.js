@@ -1735,7 +1735,6 @@ var Mold = (function(config){
 **/
 		mixin : function(target, origin, selected, config){
 			for(var property in origin){
-				
 				if(property != "className"){
 					if(selected && selected.length > 0){
 						if(selected.indexOf(property) > -1){

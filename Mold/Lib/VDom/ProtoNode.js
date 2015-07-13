@@ -2,7 +2,8 @@ Seed({
 		name : "Mold.Lib.VDom.ProtoNode",
 		dna : "data",
 		include : [
-			"Mold.Lib.VDom.VDoc"
+			"Mold.Lib.VDom.VDoc",
+			"Mold.Lib.Filter"
 		]
 	},
 	function(){
@@ -36,12 +37,15 @@ Seed({
 		this.children = this.children || {};
 		this.data = config.data || false;
 		this.name = config.name;
+		this.rawData = Mold.mixin({}, config.data) || false;
 		this.type = STRING_NODE;
 		this.parent = false;
 		this.state = STATE_NEW;
 		this.isString = config.isString || false;
+		this._id = Mold.getId();
 
 		this.vdom = _vDom;
+		this.protoChild = {};
 		
 		this.renderDom = false;
 
@@ -120,7 +124,35 @@ Seed({
 
 		}
 
-		this.setData = function(data){
+		this.renderParentDom = function(){
+			var parent = this.parent;
+			var isDom = false;
+			while(parent){
+				isDom = (parent.type === 5) ? true : false;
+				if(isDom) {
+					break;
+				}
+				parent = parent.parent;
+			}
+			parent.render()
+		}
+
+		this.setNodeData = function(nodeName, data, bind){
+			if(this.children[nodeName]){
+				if(Mold.isArray(this.children[nodeName])){
+					var i = 0, len = this.children[nodeName].length;
+					for(; i < len; i++){
+						this.children[nodeName][i].setData(data, bind)
+					}
+				}else{
+					this.children[nodeName].setData(data, bind)
+				}
+			}
+		}
+
+
+		this.setData = function(data, bind){
+	
 			_oldData = this.data;
 			if(typeof this.data === "string" && this.data === data){
 				this.state = STATE_NO_CHANGES;
@@ -128,9 +160,29 @@ Seed({
 				this.state = STATE_UPDATE;
 			}
 			this.data = data;
-			this.onSetData(data);
+			this.rawData = Mold.mixin({}, data) 
+			this.onSetData(data, bind);
 		}
 		
-	
+		this.bind = function(model){
+			
+			for(name in this.children){
+				if(model[name]){
+					
+					if(Mold.isArray(this.children[name])){
+
+						var i = 0, len = this.children[name].length;
+						for(; i < len; i++){
+							console.log(this.children[name][i].bind)
+							this.children[name][i].bind(model[name]);
+						}
+					}else{
+						this.children[name].bind(model[name]);
+					}
+				}
+				
+			}
+		
+		}
 	}
 )

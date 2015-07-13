@@ -10,12 +10,19 @@ Seed({
 			
 			this.type = BLOCK_NODE;
 			this.domPointer = _doc.createDocumentFragment();
+			this.pointerList = [];
 			this.pointer = [];
 			this.renderDom = [];
 			this.children = [];
+			this.removeList = [];
 			this.isNegative = config.isNegative || false;
+			this.filter = config.filter || [];
+			this.hide = false;
+			this.protoChild = false;
+
 
 			var _oldRenderLength = 0;
+			var that = this;
 
 			this.createRenderDom = function(index){
 				var i = 0, len = this.vdom.length;
@@ -79,7 +86,9 @@ Seed({
 			}
 
 			this.createChildren = function(index){
-				var selected = this.children[0];
+				
+				var selected =  this.children[0] || Mold.mixin({}, this.protoChild);
+
 				for(var name in selected){
 					var child = this.findChild(name, this.renderDom[index]);
 
@@ -91,10 +100,131 @@ Seed({
 				}
 			}
 
+			this.addListItem = function(index, data){
+
+				if(!this.renderDom[index]){
+					this.createRenderDom(index);
+				}
+				
+				if(!this.children[index]){
+					this.createChildren(index);
+				}
+
+				if(!Mold.isArray(this.children)){
+					this.children = [this.children];
+				}
+
+				//Handle pointers
+				if(this.children[0]['.']){
+					var y = 0, childLen = this.children.length;
+					this.children[index]['.'].setData(data);
+				}else{
+					for(var name in data){
+						var selected = this.children[index][name];
+						if(selected){
+							if(selected.isPointer){
+								selected.setData(data);
+							}else{
+								selected.setData(data[name]);
+							}
+						}
+					}
+				}
+			}
+
+			this.initChildren = function(){
+				if(!this.renderDom[0]){
+					this.createRenderDom(0);
+				}
+				
+				if(!this.children[0]){
+					this.createChildren(0);
+				}
+			}
+
+			this.removeListItem = function(index){
+				if(index === 0){
+					if(this.children[0]){
+						this.protoChild = this.children[0];
+					}
+				}
+				this.children.splice(index, 1);
+				this.renderDom.splice(index, 1);
+			}
+
+			this.removeListItems = function(from, len){
+				if(from === 0){
+					if(this.children[0]){
+						this.protoChild = this.children[0];
+					}
+				}
+				this.children.splice(from, len);
+				this.renderDom.splice(from, len);
+			}
+
+			this.removeAllListItems = function(){
+				this.removeListItems(0, this.renderDom.length)
+			}
+
+			this.bind = function(model){
+
+				var that = this;
+
+				var _initDataIfNotSet = function(){
+					if(!Mold.isArray(that.rawData)){
+						if(!that.rawData){
+							that.rawData = {}
+							that.rawData[that.name] = [];
+						}else{
+							that.rawData[that.name] = [that.rawData[that.name]]
+						}
+
+					}
+				}
+
+				model.on("list.splice", function(e){
+					_initDataIfNotSet();
+
+					var args = [e.data.from, e.data.len].concat(e.data.data);
+					Array.prototype.splice.apply(that.rawData[that.name], args);
+					that.parent.setNodeData(that.name, Mold.mixin({}, that.rawData));
+					that.renderParentDom();
+				});
+
+				model.on("list.item.add", function(e){
+					_initDataIfNotSet();
+					that.rawData[that.name][e.data.index] = e.data.value;
+					that.parent.setNodeData(that.name, Mold.mixin({}, that.rawData));
+					that.renderParentDom();
+				});
+
+				model.on("list.item.remove", function(e){
+					_initDataIfNotSet();
+					that.rawData[that.name].splice(e.data.index, 1);
+					that.parent.setNodeData(that.name, Mold.mixin({}, that.rawData))
+					that.renderParentDom();
+				});
+				
+			}
+
 			this.onSetData = function(data){
+				for(var filterName in this.filter){
+					var filter = Mold.Lib.Filter.get(filterName);
+					if(filter){
+						this.data[this.name] = filter(this.data[this.name], this.filter[filterName]);
+					}
+				}
+
 				if(this.isNegative && data[this.name]){
-					data = false;
+					
+					if(!data[this.name].length){
+						data[this.name] = "show";
+					}else{
+						data = false;
+					}
+		
 				}else if(this.isNegative && (!data || !data[this.name])){
+					this.hide = false;
 					
 					if(!data){
 						data = {};
@@ -109,54 +239,29 @@ Seed({
 				//handle array
 				if(Mold.isArray(data[this.name])){
 					var data = data[this.name];
+					
 					if(!Mold.isArray(this.children)){
 						this.children = [this.children];
 					}
 
 					var i = 0, len = data.length;
 					for(; i < len; i++){
-
-						if(!this.renderDom[i]){
-							this.createRenderDom(i);
-						}
-						
-						if(!this.children[i]){
-							this.createChildren(i);
-						}
-						//Handle pointers
-						if(this.children[0]['.']){
-							var y = 0, childLen = this.children.length;
-							this.children[i]['.'].setData(data[i]);
-						}else{
-							for(var name in data[i]){
-								var selected = this.children[i][name];
-							
-								if(selected){
-									if(selected.isPointer){
-										selected.setData(data[i]);
-									}else{
-										selected.setData(data[i][name]);
-									}
-								}
-							}
-						}
-					
+						this.addListItem(i, data[i])
 					}
 				
-					if(_oldData.length > data.length){
-						var dif =  _oldData.length - data.length;
-						this.children.splice(data.length, dif);
-						this.renderDom.splice(data.length, dif);
+					if(_oldData && _oldData[this.name] &&  (_oldData[this.name].length > data.length)){
+						var dif =  _oldData[this.name].length - data.length;
+						this.removeListItems(data.length, dif);
 					}
-				}else if((!data || !data[this.name]) && data[this.name] !== 0){
 
-					this.renderDom = [];
-					this.children = [];
+				}else if((!data || !data[this.name]) && data[this.name] !== 0){
+					
+					this.removeAllListItems();
+
 				}else{
 
 					//data from object
 					if(Mold.isObject(data)){
-						
 						if(!this.renderDom[0]){
 							this.createRenderDom(0);
 						}
@@ -178,10 +283,9 @@ Seed({
 								}else{
 
 									var selected = this.children[0][name];
-									//console.log("this.children[0][name]", this.children[0][name], name)
 									if(selected){
 										if(selected.hasParentValue){
-											console.log("set parent value")
+											
 											if(data[selected.parentName] && data[selected.parentName][selected.childName]){
 												selected.setData(data[selected.parentName][selected.childName]);
 											}
@@ -216,6 +320,7 @@ Seed({
 
 											selected.setData(data[this.parentName][this.childName]);
 										}else{
+											
 											selected.setData(data[this.name]);
 										}
 									}
@@ -230,10 +335,11 @@ Seed({
 						}
 					}
 				}
-
+		
 			}
 
 			this.clone = function(){
+				
 				var newNode =  new BlockNode({
 					name : this.name,
 					data : this.data
@@ -247,24 +353,33 @@ Seed({
 			}
 
 			this.removePointer = function(index){
-				var i = 0, len =  this.pointer[index].length;
 
-				for(; i < len; i++){
-					if(this.pointer[index][i].parentNode){
-						this.pointer[index][i].parentNode.removeChild(this.pointer[index][i]);
+				if(this.pointer[index]){
+					var i = 0, len =  this.pointer[index].length;
+					for(; i < len; i++){
+						if(this.pointer[index][i].parentNode){
+							this.pointer[index][i].parentNode.removeChild(this.pointer[index][i]);
+						}
 					}
 
+					this.pointer[index] = null;
+					if(!this.pointer){
+						this.pointer = [];
+					}
 				}
-				this.pointer[index] = null;
+
 			}
 
+
 			this.render = function(){
-			
+
 				//remove unused
 				var i = 0, len = this.renderDom.length;
-				var y = len;
+				var y = 0, removeLen = this.removeList.length;
 
-				for(; y < _oldRenderLength; y++){
+				//remove end of pointerlist
+				var y = len, pointerLen = this.pointer.length;
+				for(; y < pointerLen; y++){
 					this.removePointer(y);
 				}
 
@@ -279,8 +394,9 @@ Seed({
 						this.pointer[i][y] = item;
 					}
 				}
-
+		
 				this.state = STATE_NO_CHANGES;
+				_oldRenderLength = len;
 				return this.domPointer;
 			}
 

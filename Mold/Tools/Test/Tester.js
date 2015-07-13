@@ -794,7 +794,7 @@ Seed({
 
 		this.publics = {
 			timeout : function(timeout){
-				_timeOut = timeout
+				_timeOut = timeout;
 			},
 			addExpect : function(name, value){
 				_expect[name] = value;

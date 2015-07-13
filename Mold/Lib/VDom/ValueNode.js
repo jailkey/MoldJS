@@ -11,6 +11,7 @@ Seed({
 			this.domPointer = false;
 			this.isPointer = config.isPointer || false;
 			this.hasParentValue = config.hasParentValue || false;
+			this.filter = config.filter || false;
 			this.parentName = false;
 			this.childName = false;
 
@@ -20,13 +21,21 @@ Seed({
 				this.childName = config.name.split(".")[1];
 			}
 
-			this.onSetData = function(data){
+			this.onSetData = function(data, bind){
+
 				if(Mold.isObject(data)){
 					this.data = data[this.name]
 				}
 
 				if(data === false || !Mold.is(data)){
 					this.data = "";
+				}
+
+				for(var filterName in this.filter){
+					var filter = Mold.Lib.Filter.get(filterName);
+					if(filter){
+						this.data = filter(this.data, this.filter[filterName]);
+					}
 				}
 			}
 

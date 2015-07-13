@@ -2,7 +2,7 @@
 Seed({
 		name : "Mold.Lib.VDom.StringParser",
 		dna : "static",
-		//test : "Mold.Test.Lib.VDom.StringParser",
+		test : "Mold.Test.Lib.VDom.StringParser",
 		include : [
 			{ NodeBuilder : "Mold.Lib.VDom.NodeBuilder" }
 		]

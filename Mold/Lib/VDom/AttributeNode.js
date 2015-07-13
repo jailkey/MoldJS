@@ -14,7 +14,7 @@ Seed({
 			this.domPointer = false;
 
 
-			this.addData = function(data){
+			this.addData = function(data, bind){
 				this.data = data;
 				if(this.data){
 					var parsed = StringParser(this.data);

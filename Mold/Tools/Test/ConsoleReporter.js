@@ -22,6 +22,7 @@ Seed({
 					output += part + "\n";
 				}
 			});
+		
 			console.log(output, "color:#000000; background-color:#ffffff;", "color:#ffffff; background-color:#ff0000;", "color:#000000; background-color:#ffffff;");
 		}
 

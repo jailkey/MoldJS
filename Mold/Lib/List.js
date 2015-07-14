@@ -111,6 +111,7 @@ Seed({
 				element = arguments[i];
 				_array.oldPush(element);
 				element = _creatListItem(element);
+				
 				_array.trigger("list.item.add", { 
 					length : _array.length,
 					index : _array.length -1,
@@ -238,12 +239,7 @@ Seed({
 		}
 
 		_array.replace = function(newArray){
-			var lenDif = _array.length - newArray.length;
-			_array.splice(0, newArray.length, newArray);
-			
-			for(var i = 0; i < lenDif; i++){
-				_array.pop();
-			}
+			_array.splice(0, _array.length, newArray);
 		}
 
 	   return _array;

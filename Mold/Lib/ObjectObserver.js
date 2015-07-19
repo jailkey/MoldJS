@@ -49,21 +49,21 @@ Seed({
 
 		var _unobserve = function(){
 			if(Mold.Lib.Info.isSupported('objectObserve')){
-				Object.unobserve(_array, _observerMethod);
+				Object.unobserve(_object, _observerMethod);
 				return this;
 			}
 		}
 
 		this.publics = {
+			
 			observe : function(callback){
-
 				that.on('change', function(e){
 					callback.call(this, e.data)
 				});
 				_observe();
 			},
+
 			unobserve : function(callback){
-	
 				that.off('change')
 				_unobserve();
 			}

@@ -41,6 +41,7 @@ Seed({
 		".Model",
 		".Mongo",
 		".MultiLineString",
+		".ObjectObserver",
 		".Observer",
 		".Parents",
 		".Path",

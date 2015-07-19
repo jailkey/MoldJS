@@ -131,6 +131,26 @@ Seed({
 
 			});
 
+			it("performance test", function(){
+				var start = now();
+				test = function(data){
+
+					if(data.index === 999){
+						console.log("->", now() - start);
+					}
+				
+				}
+				observer.observe(test)
+
+				for(var i = 0; i < 1000; i++){
+					testArray.push(Math.random());
+				}
+
+				//console.log("testArray", testArray)
+			});
+
+
+
 
 		});
 	}

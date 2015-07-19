@@ -56,6 +56,7 @@ Seed({
 					"speechSynthesis" : window.speechSynthesis,
 					"touch" : !!('ontouchstart' in window),
 					"range" : !!window.Range,
+					"arrayObserve" : !!Array.observe,
 					"generator" : function(){
 						try {
 							eval("(function*(){})()");

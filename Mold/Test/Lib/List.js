@@ -178,6 +178,21 @@ Seed({
 				//console.log("-->", testList);
 			});
 
+			it("perfomance test", function(){
+				var testList = new List(["one"]);
+				var start = now();
+				testList.on("list.item.add", function(e){
+					if(e.data.index === 999){
+						console.log("time->", e.data.index, " - ", now() - start)
+					}
+				})
+
+				for(var i = 0; i < 1000; i++){
+					testList.push(Math.random());
+				}
+
+			})
+
 			
 		});
 	}

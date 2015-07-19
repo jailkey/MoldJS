@@ -15,7 +15,28 @@ Seed({
 		Mold.mixin(this, new Mold.Lib.Event(this));
 
 		var _observerMethod = function(changes){
-			that.trigger("change", changes[0])
+			var i = 0, len = changes.length;
+			for(; i < len; i++){
+				that.trigger("change", changes[i])
+			}
+		}
+
+
+		var _observeItem = function(index){
+			Mold.watch(_array, index, function(property, oldValue, newValue){
+				if(!that.arrayMethodCalled){
+					that.trigger("change", {
+						index : false,
+						type : "update",
+						object : _array,
+						name : property + "",
+						oldValue : oldValue,
+						removed : false,
+						addedCount : false
+					});
+				}
+				return newValue;
+			});
 		}
 
 		var _observe = function(){
@@ -26,22 +47,7 @@ Seed({
 			
 	
 			Mold.each(_array, function(element, index){
-				
-				Mold.watch(_array, index, function(property, oldValue, newValue){
-					if(!that.arrayMethodCalled){
-						console.log("trigger change")
-						that.trigger("change", {
-							index : false,
-							type : "update",
-							object : _array,
-							name : property + "",
-							oldValue : oldValue,
-							removed : false,
-							addedCount : false
-						});
-					}
-					return newValue;
-				})
+				_observeItem(index);
 			});
 
 			var _triggerListChange = function(index, oldValue, newValue){
@@ -56,63 +62,6 @@ Seed({
 				})
 					
 			}
-
-			var _creatListItem = function(element, parent, name){
-				if(Mold.isArray(element)){
-					var oldElement = element;
-				
-					element = new Mold.Lib.List();
-				}else if(Mold.isObject(element)){
-
-					Mold.each(element, function(subelement, index, value){
-						if(!~_blacklist.indexOf(index)){
-							_creatListItem(subelement, element, index);
-						}
-					})
-				
-				}
-
-				Mold.watch(_array, _array.length -1, function(property, oldValue, newValue){
-					_creatListItem(newValue);
-					/*
-					that.trigger("change", {
-						index : false,
-						type : "update",
-						object : _array,
-						name : property,
-						oldValue : oldValue,
-						removed : false,
-						addedCount : false
-					})*/
-				/*
-					_array.trigger("list.item.change", { 
-						list: _array,
-						index : property,
-						oldValue : oldValue,
-						value : newValue,
-						list : _array 
-					});
-
-					_array.trigger("list.item.change."+property, { 
-						list: _array,
-						index : property,
-						oldValue : oldValue,
-						value : newValue,
-						list : _array 
-					});*/
-
-					/*ugly workaround for webkit*/
-					if(_array.length - 1 === +property){
-						_array.pop();
-						_array.push(newValue);
-					}
-
-					return newValue;
-				});
-
-				return element;
-			}
-
 			
 			_array.push = function() {
 				_array.splice(_array.length, arguments.length, Array.prototype.slice.call(arguments));
@@ -171,7 +120,6 @@ Seed({
 					addedCount : addCount
 				})
 				that.arrayMethodCalled = false;
-					console.log("remove method call")
 			}
 			
 		}
@@ -187,12 +135,14 @@ Seed({
 
 		this.publics = {
 			observe : function(callback){
+
 				that.on('change', function(e){
 					callback.call(this, e.data)
 				});
 				_observe();
 			},
 			unobserve : function(callback){
+	
 				that.off('change')
 				_unobserve();
 			}

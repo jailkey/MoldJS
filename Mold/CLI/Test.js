@@ -37,6 +37,7 @@ Seed({
 						var seedContent = fs.readFileSync(path);
 						if(seedContent !== ""){
 							var info = new Mold.Tools.SeedParser(seedContent);
+						
 							if(info && info.header && info.header.test && (!parameter.only || parameter.only === info.header.name)){
 								if(
 									!info.header.platform 

@@ -26,72 +26,74 @@ Seed({
 
 		var _detectFeatures = function(){
 			var checker = false;
-			
-			if(!Mold.isNodeJS){
-				_features = {
-					"history" : !!(window.history && history.pushState),
-					"geolocation" : 'geolocation' in navigator,
-					"indexedDB" : !!window.indexedDB,
-					"postMessage" : !!window.postMessage,
-					"websql" : !!window.openDatabase,
-					"webGL" : !!window.WebGLRenderingContext,
-					"webworkers" : !!window.Worker,
-					"applicationCache" : !!window.applicationCache,
-					"canvas" : !!((checker = document.createElement('canvas')) 
-									&& checker.getContext 
-									&& checker.getContext('2d')
-								),
-					"defineProperty" : !!Object.defineProperty,
-					"querySelector" : !!document.querySelectorAll,
-					"querySelectorAll" : !!document.querySelectorAll,
-					"sessionStorage" : !!window.sessionStorage,
-					"localStorage" : !!window.localStorage,
-					"proxy" : !!window.Proxy,
-					"mutationObserver" : !!window.MutationObserver,
-					"registerElement" : !!document.registerElement,
-					"blob" : !!window.Blob,
-					"url" : !!window.URL,
-					"supports" : !!((window.CSS && window.CSS.supports) || window.supportsCSS || false),
-					"orientation" : !!window.DeviceOrientationEvent,
-					"speechSynthesis" : window.speechSynthesis,
-					"touch" : !!('ontouchstart' in window),
-					"range" : !!window.Range,
-					"arrayObserve" : !!Array.observe,
-					"generator" : function(){
-						try {
-							eval("(function*(){})()");
-							return true;
-						} catch(e){
-							return false;
-						}
-					}(),
-					"yield" : function(){
-						try {
-							eval("(function(){ yield test; })()");
-							return true;
-						} catch(e){
+			var window = window || false;
+			var document = document || false;
+			var navigator = navigator || false;
 
-							return false;
-						}
-					}(),
-					"input-date" : _detectInputType("date"),
-					"input-date" : _detectInputType("date"),
-					"input-datetime" : _detectInputType("datetime"),
-					"input-datetime-local" : _detectInputType("datetime-local"),
-					"input-month" : _detectInputType("month"),
-					"input-week" : _detectInputType("week"),
-					"input-time" : _detectInputType("time"),
-					"input-color" : _detectInputType("color"),
-					"input-number" : _detectInputType("number"),
-					"input-range" : _detectInputType("range"),
-					"input-email" : _detectInputType("email"),
-					"input-search" : _detectInputType("search"),
-					"input-url" : _detectInputType("url"),
-					"input-tel" : _detectInputType("tel")
-				}
-			}else{
-				_features = {}
+		
+			_features = {
+				"history" : !!(window && window.history && history.pushState),
+				"geolocation" : navigator && 'geolocation' in navigator,
+				"indexedDB" : !!(window && window.indexedDB),
+				"postMessage" : !!(window && window.postMessage),
+				"websql" : !!(window && window.openDatabase),
+				"webGL" : !!(window && window.WebGLRenderingContext),
+				"webworkers" : !!(window && window.Worker),
+				"applicationCache" : !!(window && window.applicationCache),
+				"canvas" : !!(document && (checker = document.createElement('canvas')) 
+								&& checker.getContext 
+								&& checker.getContext('2d')
+							),
+				"defineProperty" : !!Object.defineProperty,
+				"querySelector" : !!(document && document.querySelector),
+				"querySelectorAll" : !!(document && document.querySelectorAll),
+				"sessionStorage" : !!(window && window.sessionStorage),
+				"localStorage" : !!(window && window.localStorage),
+				"proxy" : !!(window && window.Proxy),
+				"mutationObserver" : !!(window && window.MutationObserver),
+				"registerElement" : !!document.registerElement,
+				"blob" : !!(window && window.Blob),
+				"url" : !!(window && window.URL),
+				"supports" : !!((window && window.CSS && window.CSS.supports) || window.supportsCSS || false),
+				"orientation" : !!(window && window.DeviceOrientationEvent),
+				"speechSynthesis" : !!(window && window.speechSynthesis),
+				"touch" : !!(window && ('ontouchstart' in window)),
+				"range" : !!(window && window.Range),
+				"arrayObserve" : !!Array.observe,
+				"objectObserve" : !!Object.observe,
+				"generator" : function(){
+					try {
+						eval("(function*(){})()");
+						return true;
+					} catch(e){
+						return false;
+					}
+				}(),
+				"yield" : function(){
+					try {
+						eval("(function(){ yield test; })()");
+						return true;
+					} catch(e){
+
+						return false;
+					}
+				}(),
+				"input-date" : _detectInputType("date"),
+				"input-date" : _detectInputType("date"),
+				"input-datetime" : _detectInputType("datetime"),
+				"input-datetime-local" : _detectInputType("datetime-local"),
+				"input-month" : _detectInputType("month"),
+				"input-week" : _detectInputType("week"),
+				"input-time" : _detectInputType("time"),
+				"input-color" : _detectInputType("color"),
+				"input-number" : _detectInputType("number"),
+				"input-range" : _detectInputType("range"),
+				"input-email" : _detectInputType("email"),
+				"input-search" : _detectInputType("search"),
+				"input-url" : _detectInputType("url"),
+				"input-tel" : _detectInputType("tel")
 			}
+		
 		}
 /*init featuredetection*/
 		_detectFeatures();

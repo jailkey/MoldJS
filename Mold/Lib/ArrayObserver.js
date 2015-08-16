@@ -23,6 +23,7 @@ Seed({
 
 
 		var _observeItem = function(index){
+			
 			Mold.watch(_array, index, function(property, oldValue, newValue){
 				if(!that.arrayMethodCalled){
 					that.trigger("change", {

@@ -41,8 +41,40 @@ Seed({
 				 });
 			});
 
+			it("adds data to the model via update and change object properties", function(done){
+				testModel.on("root.name.changed", function(e){
+					console.log("e", e.data, testModel.data.name);
+					done()
+					//expect(e.data)
+				})
 
-			it("First level property values", function(done){
+				testModel.update({
+					"name" : "test",
+					"list" : [
+						{
+							"item" : "hier ein item"
+						}
+					]
+				})
+
+				testModel.data.name = "irgendwas";
+			});
+
+			it("adds data to the model via push", function(done){
+
+				testModel.on("root.list.changed", function(e){
+					console.log("array changed", e.data)
+					expect(e.data.object.length).toBe(2);
+					done();
+				})
+
+				testModel.data.list.push({
+					"item" : "was anders"
+				})
+
+			})
+
+			xit("First level property values", function(done){
 			
 				testModel.data.on("property.change.name", function(e){
 					testModel.data.off("property.change.name");
@@ -55,7 +87,7 @@ Seed({
 
 			});
 
-			it("First level object added", function(done){
+			xit("First level object added", function(done){
 				
 				testModel.data.obj.on("object.change", function(e){
 					testModel.data.obj.off("object.change");
@@ -75,7 +107,7 @@ Seed({
 				
 			});
 
-			it("Test if Subobject fires events after adding", function(done){
+			xit("Test if Subobject fires events after adding", function(done){
 
 				testModel.data.obj.subobject.on("property.change.subitem", function(e){
 					testModel.data.obj.subobject.off("property.change.subitem");
@@ -88,7 +120,7 @@ Seed({
 
 			});
 
-			it("Test if object fires events after adding subobject", function(done){
+			xit("Test if object fires events after adding subobject", function(done){
 			
 				testModel.data.obj.on("property.change.objitem", function(e){
 					testModel.data.obj.off("property.change.objitem");
@@ -100,7 +132,7 @@ Seed({
 
 			});
 
-			it("Adding a list element", function(done){
+			xit("Adding a list element", function(done){
 				
 				testModel.data.list.on("list.item.add", function(e){
 					testModel.data.obj.off("list.item.add");
@@ -123,7 +155,7 @@ Seed({
 
 			});
 
-			it("Changing a list", function(done){
+			xit("Changing a list", function(done){
 			
 				testModel.data.list.on("list.item.change.0", function(e){
 					testModel.data.list.off("list.item.change.0");
@@ -147,7 +179,7 @@ Seed({
 
 
 
-			it("Add a list in a list value", function(done){
+			xit("Add a list in a list value", function(done){
 			
 				testModel.data.list[0].sublist.on("list.item.change.0", function(e){
 					testModel.data.list[0].sublist.off("list.item.change.0");
@@ -163,7 +195,7 @@ Seed({
 			});
 
 
-			it("change objectvalue in a sublist", function(done){
+			xit("change objectvalue in a sublist", function(done){
 
 				testModel.data.list[0].sublist[0].on("property.change.sublistitem", function(e){
 					testModel.data.list[0].sublist[0].off("property.change.sublistitem");
@@ -176,7 +208,7 @@ Seed({
 			});
 
 
-			it("change an objectvalue in a list", function(done){
+			xit("change an objectvalue in a list", function(done){
 				flag = false;
 					
 				testModel.data.anotherlist.push({
@@ -217,7 +249,7 @@ Seed({
 				
 			})
 
-			it("test if validation error fires", function(done){
+			xit("test if validation error fires", function(done){
 				testModel.validation(true);
 				testModel.on("validation.error", function(e){
 				 	done();

@@ -21,9 +21,9 @@ Seed({
 		}
 
 		this.publics = {
-			parameter : function(){
+			parameter : function(name){
 				//console.log("PAREA;", _parameter);
-				return _parameter;
+				return (!name) ? _parameter : _parameter[name] || false;
 			}
 		}
 	}

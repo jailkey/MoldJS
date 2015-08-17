@@ -19,6 +19,8 @@ Seed({
 			this.filter = config.filter || [];
 			this.hide = false;
 			this.protoChild = false;
+			this.bindModel = false;
+			this._id = Mold.getId();
 
 
 			var _oldRenderLength = 0;
@@ -26,6 +28,7 @@ Seed({
 
 			this.createRenderDom = function(index){
 				var i = 0, len = this.vdom.length;
+
 				for(; i < len; i++){
 					var selected = this.vdom[i];
 					//if index 0 use pointer to vdom else create new
@@ -39,7 +42,7 @@ Seed({
 					if(!this.renderDom[index]){
 						this.renderDom[index] = [];
 					}
-
+				
 					this.renderDom[index].push(newElement)
 				}
 			}
@@ -101,6 +104,7 @@ Seed({
 			}
 
 			this.addListItem = function(index, data){
+				var bind = false;
 
 				if(!this.renderDom[index]){
 					this.createRenderDom(index);
@@ -108,11 +112,19 @@ Seed({
 				
 				if(!this.children[index]){
 					this.createChildren(index);
+					//this.bindChildren(data, index);
+				}
+
+				if(index === 0){
+					//try to bind if index is 0
+					//this.bindChildren(data, index);
 				}
 
 				if(!Mold.isArray(this.children)){
 					this.children = [this.children];
 				}
+
+				
 
 				//Handle pointers
 				if(this.children[0]['.']){
@@ -167,19 +179,22 @@ Seed({
 			}
 
 			this.bind = function(model){
+				/*
+				this.bindModel = true;
 
 				var that = this;
 
 				var _initDataIfNotSet = function(){
-					if(!Mold.isArray(that.rawData)){
-						if(!that.rawData){
-							that.rawData = {}
-							that.rawData[that.name] = [];
-						}else{
+				
+					if(!that.rawData){
+						that.rawData = {}
+						that.rawData[that.name] = [];
+					}else{
+						if(!Mold.isArray(that.rawData[that.name])){
 							that.rawData[that.name] = [that.rawData[that.name]]
 						}
-
 					}
+
 				}
 
 				model.on("list.splice", function(e){
@@ -194,7 +209,8 @@ Seed({
 				model.on("list.item.add", function(e){
 					_initDataIfNotSet();
 					that.rawData[that.name][e.data.index] = e.data.value;
-					that.parent.setNodeData(that.name, Mold.mixin({}, that.rawData));
+					var newData = Mold.mixin({}, that.rawData);
+					that.parent.setNodeData(that.name, newData);
 					that.renderParentDom();
 				});
 
@@ -204,10 +220,30 @@ Seed({
 					that.parent.setNodeData(that.name, Mold.mixin({}, that.rawData))
 					that.renderParentDom();
 				});
-				
+
+				this.hasBinding = true;
+				*/
 			}
+/*
+			this.bindChildren = function(model, index){
+				var undefined;
+				if(index !== undefined){
+
+					for(var name in this.children[index]){
+						console.log("bind", name, model)
+						if(
+							model && model && model[name]
+							&& !this.children[index][name].hasBinding
+						){
+							
+							this.children[index][name].bind(model)
+						}
+					}
+				}
+			}*/
 
 			this.onSetData = function(data){
+				console.log("SET DATA", this._id)
 				for(var filterName in this.filter){
 					var filter = Mold.Lib.Filter.get(filterName);
 					if(filter){
@@ -245,12 +281,14 @@ Seed({
 					}
 
 					var i = 0, len = data.length;
+					
 					for(; i < len; i++){
 						this.addListItem(i, data[i])
 					}
-				
+					
 					if(_oldData && _oldData[this.name] &&  (_oldData[this.name].length > data.length)){
 						var dif =  _oldData[this.name].length - data.length;
+
 						this.removeListItems(data.length, dif);
 					}
 
@@ -372,7 +410,7 @@ Seed({
 
 
 			this.render = function(){
-
+				console.log("RENDER")
 				//remove unused
 				var i = 0, len = this.renderDom.length;
 				var y = 0, removeLen = this.removeList.length;
@@ -397,6 +435,7 @@ Seed({
 		
 				this.state = STATE_NO_CHANGES;
 				_oldRenderLength = len;
+
 				return this.domPointer;
 			}
 

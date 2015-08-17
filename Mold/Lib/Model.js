@@ -18,62 +18,121 @@ Seed({
 		var _dataId = false;
 		var _that = this;
 		var _data = {};
+		var _config = config;
+		var _validation = false;
 
 		Mold.mixin(this, new Event(this));
 
-		var _watchData = function(data, name){
+		/**
+		 * @method  _validateValue
+		 * @private
+		 * @description validate model propertys 
+		 * @param  {string|number} value - value to validate 
+		 * @param  {string} validation - name of the validation method
+		 * @return {boolean} boolean
+		 */
+		var _validateValue = function(value, validation){
+			var validations = validation.split("|");
+			var validator;
 
+			for(var i = 0; i < validations.length; i++){
+				if((validator = Validation.get(validations[i]))){
+					if(!validator(value)){
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		var _watchData = function(data, name, properties){
 			if(Mold.isArray(data)){
+				if(!Mold.isArray(properties)){
+					console.log(data, properties)
+					throw new TypeError(name + " can not be an array!");
+				}
 
+				/*
 				Object.defineProperty(data, '__name', {
 					value : name
-				});
+				});*/
 
 				var observabelArray = new ArrayObserver(data);
 				observabelArray.observe(function(e){
-					
-					_that.trigger("array.changed", e)
-					_that.trigger(data.__name + ".changed", e);
-					_that.trigger(data.__name + e.index + ".changed", e);
+		
+					_that.trigger(name + ".changed", e);
+					_that.trigger(name + e.index + ".changed", e);
 					
 					if(e.type === "splice"){
 						for(var i = e.index; i < e.index + e.addedCount; i++){
-							_watchData(e.object[i], name + "." + i);
+							console.log("watch",  e.object, i, e.object[i],  name + "." + i, properties[0])
+							_watchData(e.object[i], name + "." + i, properties[0]);
 						}
 					}
 
 				});
 
 				for(var i = 0; i < data.length; i++){
-					_watchData(data[i], name + "." + i);
+					_watchData(data[i], name + "." + i, properties[0]);
 				}
 
 			}else if(Mold.isObject(data)){
 
-
+				if(!Mold.isObject(properties)){
+					throw new TypeError(name + " can not be an object!");
+				}
+				/*
 				Object.defineProperty(data, '__name', {
 					value : name
 				});
-
+					*/
 				var objectObserver = new ObjectObserver(data);
 
 				objectObserver.observe(function(e){
-					_that.trigger("object.changed", e)
-					_that.trigger(data.__name + ".changed", e);
-					_that.trigger(data.__name + "." + e.name + ".changed", e);
-					_watchData(e.object[i], name + "." + e.name);
+					
+					if(!Mold.isArray(properties[e.name]) && !Mold.isObject(properties[e.name])){
+						//console.log("is not object and not array validate it", e, properties[e.name])
+						_validateValue(e.object[e.name], properties[e.name]);
+					}
+
+					_that.trigger(name + ".changed", e);
+					_that.trigger(name + "." + e.name + ".changed", e);
+
+					_watchData(e.object[e.name], name + "." + e.name, properties[e.name]);
 				})
 
 				for(var prop in data){
-					_watchData(data[prop], name + "." + prop);
+					_watchData(data[prop], name + "." + prop, properties[prop]);
 				}
 			}else{
 
 			}
-
 		}
 
-		//_watchProperties(config.properties, "root");
+		var _initProperties = function(properties){
+			var initData = {};
+			Mold.each(properties, function(prop, index){
+				if(Mold.isArray(prop)){
+					initData[index] = [];
+				}else if(Mold.isObject(prop)){
+					initData[index] = _initProperties(prop);
+				}else{
+					initData[index] = false;
+				}
+			})
+			return initData;
+		}
+
+		var _update = function(newData){
+			Mold.each(newData, function(value, index){
+				_data[index] = value;
+			});
+				
+			_watchData(_data, "data", _config.properties);
+		}
+
+
+		_update(_initProperties(_config.properties));
 
 
 		this.publics = {
@@ -82,12 +141,10 @@ Seed({
 				return _dataId;
 			},
 			validation : function(state){
-				
+				_validation = state;
 			},
-			resetInvalidValue : function(state){
-			
-			},
-			isValid : function(){
+			getProperties : function(){
+				return _config.properties;
 			},
 /**
  * save  saves the model
@@ -132,7 +189,7 @@ Seed({
  * @param  {[type]} model [description]
  * @return {[type]}       [description]
  */
-			bind : function(model){
+			connect : function(model){
 				
 			},
 /**
@@ -140,11 +197,7 @@ Seed({
  * @param  {mixed} newData [description]
  */
 			update : function(newData){
-				Mold.each(newData, function(value, index){
-					_data[index] = value;
-				});
-				
-				_watchData(_data, "data");
+				_update(newData)
 			},
 /**
  * json description]

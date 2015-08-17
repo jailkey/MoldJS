@@ -48,24 +48,16 @@ Seed({
 		var _watchData = function(data, name, properties){
 			if(Mold.isArray(data)){
 				if(!Mold.isArray(properties)){
-					console.log(data, properties)
 					throw new TypeError(name + " can not be an array!");
 				}
 
-				/*
-				Object.defineProperty(data, '__name', {
-					value : name
-				});*/
-
 				var observabelArray = new ArrayObserver(data);
 				observabelArray.observe(function(e){
-		
 					_that.trigger(name + ".changed", e);
 					_that.trigger(name + e.index + ".changed", e);
 					
 					if(e.type === "splice"){
 						for(var i = e.index; i < e.index + e.addedCount; i++){
-							console.log("watch",  e.object, i, e.object[i],  name + "." + i, properties[0])
 							_watchData(e.object[i], name + "." + i, properties[0]);
 						}
 					}
@@ -89,7 +81,7 @@ Seed({
 				var objectObserver = new ObjectObserver(data);
 
 				objectObserver.observe(function(e){
-					
+					//console.log("trigger", name)
 					if(!Mold.isArray(properties[e.name]) && !Mold.isObject(properties[e.name])){
 						//console.log("is not object and not array validate it", e, properties[e.name])
 						_validateValue(e.object[e.name], properties[e.name]);

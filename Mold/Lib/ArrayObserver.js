@@ -65,7 +65,7 @@ Seed({
 			}
 			
 			_array.push = function() {
-				_array.splice(_array.length, arguments.length, Array.prototype.slice.call(arguments));
+				_array.splice.apply(_array, [_array.length, arguments.length].concat(Array.prototype.slice.call(arguments) ));
 				return _array;
 			};
 
@@ -78,13 +78,11 @@ Seed({
 			}
 
 			_array.unshift = function(){
-				_array.splice(0, 0, Array.prototype.slice.call(arguments));
+				_array.splice.apply(_array, [0, 0].concat(Array.prototype.slice.call(arguments)));
 			}
 
 			_array.concat = function(newArray){
-				Mold.each(newArray, function(element){
-					_array.push(element);
-				});
+				_array.splice.apply(_array, [_array.length, 0].concat(newArray) );
 			}
 
 			_array.splice = function(from, len){
@@ -96,14 +94,8 @@ Seed({
 
 				Mold.each(arguments, function(element, index){
 					if(index > 1) {
-						if(Mold.isArray(element)){
-							argumentsArray = argumentsArray.concat(element);
-							addCount = addCount + element.length;
-						}else{
-							argumentsArray.push(element);
-							addCount++;
-						}
-						
+						argumentsArray.push(element);
+						addCount++;
 					}
 				});
 		

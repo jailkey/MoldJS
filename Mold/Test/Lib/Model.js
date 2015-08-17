@@ -42,7 +42,7 @@ Seed({
 			});
 
 			it("adds data to the model via update and change object properties", function(done){
-				testModel.on("root.name.changed", function(e){
+				testModel.on("data.name.changed", function(e){
 					console.log("e", e.data, testModel.data.name);
 					done()
 					//expect(e.data)
@@ -62,8 +62,7 @@ Seed({
 
 			it("adds data to the model via push", function(done){
 
-				testModel.on("root.list.changed", function(e){
-					console.log("array changed", e.data)
+				testModel.on("data.list.changed", function(e){
 					expect(e.data.object.length).toBe(2);
 					done();
 				})
@@ -73,6 +72,22 @@ Seed({
 				})
 
 			})
+
+
+			it("update a list item", function(done){
+
+				testModel.on("data.list.0.item.changed", function(e){
+					expect(e.data.type).toBe("update");
+					expect(e.data.oldValue).toBe("hier ein item");
+					expect(e.data.name).toBe("item");
+					expect(e.data.object.item).toBe("neu");
+					done();
+				})
+
+				testModel.data.list[0].item = "neu";
+
+			})
+
 
 			xit("First level property values", function(done){
 			

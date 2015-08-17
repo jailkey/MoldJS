@@ -49,13 +49,21 @@ Seed({
 
 
 		var _connect = function(model, subTree, properties, path, tree){
+			console.log("watch", path)
 			if(Mold.isArray(properties)){
-				var i = 0, len = properties.length;
-				
+				var i = 0, len = subTree.length;
+				console.log("subTree len", subTree)
+				for(; i < len; i++){
+					model.on(path + "." + i + ".changed", function(e){
+						console.log("array item changed", i)
+						//_connect(model, subTree.children[prop], properties[prop], path + "." + i, tree)
+					});
+				}
 			}else if(Mold.isObject(properties)){
 				for(var prop in properties){
 					if(subTree.children[prop]){
 						model.on(path + "." + prop + ".changed", function(e){
+
 							switch(e.data.type){
 								case "splice":
 									
@@ -64,7 +72,8 @@ Seed({
 											var newData = {};
 											newData[prop] = e.data.object;
 											subTree.setData(newData);
-											
+											console.log("changed", i, e.data.addedCount)
+											_connect(model, subTree.children[prop][i].children, properties[prop], path + "." + prop, tree)
 										}
 									}
 									break;

@@ -15,7 +15,7 @@ Seed({
 				});
 				*/
 				node = new RootNode({
-					content : "<ul> {{#mylist}} <li class=\"in-attribute {{listclass}}\"> <div> {{test}}  </div> </li>  {{/mylist}} </ul> asd"
+					content : "<ul> {{#mylist}} <li class=\"in-attribute {{listclass}} {{#mysublist}} {{subtest}} {{/mysublist}}\"> <div> {{test}}  </div> </li>  {{/mylist}} </ul> asd"
 				});
 				console.log("parse time", performance.now() - start)
 				console.log(node)
@@ -35,12 +35,19 @@ Seed({
 				}
 				*/
 				for(var i =0; i < 10; i++){
-					data.push({  test : "1 -" + Math.random(), listclass : i + " test" })
+					data.push({  
+						test : "1 -" + Math.random(), 
+						listclass : i + " test",
+						mysublist : [
+							{ subtest : "irgendwas-" + Math.random()+"-" }
+						]
+					})
 				}
 				
 				node.setData({
 					mylist : data
 				})
+				
 				console.log("set data", performance.now() - start)
 			})
 
@@ -63,7 +70,10 @@ Seed({
 					}
 					*/
 					for(var i =0; i < 1000; i++){
-						data.push({  test : "2 -" + Math.random(), listclass : i * 10 + " test"  })
+						data.push({  
+							test : "2 -" + Math.random(),
+							listclass : i * 10 + " test"
+						})
 					}
 					
 					node.setData({
@@ -82,6 +92,39 @@ Seed({
 			
 			});
 
+
+			xit("set less data then before ", function(done){
+				window.setTimeout(function(){
+					console.log("more")
+					var start = performance.now();
+					var data = [];
+					/*
+					for(var i =0; i < 1000; i++){
+						data.push({ sublist : { test : Math.random() }})
+					}
+					*/
+					for(var i =0; i < 30; i++){
+						data.push({  
+							test : "2 -" + Math.random(),
+							listclass : i * 10 + " test"
+						})
+					}
+					
+					node.setData({
+						mylist : data
+					})
+					console.log("more data", performance.now() - start)
+					done();
+				}, 500);
+			})
+			
+			xit("render with less data", function(){
+				var start = performance.now();
+				var result = node.render();
+				//console.log("result", result)
+				console.log("render data", performance.now() - start)
+			
+			});
 
 
 			

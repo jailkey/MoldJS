@@ -3,6 +3,7 @@ Seed({
 		dna : "test"
 	},
 	function(Builder){
+
 		describe("Test Mold.Lib.VDom.Builder", function(){
 			var result = false;
 			it("parse some value nodes", function(){
@@ -14,7 +15,7 @@ Seed({
 			});
 
 			it("add some data", function(){
-				var start = performance.now();
+				var start = now();
 				var data = { block : [] };
 				for(var i = 0; i < 10; i++){
 					data.block.push({
@@ -68,6 +69,7 @@ Seed({
 
 			it("remove blockdata", function(){
 				secondResult.dom.setData(false);
+				console.log(secondResult.dom.children.block[0].isNegative, secondResult.dom.children.block[0].renderDom);
 				expect(secondResult.dom.children.block[0].renderDom.length).toBe(0);
 				expect(secondResult.dom.children.block[1].renderDom.length).toBe(1);
 			})
@@ -139,6 +141,46 @@ Seed({
 				fivesResult.dom.setData(data);
 				expect(fivesResult.dom.children.block.children[0]['block.name'].data).toBe("hans peter");
 				expect(fivesResult.dom.children.block.children[0]['irgendwas.anderes'].data).toBe("test");
+			});
+
+			var filterResult = false;
+			it("create a value filter", function(){
+				filterResult = new Builder('{{#block}} <div>{{test|currency}}</div> {{/block}}');
+				expect(filterResult.dom.children.block.children[0].test.filter.currency).toBeObject();
+			});
+
+			it("set data for value filter", function(){
+				filterResult.dom.setData({
+					block : {
+						test : "2000"
+					}
+				});
+				expect(filterResult.dom.children.block.children[0].test.data).toBe("2.000,00");
+			});
+
+			var filterResult = false;
+			it("create a block filter", function(){
+				filterResult = new Builder('{{#block|sort,value:test,desc|maxlen,len:2}} <div>{{test}}</div> {{/block}}');
+				expect(filterResult.dom.children.block.filter.maxlen).toBeObject();
+			});
+
+
+			it("set data for value filter", function(){
+
+				filterResult.dom.setData({
+					block : [
+						{ test : 1 },
+						{ test : 2 },
+						{ test : 3 },
+						{ test : 4 },
+						{ test : 5 }
+					]
+						
+				});
+
+				expect(filterResult.dom.children.block.children.length).toBe(2);
+				expect(filterResult.dom.children.block.children[0].test.data).toBe(5);
+				expect(filterResult.dom.children.block.children[1].test.data).toBe(4);
 			});
 
 		})

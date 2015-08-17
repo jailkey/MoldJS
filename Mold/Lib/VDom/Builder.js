@@ -49,6 +49,10 @@ Seed({
 			
 		}
 
+		var _parseAsText = function(content){
+			
+		}
+
 		var _getFilter = function(name){
 			var filter = {};
 			if(~name.indexOf("|")){

@@ -28,6 +28,7 @@ Seed({
 					expect(data.addedCount).toBe(1);
 					expect(data.index).toBe(5);
 					expect(data.object.length).toBe(6);
+					console.log(data.object[5])
 					expect(data.object[5]).toBe("six");
 					expect(data.removed.length).toBe(0);
 					observer.unobserve(test);
@@ -59,6 +60,8 @@ Seed({
 				testArray.splice(2, 2, "seven", "eight", "nine");
 
 			});
+
+
 
 			it("observe pop", function(done){
 				test = function(data){
@@ -128,6 +131,21 @@ Seed({
 				observer.observe(test)
 
 				testArray[0] = "ten";
+
+			});
+
+
+			it("observe splice with array as argument", function(done){
+				test = function(data){
+
+					console.log("data", data.object[0])
+					expect(data.object[0].length).toBe(3)
+					observer.unobserve(test);
+					done();
+				}
+				observer.observe(test)
+
+				testArray.splice(0, 0, ["seven", "eight", "nine"]);
 
 			});
 

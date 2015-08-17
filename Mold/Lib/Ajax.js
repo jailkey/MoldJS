@@ -49,6 +49,14 @@
 
 				});
 			},
+
+			put : function(){
+
+			},
+
+			del : function(){
+
+			},
 		
 			send : function(url, data, config){
 				var xhr; 

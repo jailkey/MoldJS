@@ -22,7 +22,11 @@ Seed({
 					output += part + "\n";
 				}
 			});
-		
+
+			if(!contentParts.length){
+				output = stack;
+			}
+
 			console.log(output, "color:#000000; background-color:#ffffff;", "color:#ffffff; background-color:#ff0000;", "color:#000000; background-color:#ffffff;");
 		}
 

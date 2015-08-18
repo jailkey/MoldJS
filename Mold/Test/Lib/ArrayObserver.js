@@ -149,6 +149,19 @@ Seed({
 
 			});
 
+			it("observe conncat", function(done){
+				test = function(data){
+
+					console.log("conncat", data.object[0])
+					observer.unobserve(test);
+					done();
+				}
+				observer.observe(test)
+
+				testArray.push.apply(testArray, ["seven", "eight", "nine"]);
+
+			});
+
 			it("performance test", function(){
 				var start = now();
 				test = function(data){

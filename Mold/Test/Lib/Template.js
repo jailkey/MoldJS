@@ -138,26 +138,11 @@ Seed({
 						}
 					});
 					
-					console.log(dataModel.data)
-					//template.connect(dataModel);
+					template.connect(dataModel);
 					window.setTimeout(done, 100)
 				})
 
-				xit("add data to model", function(done){
-
-					for(var i = 0; i < 10; i++){
-						dataModel.data.block.push({
-							i : "a" + i + 2,
-							value : "NEU",
-							color : Color.randomColor()
-						})
-					}
-
-
-					window.setTimeout(done, 800)
-				});
-
-				xit("change model data with splice", function(done){
+				it("add model data with push", function(done){
 					var test = now();
 					var data = [];
 					for(var i = 0; i < 10; i++){
@@ -167,17 +152,18 @@ Seed({
 							color : Color.randomColor()
 						})
 					}
-					dataModel.data.block.splice(0, 0, data);
-					
-					template.addDataSync(dataModel.data)
+				
+					dataModel.data.block.push.apply(dataModel.data.block, data);
+					//template.addDataSync(dataModel.data)
 					console.log("time  ", now() - test);
 					window.setTimeout(done, 800)
 				});
 
 
-				xit("change property values", function(){
+				it("change property values", function(){
 					var test = now();
-					dataModel.data.block.each(function(data){
+					Mold.each(dataModel.data.block, function(data){
+						console.log("data", data.color)
 						data.color = Color.randomColor();
 					});
 					console.log("->", now() - test)

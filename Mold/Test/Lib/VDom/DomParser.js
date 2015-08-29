@@ -3,7 +3,7 @@ Seed({
 		dna : "test"
 	},
 	function(VDomParser){
-		describe("Test Mold.Lib.VDom.DomParser", function(){
+		xdescribe("Test Mold.Lib.VDom.DomParser", function(){
 			console.log("test dom parser")
 			var result = false;
 			var input = document.createElement("div");

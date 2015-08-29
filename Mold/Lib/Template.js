@@ -29,7 +29,6 @@ Seed({
 				ajax
 					.get(markup)
 					.then(function(data){
-						console.log("test")
 						resolve(data);
 					})
 					.fail(function(error){
@@ -48,47 +47,114 @@ Seed({
 		});
 
 
-		var _connect = function(model, subTree, properties, path, tree){
-			console.log("watch", path)
-			if(Mold.isArray(properties)){
-				var i = 0, len = subTree.length;
-				console.log("subTree len", subTree)
-				for(; i < len; i++){
-					model.on(path + "." + i + ".changed", function(e){
-						console.log("array item changed", i)
-						//_connect(model, subTree.children[prop], properties[prop], path + "." + i, tree)
-					});
-				}
-			}else if(Mold.isObject(properties)){
-				for(var prop in properties){
-					if(subTree.children[prop]){
-						model.on(path + "." + prop + ".changed", function(e){
+		var _connector = {
+			renderTimer : false,
+			reRender : function(tree){
+				clearTimeout(_connector.renderTimer);
+				_connector.renderTimer = setTimeout(function(){
+					tree.dom.render();
+				}, 2);
 
-							switch(e.data.type){
-								case "splice":
-									
-									if(Mold.isArray(subTree.children[prop])){
-										for(var i = 0; i < subTree.children[prop].length; i++){
-											var newData = {};
-											newData[prop] = e.data.object;
-											subTree.setData(newData);
-											console.log("changed", i, e.data.addedCount)
-											_connect(model, subTree.children[prop][i].children, properties[prop], path + "." + prop, tree)
-										}
-									}
-									break;
+			},
+			updateChildren : function(children, data, tree){
+				if(Mold.isObject(children)){
+					for(var childName in children){
+						_connector.updateChild(children[childName], data[childName], tree, childName)
+					}
+				}else{
+					throw new Error("only object implemented in _connector.updateChildren")
+				}
+			},
+			updateChild : function(child, data, tree, name){
+				//if blocknode
+				if(child.type === 2){
+					var blockData = {};
+					blockData[name] = data;
+					//console.log("set data", name, data)
+					child.setData(blockData);
+				}else{
+					child.setData(data);
+				}
+				_connector.reRender(tree);
+				
+			},
+			watchObjectProp : function(model, subTree, properties, path, tree, name){
+				model.on(path + ".changed", function(e){
+					switch(e.data.type){
+						case "update":
+						case "splice":
+							//console.log("property changed", path + ".changed", properties, subTree)
+							//if subtree is an array update all childnodes
+							//console.log("SPLCIE", e.data)
+							if(Mold.isArray(subTree)){
+								var i = 0, len = subTree.length;
+								for(; i < len; i++){
+									_connector.updateChild(subTree[i], e.data.object, tree, name);
+									//if(e.data.type)
+									_connect(model, subTree[i], properties, path, tree);
+								}
+							}else if(subTree.children && subTree.children[name]){
+								_connector.updateChild(subTree, e.data.object, tree, name);
 							}
-							tree.dom.render();
-						});
-						_connect(model, subTree.children[prop], properties[prop], path + "." + prop, tree)
+							break;
+						default:
+							throw new Error("type " + e.data.type + " for watchObjectProp is not implemented!");
+					}
+
+				});
+			},
+			watchArray : function(model, subTree, properties, path, tree){
+				model.on(path + ".changed", function(e){
+					switch(e.data.type){
+						case "update":
+							if(Mold.isObject(e.data.object)){
+								_connector.updateChildren(subTree, e.data.object, tree)
+							}else{
+								throw new Error("e.data.object is no Object, not Implemented");
+							}
+							break;
+						default:
+							throw new Error("method " + e.data.type + " for watchArray is not implemented!");
+					}
+				});
+			},
+			parseArray : function(model, subTree, properties, path, tree){
+				var i = 0, len = subTree.children.length;
+				for(; i < len; i++){
+					var newPath = path + "." + i;
+					//console.log("watch", newPath)
+
+					_connector.watchArray(model, subTree.children[i], properties[0], newPath, tree)
+					_connect(model, subTree.children[i], properties[0], newPath, tree)
+				}
+			},
+			parseObject : function(model, subTree, properties, path, tree){
+				for(var prop in properties){
+					//_connector.watchObject
+					var newPath = path + "." + prop;
+					if(subTree.children){
+						if(subTree.children[prop]){
+							_connector.watchObjectProp(model, subTree.children[prop], properties[prop], newPath, tree, prop)
+						}
+					}else{
+						_connector.watchObjectProp(model, subTree[prop], properties[prop], newPath, tree, prop)
+						//throw new Error("subTree children is not defined, in _connector.parseObject!");
 					}
 				}
+			}
+		}
+		
+		
+		var _connect = function(model, subTree, properties, path, tree){
+			if(Mold.isArray(properties)){
+				_connector.parseArray(model, subTree, properties, path, tree);
+			}else if(Mold.isObject(properties)){
+				_connector.parseObject(model, subTree, properties, path, tree);
 			}
 
 		}
 
 		
-	
 
 		this.publics = {
 			refresh : function(){
@@ -100,7 +166,10 @@ Seed({
 			connect : function(model){
 				_templateTree.then(function(tree){
 					_connect(model, tree.dom, model.getProperties(), "data", tree);
-					//tree.dom.render();
+					window.setTimeout(function(){
+						model.triggerUpdate();
+					}, 50)
+					
 				});
 			},
 			unbind : function(){

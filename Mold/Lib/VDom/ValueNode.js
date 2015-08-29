@@ -14,6 +14,9 @@ Seed({
 			this.filter = config.filter || false;
 			this.parentName = false;
 			this.childName = false;
+			this.id = Mold.getId();
+
+			var that = this;
 
 			if(!this.isPointer && ~this.name.indexOf(".")){
 				this.hasParentValue = true;

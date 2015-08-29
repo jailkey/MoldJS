@@ -42,6 +42,7 @@ Seed({
 		this.parent = false;
 		this.state = STATE_NEW;
 		this.isString = config.isString || false;
+		this.hasBinding = false;
 		this._id = Mold.getId();
 
 		this.vdom = _vDom;
@@ -152,16 +153,17 @@ Seed({
 
 
 		this.setData = function(data, bind){
-	
-			_oldData = this.data;
+			
+			
 			if(typeof this.data === "string" && this.data === data){
 				this.state = STATE_NO_CHANGES;
 			}else if(this.state === STATE_NO_CHANGES){
 				this.state = STATE_UPDATE;
 			}
+			
 			this.data = data;
-			this.rawData = Mold.mixin({}, data) 
 			this.onSetData(data, bind);
+			
 		}
 		
 		this.bind = function(model){

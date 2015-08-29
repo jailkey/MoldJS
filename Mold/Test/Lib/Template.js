@@ -122,7 +122,8 @@ Seed({
 					window.setTimeout(done, 800)
 				})
 			});
-	
+
+	//model data
 			it("bind model and add and remove data", function(){
 
 				it("add model to template", function(done){
@@ -138,47 +139,46 @@ Seed({
 						}
 					});
 					
-					template.connect(dataModel);
-					window.setTimeout(done, 100)
+					
+					window.setTimeout(done, 800)
 				})
 
 				it("add model data with push", function(done){
 					var test = now();
 					var data = [];
-					for(var i = 0; i < 10; i++){
+					for(var i = 0; i < 100; i++){
 						data.push({
 							i : "c" + i ,
-							value : "noch später",
+							value : "noch spä hans ter",
 							color : Color.randomColor()
 						})
 					}
 				
 					dataModel.data.block.push.apply(dataModel.data.block, data);
-					//template.addDataSync(dataModel.data)
-					console.log("time  ", now() - test);
+					template.connect(dataModel);
+					console.log("push time  ", now() - test);
 					window.setTimeout(done, 800)
 				});
 
 
-				it("change property values", function(){
+				it("change property values", function(done){
 					var test = now();
-					Mold.each(dataModel.data.block, function(data){
-						console.log("data", data.color)
-						data.color = Color.randomColor();
-					});
-					console.log("->", now() - test)
+					for(var i = 0; i < 100; i++){
+						dataModel.data.block[i].color = Color.randomColor();
+						dataModel.data.block[i].value = "Neu Inhalte";
+					}
+					console.log("change ->", now() - test);
+					window.setTimeout(done, 800);
 				})
 
-				xit("remove model data", function(done){
-					var test = now()
-					for(var i = 0; i < 5; i++){
-						dataModel.data.block.shift();
-					}
-				
+				it("remove model data", function(done){
+					var test = now();
+					dataModel.data.block.splice(0, 190);
+					console.log("remove time->", now() - test)
 					window.setTimeout(done, 800)
 				});
 
-				xit("add model data again", function(done){
+				it("add model data again", function(done){
 					
 					for(var i = 0; i < 5; i++){
 						dataModel.data.block.push({
@@ -191,11 +191,8 @@ Seed({
 				});
 
 
-				
 
-
-
-				xit("change model data with splice", function(done){
+				it("change model data with splice", function(done){
 					var test = now();
 					var data = [];
 					for(var i = 0; i < 20; i++){
@@ -205,12 +202,12 @@ Seed({
 							color : Color.randomColor()
 						})
 					}
-					dataModel.data.block.splice(0, 20, data);
-					console.log("time", now() - test);
+					dataModel.data.block.splice.apply(dataModel.data.block.splice, [5, 20].concat(data));
+					console.log("change with splice", now() - test);
 					window.setTimeout(done, 800)
 				});
 
-				xit("remove all model data", function(done){
+				it("remove all model data", function(done){
 					var test = now();
 					
 					dataModel.data.block.splice(0, 5030)
@@ -218,7 +215,7 @@ Seed({
 					window.setTimeout(done, 800)
 				});
 
-				xit("and add more data", function(done){
+				it("and add more data", function(done){
 					var test = now();
 					var data = [];
 					for(var i = 0; i < 30; i++){
@@ -228,7 +225,7 @@ Seed({
 							color : Color.randomColor()
 						})
 					}
-					dataModel.data.block.splice(0, 0, data);
+					dataModel.data.block.splice.apply(dataModel.data.block.splice, [5, 0].concat(data));
 					console.log("time", now() - test);
 					window.setTimeout(done, 800)
 				});

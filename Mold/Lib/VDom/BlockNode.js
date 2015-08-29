@@ -24,6 +24,7 @@ Seed({
 
 
 			var _oldRenderLength = 0;
+			var _oldDataLength = 0;
 			var that = this;
 
 			this.createRenderDom = function(index){
@@ -178,72 +179,9 @@ Seed({
 				this.removeListItems(0, this.renderDom.length)
 			}
 
-			this.bind = function(model){
-				/*
-				this.bindModel = true;
-
-				var that = this;
-
-				var _initDataIfNotSet = function(){
-				
-					if(!that.rawData){
-						that.rawData = {}
-						that.rawData[that.name] = [];
-					}else{
-						if(!Mold.isArray(that.rawData[that.name])){
-							that.rawData[that.name] = [that.rawData[that.name]]
-						}
-					}
-
-				}
-
-				model.on("list.splice", function(e){
-					_initDataIfNotSet();
-
-					var args = [e.data.from, e.data.len].concat(e.data.data);
-					Array.prototype.splice.apply(that.rawData[that.name], args);
-					that.parent.setNodeData(that.name, Mold.mixin({}, that.rawData));
-					that.renderParentDom();
-				});
-
-				model.on("list.item.add", function(e){
-					_initDataIfNotSet();
-					that.rawData[that.name][e.data.index] = e.data.value;
-					var newData = Mold.mixin({}, that.rawData);
-					that.parent.setNodeData(that.name, newData);
-					that.renderParentDom();
-				});
-
-				model.on("list.item.remove", function(e){
-					_initDataIfNotSet();
-					that.rawData[that.name].splice(e.data.index, 1);
-					that.parent.setNodeData(that.name, Mold.mixin({}, that.rawData))
-					that.renderParentDom();
-				});
-
-				this.hasBinding = true;
-				*/
-			}
-/*
-			this.bindChildren = function(model, index){
-				var undefined;
-				if(index !== undefined){
-
-					for(var name in this.children[index]){
-						console.log("bind", name, model)
-						if(
-							model && model && model[name]
-							&& !this.children[index][name].hasBinding
-						){
-							
-							this.children[index][name].bind(model)
-						}
-					}
-				}
-			}*/
 
 			this.onSetData = function(data){
-				console.log("SET DATA", this._id)
+			
 				for(var filterName in this.filter){
 					var filter = Mold.Lib.Filter.get(filterName);
 					if(filter){
@@ -286,12 +224,12 @@ Seed({
 						this.addListItem(i, data[i])
 					}
 					
-					if(_oldData && _oldData[this.name] &&  (_oldData[this.name].length > data.length)){
-						var dif =  _oldData[this.name].length - data.length;
+					if(_oldDataLength > data.length){
+						var dif =  _oldDataLength - data.length;
 
 						this.removeListItems(data.length, dif);
 					}
-
+					_oldDataLength = data.length;
 				}else if((!data || !data[this.name]) && data[this.name] !== 0){
 					
 					this.removeAllListItems();
@@ -373,7 +311,7 @@ Seed({
 						}
 					}
 				}
-		
+			
 			}
 
 			this.clone = function(){
@@ -410,7 +348,6 @@ Seed({
 
 
 			this.render = function(){
-				console.log("RENDER")
 				//remove unused
 				var i = 0, len = this.renderDom.length;
 				var y = 0, removeLen = this.removeList.length;

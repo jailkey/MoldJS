@@ -73,11 +73,7 @@ Seed({
 				if(!Mold.isObject(properties)){
 					throw new TypeError(name + " can not be an object!");
 				}
-				/*
-				Object.defineProperty(data, '__name', {
-					value : name
-				});
-					*/
+				
 				var objectObserver = new ObjectObserver(data);
 
 				objectObserver.observe(function(e){
@@ -125,6 +121,16 @@ Seed({
 
 
 		_update(_initProperties(_config.properties));
+
+		_triggerUpdate = function(){
+			Mold.each(_data, function(value, name){
+				var e = {
+					type : "update",
+					object : value
+				}
+				_that.trigger("data." + name + ".changed", e);
+			});
+		}
 
 
 		this.publics = {
@@ -196,8 +202,10 @@ Seed({
  * @return {[type]} [description]
  */
 			json : function(){
-				
-			}
+			
+			},
+
+			triggerUpdate : _triggerUpdate
 
 		}
 	}

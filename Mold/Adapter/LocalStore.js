@@ -3,13 +3,14 @@ Seed({
 		dna : "class",
 		include : [
 			"Mold.Lib.Event",
-			"Mold.Lib.LocalStore"
+			"Mold.Lib.LocalStore",
+			{ Promise : "Mold.Lib.Promise" }
 		]
 	},
-	function(){
+	function(config){
 
 		Mold.mixin(this, new Mold.Lib.Event(this));
-		var _localStore = new Mold.Lib.LocalStore();
+		var _localStore = new Mold.Lib.LocalStore(config);
 		var _that = this;
 
 		this.publics = {
@@ -17,19 +18,13 @@ Seed({
 				return _localStore.save(data, id);
 			},
 			load : function(id){
-				var promise =  _localStore.load(id);
-
-				promise.then(function(data){
-					_that.trigger("update", { data : data, id : id });
-				});
-				
-				return promise;
+				return _localStore.load(id);
 			},
-			insert : function(data, id){
-				return _localStore.add(data, id);
+			insert : function(data){
+				return _localStore.add(data);
 			},
 			remove : function(id){
-				 return _localStore.remove(id);
+				return _localStore.remove(id);
 			}
 		}
 	}

@@ -11,9 +11,12 @@ Seed({
 		]
 	},
 	function(markup, config){
+		
+		config = config || {};
 
 		var ajax = new Ajax();
 		var _tree = false;
+		var _parseAsString= config.parseAsString || false;
 		var undefined;
 
 		//load the 
@@ -41,7 +44,7 @@ Seed({
 		
 		var _templateTree = new Promise(function(resolve, reject){
 			_template.then(function(data){
-				_tree = new Builder(data);
+				_tree = new Builder(data, this);
 				resolve(_tree);
 			})
 		});
@@ -52,7 +55,11 @@ Seed({
 			reRender : function(tree){
 				clearTimeout(_connector.renderTimer);
 				_connector.renderTimer = setTimeout(function(){
-					tree.dom.render();
+					if(!_parseAsString){
+						tree.render();
+					}else{
+						tree.renderString();
+					}
 				}, 2);
 
 			},
@@ -175,22 +182,30 @@ Seed({
 			unbind : function(){
 
 			},
-			addData : function(data){
+			setData : function(data){
 				_templateTree.then(function(tree){
 					tree.dom.setData(data);
-					tree.dom.render();
+					if(!_parseAsString){
+						tree.render();
+					}else{
+						tree.renderString();
+					}
 				});
-			},
-			addDataSync : function(data){
-				_tree.dom.setData(data);
-				_tree.dom.render();
 			},
 			appendTo : function(element){
 				_templateTree.then(function(tree){
-
-					element.appendChild(tree.dom.render())
+					element.appendChild(tree.render())
 				})
-				
+			},
+			getString : function(data){
+				return new Promise(function(resolve, reject){
+					_templateTree.then(function(tree){
+						if(data){
+							tree.dom.setData(data);
+						}
+						resolve(tree.renderString());
+					})
+				});
 			},
 			get : _templateTree,
 			tree : _templateTree

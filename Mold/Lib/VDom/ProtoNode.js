@@ -22,6 +22,7 @@ Seed({
 		var TEXT_NODE = 6;
 		var ATTRIBUTE_NODE = 6;
 		var STRING_NODE = 8;
+		var ROOT_NODE = 9;
 
 		var _doc = Mold.Lib.VDom.VDoc;
 		
@@ -37,13 +38,14 @@ Seed({
 		this.children = this.children || {};
 		this.data = config.data || false;
 		this.name = config.name;
-		this.rawData = Mold.mixin({}, config.data) || false;
 		this.type = STRING_NODE;
 		this.parent = false;
 		this.state = STATE_NEW;
 		this.isString = config.isString || false;
 		this.hasBinding = false;
 		this._id = Mold.getId();
+		this.services = config.services || false;
+		this.template = config.template || false;
 
 		this.vdom = _vDom;
 		this.protoChild = {};
@@ -61,6 +63,7 @@ Seed({
 			}
 			
 			child.parent = _that;
+			child.services = this.services;
 
 			if(
 				child.type === BLOCK_NODE 
@@ -123,6 +126,53 @@ Seed({
 
 		this.onSetData = function(data){
 
+				//set children to false if no data is given
+			for(var name in this.children){
+				if(Mold.isArray(this.children[name])){
+					var len = this.children[name].length, i = 0;
+					for(; i < len; i++){
+						var selected = this.children[name][i];
+						if(selected.type === BLOCK_NODE){
+							//if type is a blocknode add parent data
+							if(data){
+								selected.setData(data);
+							}else{
+								selected.setData(false);
+							}
+						}else{
+							if(selected.hasParentValue && data[selected.parentName] &&  data[selected.parentName][selected.childName]){
+								selected.setData(data[selected.parentName][selected.childName]);
+							}else if(data[name]){
+								selected.setData(data[name]);	
+							}else{
+								selected.setData("");	
+							}
+							
+							
+						}
+					}
+				}else{
+
+					if(this.children[name].type === BLOCK_NODE){
+						//if type is a blocknode add parent data
+						if(data){
+							this.children[name].setData(data);
+						}else{
+							this.children[name].setData(false);
+						}
+					}else{
+						var selected = this.children[name];
+						if(selected.hasParentValue && data[selected.parentName] &&  data[selected.parentName][selected.childName]){
+							selected.setData(data[selected.parentName][selected.childName]);
+						}else if(data[name]){
+							this.children[name].setData(data[name]);
+						}else{
+							this.children[name].setData("");
+						}
+					}
+					
+				}
+			}
 		}
 
 		this.renderParentDom = function(){
@@ -165,26 +215,11 @@ Seed({
 			this.onSetData(data, bind);
 			
 		}
-		
-		this.bind = function(model){
-			
-			for(name in this.children){
-				if(model[name]){
-					
-					if(Mold.isArray(this.children[name])){
 
-						var i = 0, len = this.children[name].length;
-						for(; i < len; i++){
-							console.log(this.children[name][i].bind)
-							this.children[name][i].bind(model[name]);
-						}
-					}else{
-						this.children[name].bind(model[name]);
-					}
-				}
-				
-			}
-		
+
+		this.renderString = function(){
+			throw new Error("renderString ist not implemented!")
 		}
+		
 	}
 )

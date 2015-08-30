@@ -16,20 +16,19 @@ Seed({
 					{ entry : "string" }
 				],
 				myproperty : "string"
-			},
-			//define how to sync the model
-			adapter : new Mold.Adapter.LocalStore()
+			}
+			
+			//adapter : new Mold.Adapter.LocalStore()
 		});
 
-		//define some events
-		model.data.list.on("list.item.add", function(e){
-			console.log("Item added to list!", "Item value is: " + e.data.value.entry);
-		})
+		//define a adapter to save the model
+		model.connect(new Mold.Adapter.LocalStore());
+
 
 		//trigger the event 
 		model.data.list.push({ entry : "something" });
 
-			//if you want to use validation turn it on
+		//if you want to use validation turn it on
 		model.validation(true);
 
 		//define an event
@@ -40,14 +39,18 @@ Seed({
 		//triggers an error, cause the property validation is string, not number
 		model.data.list.push({ entry : 5 });
 
-		//wrong value will reseted
-		console.log("Value is a empty string:", model.data.list[1].entry);
+		//wrong value will reset
+		//console.log("Value is a empty string:", model.data.list[1].entry);
 
-		//use save() to save the data via the given adapter (in our case it sends a POST-request with models data);
-		model.save("test.data").then(function(id){
-			model.load(id).success(function(data){
-				console.log("e", data)
-			});
+		//use save() to save the data via the given adapter (in our case it saved to localStorage);
+		model.save().then(function(id){
+			console.log("saved", id);
+			model
+				.load(id)
+				.then(function(data){
+					console.log("ready", data)
+				});
+
 		});
 		
 

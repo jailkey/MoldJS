@@ -2,9 +2,9 @@ Seed({
 		name : "Mold.Lib.LocalStore",
 		dna : "class",
 		include : [
-			"Mold.Lib.Info",
-			"Mold.Lib.Promise",
-			"Mold.Lib.Sanitize"
+			".Info",
+			".Promise",
+			".Sanitize"
 		]
 	},
 	function(){
@@ -26,8 +26,10 @@ Seed({
 				if(!Mold.startsWith(name, "_")){
 					if(Mold.isArray(value) || Mold.isObject(value)){
 						output[name] = _sanitize(value);
+					}else if(typeof value === "string"){
+						output[name] = _sanitizer.text(value + "");
 					}else if(typeof value !== "function"){
-						output[name] = _sanitizer.text(value);
+						output[name] = value;
 					}
 				}
 			})
@@ -35,11 +37,13 @@ Seed({
 		}
 
 		var _save = function(data, id){
+
 			if(Mold.isObject(data)){
 				data = _sanitize(data);
 				data = JSON.stringify(data);
 
 			}
+			console.log("save", id, data)
 			return localStorage.setItem(id, data);
 		}
 
@@ -86,7 +90,6 @@ Seed({
 			},
 			load : function(id){
 				return new Mold.Lib.Promise(function(fullfill, reject){
-					
 					var data = localStorage.getItem(id);
 					try {
 						var result = JSON.parse(data);
@@ -103,10 +106,10 @@ Seed({
 					fullfill(localStorage.removeItem(id));
 				});
 			},
-			add : function(data, id){
+			add : function(data){
 				return new Mold.Lib.Promise(function(fullfill, reject){
-					console.log("add with aid", id)
-					fullfill(_add(data, id));
+					var id = _add(data);
+					fullfill(id);
 				});
 			}
 

@@ -16,7 +16,7 @@ Seed({
 				document.body.appendChild(testElement)
 			})
 
-			it("create Seed and test rendering", function(){
+			it("create Seed and test rendering", function(done){
 				var style = new Mold.Lib.CSS(function(){/*|
 				
 					.test {
@@ -26,13 +26,16 @@ Seed({
 
 				|*/});
 
-				style.exec();
-				var backgroundColor = window.getComputedStyle(testElement).backgroundColor;
-				expect(Mold.Lib.Color.rgbToHex(backgroundColor)).toBe("#efefef");
+				style.exec().then(function(){
+					var backgroundColor = window.getComputedStyle(testElement).backgroundColor;
+					expect(Mold.Lib.Color.rgbToHex(backgroundColor)).toBe("#efefef");
+					done();
+				})
+				
 
 			});
 
-			it("create Seed and test appending Data", function(){
+			it("create Seed and test appending Data", function(done){
 				
 				var style = new Mold.Lib.CSS(function(){/*|
 					.test {
@@ -43,10 +46,13 @@ Seed({
 				
 				style.append({
 					test : "#ff0000"
-				});
+				}).then(function(){
+					var backgroundColor = window.getComputedStyle(testElement).backgroundColor;
+					expect(Mold.Lib.Color.rgbToHex(backgroundColor)).toBe("#ff0000");
+					done();
+				})
 
-				var backgroundColor = window.getComputedStyle(testElement).backgroundColor;
-				expect(Mold.Lib.Color.rgbToHex(backgroundColor)).toBe("#ff0000");
+			
 			});
 
 		});

@@ -114,6 +114,26 @@ Seed({
 				return this.domPointer;
 			}
 
+			this.renderString = function(){
+				var output = '<' + this.name;
+
+				for(var name in this.attributes){
+					var attrValue = this.attributes[name].renderString();
+					output += ' ' + name + '="' + attrValue + '"';
+				}
+
+				output += '>';
+				
+				var i = 0, len = this.renderDom.length;
+				for(; i < len; i++){
+					output += this.renderDom[i].renderString();
+				}
+
+				output += '</' + this.name + '>';
+
+				return output;
+			}
+
 		}
 	
 	}

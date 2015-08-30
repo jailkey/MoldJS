@@ -17,6 +17,7 @@ Seed({
 		var ajax = new Ajax();
 		var _tree = false;
 		var _parseAsString= config.parseAsString || false;
+	
 		var undefined;
 
 		//load the 

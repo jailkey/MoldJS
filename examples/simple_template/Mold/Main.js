@@ -18,8 +18,10 @@ Seed({
 			|*/
 		});
 
+		console.log(template)
 		//add some content
-		template.append({
+		
+		template.setData({
 			list : [
 				{ myproperty : "One"},
 				{ myproperty : "Two"},
@@ -27,12 +29,10 @@ Seed({
 			]
 		});
 
-		console.log(" template.",  template.tree());
-		console.log("html", template.get().innerHTML);
-
 		//append to document
-		document.body.appendChild(template.get());
+		template.appendTo(document.body);
 
+		
 	
 	}
 );

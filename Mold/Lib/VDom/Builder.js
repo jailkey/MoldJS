@@ -13,6 +13,7 @@ Seed({
 				{ ValueNode : "Mold.Lib.VDom.ValueNode" },
 				{ TextNode : "Mold.Lib.VDom.TextNode" },
 				{ AttributeNode : "Mold.Lib.VDom.AttributeNode" },
+				{ RootNode : "Mold.Lib.VDom.RootNode" },
 				{ Doc : "Mold.Lib.VDom.VDoc"}
 			]
 		]
@@ -139,8 +140,6 @@ Seed({
 							break;
 						}
 
-
-
 						//Value
 						if(Mold.startsWith(selected.nodeValue, VALUE)){
 							var name = selected.nodeValue.replace(VALUE, "").replace(END, "");
@@ -171,13 +170,26 @@ Seed({
 			return vDom;
 		}
 
-		this.dom = _parseNode(_doc, new DomNode({
+		var rootNode = new RootNode({
 			name : "root",
-			protoDom : _doc
-		}));
+			protoDom : _doc,
+			services : {},
+		});
+
+		this.dom = _parseNode(_doc, rootNode);
 
 		this.publics = {
-
+			/**
+			 * @method render
+			 * @description trigger the renderservice
+			 * @return {[type]} [description]
+			 */
+			render : function(){
+				return rootNode.render();
+			},
+			renderString : function(){
+				return rootNode.renderString();
+			}
 		}
 	}
 )

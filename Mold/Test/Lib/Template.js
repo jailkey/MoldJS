@@ -48,7 +48,7 @@ Seed({
 					})
 				}
 
-				template.addDataSync(data)
+
 				console.log("time", now() - test);
 				window.setTimeout(done, 800)
 			})
@@ -67,7 +67,7 @@ Seed({
 						})
 					}
 
-					template.addData(data)
+					template.setData(data)
 					window.setTimeout(done, 800)
 				})
 
@@ -82,12 +82,12 @@ Seed({
 							color : Color.randomColor()
 						})
 					}
-					template.addData(data)
+					template.setData(data)
 					window.setTimeout(done, 800)
 				})
 
 				it("delete data", function(done){
-					template.addData(false)
+					template.setData(false)
 					window.setTimeout(done, 800)
 				})
 
@@ -100,12 +100,12 @@ Seed({
 							color : Color.randomColor()
 						})
 					}
-					template.addData(data)
+					template.setData(data)
 					window.setTimeout(done, 800)
 				})
 
 				it("delete data", function(done){
-					template.addData(false)
+					template.setData(false)
 					window.setTimeout(done, 800)
 				});
 
@@ -118,7 +118,7 @@ Seed({
 							color : Color.randomColor()
 						})
 					}
-					template.addData(data)
+					template.setData(data)
 					window.setTimeout(done, 800)
 				})
 			});

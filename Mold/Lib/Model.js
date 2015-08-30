@@ -8,7 +8,8 @@ Seed({
 			{ Event : "Mold.Lib.Event" },
 			{ ArrayObserver : "Mold.Lib.ArrayObserver" },
 			{ ObjectObserver : "Mold.Lib.ObjectObserver" },
-			{ Validation : "Mold.Lib.Validation" }
+			{ Validation : "Mold.Lib.Validation" },
+			{ Promise : "Mold.Lib.Promise" }
 
 		],
 		test : "Mold.Test.Lib.Model"
@@ -20,6 +21,9 @@ Seed({
 		var _data = {};
 		var _config = config;
 		var _validation = false;
+		var _adapter = false;
+
+		this.id = false;
 
 		Mold.mixin(this, new Event(this));
 
@@ -119,6 +123,21 @@ Seed({
 			_watchData(_data, "data", _config.properties);
 		}
 
+		var _chechAdapterInterface = function(adapter){
+			if(typeof adapter.insert !== "function"){
+				throw new Error("Adapter has no 'insert' method!");
+			}
+			if(typeof adapter.update !== "function"){
+				throw new Error("Adapter has no 'update' method!");
+			}
+			if(typeof adapter.remove !== "function"){
+				throw new Error("Adapter has no 'remove' method!");
+			}
+			if(typeof adapter.load !== "function"){
+				throw new Error("Adapter has no 'load' method!");
+			}
+		}
+
 
 		_update(_initProperties(_config.properties));
 
@@ -134,61 +153,86 @@ Seed({
 
 
 		this.publics = {
+/**
+ * @name data 
+ * @description an object with the current model data
+ * @type {object}
+ */
 			data : _data,
-			getId : function(){
-				return _dataId;
-			},
+/**
+ * @method validation 
+ * @description enables the model validation
+ * @param  {boolean} state - a boolean value with true enables the validation / false disable it
+ */
 			validation : function(state){
 				_validation = state;
 			},
+/**
+ * @method getProperties 
+ * @description returns the model properties:
+ * @return {object} properties
+ */
 			getProperties : function(){
 				return _config.properties;
 			},
 /**
- * save  saves the model
- * @param  {[type]} id [description]
+ * @method save  
+ * @saves the model data to the specified adapter
  * @return {promise} returns a promise
  */
-			save : function(id){
-	
+			save : function(){
+				var that = this;
 				if(!_adapter){
-					throw new Error("Can not save data without adapter!");
+					throw new Error("adapter is not specified!")
 				}
-
-				var data = _cleanData(_data, _properties);
-				if(!_dataId){
-					var promise = _adapter.insert(data, id);
-					promise.then(function(id){
-						_dataId = id;
-					})
+				//check if model has id, if not use insert
+				if(this.id !== false){
+					var promise = _adapter.update(_data, this.id);
 				}else{
-					var promise = _adapter.update(data, _dataId);
+
+					var promise = _adapter.insert(_data);
+					promise.then(function(id){
+						that.id = id;
+					})
+								
 				}
-				
 				return promise;
 			},
 /**
- * load loads data by the specified resourceID
- * @param  {number|string} id [description]
+ * @method load
+ * @description loads data by the specified resourceID
+ * @param  {number|string} id - the resource id
  * @returns {promise} - returns a promise
  */
 			load : function(id){
-				
+				this.id = id;
+				var that = this
+				var promise = _adapter.load(this.id)
+				promise.then(function(data){
+					that.update(data);
+				});
+				return promise;
 			},
-
+/**
+ * @method  remove 
+ * @description removes model from the resource
+ * @return {promise} returns a promise
+ */
 			remove : function(){
-				_data = {};
-				this.data = _data;
-				return _adapter.remove(_dataId);
+				var that = this;
+				return _adapter.remove(this.id);
 			},
 
 /**
- * [bind description]
- * @param  {[type]} model [description]
- * @return {[type]}       [description]
+ * @method connect
+ * @description connects a adapter to the model
+ * @param  {object} adapter
  */
-			connect : function(model){
-				
+			connect : function(adapter){
+				//check interface
+				_chechAdapterInterface(adapter);
+				_adapter = adapter;
+			
 			},
 /**
  * update replace the model with new data
@@ -198,11 +242,12 @@ Seed({
 				_update(newData)
 			},
 /**
- * json description]
+ * @method  json
+ * @description returns a JSON string with the current model data
  * @return {[type]} [description]
  */
 			json : function(){
-			
+				return JSON.stringifiy(_data);
 			},
 
 			triggerUpdate : _triggerUpdate

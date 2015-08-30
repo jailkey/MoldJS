@@ -49,7 +49,12 @@ Seed({
 			})
 		});
 
-
+		/**
+		 * @method  _connector
+		 * @private
+		 * @description collection of methods to bind a model to the template
+		 * @type {Object}
+		 */
 		var _connector = {
 			renderTimer : false,
 			reRender : function(tree){
@@ -158,15 +163,11 @@ Seed({
 			}else if(Mold.isObject(properties)){
 				_connector.parseObject(model, subTree, properties, path, tree);
 			}
-
 		}
 
 		
 
 		this.publics = {
-			refresh : function(){
-
-			},
 			snatch : function(){
 
 			},
@@ -178,9 +179,6 @@ Seed({
 					}, 50)
 					
 				});
-			},
-			unbind : function(){
-
 			},
 			setData : function(data){
 				_templateTree.then(function(tree){

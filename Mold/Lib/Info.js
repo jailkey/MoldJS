@@ -48,7 +48,10 @@ Seed({
 				"querySelector" : !!(document && document.querySelector),
 				"querySelectorAll" : !!(document && document.querySelectorAll),
 				"sessionStorage" : !!(window && window.sessionStorage),
-				"localStorage" : !!(window && window.localStorage),
+				"localStorage" : (function(){
+					var output = !!(window && window.localStorage) || !!localStorage;
+					return output;
+				})(),
 				"proxy" : !!(window && window.Proxy),
 				"mutationObserver" : !!(window && window.MutationObserver),
 				"registerElement" : !!document.registerElement,

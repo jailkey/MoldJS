@@ -7,7 +7,8 @@ Seed({
 			"Mold.Lib.MultiLineString",
 			"Mold.Lib.Template",
 			"Mold.Lib.Color",
-			{ Element : ".Element" }
+			{ Element : ".Element" },
+			{ Promise : ".Promise" }
 		],
 		test : "Mold.Test.Lib.CSS"
 	},
@@ -30,8 +31,7 @@ Seed({
 		}
 
 		if(rules){
-			_cssContent = Mold.Lib.MultiLineString(rules);
-			var _template = new Mold.Lib.Template(_cssContent, { parseAsString : true});
+			var _template = new Mold.Lib.Template(rules, { parseAsString : true});
 		}
 
 
@@ -55,7 +55,6 @@ Seed({
 						len = styleParts.length;
 					
 					for(; i < len; i++){
-						
 						var styleFragments = styleParts[i].split(":"),
 							y = 0,
 							fragmentLen = styleFragments.length;
@@ -156,39 +155,42 @@ Seed({
 		}
 
 
-		var _apply = function(){
+		var _apply = function(data){
+			return new Promise(function(resolve, reject){
+				_template.getString(data).then(function(content){
+					var style = _parseStyles(content);
+					var ruleCount = 0;
 
-			var style = _parseStyles(_template.get());
-			var ruleCount = 0;
+					Mold.each(style, function(value, rule){
+						 _deleteRule(rule, _sheet);
 
-			Mold.each(style, function(value, rule){
-				 _deleteRule(rule, _sheet);
-
-				if(Mold.isObject(value)){
-					var ruleString = rule + "{";
-					Mold.each(value, function(propValue, prop){
-						if(Mold.isObject(propValue)){
-							ruleString += prop + "{";
-							Mold.each(propValue, function(subPropValue, subProp){
-								ruleString += subProp + ":" + subPropValue + ";";
+						if(Mold.isObject(value)){
+							var ruleString = rule + "{";
+							Mold.each(value, function(propValue, prop){
+								if(Mold.isObject(propValue)){
+									ruleString += prop + "{";
+									Mold.each(propValue, function(subPropValue, subProp){
+										ruleString += subProp + ":" + subPropValue + ";";
+									});
+									ruleString += "}";
+								}else{
+									ruleString += prop + " : " + propValue + ";";
+								}
 							});
-							ruleString += "}";
+							 ruleString += "}";
 						}else{
-							ruleString += prop + " : " + propValue + ";";
+							throw new Error("something went wrong during style parsing!");
 						}
-					});
-					 ruleString += "}";
-				}else{
-					throw new Error("something went wrong until style parsing!");
-				}
+						
+						if(_sheet.insertRule){
+							_sheet.insertRule(ruleString, ruleCount);
+						}
 				
-				if(_sheet.insertRule){
-					_sheet.insertRule(ruleString, ruleCount);
-				}
-		
-				ruleCount++;
-			})
-			//
+						ruleCount++;
+					})
+					resolve();
+				})
+			});
 		}
 
 
@@ -196,18 +198,18 @@ Seed({
 		this.publics = {
 			getRule : _getRule,
 			getTemplate : function(){
-				return _template.get();
+				return _template;
 			},
-			bind : function(data){
-				_template.bind(data);
-				_apply();
+			connect : function(data){
+				_template.connect(data);
+				//return _apply();
 			},
 			exec : function(){
-				_apply();
+				return _apply();
 			},
 			append : function(data){
-				_template.append(data);
-				_apply();
+				//_template.setData(data);
+				return _apply(data);
 			},
 			remove : function(){
 				_styleElement.remove();

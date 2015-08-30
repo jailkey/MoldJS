@@ -90,6 +90,7 @@ var Mold = (function(config){
 	
 	var _onlySubSeeds = function(seedList, parent){
 		var output = true;
+
 		Mold.each(seedList, function(seed){
 			if(typeof seed === "string" && !_isSeedAdded(seed, parent)){
 				output = false;
@@ -318,6 +319,9 @@ var Mold = (function(config){
 
 
 	var _loadSubSeeds = function(seedList, seedName, parent){
+		if(!parent){
+			parent = { name : seedName };
+		}
 		if(_onlySubSeeds(seedList, parent)){
 			var subSeedList = [];
 			Mold.each(seedList, function(entry){
@@ -333,7 +337,7 @@ var Mold = (function(config){
 				}else{
 					if(!_Mold[subElement]){
 
-						Mold.load({ name : subElement, isExternal : _externalSeeds[seedName] || false });
+						Mold.load({ name : subElement, isExternal : _externalSeeds[seedName] || false, parent : { name : seedName } });
 					}
 				}
 			});
@@ -1561,7 +1565,6 @@ var Mold = (function(config){
 * @return (Object) A loader Object it offers a "loaded" eventlistener 
 **/
 	load : function(seed){
-
 		var rule = Mold.getLoadingRule(seed);
 
 		if(!rule){
@@ -1971,6 +1974,7 @@ Mold.addLoadingRule("relative", function(seed){
 
 Mold.addSeedNameCleaner("relative", function(seedName, parent){
 	if(Mold.startsWith(seedName, ".")){
+
 		var parentParts = parent.name.split("."),
  	 		parts = seedName.split(".");
  	 	parentParts.pop();

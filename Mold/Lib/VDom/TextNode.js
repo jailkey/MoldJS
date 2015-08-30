@@ -31,6 +31,11 @@ Seed({
 				return this.domPointer;
 			}
 
+			this.renderString = function(){
+				this.state = STATE_NO_CHANGES;
+				return this.data;
+			}
+
 			
 		}
 	

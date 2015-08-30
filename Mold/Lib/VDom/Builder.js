@@ -4,17 +4,17 @@ Seed({
 		dna : "class",
 		test : "Mold.Test.Lib.VDom.Builder",
 		include : [
-			"->Mold.Lib.Dom",
-			"->Mold.Tools.Dev.CodeInclude",
-			"Mold.Lib.VDom.ProtoNode",
+			"Mold.Lib.Dom",
+			"Mold.Tools.Dev.CodeInclude",
+			".ProtoNode",
 			[
-				{ DomNode : "Mold.Lib.VDom.DomNode" },
-				{ BlockNode : "Mold.Lib.VDom.BlockNode" },
-				{ ValueNode : "Mold.Lib.VDom.ValueNode" },
-				{ TextNode : "Mold.Lib.VDom.TextNode" },
-				{ AttributeNode : "Mold.Lib.VDom.AttributeNode" },
-				{ RootNode : "Mold.Lib.VDom.RootNode" },
-				{ Doc : "Mold.Lib.VDom.VDoc"}
+				{ DomNode : ".DomNode" },
+				{ BlockNode : ".BlockNode" },
+				{ ValueNode : ".ValueNode" },
+				{ TextNode : ".TextNode" },
+				{ AttributeNode : ".AttributeNode" },
+				{ RootNode : ".RootNode" },
+				{ Doc : ".VDoc"}
 			]
 		]
 	},

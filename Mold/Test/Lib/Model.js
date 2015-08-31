@@ -43,9 +43,7 @@ Seed({
 
 			it("adds data to the model via update and change object properties", function(done){
 				testModel.on("data.name.changed", function(e){
-					console.log("e", e.data, testModel.data.name);
 					done()
-					//expect(e.data)
 				})
 
 				testModel.update({
@@ -63,7 +61,9 @@ Seed({
 			it("adds data to the model via push", function(done){
 
 				testModel.on("data.list.changed", function(e){
-					expect(e.data.object.length).toBe(2);
+					testModel.off("data.list.changed")
+					console.log("changed", JSON.stringify(e.data.object))
+					expect(e.data.object.list.length).toBe(2);
 					done();
 				})
 

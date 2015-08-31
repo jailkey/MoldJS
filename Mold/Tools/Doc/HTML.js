@@ -59,7 +59,6 @@ Seed({
 						output = { type : "snippet-end" };
 						break;
 					case "name":
-						console.log("name foudn",  _extractText(value))
 						output.name = _extractText(value);
 						break;
 					case "description":
@@ -74,7 +73,6 @@ Seed({
 		}
 
 		var _parse = function(data){
-			//console.log("data", result.data.data)
 			var parts = data.split(/\<\!\-\-\/\/([\s\S]*?)\/\/\-\-\>/g);
 			var parsed = false;
 			var modul = false;
@@ -84,8 +82,7 @@ Seed({
 			for(var i = 0; i < parts.length; i++){
 
 				if((parsed = _parseDoc(parts[i]) )){
-					//console.log("parsed", parsed.type)
-					console.log(i, parts[i])
+					
 					switch(parsed.type){
 						case "modul":
 							modul = new Modul(parsed);

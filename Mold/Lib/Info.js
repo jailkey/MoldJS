@@ -49,7 +49,7 @@ Seed({
 				"querySelectorAll" : !!(document && document.querySelectorAll),
 				"sessionStorage" : !!(window && window.sessionStorage),
 				"localStorage" : (function(){
-					var output = !!(window && window.localStorage) || !!localStorage;
+					var output = !!(window && window.localStorage) || (typeof localStorage !== "undefined") ? true : false ;
 					return output;
 				})(),
 				"proxy" : !!(window && window.Proxy),

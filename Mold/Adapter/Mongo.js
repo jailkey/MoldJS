@@ -2,7 +2,7 @@ Seed({
 		name : "Mold.Adapter.Mongo",
 		dna : "class",
 		platform : "node",
-		test : "Mold.Test.Adapter.Mongo",
+		//test : "Mold.Test.Adapter.Mongo",
 		include : [
 			"Mold.Lib.Event",
 			{ Promise : "Mold.Lib.Promise" }

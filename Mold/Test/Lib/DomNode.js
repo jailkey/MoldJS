@@ -143,7 +143,6 @@ Seed({
 				var insertNode = new DomNode(1, "span");
 				insertNode.setAttribute("id", "hans");
 				testNode.insertBefore(insertNode, test);
-				//console.log("INSERT BERFORE", testNode);
 				expect(testNode.childNodes[1].getAttribute('id')).toEqual("hans")
 			});
 

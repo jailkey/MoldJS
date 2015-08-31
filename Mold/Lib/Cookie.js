@@ -40,7 +40,6 @@ Seed({
 
 		if(cookieString){
 			_cookies = _parseCookies(cookieString);
-			console.log("cookies");
 		}
 
 		this.publics = {

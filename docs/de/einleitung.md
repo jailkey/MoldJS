@@ -234,7 +234,7 @@ Dieser erwartet im Code Teil eine JSON Objekt mit der Route als Schlüssel und d
 Als Inhalt kann eine Funktion, oder ein Event angegeben werden. Beides wird ausgeführt wenn die Route auf die URL passt.
 Das Event '@ready' kann zusätzlich mit deinem Seed verknüpft werden, dieser wird beim ausführen der Route geladen.
 Auf diese Weise lassen sich einfach bestimmte Bereiche einer Webseite dann dynamisch nachladen wenn sie benötigt werden.  
-In einer Route können Platzhalter für bestimmte Teile einer Url vergeben werden. Mit ':' wird ein Abschnitt bis zum nächsten '/' definiert. Mit '*' der gesamte Bereiche nach dem Sternchen.Der Platzhalter wird von einem Namen gefolgt der das spätere Zugreifen auf den Inhalt ermöglicht. Die gesammelten Url Daten werden als Parameter an das rout-Event übergeben.
+In einer Route können Platzhalter für bestimmte Teile einer Url vergeben werden. Mit ':' wird ein Abschnitt bis zum nächsten '/' definiert. Mit '*' der gesamte Bereiche nach dem Sternchen. Der Platzhalter wird von einem Namen gefolgt der das spätere Zugreifen auf den Inhalt ermöglicht. Die gesammelten Url Daten werden als Parameter an das rout-Event übergeben.
 
 
 
@@ -308,17 +308,16 @@ Seed(
 
 
 		var model = new Mold.Lib.Model({
-			properties : {
-				list : [
-					{ entry : "string" }
-				]
-			},
-			adapter : new Mold.Adapter.LocalStore()
+			list : [
+				{ entry : "string" }
+			]
 		});
+		
+		model.connect(new Mold.Adapter.LocalStore());
 	}
 );
 ```
-*das Konfigurationsobjekt, welches dem Konstruktor übergeben wir kann zwei Parameter enthalten die Datenstruktur (properties) und das Adapter das sich um die Persistenz kümmert.*
+*das Konfigurationsobjekt, welches dem Konstruktor übergeben wir endhält die Datenstruktur des Models. Mit model.connect kann ein Adapter hinzugefügt werden das sich um die Persistenz kümmert*
 
 Ist das Model angelegt kann es über das Objekt "data" mit Daten gefüllt werden:
 
@@ -511,7 +510,7 @@ Im Detail setzt sich die Komponente wie folgt zusammen:
 * Im header werden über die Eigenschaft **'files'** zwei Bilder angegeben die beim Erstellen der Komponente geladen werden.
 * Die Eigenschaft **'directives'** enthält Direktiven die beschreiben auf welche Elemente die Componente angewandt wird. Eine Direktive enthält zum eine die Beschreibung des Elementes auf das sie angewandt werden soll (Im obigen Fall also Elemente mit dem Namen **x-imagelist**), zum anderen kann über das collect Objekt angegeben werden welches Informationen über ein Element gesammelt werden sollen. Bei diesem Beispiel das Attribute **'show'**.   
 Die Eigenschaft **'watchable'** legt fest ob die collection überwacht werden soll. Das heißt falls sich z.B. ein Element Attribute ändert ein Ereignis feuert. 
-* Über die Eigenschaft **register : 'all'** kann festgelegt werden das ob die Collection und die Komponente am Komponenten-Controller automatisch registriert werden.
+* Über die Eigenschaft **register : 'all'** kann festgelegt werden das die Collection und die Komponente am Komponenten-Controller automatisch registriert werden.
 
 Nach dem Headeraufbau folgt der der Komponenten-Controller. Er ist eine normal Controller Instanz die für jedes Element in der Directive erzeugt wird. Ihm werden 4 Parameter übergeben, **'node'** die DOM-Node (Element-/ Attributnode) auf die die Directive zutrifft, **'element'** das DOM Element (eine Instanz von Mold.Lib.Element), **'collection'** ein Objekt mit den gesammelten Daten und **'componente'** die Instanz der Komponente mit Methoden und Events um z.B. zu ladende Dateien zu handeln.
 

@@ -8,6 +8,7 @@ Seed({
 			{ MultiLineString :  "Mold.Lib.MultiLineString" },
 			{ Path : "Mold.Lib.Path" },
 			{ Promise : "Mold.Lib.Promise" },
+			{ Event : "Mold.Lib.Event" },
 		]
 	},
 	function(markup, config){
@@ -16,9 +17,11 @@ Seed({
 
 		var ajax = new Ajax();
 		var _tree = false;
+		var _that = this;
 		var _parseAsString= config.parseAsString || false;
-	
 		var undefined;
+
+		Mold.mixin(this, new Event(this));
 
 		//load the 
 		var _template = new Promise(function(resolve, reject){
@@ -47,6 +50,7 @@ Seed({
 			_template.then(function(data){
 				_tree = new Builder(data, this);
 				resolve(_tree);
+				_that.trigger("ready");
 			})
 		});
 
@@ -66,6 +70,7 @@ Seed({
 					}else{
 						tree.renderString();
 					}
+					_that.trigger("renderd", { tree : _tree });
 				}, 2);
 
 			},
@@ -96,9 +101,7 @@ Seed({
 					switch(e.data.type){
 						case "update":
 						case "splice":
-							//console.log("property changed", path + ".changed", properties, subTree)
 							//if subtree is an array update all childnodes
-							//console.log("SPLCIE", e.data)
 							if(Mold.isArray(subTree)){
 								var i = 0, len = subTree.length;
 								for(; i < len; i++){
@@ -189,11 +192,13 @@ Seed({
 					}else{
 						tree.renderString();
 					}
+					_that.trigger("renderd", { tree : _tree });
 				});
 			},
 			appendTo : function(element){
 				_templateTree.then(function(tree){
 					element.appendChild(tree.render())
+					_that.trigger("renderd", { tree : _tree });
 				})
 			},
 			getString : function(data){
@@ -203,6 +208,7 @@ Seed({
 							tree.dom.setData(data);
 						}
 						resolve(tree.renderString());
+						_that.trigger("renderd", { tree : _tree });
 					})
 				});
 			},

@@ -22,7 +22,7 @@ Seed({
 
 			it("observe object property change", function(done){
 				test = function(data){
-					console.log("data", data)
+	
 					expect(data.type).toBe("update");
 					expect(data.name).toBe("one");
 					expect(data.oldValue).toBe("irgendwas");

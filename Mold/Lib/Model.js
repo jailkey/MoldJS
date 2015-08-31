@@ -120,7 +120,7 @@ Seed({
 				_data[index] = value;
 			});
 				
-			_watchData(_data, "data", _config.properties);
+			_watchData(_data, "data", _config);
 		}
 
 		var _chechAdapterInterface = function(adapter){
@@ -139,7 +139,7 @@ Seed({
 		}
 
 
-		_update(_initProperties(_config.properties));
+		_update(_initProperties(_config));
 
 		_triggerUpdate = function(){
 			Mold.each(_data, function(value, name){
@@ -173,7 +173,7 @@ Seed({
  * @return {object} properties
  */
 			getProperties : function(){
-				return _config.properties;
+				return _config;
 			},
 /**
  * @method save  

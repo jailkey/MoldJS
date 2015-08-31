@@ -240,7 +240,7 @@ Seed (
 				}
 
 				var i = 0, 
-					eventsLen =events.length,
+					eventsLen = events.length,
 					eventObject = {};
 
 				for(; i < eventsLen;  i++){
@@ -251,7 +251,9 @@ Seed (
 							_element.dispatchEvent(eventObject);
 						}
 					}else{
-						output = events[i].call(((config && config.context) ? config.context : this), eventData) || output;
+						if(events[i]){
+							output = events[i].call(((config && config.context) ? config.context : this), eventData) || output;
+						}
 					}
 				}
 				Mold.Lib.EventStore.saveTrigger(_element, event, data);

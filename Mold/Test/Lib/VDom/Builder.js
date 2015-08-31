@@ -69,7 +69,6 @@ Seed({
 
 			it("remove blockdata", function(){
 				secondResult.dom.setData(false);
-				console.log(secondResult.dom.children.block[0].isNegative, secondResult.dom.children.block[0].renderDom);
 				expect(secondResult.dom.children.block[0].renderDom.length).toBe(0);
 				expect(secondResult.dom.children.block[1].renderDom.length).toBe(1);
 			})

@@ -30,8 +30,6 @@ Seed({
 				|*/});
 
 				template.tree.then(function(tree){
-					template.appendTo(document.body);
-					console.log(tree)
 					go();
 				})
 			});
@@ -49,8 +47,8 @@ Seed({
 				}
 
 
-				console.log("time", now() - test);
-				window.setTimeout(done, 800)
+				done();
+			
 			})
 
 
@@ -68,7 +66,7 @@ Seed({
 					}
 
 					template.setData(data)
-					window.setTimeout(done, 800)
+					done()
 				})
 
 				it("add more data to template", function(done){
@@ -83,12 +81,12 @@ Seed({
 						})
 					}
 					template.setData(data)
-					window.setTimeout(done, 800)
+					done()
 				})
 
 				it("delete data", function(done){
 					template.setData(false)
-					window.setTimeout(done, 800)
+					setTimeout(done, 800)
 				})
 
 				it("add more data to template", function(done){
@@ -101,12 +99,12 @@ Seed({
 						})
 					}
 					template.setData(data)
-					window.setTimeout(done, 800)
+					setTimeout(done, 800)
 				})
 
 				it("delete data", function(done){
 					template.setData(false)
-					window.setTimeout(done, 800)
+					setTimeout(done, 800)
 				});
 
 				it("add more data to template", function(done){
@@ -119,7 +117,7 @@ Seed({
 						})
 					}
 					template.setData(data)
-					window.setTimeout(done, 800)
+					setTimeout(done, 800)
 				})
 			});
 

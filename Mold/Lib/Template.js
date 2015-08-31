@@ -178,7 +178,7 @@ Seed({
 			connect : function(model){
 				_templateTree.then(function(tree){
 					_connect(model, tree.dom, model.getProperties(), "data", tree);
-					window.setTimeout(function(){
+					setTimeout(function(){
 						model.triggerUpdate();
 					}, 50)
 					

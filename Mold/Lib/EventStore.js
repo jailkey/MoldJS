@@ -7,9 +7,11 @@ Seed (
 		version : 0.1
 	},
 	function(){
+		
 		var _elementList = [];
 		var _savedTrigger = [];
 		var _referenzList = {};
+
 		return {
 			addElementEvent : function(element, event, value){
 			//	Mold.cue.add("registerdEventObjects", "event-"+Mold.getId(), element);

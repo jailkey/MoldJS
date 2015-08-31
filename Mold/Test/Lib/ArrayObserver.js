@@ -28,7 +28,6 @@ Seed({
 					expect(data.addedCount).toBe(1);
 					expect(data.index).toBe(5);
 					expect(data.object.length).toBe(6);
-					console.log(data.object[5])
 					expect(data.object[5]).toBe("six");
 					expect(data.removed.length).toBe(0);
 					observer.unobserve(test);
@@ -137,8 +136,6 @@ Seed({
 
 			it("observe splice with array as argument", function(done){
 				test = function(data){
-
-					console.log("data", data.object[0])
 					expect(data.object[0].length).toBe(3)
 					observer.unobserve(test);
 					done();
@@ -151,8 +148,6 @@ Seed({
 
 			it("observe conncat", function(done){
 				test = function(data){
-
-					console.log("conncat", data.object[0])
 					observer.unobserve(test);
 					done();
 				}
@@ -165,10 +160,6 @@ Seed({
 			it("performance test", function(){
 				var start = now();
 				test = function(data){
-
-					if(data.index === 999){
-						console.log("->", now() - start);
-					}
 				
 				}
 				observer.observe(test)

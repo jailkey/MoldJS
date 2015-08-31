@@ -12,7 +12,7 @@ Seed({
 
 			it("create model", function(){
 				 testModel = new Model({
-				 	properties : {
+				 
 				 		"name" : "string|required",
 				 		"vorname" : "string",
 
@@ -37,7 +37,7 @@ Seed({
 				 				"name" : "string"
 				 			}
 				 		]
-				 	}
+				 	
 				 });
 			});
 

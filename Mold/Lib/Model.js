@@ -81,9 +81,7 @@ Seed({
 				var objectObserver = new ObjectObserver(data);
 
 				objectObserver.observe(function(e){
-					//console.log("trigger", name)
 					if(!Mold.isArray(properties[e.name]) && !Mold.isObject(properties[e.name])){
-						//console.log("is not object and not array validate it", e, properties[e.name])
 						_validateValue(e.object[e.name], properties[e.name]);
 					}
 

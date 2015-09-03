@@ -11,6 +11,7 @@ Seed({
 			this.domPointer = false;
 			this.isPointer = config.isPointer || false;
 			this.hasParentValue = config.hasParentValue || false;
+			this.hasIndexValue = config.hasIndexValue || false;
 			this.filter = config.filter || false;
 			this.parentName = false;
 			this.childName = false;
@@ -24,8 +25,11 @@ Seed({
 				this.childName = config.name.split(".")[1];
 			}
 
-			this.onSetData = function(data, bind){
+			if(!this.isPointer && ~this.name.indexOf("+")){
+				this.hasIndexValue = true;
+			}
 
+			this.onSetData = function(data){
 				if(Mold.isObject(data)){
 					this.data = data[this.name]
 				}
@@ -46,18 +50,20 @@ Seed({
 				var newNode =  new ValueNode({
 					name : this.name,
 					data : this.data,
-					isString : this.isString
+					isString : this.isString,
+					services : this.services
 				});
-
 				return newNode;
 			}
 
 			this.render = function(){
+
 				if(!this.domPointer){
 					this.domPointer = _doc.createTextNode(this.data);
 				}else{
 					this.domPointer.nodeValue = this.data;
 				}
+
 				return this.domPointer;
 			}
 
@@ -66,9 +72,8 @@ Seed({
 			}
 
 			this.setDataAndRender = function(data){
-				if(data){
-					this.setData(data);
-				}
+				this.setData(data);
+				
 				if(this.isString){
 					if(this.parent.type === ATTRIBUTE_NODE){
 						this.parent.renderAttribute();

@@ -32,8 +32,8 @@ Seed({
 
 				for(; i < len; i++){
 					var selected = this.vdom[i];
+
 					//if index 0 use pointer to vdom else create new
-					
 					if(index === 0){
 						var newElement = selected;
 					}else{
@@ -43,13 +43,14 @@ Seed({
 					if(!this.renderDom[index]){
 						this.renderDom[index] = [];
 					}
-				
+
 					this.renderDom[index].push(newElement)
 				}
 			}
 
-			this.findChild = function(name, dom){
-				var result = false;
+			this.findChild = function(name, dom, all){
+				var result = (all) ? [] : false;
+
 				if(Mold.isArray(dom)){
 					var i = 0, len = dom.length;
 
@@ -57,14 +58,23 @@ Seed({
 						var selectedName = dom[i].name;
 
 						if(selectedName === name){
-							return dom[i];
+							if(all){
+								result.push(dom[i]);
+							}else{
+								return dom[i];
+							}
 						}else{
-							var subResult = this.findChild(name, dom[i].vdom);
-							if(!subResult && dom[i].attributes){
-								subResult = this.findChild(name, dom[i].attributes);
+							var subResult = this.findChild(name, dom[i].vdom, all);
+
+							if((!subResult || all)  && dom[i].attributes){
+								subResult = (all) ? subResult.concat(this.findChild(name, dom[i].attributes, all)) : this.findChild(name, dom[i].attributes, all);
 							}
 							if(subResult){
-								return subResult;
+								if(all){
+									result = result.concat(subResult)
+								}else{
+									return subResult;
+								}
 							}
 						}
 					}
@@ -73,14 +83,23 @@ Seed({
 					for(var selected in dom){
 						var selectedName = dom[selected].name;
 						if(selectedName === name){
-							return dom[selected];
+							if(all){
+								result.push(dom[selected])
+							}else{
+								return dom[selected];
+							}
 						}else{
-							var subResult = this.findChild(name, dom[selected].vdom);
-							if(!subResult && dom[selected].attributes){
-								subResult = this.findChild(name, dom[selected].attributes);
+
+							var subResult = this.findChild(name, dom[selected].vdom, all);
+							if((!subResult || all) && dom[selected].attributes){
+								subResult = (all) ? subResult.concat(this.findChild(name, dom[selected].attributes, all)) : this.findChild(name, dom[selected].attributes, all);
 							}
 							if(subResult){
-								return subResult;
+								if(all){
+									result = result.concat(subResult)
+								}else{
+									return subResult;
+								}
 							}
 						}
 					}
@@ -90,17 +109,22 @@ Seed({
 			}
 
 			this.createChildren = function(index){
-				
+			
 				var selected =  this.children[0] || Mold.mixin({}, this.protoChild);
-
+			
 				for(var name in selected){
-					var child = this.findChild(name, this.renderDom[index]);
-
 					if(!this.children[index]){
 						this.children[index] = {};
 					}
 
-					this.children[index][name] = child;
+					//create an array if there is more then one child with the same name
+					if(Mold.isArray(selected[name])){
+						var child = this.findChild(name, this.renderDom[index], true);
+						this.children[index][name] = child;
+					}else{
+						var child = this.findChild(name, this.renderDom[index]);
+						this.children[index][name] = child;
+					}
 				}
 			}
 
@@ -117,30 +141,59 @@ Seed({
 				}
 
 				if(index === 0){
-					//try to bind if index is 0
-					//this.bindChildren(data, index);
+					//if index is 0 find all children
+					for(var name in this.children[0]){
+						var child = this.findChild(name, this.renderDom[index], true);
+						if(child.length > 1){
+							this.children[index][name] = child;
+						}else{
+							this.children[index][name] = child[0]
+						}
+					}
+					//this.children[index][name] = child;
+					
 				}
 
 				if(!Mold.isArray(this.children)){
 					this.children = [this.children];
 				}
 
-				
+				var specialData = {
+					'.' : data,
+					'+' : index
+				}
 
-				//Handle pointers
-				if(this.children[0]['.']){
-					var y = 0, childLen = this.children.length;
-					this.children[index]['.'].setData(data);
-				}else{
+				var eachInData = function(data){
 					for(var name in data){
-						var selected = this.children[index][name];
+						var selected = that.children[index][name];
 						if(selected){
-							if(selected.isPointer){
-								selected.setData(data);
+							if(Mold.isArray(selected)){
+								var i = 0, len = selected.length;
+								for(; i < len; i++){
+									that.setListItemValue(selected[i], index, data, name);
+								}
 							}else{
-								selected.setData(data[name]);
+								that.setListItemValue(selected, index, data, name);
 							}
 						}
+						
+					}
+				}
+				eachInData(data);
+				eachInData(specialData);
+
+
+			}
+
+			this.setListItemValue = function(selected, index, data, name){
+				if(selected){
+					//Handle pointers
+					if(selected.isPointer){
+						selected.setData(data);
+					}else if(selected.hasIndexValue){
+						selected.setData(index);
+					}else{
+						selected.setData(data[name]);
 					}
 				}
 			}
@@ -318,7 +371,8 @@ Seed({
 				
 				var newNode =  new BlockNode({
 					name : this.name,
-					data : this.data
+					data : this.data,
+					services : this.services
 				});
 
 				for(var name in this.vdom){

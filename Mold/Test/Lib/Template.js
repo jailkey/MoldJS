@@ -30,6 +30,9 @@ Seed({
 				|*/});
 
 				template.tree.then(function(tree){
+					if(!Mold.isNodeJS){
+						template.appendTo(document.body)
+					}
 					go();
 				})
 			});

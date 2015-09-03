@@ -26,13 +26,13 @@ Seed(
 					{{#list}}
 						<li style="color:{{color}};">
 							{{+}}. {{entry}}
-							<a href="#" mold-event="click:@delete.entry" index="{{+}}" value="{{entry}}">delete</a>
+							<a href="#" mold-event="click:@delete.entry:{{+}}">delete</a>
 						</li>
 					{{/list}}
 				</ul>
-				<input name="entry" value="" type="text" mold-data="listdata">
+				<input name="entry" type="text" value="">
 				{{#error}}
-					<p class="error">{{.}}</p>
+					<p class="error">{{error}}</p>
 				{{/error}}
 				<br>
 				<div class="actions">
@@ -44,58 +44,52 @@ Seed(
 
 		//create model for data
 		var model = new Mold.Lib.Model({
-			properties : {
-				list : [
-					{ 
-						entry : "string",
-						color : "string"
-					}
-				]
-			},
-			adapter : new Mold.Adapter.LocalStore()
+			list : [
+				{ 
+					entry : "string",
+					color : "string"
+				}
+			],
+			error : "string"
 		});
 
-		var error = new Mold.Lib.Model({
-			properties : {
-				error : "string"
-			}
-		})
+		model.connect(new Mold.Adapter.LocalStore());
 
-		//bind model on template
-		template.bind(model);
+		//connect model on template
+		template.connect(model);
 
-		//bind error model
-		template.bind(error);
-
+		//load template list if it is in local storage
 		model.load("my-todo");
-
-		//register template and model at the controller
+		
+		//register template at the controller
 		this.register(template);
 
 		//append template to element
-		element.append(template.get());
+		template.appendTo(element);
 
 		//handle events
 		this.actions = {
 			"@add.entry" : function(e){
-				if(e.data.listdata && e.data.listdata.entry !== ""){
+
+				if(template.forms.entry){
 					model.data.list.push({ 
-						entry : e.data.listdata.entry,
-						color : Mold.Lib.Color.randomColor()
+						entry : template.forms.entry,
+						color : Mold.Lib.Color.randomColor(),
+						index : model.data.list.length
 					})
-					error.data.error = false;
+					
+					model.data.error = false;
 					model.save();
 				}else{
-					error.data.error = "The field is empty!"
+					model.data.error = "The field is empty!"
 				}
 			},
 			"@delete.entry" : function(e){
-				console.log(e.data.element.index);
-				model.data.list.splice(e.data.element.getAttribute('index'), 1);
+				model.data.list.splice(e.data.data, 1);
 				model.save();
 			},
 			"@delete.all" : function(e){
-				model.data.list.remove();
+				model.data.list.splice(0, model.data.list.length);
 				model.save();
 			}	
 		}

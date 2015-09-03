@@ -43,7 +43,8 @@ Seed({
 
 			it("adds data to the model via update and change object properties", function(done){
 				testModel.on("data.name.changed", function(e){
-					done()
+					testModel.off("data.name.changed")
+					done();
 				})
 
 				testModel.update({
@@ -59,14 +60,12 @@ Seed({
 			});
 
 			it("adds data to the model via push", function(done){
-
 				testModel.on("data.list.changed", function(e){
 					testModel.off("data.list.changed")
-					console.log("changed", JSON.stringify(e.data.object))
-					expect(e.data.object.list.length).toBe(2);
+					expect(e.data.object.length).toBe(2);
 					done();
-				})
-
+				});
+				
 				testModel.data.list.push({
 					"item" : "was anders"
 				})
@@ -75,8 +74,8 @@ Seed({
 
 
 			it("update a list item", function(done){
-
 				testModel.on("data.list.0.item.changed", function(e){
+					testModel.off("data.list.0.item.changed");
 					expect(e.data.type).toBe("update");
 					expect(e.data.oldValue).toBe("hier ein item");
 					expect(e.data.name).toBe("item");
@@ -92,7 +91,7 @@ Seed({
 			xit("First level property values", function(done){
 			
 				testModel.data.on("property.change.name", function(e){
-					testModel.data.off("property.change.name");
+					testModel.off("property.change.name");
 					expect(e.data.value).toEqual("Hans");
 					expect(e.data.name).toEqual("name");
 					done()
@@ -105,7 +104,7 @@ Seed({
 			xit("First level object added", function(done){
 				
 				testModel.data.obj.on("object.change", function(e){
-					testModel.data.obj.off("object.change");
+					testModel.off("object.change");
 					expect(e.data.value.objitem).toEqual("objectitemvalue");
 					expect(e.data.value.subobject.subitem).toEqual("subobjectitemvalue");
 					expect(e.data.name).toEqual("obj");
@@ -125,7 +124,7 @@ Seed({
 			xit("Test if Subobject fires events after adding", function(done){
 
 				testModel.data.obj.subobject.on("property.change.subitem", function(e){
-					testModel.data.obj.subobject.off("property.change.subitem");
+					testModel.off("property.change.subitem");
 					expect(e.data.value).toEqual("anewsubvalue");
 					expect(e.data.name).toEqual("subitem");
 					done();

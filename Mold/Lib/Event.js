@@ -215,6 +215,7 @@ Seed (
 				return _element;
 			},
 			trigger : function(event, data, config){
+
 				var output = false,
 					events = [];
 
@@ -242,7 +243,7 @@ Seed (
 				var i = 0, 
 					eventsLen = events.length,
 					eventObject = {};
-
+				
 				for(; i < eventsLen;  i++){
 					if(_isHTMLElement && _isElementEvent(event)){
 						eventObject = _initEvent(event);

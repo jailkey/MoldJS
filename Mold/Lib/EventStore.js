@@ -14,12 +14,12 @@ Seed (
 
 		return {
 			addElementEvent : function(element, event, value){
-			//	Mold.cue.add("registerdEventObjects", "event-"+Mold.getId(), element);
+
 				var item = this.getElement(element);
 				if(!item){
 					_elementList.push({
 						element : element,
-						events : []
+						events : {}
 					});
 					item = _elementList[_elementList.length -1];
 					if(element._eid){
@@ -27,6 +27,7 @@ Seed (
 					}
 					
 				}
+				
 				item.events[event] = item.events[event] || [];
 				item.events[event].push(value);
 			

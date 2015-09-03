@@ -28,7 +28,8 @@ Seed({
 			this.clone = function(){
 
 				var newNode =  new AttributeNode({
-					name : this.name
+					name : this.name,
+					services : this.services
 				});
 
 				var i = 0, len = this.vdom.length;
@@ -51,7 +52,10 @@ Seed({
 				var i = 0, len = this.vdom.length;
 
 				for(; i < len; i++){
-					output += this.vdom[i].renderString();
+					var val =  this.vdom[i].renderString();
+					if(val !== false){
+						output += this.vdom[i].renderString();
+					}
 				}
 
 				return output;

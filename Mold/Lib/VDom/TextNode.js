@@ -16,7 +16,8 @@ Seed({
 
 				var newNode =  new TextNode({
 					name : this.name,
-					data : this.data
+					data : this.data,
+					services : this.services
 				});
 
 				return newNode;

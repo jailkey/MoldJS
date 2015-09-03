@@ -18,7 +18,7 @@ Seed({
 			]
 		]
 	},
-	function(content){
+	function(content, config){
 
 		var _dom = new Mold.Lib.Dom(content);
 		var _newDoc = Doc;
@@ -173,7 +173,9 @@ Seed({
 		var rootNode = new RootNode({
 			name : "root",
 			protoDom : _doc,
-			services : {},
+			services : {
+				template : config.template
+			},
 		});
 
 		this.dom = _parseNode(_doc, rootNode);

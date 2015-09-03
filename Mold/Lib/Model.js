@@ -22,6 +22,7 @@ Seed({
 		var _config = config;
 		var _validation = false;
 		var _adapter = false;
+		var undefined;
 
 		this.id = false;
 
@@ -36,6 +37,7 @@ Seed({
 		 * @return {boolean} boolean
 		 */
 		var _validateValue = function(value, validation){
+
 			var validations = validation.split("|");
 			var validator;
 
@@ -50,17 +52,19 @@ Seed({
 		}
 
 		var _watchData = function(data, name, properties){
+			
 			if(Mold.isArray(data)){
 				if(!Mold.isArray(properties)){
 					throw new TypeError(name + " can not be an array!");
 				}
-
+	
 				var observabelArray = new ArrayObserver(data);
 				observabelArray.observe(function(e){
-					_that.trigger(name + ".changed", e);
-					_that.trigger(name + e.index + ".changed", e);
 					
 					if(e.type === "splice"){
+						_that.trigger(name + ".changed", e);
+						_that.trigger(name + "." + e.index + ".changed", e);
+						
 						for(var i = e.index; i < e.index + e.addedCount; i++){
 							_watchData(e.object[i], name + "." + i, properties[0]);
 						}
@@ -81,13 +85,15 @@ Seed({
 				var objectObserver = new ObjectObserver(data);
 
 				objectObserver.observe(function(e){
-					if(!Mold.isArray(properties[e.name]) && !Mold.isObject(properties[e.name])){
+				
+					if(!Mold.isArray(properties[e.name]) && !Mold.isObject(properties[e.name]) && properties[e.name] !== undefined){
 						_validateValue(e.object[e.name], properties[e.name]);
 					}
-
-					_that.trigger(name + ".changed", e);
-					_that.trigger(name + "." + e.name + ".changed", e);
-
+					
+					if(!Mold.isArray(e.object[e.name])){
+						_that.trigger(name + ".changed", e);
+						_that.trigger(name + "." + e.name + ".changed", e);
+					}
 					_watchData(e.object[e.name], name + "." + e.name, properties[e.name]);
 				})
 

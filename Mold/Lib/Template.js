@@ -9,6 +9,10 @@ Seed({
 			{ Path : "Mold.Lib.Path" },
 			{ Promise : "Mold.Lib.Promise" },
 			{ Event : "Mold.Lib.Event" },
+
+			//load template components
+			".VDom.Components.MoldEvent",
+			".VDom.Components.MoldCaptureForms"
 		]
 	},
 	function(markup, config){
@@ -48,7 +52,8 @@ Seed({
 		
 		var _templateTree = new Promise(function(resolve, reject){
 			_template.then(function(data){
-				_tree = new Builder(data, this);
+				_tree = new Builder(data, { template : _that });
+
 				resolve(_tree);
 				_that.trigger("ready");
 			})
@@ -97,6 +102,8 @@ Seed({
 				
 			},
 			watchObjectProp : function(model, subTree, properties, path, tree, name){
+
+				model.off(path + ".changed");
 				model.on(path + ".changed", function(e){
 					switch(e.data.type){
 						case "update":
@@ -111,6 +118,8 @@ Seed({
 								}
 							}else if(subTree.children && subTree.children[name]){
 								_connector.updateChild(subTree, e.data.object, tree, name);
+							}else if(subTree.name === name){
+								_connector.updateChild(subTree, e.data.object, tree, name);
 							}
 							break;
 						default:
@@ -120,6 +129,8 @@ Seed({
 				});
 			},
 			watchArray : function(model, subTree, properties, path, tree){
+				model.off(path + ".changed");
+				console.log(path + ".changed", "ARRAY")
 				model.on(path + ".changed", function(e){
 					switch(e.data.type){
 						case "update":
@@ -128,6 +139,9 @@ Seed({
 							}else{
 								throw new Error("e.data.object is no Object, not Implemented");
 							}
+							break;
+						case "splice":
+							
 							break;
 						default:
 							throw new Error("method " + e.data.type + " for watchArray is not implemented!");
@@ -138,21 +152,20 @@ Seed({
 				var i = 0, len = subTree.children.length;
 				for(; i < len; i++){
 					var newPath = path + "." + i;
-					//console.log("watch", newPath)
-
 					_connector.watchArray(model, subTree.children[i], properties[0], newPath, tree)
 					_connect(model, subTree.children[i], properties[0], newPath, tree)
 				}
 			},
 			parseObject : function(model, subTree, properties, path, tree){
 				for(var prop in properties){
-					//_connector.watchObject
+				
 					var newPath = path + "." + prop;
 					if(subTree.children){
 						if(subTree.children[prop]){
 							_connector.watchObjectProp(model, subTree.children[prop], properties[prop], newPath, tree, prop)
 						}
 					}else{
+
 						_connector.watchObjectProp(model, subTree[prop], properties[prop], newPath, tree, prop)
 						//throw new Error("subTree children is not defined, in _connector.parseObject!");
 					}
@@ -162,6 +175,7 @@ Seed({
 		
 		
 		var _connect = function(model, subTree, properties, path, tree){
+
 			if(Mold.isArray(properties)){
 				_connector.parseArray(model, subTree, properties, path, tree);
 			}else if(Mold.isObject(properties)){
@@ -169,12 +183,22 @@ Seed({
 			}
 		}
 
-		
+		var _forms = {};
+
+		Mold.mixin(_forms, new Event(_forms));
+
+		_forms.setValue = function(name, value){
+			this[name] = value;
+			this.trigger(name + ".changed", value);
+		}
+
+
 
 		this.publics = {
 			snatch : function(){
 
 			},
+			forms : _forms,
 			connect : function(model){
 				_templateTree.then(function(tree){
 					_connect(model, tree.dom, model.getProperties(), "data", tree);

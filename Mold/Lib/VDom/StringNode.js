@@ -12,7 +12,8 @@ Seed({
 			this.clone = function(){
 				return new StringNode({
 					name : this.name,
-					data : this.data
+					data : this.data,
+					services : this.services
 				});
 			}
 

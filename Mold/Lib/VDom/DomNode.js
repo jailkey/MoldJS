@@ -68,7 +68,8 @@ Seed({
 
 				var newNode =  new DomNode({
 					name : this.name,
-					data : this.data
+					data : this.data,
+					services : this.services
 				});
 				
 				var i = 0, len = this.vdom.length;
@@ -99,6 +100,7 @@ Seed({
 				
 				if(!this.domPointer){
 					this.domPointer = _doc.createElement(this.name);
+					this.domPointer.moldTemplate = this.services.template;
 				}
 
 				var i = 0, len = this.renderDom.length;

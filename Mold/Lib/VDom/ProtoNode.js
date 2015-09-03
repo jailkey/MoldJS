@@ -74,7 +74,6 @@ Seed({
 
 				//if current node is not a block-node add child to next block-node
 				if(this.type !== BLOCK_NODE){
-
 					if(this.children[child.name]){
 						//if there are two nodes with the same name create an array
 						this.children[child.name] = [this.children[child.name]]
@@ -132,6 +131,7 @@ Seed({
 					var len = this.children[name].length, i = 0;
 					for(; i < len; i++){
 						var selected = this.children[name][i];
+
 						if(selected.type === BLOCK_NODE){
 							//if type is a blocknode add parent data
 							if(data){
@@ -202,7 +202,7 @@ Seed({
 		}
 
 
-		this.setData = function(data, bind){
+		this.setData = function(data){
 			
 			
 			if(typeof this.data === "string" && this.data === data){
@@ -212,7 +212,7 @@ Seed({
 			}
 			
 			this.data = data;
-			this.onSetData(data, bind);
+			this.onSetData(data);
 			
 		}
 

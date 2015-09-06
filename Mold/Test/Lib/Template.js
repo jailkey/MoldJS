@@ -37,93 +37,6 @@ Seed({
 				})
 			});
 
-			xit("add test data to template", function(done){
-				var test = now();
-				var data = { block : [] };
-				
-				for(var i = 0; i < 1000; i++){
-					data.block.push({
-						i : i,
-						value : Math.random(),
-						color : Color.randomColor()
-					})
-				}
-
-
-				done();
-			
-			})
-
-
-			xit("add and remove plain template data", function(){
-				it("add some data to template", function(done){
-					var test = now();
-					var data = { block : [] };
-					
-					for(var i = 0; i < 100; i++){
-						data.block.push({
-							i : i,
-							value : Math.random(),
-							color : Color.randomColor()
-						})
-					}
-
-					template.setData(data)
-					done()
-				})
-
-				it("add more data to template", function(done){
-					var test = now();
-					var data = { block : [] };
-					
-					for(var i = 0; i < 10; i++){
-						data.block.push({
-							i : i,
-							value : "NEU",
-							color : Color.randomColor()
-						})
-					}
-					template.setData(data)
-					done()
-				})
-
-				it("delete data", function(done){
-					template.setData(false)
-					setTimeout(done, 800)
-				})
-
-				it("add more data to template", function(done){
-					var data = { block : [] };
-					for(var i = 0; i < 10; i++){
-						data.block.push({
-							i : i,
-							value : "NEU",
-							color : Color.randomColor()
-						})
-					}
-					template.setData(data)
-					setTimeout(done, 800)
-				})
-
-				it("delete data", function(done){
-					template.setData(false)
-					setTimeout(done, 800)
-				});
-
-				it("add more data to template", function(done){
-					var data = { block : [] };
-					for(var i = 0; i < 10; i++){
-						data.block.push({
-							i : i,
-							value : "NEU",
-							color : Color.randomColor()
-						})
-					}
-					template.setData(data)
-					setTimeout(done, 800)
-				})
-			});
-
 	//model data
 			it("bind model and add and remove data", function(){
 
@@ -166,11 +79,10 @@ Seed({
 
 
 				it("change property values", function(done){
-
 					var testRendert = function(e){
 						if(e.data.tree.dom.children.block[0].children[0].value.data === "Neu Inhalte"){
 							template.off("renderd", testRendert)
-							done();
+							done()
 						}
 					}
 
@@ -180,31 +92,32 @@ Seed({
 						dataModel.data.block[i].color = Color.randomColor();
 						dataModel.data.block[i].value = "Neu Inhalte";
 					}
-
 					
 				})
 
 				it("remove model data", function(done){
-
+					console.log("remove")
 					var testRendert = function(e){
 						if(e.data.tree.dom.children.block[0].children.length === 0){
 							template.off("renderd", testRendert)
-							done();
+							//done()
 						}
 					}
 					
 					template.on("renderd", testRendert)
 
 					dataModel.data.block.splice(0, 30);
-				
+					setTimeout(function(){
+						done();
+					}, 1000)
 				});
 
 				it("add model data again", function(done){
-
+					
 					var testRendert = function(e){
 						if(e.data.tree.dom.children.block[0].children.length === 5){
 							template.off("renderd", testRendert)
-							done();
+							
 						}
 					}
 					
@@ -217,7 +130,9 @@ Seed({
 							color : Color.randomColor()
 						})
 					}
-				
+					setTimeout(function(){
+						done();
+					}, 1000)
 				});
 
 

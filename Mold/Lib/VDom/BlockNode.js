@@ -22,6 +22,7 @@ Seed({
 			this.bindModel = false;
 			this.changedItems = [];
 			this._id = Mold.getId();
+			this.referenceNode = _doc.createTextNode("");
 
 			var _oldRenderLength = 0;
 			var _oldDataLength = 0;
@@ -451,6 +452,7 @@ Seed({
 
 				//add changed
 				var i = 0, len = this.renderDom.length;
+				this.domPointer.appendChild(this.referenceNode);
 				for(; i < len; i++){
 					//if items does not change, copy pointer
 					if(!~this.changedItems.indexOf(i)){
@@ -482,7 +484,6 @@ Seed({
 			}
 
 			this.reRender = function(){
-				console.log("reRender", this.name)
 				//remove pointers
 				var y = 0, removeLen = this.removeList.length;
 				for(; y < removeLen; y++){
@@ -527,12 +528,11 @@ Seed({
 							selected.parentElement = this.parentElement;
 							var item = selected[y].render();
 							item.stopDirective = false;
-							if(!lastElement && this.parentElement.firstChid){
-								this.parentElement.insertBefore(item, this.parentElement.firstChid);
-							}else if(lastElement){
+
+							if(lastElement){
 								lastElement.parentNode.insertBefore(item, lastElement.nextSibling);
 							}else{
-								this.parentElement.appendChild(item);
+								this.parentElement.insertBefore(item, this.referenceNode);
 							}
 							this.pointer[i][y] = item;
 							lastElement = item;

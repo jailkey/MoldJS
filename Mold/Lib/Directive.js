@@ -4,10 +4,11 @@ Seed({
 		include : [
 			"Mold.Lib.Event",
 			"Mold.Lib.Controller",
-			"Mold.Lib.CssParser",
+			//"Mold.Lib.CssParser",
 			"Mold.Lib.Element",
 			"Mold.Lib.Info",
-			"Mold.Lib.DomObserver"
+			"Mold.Lib.DomObserver",
+			//"Mold.Lib.Stack",
 		]
 	},
 	function(){
@@ -17,10 +18,11 @@ Seed({
 			_cache = {},
 			_events = {},
 			doc = (Mold.isMoldJS) ? false : document,
-			cssParser = new Mold.Lib.CssParser(document);
+			_events = new Mold.Lib.Event(_events);
+			//cssParser = new Mold.Lib.CssParser(document);
 
 		//Mold.mixin(this, new Mold.Lib.Event(this));
-			_events = new Mold.Lib.Event(_events);
+			
 
 		/*
 			Directive Exampel
@@ -50,19 +52,30 @@ Seed({
 
 		
 		var _watch = function(element, callback){
+		
 			//if(!_isInWatchList(element)){
+				
 				var that = this;
-				var selected = Mold.Lib.DomObserver.observe(element,  { childList: false, characterData : false, subtree : true});
+				
+				/*
+				var selected = Mold.Lib.DomObserver.observeAttributes(element);
+				
 				selected
-					.on("element.inserted", function(e){
-						callback.call(that, e.data.mutation);
-					})
 					.on("attribute.changed", function(e){
-						callback.call(that, e.data.mutation);
+						console.log("changed")
+						//callback.call(that, e.data.mutation);
 					})
+				*/
 				_watchList.push(element);
+				
 			//}
 			
+		}
+
+		var _watchAttribute = function(element, attribute, callback){
+			Mold.watch(element, attribute, function(){
+				callback(element, attribute);
+			})
 		}
 
 		var _collectChilds = function(elements, collection, elementName, output, watchable){
@@ -130,14 +143,14 @@ Seed({
 												watchable
 											)
 										);
-										output.trigger("element.added", { name: elementName, node : selectedNode, mutation : mutation})
+										output.trigger("element.added", { name: elementName, node : selectedNode, mutation : mutation},  { disableSaveTrigger : true})
 									}
 								});
 							}else if (mutation.type === "attributes"){
 								var collectedAttributes = (Mold.isArray(collection.attribute)) ? collection.attribute : [collection.attribute]
 								Mold.each(collectedAttributes, function(selectedAttribute){
 									if(mutation.attributeName === selectedAttribute){
-										output.trigger('attribute.changed',  { name: selectedAttribute, mutation : mutation});
+										output.trigger('attribute.changed',  { name: selectedAttribute, mutation : mutation},  { disableSaveTrigger : true});
 									}
 									
 								});
@@ -157,7 +170,7 @@ Seed({
 						if(watchable){
 							_watch(scope, function(mutation){
 								output[contentName] = scope.innerHTML;
-								output.trigger("html.change", { name: contentName, mutation : mutation})
+								output.trigger("html.change", { name: contentName, mutation : mutation},  { disableSaveTrigger : true})
 							});
 						}
 					}
@@ -180,17 +193,12 @@ Seed({
 						var attributeName = selectedAttribute.name || selectedAttribute;
 						output[attributeName] = attribute;
 						if(watchable){
-							_watch(scope, function(mutation){
-							
-								if(
-									mutation.type === "attributes"
-									&& mutation.attributeName === attributeName
-								){
-									output[attributeName] = mutation.target.getAttribute(attributeName);
-									output.trigger(attributeName + ".changed", { name: attributeName, mutation : mutation})
-									output.trigger("attribute.changed", { name: attributeName, mutation : mutation})
-								}
-							});
+							_watchAttribute(scope, attributeName, function(element, attribute){
+								output[attributeName] = element.getAttribute(attributeName);
+								output.trigger(attributeName + ".changed", { name: attributeName, value : output[attributeName]},  { disableSaveTrigger : true})
+								output.trigger("attribute.changed", { name: attributeName, value : output[attributeName]},  { disableSaveTrigger : true})
+			
+							})
 						}
 						
 					});
@@ -200,12 +208,24 @@ Seed({
 		}
 		
 		var _add = function(directive, scope, fromtemplate){
+
 			if(!directive._id){
 				directive._id = Mold.getId();
 			}
 
+			if(typeof directive.seed === "string"){
+				directive.controller = Mold.getSeed(directive.seed);
+			}else{
+				directive.controller = new Mold.Lib.Controller(directive.seed);
+				
+			}
+
+	
 			directive.apply = function(node, element, template, index, style){
+				window.testTime = window.testTime || 0;
+				var startTime = performance.now();
 				if(!element.hasDirective || !element.hasDirective(directive._id)){
+					
 					directive.scope = element;
 					
 					if(!element.hasDirective){
@@ -218,11 +238,11 @@ Seed({
 					}
 					element.directives.push(directive._id)
 					if(directive.seed){
-
-
+						
 						if(directive.collect){
-
+							
 							var collection = _collect(directive.scope, directive.collect, Mold.mixin({}, new Mold.Lib.Event({})), directive.watchable);
+							
 						}
 
 						if(style){
@@ -238,13 +258,19 @@ Seed({
 								}
 							}
 						}
-
+						/*
 						if(typeof directive.seed === "string"){
 							var seed = Mold.getSeed(directive.seed);
 							
 						}else{
+							
 							var seed = new Mold.Lib.Controller(directive.seed);
-						}
+							
+						}*/
+						
+						var seed = directive.controller;
+						
+						
 						directive.instance = new seed(scope, new Mold.Lib.Element(element), collection, directive.component);
 						if(directive.register){
 							switch(directive.register){
@@ -261,6 +287,7 @@ Seed({
 
 							}
 						}
+					
 						if(directive.instance.scope){
 							if(directive.replace) {
 								directive.replaceElement(directive.instance.scope);
@@ -271,13 +298,16 @@ Seed({
 							directive.instance.scope = directive.scope;
 							directive.instance.trigger("scope");
 						}
+						
 					}
 					
-					if(directive.action){
 
+					if(directive.action){
 						directive.action.call(directive, node, element, template, index);
 					}
+					
 				}
+				window.testTime +=  performance.now()- startTime;
 			}
 			
 			directive.appendElement = function(child){
@@ -307,7 +337,7 @@ Seed({
 				if(directive.at !== "style-property"){
 					return false;
 				}
-				var elementStyles = cssParser.getElementsByStyleProperty(directive.name);
+				//var elementStyles = cssParser.getElementsByStyleProperty(directive.name);
 			
 				Mold.each(elementStyles, function(selected){
 					
@@ -336,9 +366,9 @@ Seed({
 				template = false,
 				styleAttributes = false;
 
-
+		
 			Mold.each(_directives, function(directive){
-
+				
 				if(element.nodeType !== 1){
 					return false;
 				}
@@ -346,7 +376,7 @@ Seed({
 				if(!!element.hasDirective && element.hasDirective(directive._id)){
 					return false;
 				}
-
+				
 				if(directive.at === "element" && directive.name.toUpperCase() !== element.nodeName){
 					return false;
 				}
@@ -375,17 +405,17 @@ Seed({
 				}else{
 					node = element;
 				}
+				setTimeout(function(){
+					directive.apply(
+						node,
+						element,
+						template,
+						index,
+						(styleAttributes) ? styleAttributes[index] : false
+					);
+				}, 1);
 				
-				directive.apply(
-					node,
-					element,
-					template,
-					index,
-					(styleAttributes) ? styleAttributes[index] : false
-				);
 				_cache[cacheName+"len"]++;
-					
-				
 			});
 		}
 
@@ -409,8 +439,9 @@ Seed({
 				case "class":
 					var elements = scope.getElementsByClassName(directive.name);
 					break;
+				/*
 				case "style-property":
-
+					
 					var elementStyles = cssParser.getElementsByStyleProperty(directive.name),
 						elements = [],
 						styleAttributes = [];
@@ -420,11 +451,11 @@ Seed({
 						styleAttributes.push(selected.properties)
 					});
 
-					break;
+					break;*/
 				default:
 					break;
 			}
-
+			var styleAttributes = [];
 			
 			if(elements && elements.length){
 				
@@ -462,8 +493,8 @@ Seed({
 			}
 		});
 
-		var bodyElement = new Mold.Lib.Element(document.body);
-		Mold.Lib.DomObserver.observe(bodyElement, { childList: false, characterData : false, subtree : true});
+		//var bodyElement = new Mold.Lib.Element(document.body);
+		//Mold.Lib.DomObserver.observe(bodyElement, { childList: false, characterData : false, subtree : true});
 
 		var _appendSubElements = function(element){
 			for(var i = 0, len = element.childNodes.length; i < len; i++){
@@ -473,22 +504,26 @@ Seed({
 				}
 			}
 		}
-
+		/*
 		bodyElement.on("attribute.changed", function(e){
 			_appendElement(e.data.mutation.target);
 			_appendStyleProperty(e.data.mutation.target);
 		});
 
 		bodyElement.on("element.inserted", function(e){
+			
 			_appendElement(e.data.mutation.target);
 			_appendSubElements(e.data.mutation.target);
 			_appendStyleProperty(e.data.mutation.target);
 		});
+		*/
 
-
-		Mold.Lib.Observer.on("create.element", function(e){
+		
+		Mold.Lib.Observer.on("element.created", function(e){
+		//	var startTime = performance.now()
 			_appendElement(e.data.element);
-			_appendStyleProperty(e.data.element);
+			//_appendStyleProperty(e.data.element);
+			//console.log("TIME", performance.now() - startTime);
 		})
 
 		return {
@@ -505,9 +540,10 @@ Seed({
 					_add(directive, scope, template);
 					
 				}else{
+					/*
 					cssParser.at("ready", function(){
 						_add(directive, scope, template);
-					});
+					});*/
 				}
 			},
 			

@@ -53,7 +53,7 @@ Seed({
 					return output;
 				})(),
 				"proxy" : !!(window && window.Proxy),
-				"mutationObserver" : !!(window && window.MutationObserver),
+				"mutationObserver" : !!((window && window.MutationObserver) || (MutationObserver)),
 				"registerElement" : !!document.registerElement,
 				"blob" : !!(window && window.Blob),
 				"url" : !!(window && window.URL),

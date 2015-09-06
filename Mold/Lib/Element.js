@@ -1,7 +1,7 @@
 /**
  * @module Mold.Lib.Element
  * @description extends a element node with extra methodes, or create an extended node from a string
- * @event create.element global event fires if the element is created
+ * @event element.created global event fires if the element is created
  * @event height.changed element event fires when the height  has changed
  * @event width.changed element event fires when the with has changed 
  * @event size.changed element event fires when the sizes has changed
@@ -1052,7 +1052,7 @@ Seed (
 			}
 		}
 		if(_createElement){
-			Mold.Lib.Observer.pub("create.element", { element : element });
+			Mold.Lib.Observer.pub("element.created", { element : element });
 		}
 		return element;
 	}

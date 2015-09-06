@@ -43,7 +43,7 @@ Seed({
 				data = JSON.stringify(data);
 
 			}
-			console.log("save", id, data)
+			
 			return localStorage.setItem(id, data);
 		}
 

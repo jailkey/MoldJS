@@ -16,8 +16,6 @@ Seed({
 				throw new Error("RootNode has no clone method!")
 			}
 
-
-
 			this.render = function(){
 				if(!this.domPointer){
 					this.domPointer = _doc.createElement(this.name);
@@ -25,10 +23,18 @@ Seed({
 
 				var i = 0, len = this.renderDom.length;
 				for(; i < len; i++){
+					this.renderDom[i].parentElement = this.domPointer;
 					this.domPointer.appendChild(this.renderDom[i].render());
 				}
-
+				Mold.Lib.Observer.publish('element.created', { element : this.domPointer })
 				return this.domPointer;
+			}
+
+			this.reRender = function(){
+				var i = 0, len = this.renderDom.length;
+				for(; i < len; i++){
+					this.renderDom[i].reRender();
+				}
 			}
 
 			this.renderString = function(){

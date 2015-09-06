@@ -5,6 +5,7 @@ Seed (
 		dna : "class",
 		author : "Jan Kaufmann",
 		description : "",
+		test : "Mold.Test.Lib.Event",
 		include : [
 			"Mold.Lib.EventStore"
 		],
@@ -217,6 +218,7 @@ Seed (
 			trigger : function(event, data, config){
 
 				var output = false,
+					config = config || {},
 					events = [];
 
 				if(!data || !data.id || data.id !== "event"){
@@ -257,8 +259,11 @@ Seed (
 						}
 					}
 				}
-				Mold.Lib.EventStore.saveTrigger(_element, event, data);
+				if(!config.disableSaveTrigger){
+					Mold.Lib.EventStore.saveTrigger(_element, event, data);
+				}
 				return (Mold.is(output)) ? output : _element;
+
 			}
 
 		}

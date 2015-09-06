@@ -11,7 +11,6 @@ Seed({
 	function(controller, name){
 
 		var controllerPrototype = function(){
-
 			var that = this;
 			this.ident = Mold.getId();
 			Mold.mixin(this, new Mold.Lib.Event(this));
@@ -53,7 +52,8 @@ Seed({
 					}
 				}
 				delete that;
-			}			
+			}
+		
 			return this;
 		}
 
@@ -93,6 +93,8 @@ Seed({
 					}
 				);
 			}else{
+				/* why?
+				console.log("obser all")
 				Mold.Lib.Observer.at("all", function(e){
 						
 						controllerWrapped.trigger(e.event, e.data );
@@ -100,7 +102,7 @@ Seed({
 					{
 						triggerElement : controllerWrapped
 					}
-				);
+				);*/
 			}
 			
 			return controllerWrapped;

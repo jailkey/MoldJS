@@ -10,7 +10,11 @@ Seed({
 	function(){
 
 		var _that = this,
-			_watchList = [];
+			_watchList = []
+			_insertedElements = [],
+			_triggerConf = {
+				disableSaveTrigger : true
+			};
 
 		Mold.mixin(this, new Mold.Lib.Event(this));
 
@@ -27,44 +31,49 @@ Seed({
 			
 			config = config || {};
 			
-			config.insert = config.insert || true;
-			config.remove = config.remove || true;
-			config.attributes = config.attributes ||  true;
+			config.insert = config.insert || false;
+			config.remove = config.remove || false;
+			config.attributes = config.attributes ||  false;
 
 
 			var subtree = config.subtree || false,
-				childList = config.childList || true;
-				characterData = config.characterData || true;
+				childList = config.childList || false;
+				characterData = config.characterData || false;
 
 			if(Mold.Lib.Info.isSupported("mutationObserver")){
+
 				var observer = new MutationObserver(function(mutations){
+					//console.log("mutations", mutations)
 					Mold.each(mutations, function(mutation){
 						if(config.attributes){
 							if(mutation.type === "attributes"){
-								_that.trigger("dom.changed", { mutation : mutation, element : element});
-								_that.trigger("attribute.changed", { mutation : mutation, element : element});
-								element.trigger("attribute.changed", {mutation : mutation, element : element});
+								_that.trigger("dom.changed", { mutation : mutation, element : element}, _triggerConf);
+								_that.trigger("attribute.changed", { mutation : mutation, element : element}, _triggerConf);
+								element.trigger("attribute.changed", {mutation : mutation, element : element}, _triggerConf);
 							}
 						}
 						if(config.insert){
 							mutation.addedNodes = _filterNodeTyps(mutation.addedNodes, 1);
 							if(mutation.type === "childList" && mutation.addedNodes.length){
-								_that.trigger("dom.changed", { mutation : mutation, element : element});
-								_that.trigger("element.inserted", { mutation : mutation, element : element});
-								element.trigger("element.inserted", {mutation : mutation, element : element});
+								if(mutation.nodeType === 1){
+									_that.trigger("dom.changed", { mutation : mutation, element : element}, _triggerConf);
+									_that.trigger("element.inserted", { mutation : mutation, element : element}, _triggerConf);
+									element.trigger("element.inserted", {mutation : mutation, element : element}, _triggerConf);
+								}
 							}
 						}
 						if(config.remove){
 							mutation.addedNodes = _filterNodeTyps(mutation.removedNodes, 1);
 							if(mutation.type === "childList" && mutation.removedNodes.length){
-								_that.trigger("dom.changed", { mutation : mutation, element : element});
-								_that.trigger("element.removed", { mutation : mutation, element : element});
-								element.trigger("element.removed", {mutation : mutation, element : element});
+								_that.trigger("dom.changed", { mutation : mutation, element : element}, _triggerConf);
+								_that.trigger("element.removed", { mutation : mutation, element : element}, _triggerConf);
+								element.trigger("element.removed", {mutation : mutation, element : element}, _triggerConf);
 							}
 						}
 						
 					});
 				});
+				
 				observer.observe(element, { attributes: config.attributes, childList: childList, characterData: characterData, subtree: subtree })
 				
 			}else{
@@ -80,26 +89,28 @@ Seed({
 						addedNodes : [],
 						removedNodes : [],
 					}
-					_that.trigger("dom.changed", { mutation : mutation, element : element});
-					_that.trigger("attribute.changed", { mutation : mutation, element : element});
-					element.trigger("attribute.changed", {mutation : mutation, element : element});
+					_that.trigger("dom.changed", { mutation : mutation, element : element}, _triggerConf);
+					_that.trigger("attribute.changed", { mutation : mutation, element : element}, _triggerConf);
+					element.trigger("attribute.changed", {mutation : mutation, element : element}, _triggerConf);
 					
 
 				});
 				element.on("DOMNodeInserted", function(e){
-					var mutation = {
-						target : e.target,
-						attributeName : e.attrName,
-						type : "childList",
-						oldValue : e.prevValue,
-						addedNodes : [],
-						removedNodes : [],
-					}
+					if(e.target.nodeType === 1){
+						var mutation = {
+							target : e.target,
+							attributeName : e.attrName,
+							type : "childList",
+							oldValue : e.prevValue,
+							addedNodes : [],
+							removedNodes : [],
+						}
 
-					mutation.addedNodes.push(e.explicitOriginalTarget);
-					_that.trigger("dom.changed", { mutation : mutation, element : element});
-					_that.trigger("element.inserted", { mutation : mutation, element : element});
-					element.trigger("element.inserted", {mutation : mutation, element : element});
+						mutation.addedNodes.push(e.explicitOriginalTarget);
+						_that.trigger("dom.changed", { mutation : mutation, element : element}, _triggerConf);
+						_that.trigger("element.inserted", { mutation : mutation, element : element}, _triggerConf);
+						element.trigger("element.inserted", {mutation : mutation, element : element}, _triggerConf);
+					}
 				});
 
 				element.on("DOMNodeRemoved", function(e){
@@ -113,9 +124,9 @@ Seed({
 					}
 
 					mutation.removedNodes.push(e.explicitOriginalTarget);
-					_that.trigger("dom.changed", { mutation : mutation, element : element});
-					_that.trigger("element.removed", { mutation : mutation, element : element});
-					element.trigger("element.removed", {mutation : mutation, element : element});
+					_that.trigger("dom.changed", { mutation : mutation, element : element}, _triggerConf);
+					_that.trigger("element.removed", { mutation : mutation, element : element}, _triggerConf);
+					element.trigger("element.removed", {mutation : mutation, element : element}, _triggerConf);
 				});
 
 				/*childlist*/
@@ -152,7 +163,7 @@ Seed({
 				return this.observe(element, {
 					childList: false, 
 					characterData : false, 
-					subtree : true,
+					subtree : false,
 					attributes : true
 				})
 			},

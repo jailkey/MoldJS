@@ -18,10 +18,19 @@ Seed({
 				element.moldTemplate.forms[name] = value;
 			}
 		}
+
+
 		
 		switch(element.attr('type')){
 			case "text" :
 				element.on('keyup', function(e){
+
+					setValue(element.attr("name"), element.val());
+				})
+				break;
+			case "radio":
+				element.on('click', function(e){
+					
 					setValue(element.attr("name"), element.val());
 				})
 				break;

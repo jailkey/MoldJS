@@ -8,7 +8,7 @@ Seed({
 			{
 				at : "attribute",
 				name : "mold-event",
-				watchable : true,
+				//watchable : true,
 				collect : {
 					attribute : [
 						 "mold-event"
@@ -19,20 +19,32 @@ Seed({
 	},
 	function(node, element, collection){
 
+		var getEventData = function(eventName){
+			var eventList = element.getAttribute('mold-event').split(";");
+			for(var i = 0; i < eventList.length; i++){
+				var eventParts = eventList[i].split(":");
+				if(eventParts[0]){
+					return eventParts[2];
+				}
+			}
+		}
+		
 		var setEvent = function(){
 			var eventList = collection['mold-event'].split(";");
-
+			
 			for(var i = 0; i < eventList.length; i++){
 
 				var eventParts = eventList[i].split(":");
 				var eventData = {
 					element : element,
-					data : (eventParts[2]) ? JSON.parse(eventParts[2]) : null,
 					forms : element.moldTemplate.forms
 				}
 
 				if(element.moldTemplate){
-					element.on(eventParts[0], function(){
+					
+					element.on(eventParts[0], function(e){
+						eventData.elementEvent = e;
+						eventData.data = (getEventData(eventParts[0])) ? JSON.parse(getEventData(eventParts[0])) : null,
 						element.moldTemplate.trigger(eventParts[1].replace("@", ""), eventData);
 					})
 				}else{
@@ -40,11 +52,10 @@ Seed({
 				}
 
 			}
+			
 		}
-		collection.on("mold-event.changed", function(){
-			console.log("attribute changed")
-		})
 
 		setEvent();
+		
 	}
 );

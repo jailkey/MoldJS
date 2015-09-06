@@ -258,18 +258,8 @@ Seed({
 								}
 							}
 						}
-						/*
-						if(typeof directive.seed === "string"){
-							var seed = Mold.getSeed(directive.seed);
-							
-						}else{
-							
-							var seed = new Mold.Lib.Controller(directive.seed);
-							
-						}*/
-						
+				
 						var seed = directive.controller;
-						
 						
 						directive.instance = new seed(scope, new Mold.Lib.Element(element), collection, directive.component);
 						if(directive.register){
@@ -523,7 +513,7 @@ Seed({
 		//	var startTime = performance.now()
 			_appendElement(e.data.element);
 			//_appendStyleProperty(e.data.element);
-			//console.log("TIME", performance.now() - startTime);
+
 		})
 
 		return {

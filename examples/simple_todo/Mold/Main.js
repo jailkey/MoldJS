@@ -42,6 +42,7 @@ Seed(
 			|*/
 		});
 
+
 		//create model for data
 		var model = new Mold.Lib.Model({
 			list : [
@@ -74,8 +75,7 @@ Seed(
 				if(template.forms.entry){
 					model.data.list.push({ 
 						entry : template.forms.entry,
-						color : Mold.Lib.Color.randomColor(),
-						index : model.data.list.length
+						color : Mold.Lib.Color.randomColor()
 					})
 					
 					model.data.error = false;
@@ -86,12 +86,13 @@ Seed(
 			},
 			"@delete.entry" : function(e){
 				model.data.list.splice(e.data.data, 1);
+				e.data.elementEvent.preventDefault()
 				model.save();
 			},
 			"@delete.all" : function(e){
 				model.data.list.splice(0, model.data.list.length);
 				model.save();
-			}	
+			}
 		}
 	}
 );

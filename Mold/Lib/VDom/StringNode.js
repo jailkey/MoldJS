@@ -21,6 +21,11 @@ Seed({
 				this.state = STATE_NO_CHANGES;
 				return this.data;
 			}
+
+			this.reRender = function(){
+				this.state = STATE_NO_CHANGES;
+				return this.data;
+			}
 		}
 	}
 )

@@ -71,7 +71,7 @@ Seed({
 				clearTimeout(_connector.renderTimer);
 				_connector.renderTimer = setTimeout(function(){
 					if(!_parseAsString){
-						tree.render();
+						tree.reRender();
 					}else{
 						tree.renderString();
 					}
@@ -89,11 +89,11 @@ Seed({
 				}
 			},
 			updateChild : function(child, data, tree, name){
+				
 				//if blocknode
 				if(child.type === 2){
 					var blockData = {};
-					blockData[name] = data;
-					//console.log("set data", name, data)
+					blockData[name] = (data[name] === undefined) ? data : data[name];
 					child.setData(blockData);
 				}else{
 					child.setData(data);
@@ -105,15 +105,14 @@ Seed({
 
 				model.off(path + ".changed");
 				model.on(path + ".changed", function(e){
+
 					switch(e.data.type){
 						case "update":
-						case "splice":
 							//if subtree is an array update all childnodes
 							if(Mold.isArray(subTree)){
 								var i = 0, len = subTree.length;
 								for(; i < len; i++){
 									_connector.updateChild(subTree[i], e.data.object, tree, name);
-									//if(e.data.type)
 									_connect(model, subTree[i], properties, path, tree);
 								}
 							}else if(subTree.children && subTree.children[name]){
@@ -121,6 +120,35 @@ Seed({
 							}else if(subTree.name === name){
 								_connector.updateChild(subTree, e.data.object, tree, name);
 							}
+							break;
+						case "splice":
+							if(!e.data.addedCount && e.data.removed.length){
+								if(Mold.isArray(subTree)){
+									for(var i = 0; i < subTree.length; i++){
+										subTree[i].removeListItems(e.data.index, e.data.removed.length);
+									}
+								}else{
+									subTree.removeListItems(e.data.index, e.data.removed.length);
+								}
+								
+							}
+
+							if(e.data.addedCount){
+								var i = e.data.index, len = e.data.index + e.data.addedCount;
+								for(; i < len; i++){
+									if(Mold.isArray(subTree)){
+										for(var y = 0; y < subTree.length; y++){
+											subTree[y].changeListItem(i, e.data.object[i]);
+										}
+									}else{
+										subTree.changeListItem(i, e.data.object[i]);
+									}
+								}
+								
+							}
+							_connector.reRender(tree);
+							
+							
 							break;
 						default:
 							throw new Error("type " + e.data.type + " for watchObjectProp is not implemented!");
@@ -130,7 +158,6 @@ Seed({
 			},
 			watchArray : function(model, subTree, properties, path, tree){
 				model.off(path + ".changed");
-				console.log(path + ".changed", "ARRAY")
 				model.on(path + ".changed", function(e){
 					switch(e.data.type){
 						case "update":
@@ -160,6 +187,7 @@ Seed({
 				for(var prop in properties){
 				
 					var newPath = path + "." + prop;
+
 					if(subTree.children){
 						if(subTree.children[prop]){
 							_connector.watchObjectProp(model, subTree.children[prop], properties[prop], newPath, tree, prop)

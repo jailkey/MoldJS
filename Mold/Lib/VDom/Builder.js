@@ -20,6 +20,8 @@ Seed({
 	},
 	function(content, config){
 
+		var config = config || {};
+
 		var _dom = new Mold.Lib.Dom(content);
 		var _newDoc = Doc;
 		var _doc = _dom.get();
@@ -188,6 +190,9 @@ Seed({
 			 */
 			render : function(){
 				return rootNode.render();
+			},
+			reRender : function(){
+				rootNode.reRender();
 			},
 			renderString : function(){
 				return rootNode.renderString();

@@ -67,6 +67,13 @@ Seed({
 				return this.domPointer;
 			}
 
+			this.reRender = function(){
+				this.domPointer.nodeValue = this.data;
+				if(this.parent.type === ATTRIBUTE_NODE){
+					this.parent.renderAttribute();
+				}
+			}
+
 			this.renderString = function(){
 				return this.data;
 			}

@@ -20,8 +20,8 @@ Seed({
 			this.hide = false;
 			this.protoChild = false;
 			this.bindModel = false;
+			this.changedItems = [];
 			this._id = Mold.getId();
-
 
 			var _oldRenderLength = 0;
 			var _oldDataLength = 0;
@@ -129,6 +129,22 @@ Seed({
 			}
 
 			this.addListItem = function(index, data){
+
+				//if negativ block, remove all items
+				if(this.isNegative && this.renderDom.length){
+					this.changedItems = [];
+					var from = 0, len = this.renderDom.length;
+					this.children.splice(from, len);
+					this.renderDom.splice(from, len);
+					var i = from;
+					var removeLen = from + len;
+					for(; i < removeLen; i++){
+						this.removeList.push(i);
+					}
+					return;
+				}
+
+				
 				var bind = false;
 
 				if(!this.renderDom[index]){
@@ -162,30 +178,33 @@ Seed({
 					'.' : data,
 					'+' : index
 				}
+				
+				this.setListItems(data, index);
+				this.setListItems(specialData, index);
 
-				var eachInData = function(data){
-					for(var name in data){
-						var selected = that.children[index][name];
-						if(selected){
-							if(Mold.isArray(selected)){
-								var i = 0, len = selected.length;
-								for(; i < len; i++){
-									that.setListItemValue(selected[i], index, data, name);
-								}
-							}else{
-								that.setListItemValue(selected, index, data, name);
-							}
-						}
-						
-					}
-				}
-				eachInData(data);
-				eachInData(specialData);
-
+				this.changedItems.push(index);
 
 			}
 
+			this.setListItems = function(data, index){
+				for(var name in data){
+					var selected = (that.children[index]) ? that.children[index][name] : false;
+					if(selected){
+						if(Mold.isArray(selected)){
+							var i = 0, len = selected.length;
+							for(; i < len; i++){
+								that.setListItemValue(selected[i], index, data, name);
+							}
+						}else{
+							that.setListItemValue(selected, index, data, name);
+						}
+					}
+					
+				}
+			}
+
 			this.setListItemValue = function(selected, index, data, name){
+
 				if(selected){
 					//Handle pointers
 					if(selected.isPointer){
@@ -209,6 +228,7 @@ Seed({
 			}
 
 			this.removeListItem = function(index){
+				
 				if(index === 0){
 					if(this.children[0]){
 						this.protoChild = this.children[0];
@@ -216,6 +236,10 @@ Seed({
 				}
 				this.children.splice(index, 1);
 				this.renderDom.splice(index, 1);
+				this.removeList.push(index);
+				if(!this.isNegative && !this.children.length){
+					this.addListItem(0, "show")
+				}
 			}
 
 			this.removeListItems = function(from, len){
@@ -226,15 +250,27 @@ Seed({
 				}
 				this.children.splice(from, len);
 				this.renderDom.splice(from, len);
+				var i = from;
+				var removeLen = from + len;
+				for(; i < removeLen; i++){
+					this.removeList.push(i);
+				}
+				if(this.isNegative && !this.children.length){
+					this.addListItem(0, "show")
+				}
 			}
 
 			this.removeAllListItems = function(){
-				this.removeListItems(0, this.renderDom.length)
+				this.removeListItems(0, this.renderDom.length);
+			}
+
+			this.changeListItem = function(index, data){
+				this.addListItem(index, data)
 			}
 
 
 			this.onSetData = function(data){
-			
+				
 				for(var filterName in this.filter){
 					var filter = Mold.Lib.Filter.get(filterName);
 					if(filter){
@@ -284,13 +320,13 @@ Seed({
 					}
 					_oldDataLength = data.length;
 				}else if((!data || !data[this.name]) && data[this.name] !== 0){
-					
 					this.removeAllListItems();
 
 				}else{
 
 					//data from object
 					if(Mold.isObject(data)){
+
 						if(!this.renderDom[0]){
 							this.createRenderDom(0);
 						}
@@ -298,6 +334,9 @@ Seed({
 						if(!this.children[0]){
 							this.createChildren(0);
 						}
+						
+						this.addListItem(0, data[this.name])
+						
 						if(this.children[0]){
 							for(var name in this.children[0]){
 						
@@ -383,7 +422,6 @@ Seed({
 			}
 
 			this.removePointer = function(index){
-
 				if(this.pointer[index]){
 					var i = 0, len =  this.pointer[index].length;
 					for(; i < len; i++){
@@ -392,42 +430,119 @@ Seed({
 						}
 					}
 
-					this.pointer[index] = null;
+					this.pointer.splice(index, 1);
 					if(!this.pointer){
 						this.pointer = [];
 					}
+
 				}
 
 			}
 
 
 			this.render = function(){
-				//remove unused
-				var i = 0, len = this.renderDom.length;
+
+				//remove pointers
 				var y = 0, removeLen = this.removeList.length;
-
-				//remove end of pointerlist
-				var y = len, pointerLen = this.pointer.length;
-				for(; y < pointerLen; y++){
-					this.removePointer(y);
+				for(; y < removeLen; y++){
+					this.removePointer(this.removeList[removeLen - y - 1]);
 				}
+				this.removeList = [];
 
-				//create new
+				//add changed
+				var i = 0, len = this.renderDom.length;
 				for(; i < len; i++){
-					var selected = this.renderDom[i];
-					var y = 0, subLen = selected.length;
-					this.pointer[i] = [];
-					for(; y < subLen; y++){
-						var item = selected[y].render();
-						this.domPointer.appendChild(item);
-						this.pointer[i][y] = item;
+					//if items does not change, copy pointer
+					if(!~this.changedItems.indexOf(i)){
+						if(this.pointer[i]){
+				
+							for(; y < subLen; y++){
+								this.domPointer.appendChild(this.pointer[i][y]);
+							}
+						}
+
+					//if items has changed, render new
+					}else{
+						var selected = this.renderDom[i];
+						var y = 0, subLen = selected.length;
+						this.pointer[i] = [];
+						for(; y < subLen; y++){
+							var item = selected[y].render();
+							this.domPointer.appendChild(item);
+							this.pointer[i][y] = item;
+						}
 					}
 				}
+				this.changedItems = [];
 		
 				this.state = STATE_NO_CHANGES;
 				_oldRenderLength = len;
 
 				return this.domPointer;
+			}
+
+			this.reRender = function(){
+				console.log("reRender", this.name)
+				//remove pointers
+				var y = 0, removeLen = this.removeList.length;
+				for(; y < removeLen; y++){
+					this.removePointer(this.removeList[removeLen - y - 1]);
+				}
+				this.removeList = [];
+
+				//add changed
+				var i = 0, len = this.renderDom.length;
+				var lastElement = false;
+
+				
+
+				for(; i < len; i++){
+					//if items does not change, copy pointer
+					if(!~this.changedItems.indexOf(i)){
+
+						if(this.children[i]){
+							//do nothing
+							lastElement = this.pointer[i][this.pointer[i].length - 1];
+							this.setListItems({ "+" : i }, i);
+
+							for(var name in this.children[i]){
+								if(Mold.isArray(this.children[i][name])){
+									var y = 0, renderLen = this.children[i][name].length;
+									for(; y < renderLen; y++){
+										this.children[i][name][y].reRender();
+									}
+								}else{
+									this.children[i][name].reRender();
+								}	
+							}
+							
+						}
+
+					//if items has changed, render new
+					}else{
+						var selected = this.renderDom[i];
+						var y = 0, subLen = selected.length;
+						this.pointer[i] = [];
+						for(; y < subLen; y++){
+							selected.parentElement = this.parentElement;
+							var item = selected[y].render();
+							item.stopDirective = false;
+							if(!lastElement && this.parentElement.firstChid){
+								this.parentElement.insertBefore(item, this.parentElement.firstChid);
+							}else if(lastElement){
+								lastElement.parentNode.insertBefore(item, lastElement.nextSibling);
+							}else{
+								this.parentElement.appendChild(item);
+							}
+							this.pointer[i][y] = item;
+							lastElement = item;
+						}
+					}
+				}
+				this.changedItems = [];
+		
+				this.state = STATE_NO_CHANGES;
+				_oldRenderLength = len;
 			}
 
 

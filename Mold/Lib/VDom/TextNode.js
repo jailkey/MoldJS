@@ -10,8 +10,6 @@ Seed({
 			this.type = TEXT_NODE;
 			this.domPointer = false;
 
-			
-
 			this.clone = function(){
 
 				var newNode =  new TextNode({
@@ -25,11 +23,15 @@ Seed({
 
 			this.render = function(){
 
-				if(!this.domPointer ){
+				if(!this.domPointer){
 					this.domPointer = _doc.createTextNode(this.data);
 				}
 				this.state = STATE_NO_CHANGES;
 				return this.domPointer;
+			}
+
+			this.reRender = function(){
+				this.domPointer.nodeValue = this.data;
 			}
 
 			this.renderString = function(){

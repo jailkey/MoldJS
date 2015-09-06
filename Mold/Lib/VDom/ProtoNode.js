@@ -3,7 +3,8 @@ Seed({
 		dna : "data",
 		include : [
 			"Mold.Lib.VDom.VDoc",
-			"Mold.Lib.Filter"
+			"Mold.Lib.Filter",
+			"Mold.Lib.Observer"
 		]
 	},
 	function(){
@@ -40,6 +41,7 @@ Seed({
 		this.name = config.name;
 		this.type = STRING_NODE;
 		this.parent = false;
+		this.parentElement = false;
 		this.state = STATE_NEW;
 		this.isString = config.isString || false;
 		this.hasBinding = false;
@@ -219,6 +221,10 @@ Seed({
 
 		this.renderString = function(){
 			throw new Error("renderString ist not implemented!")
+		}
+
+		this.reRender = function(){
+			throw new Error("reRender ist not implemented!")
 		}
 		
 	}

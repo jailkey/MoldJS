@@ -23,6 +23,7 @@ Seed({
 		var _validation = false;
 		var _adapter = false;
 		var undefined;
+		var _lastSplice = false;
 
 		this.id = false;
 
@@ -62,11 +63,15 @@ Seed({
 				observabelArray.observe(function(e){
 					
 					if(e.type === "splice"){
-						_that.trigger(name + ".changed", e);
-						_that.trigger(name + "." + e.index + ".changed", e);
-						
-						for(var i = e.index; i < e.index + e.addedCount; i++){
-							_watchData(e.object[i], name + "." + i, properties[0]);
+						var spliceIdend = e.index + "." +  e.addedCount + "." + e.object.length + e.removed.length;
+						if(spliceIdend !== _lastSplice){
+							_that.trigger(name + ".changed", e);
+							_that.trigger(name + "." + e.index + ".changed", e);
+							
+							for(var i = e.index; i < e.index + e.addedCount; i++){
+								_watchData(e.object[i], name + "." + i, properties[0]);
+							}
+							_lastSplice = spliceIdend;
 						}
 					}
 
@@ -85,12 +90,11 @@ Seed({
 				var objectObserver = new ObjectObserver(data);
 
 				objectObserver.observe(function(e){
-				
 					if(!Mold.isArray(properties[e.name]) && !Mold.isObject(properties[e.name]) && properties[e.name] !== undefined){
 						_validateValue(e.object[e.name], properties[e.name]);
 					}
 					
-					if(!Mold.isArray(e.object[e.name])){
+					if(!Mold.isArray(e.object[e.name]) || e.type === "update"){
 						_that.trigger(name + ".changed", e);
 						_that.trigger(name + "." + e.name + ".changed", e);
 					}

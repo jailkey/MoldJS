@@ -12,9 +12,7 @@ Seed({
 		var _that = this,
 			_watchList = []
 			_insertedElements = [],
-			_triggerConf = {
-				disableSaveTrigger : true
-			};
+			_triggerConf = { disableSaveTrigger : true} ;
 
 		Mold.mixin(this, new Mold.Lib.Event(this));
 

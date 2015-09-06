@@ -11,6 +11,7 @@ Seed({
 			this.attributes = config.attributes || {};
 			this.domPointer = false; 
 			this.renderDom = this.vdom;
+			this.stopDirective = true;
 
 			this.onSetData = function(data, bind){
 
@@ -97,14 +98,16 @@ Seed({
 			}
 
 			this.render = function(){
-				
+				var created = false;
 				if(!this.domPointer){
 					this.domPointer = _doc.createElement(this.name);
 					this.domPointer.moldTemplate = this.services.template;
+					created = true;
 				}
 
 				var i = 0, len = this.renderDom.length;
 				for(; i < len; i++){
+					this.renderDom[i].parentElement = this.domPointer;
 					this.domPointer.appendChild(this.renderDom[i].render());
 				}
 
@@ -112,8 +115,18 @@ Seed({
 					var attrValue = this.attributes[name].render();
 					this.domPointer.setAttribute(name, attrValue);
 				}
-
+				this.domPointer.stopDirective = this.stopDirective;
+				if(created){
+					Mold.Lib.Observer.publish('element.created', { element : this.domPointer });
+				}
 				return this.domPointer;
+			}
+
+			this.reRender = function(){
+				var i = 0, len = this.renderDom.length;
+				for(; i < len; i++){
+					 this.renderDom[i].reRender();
+				}
 			}
 
 			this.renderString = function(){

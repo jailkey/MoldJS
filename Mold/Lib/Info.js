@@ -6,6 +6,7 @@ Seed({
 
 		var _features = {};
 		var helperInputElement = false;
+		var undefined;
 			
 		if(!Mold.isNodeJS){
 			helperInputElement = document.createElement("input");
@@ -53,7 +54,7 @@ Seed({
 					return output;
 				})(),
 				"proxy" : !!(window && window.Proxy),
-				"mutationObserver" : !!((window && window.MutationObserver) || (MutationObserver)),
+				"mutationObserver" : !!((window && window.MutationObserver) || (typeof MutationObserver !== "undefined")),
 				"registerElement" : !!document.registerElement,
 				"blob" : !!(window && window.Blob),
 				"url" : !!(window && window.URL),

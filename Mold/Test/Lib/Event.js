@@ -17,12 +17,13 @@ Seed({
 			});
 
 			it("use methode on and trigger with data", function(done){
-				test.on("test.event", function(e.data){
+				
+				testObject.on("test.event", function(e){
 					expect(e.data.test).toBe(true)
 					done()
 				});
 
-				test.trigger("test.event", {test : true});
+				testObject.trigger("test.event", {test : true});
 			})
 
 

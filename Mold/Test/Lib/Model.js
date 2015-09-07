@@ -60,14 +60,22 @@ Seed({
 			});
 
 			it("adds data to the model via push", function(done){
+				console.log("start push");
+				
+
 				testModel.on("data.list.changed", function(e){
+					console.log("---------------------")
 					testModel.off("data.list.changed")
 					expect(e.data.object.length).toBe(2);
 					done();
 				});
+
+				testModel.on("all", function(e){
+					console.log("e", e.event, e.data)
+				})
 				
 				testModel.data.list.push({
-					"item" : "was anders"
+					"item" : "was wie wo"
 				})
 
 			})

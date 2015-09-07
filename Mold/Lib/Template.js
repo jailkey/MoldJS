@@ -8,11 +8,17 @@ Seed({
 			{ MultiLineString :  "Mold.Lib.MultiLineString" },
 			{ Path : "Mold.Lib.Path" },
 			{ Promise : "Mold.Lib.Promise" },
-			{ Event : "Mold.Lib.Event" },
-
+			{ Event : "Mold.Lib.Event" }
+			
+		],
+		
+		browserInclude : [
 			//load template components
-			".VDom.Components.MoldEvent",
-			".VDom.Components.MoldCaptureForms"
+			"Mold.Lib.VDom.Builder",
+			[	
+				".VDom.Components.MoldEvent",
+				".VDom.Components.MoldCaptureForms" 
+			]
 		]
 	},
 	function(markup, config){
@@ -52,6 +58,7 @@ Seed({
 		
 		var _templateTree = new Promise(function(resolve, reject){
 			_template.then(function(data){
+
 				_tree = new Builder(data, { template : _that });
 
 				resolve(_tree);

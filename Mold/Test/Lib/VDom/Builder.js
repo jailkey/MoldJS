@@ -63,7 +63,9 @@ Seed({
 			});
 
 			it("render block", function(){
+
 				var insert = secondResult.dom.render();
+				
 				expect(insert.getElementsByTagName("div").length).toBe(1);
 			});
 

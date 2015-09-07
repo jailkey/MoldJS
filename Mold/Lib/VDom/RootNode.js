@@ -17,7 +17,6 @@ Seed({
 			}
 
 			this.render = function(){
-				console.log("RENDER")
 				if(!this.domPointer){
 					this.domPointer = _doc.createElement(this.name);
 				}

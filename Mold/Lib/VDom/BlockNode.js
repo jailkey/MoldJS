@@ -253,16 +253,20 @@ Seed({
 				this.renderDom.splice(from, len);
 				var i = from;
 				var removeLen = from + len;
+
+
+
 				for(; i < removeLen; i++){
 					this.removeList.push(i);
 				}
+
 				if(this.isNegative && !this.children.length){
 					this.addListItem(0, "show")
 				}
 			}
 
-			this.removeAllListItems = function(){
-				this.removeListItems(0, this.renderDom.length);
+			this.removeAllListItems = function(force){
+				this.removeListItems(0, this.renderDom.length, force);
 			}
 
 			this.changeListItem = function(index, data){
@@ -278,26 +282,7 @@ Seed({
 						this.data[this.name] = filter(this.data[this.name], this.filter[filterName]);
 					}
 				}
-
-				if(this.isNegative && data[this.name]){
-					
-					if(!data[this.name].length){
-						data[this.name] = "show";
-					}else{
-						data = false;
-					}
 		
-				}else if(this.isNegative && (!data || !data[this.name])){
-					this.hide = false;
-					
-					if(!data){
-						data = {};
-					}else{
-						data = Mold.mixin({}, data);
-					}
-
-					data[this.name] = "show";
-				}
 
 				_oldRenderLength = this.renderDom.length;
 				//handle array
@@ -321,8 +306,7 @@ Seed({
 					}
 					_oldDataLength = data.length;
 				}else if((!data || !data[this.name]) && data[this.name] !== 0){
-					this.removeAllListItems();
-
+					this.removeAllListItems(true);
 				}else{
 
 					//data from object
@@ -336,7 +320,7 @@ Seed({
 							this.createChildren(0);
 						}
 						
-						this.addListItem(0, data[this.name])
+						this.addListItem(0, data[this.name], true)
 						
 						if(this.children[0]){
 							for(var name in this.children[0]){
@@ -397,14 +381,13 @@ Seed({
 							}
 
 							if(!Mold.is(data[this.name]) || data[this.name] === false){
-						
 								this.renderDom = [];
 								this.children = [];
 							}
 						}
 					}
 				}
-			
+
 			}
 
 			this.clone = function(){
@@ -484,6 +467,7 @@ Seed({
 			}
 
 			this.reRender = function(){
+
 				//remove pointers
 				var y = 0, removeLen = this.removeList.length;
 				for(; y < removeLen; y++){
@@ -532,6 +516,7 @@ Seed({
 							if(lastElement){
 								lastElement.parentNode.insertBefore(item, lastElement.nextSibling);
 							}else{
+
 								this.parentElement.insertBefore(item, this.referenceNode);
 							}
 							this.pointer[i][y] = item;

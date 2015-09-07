@@ -52,7 +52,7 @@ Seed({
 			this.childNodes = [];
 			this.parentNode = null;
 
-			var _parentNode = false;
+			var _parentNode = null;
 			
 			Object.defineProperty(this, 'parentNode', {
 				get : function() {
@@ -175,6 +175,12 @@ Seed({
 			}
 
 			this.appendChild = function(child){
+				if(child.nodeType === 11){
+					while(child.childNodes.length){
+						this.appendChild(child.childNodes.shift());
+					}
+					return;
+				}
 				
 				if(child === this || child.nodeIdent === this.nodeIdent){
 					throw new Error("circular insert!");

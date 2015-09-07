@@ -17,6 +17,7 @@ Seed({
 			}
 
 			this.render = function(){
+				console.log("RENDER")
 				if(!this.domPointer){
 					this.domPointer = _doc.createElement(this.name);
 				}
@@ -24,6 +25,7 @@ Seed({
 				var i = 0, len = this.renderDom.length;
 				for(; i < len; i++){
 					this.renderDom[i].parentElement = this.domPointer;
+					
 					this.domPointer.appendChild(this.renderDom[i].render());
 				}
 				Mold.Lib.Observer.publish('element.created', { element : this.domPointer })
@@ -33,6 +35,7 @@ Seed({
 			this.reRender = function(){
 				var i = 0, len = this.renderDom.length;
 				for(; i < len; i++){
+					this.renderDom[i].parentElement = this.domPointer;
 					this.renderDom[i].reRender();
 				}
 			}

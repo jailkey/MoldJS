@@ -1,6 +1,7 @@
 Seed({
 		name : "Mold.Lib.Directive",
 		dna : "static",
+		platform : "browser",
 		include : [
 			"Mold.Lib.Event",
 			"Mold.Lib.Controller",
@@ -17,7 +18,7 @@ Seed({
 			_directivesIndex = {},
 			_cache = {},
 			_events = {},
-			doc = (Mold.isMoldJS) ? false : document,
+			doc = (typeof document !== "undefiend") ? document : false,
 			_events = new Mold.Lib.Event(_events);
 			//cssParser = new Mold.Lib.CssParser(document);
 

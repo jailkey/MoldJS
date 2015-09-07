@@ -509,6 +509,7 @@ var Mold = (function(config){
 			Mold.each(loadingproperties, function(property){
 				if(header[property]){
 					imports = imports.concat(_getImports(header[property]));
+
 					header[property] = _removeImports(header[property]);
 					var parsed = parseDependencies(header[property]);
 					dependencies = dependencies.concat(parsed.dep);
@@ -1290,7 +1291,7 @@ var Mold = (function(config){
 					var startCreating = true;
 					seed.imports = seed.imports || [];
 					Mold.each(loadingproperties, function(property){
-						
+				
 						
 						if(seed[property]){
 							seed.imports = seed.imports.concat(_getImports(seed[property]));
@@ -1320,7 +1321,6 @@ var Mold = (function(config){
 							}
 						}
 					});
-			
 
 					//If the seed has to wait for the DNA a callback will be added
 					if(startCreating){
@@ -1358,9 +1358,9 @@ var Mold = (function(config){
 						if(!_createdMold[seed.name]){		
 							if(seed.status !== Mold.SEED_STATUS_PREPROZESSING){
 								seed.status = Mold.SEED_STATUS_PREPROZESSING;
+
 								//import seeds
 								seed.func = Mold.importSeeds(seed.func, seed.imports, seed);
-
 								var initSeed = function(compiled){
 									Mold.seedList.push(_pathes[seed.name]);
 									//mark as created

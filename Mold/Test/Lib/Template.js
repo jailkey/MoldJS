@@ -2,8 +2,9 @@ Seed({
 		name : "Mold.Test.Lib.Template",
 		dna : "test",
 		include : [
-			{ Color : "->Mold.Lib.Color" },
-			{ Model : "->Mold.Lib.Model" }
+			{ Color : "Mold.Lib.Color" },
+			{ Model : "Mold.Lib.Model" },
+			{ Doc : "Mold.Lib.Document" }
 		]
 	},
 	function(Template){
@@ -16,7 +17,7 @@ Seed({
 			it("create new template from multilinestring", function(go){
 
 				template = new Template(function(){/*|
-					<h1 class="topic">Übersxhrift</h1>
+					<h1 class="topic">Überschrift</h1>
 					<ul class="values" mold-name="mylist">
 						{{#block}}
 							<li style="background:{{color}}">{{i}} - {{value}}</li>
@@ -32,6 +33,9 @@ Seed({
 				template.tree.then(function(tree){
 					if(!Mold.isNodeJS){
 						template.appendTo(document.body)
+					}else{
+						var doc = new Doc();
+						template.appendTo(doc.get())
 					}
 					go();
 				})

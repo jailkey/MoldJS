@@ -12,7 +12,7 @@ Seed({
 		timeout(5000);
 
 		describe("Test Mold.Lib.Template", function(){
-			var template, test = now(), dataModel;
+			var template, templateTwo, test = now(), dataModel;
 
 			it("create new template from multilinestring", function(go){
 
@@ -181,6 +181,62 @@ Seed({
 				});
 
 			});
+
+			it("tests another configuration", function(){
+				it("create new template with nested blocks", function(go){
+
+					templateTwo = new Template(function(){/*|
+						<h1 class="topic">Überschrift</h1>
+						<ul class="values" mold-name="mylist">
+							{{#block}}
+								<li>
+									{{#subblock}}
+										test
+										{{subitem}}
+									{{/subblock}}
+								</li>
+							{{/block}}
+
+							{{^block}}
+								<li>Keine Daten</li>
+							{{/block}}
+						</ul> 
+					|*/});
+
+					templateTwo.tree.then(function(tree){
+						console.log(tree)
+						if(!Mold.isNodeJS){
+							templateTwo.appendTo(document.body)
+						}else{
+							var doc = new Doc();
+							templateTwo.appendTo(doc.get())
+						}
+						go();
+					})
+				});
+
+				it("add data with subblock ", function(){
+					
+					var data = {
+						block : []
+					}
+
+					for(var i = 0; i < 30; i++){
+						var subdata = []
+						for(var y = 0; y < 30; y++){
+							subdata.push({
+								subitem : Math.random()
+							});
+						}
+						data.block.push({
+							subblock : subdata
+						})
+					}
+					console.log("data", data)
+					templateTwo.setData(data);
+				})
+			});
+
 
 		});
 	}

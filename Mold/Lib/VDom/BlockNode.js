@@ -167,7 +167,6 @@ Seed({
 							this.children[index][name] = child[0]
 						}
 					}
-					//this.children[index][name] = child;
 					
 				}
 
@@ -276,6 +275,10 @@ Seed({
 
 			this.onSetData = function(data){
 				
+				if(!data[this.name]){
+					data[this.name] = data;
+				}
+
 				for(var filterName in this.filter){
 					var filter = Mold.Lib.Filter.get(filterName);
 					if(filter){

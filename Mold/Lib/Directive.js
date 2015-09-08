@@ -18,7 +18,6 @@ Seed({
 			_directivesIndex = {},
 			_cache = {},
 			_events = {},
-			doc = (typeof document !== "undefiend") ? document : false,
 			_events = new Mold.Lib.Event(_events);
 			//cssParser = new Mold.Lib.CssParser(document);
 

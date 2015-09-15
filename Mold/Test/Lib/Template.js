@@ -14,7 +14,7 @@ Seed({
 		describe("Test Mold.Lib.Template", function(){
 			var template, templateTwo, test = now(), dataModel;
 
-			it("create new template from multilinestring", function(go){
+			xit("create new template from multilinestring", function(go){
 
 				template = new Template(function(){/*|
 					<h1 class="topic">Überschrift</h1>
@@ -42,7 +42,7 @@ Seed({
 			});
 
 	//model data
-			it("bind model and add and remove data", function(){
+			xit("bind model and add and remove data", function(){
 
 				it("add model to template", function(){
 					dataModel = new Model({
@@ -187,12 +187,15 @@ Seed({
 
 					templateTwo = new Template(function(){/*|
 						<h1 class="topic">Überschrift</h1>
-						<ul class="values" mold-name="mylist">
+						<ul class="values mold-name="mylist">
 							{{#block}}
 								<li>
 									{{#subblock}}
 										test
-										{{subitem}}
+										<div style="background:{{background}}"> {{subitem}} </div>
+									{{/subblock}}
+									{{^subblock}}
+										subblock is not defined!
 									{{/subblock}}
 								</li>
 							{{/block}}
@@ -221,12 +224,17 @@ Seed({
 						block : []
 					}
 
-					for(var i = 0; i < 30; i++){
+					for(var i = 0; i < 3; i++){
 						var subdata = []
-						for(var y = 0; y < 30; y++){
-							subdata.push({
-								subitem : Math.random()
-							});
+						for(var y = 0; y < 3; y++){
+							if(i !== 1){
+								subdata.push({
+									subitem : Math.random(),
+									background : Color.randomColor()
+								});
+							}else{
+								subdata = false;
+							}
 						}
 						data.block.push({
 							subblock : subdata

@@ -183,7 +183,7 @@ Seed({
 			});
 
 			it("tests another configuration", function(){
-				var templateTwoTree = false;
+				var templateTwoTree = false, modelTwo = false;
 				it("create new template with nested blocks", function(go){
 
 					templateTwo = new Template(function(){/*|
@@ -204,6 +204,10 @@ Seed({
 							{{^block}}
 								<li>Keine Daten</li>
 							{{/block}}
+
+							{{#list}}
+								<li>{{.}}</li>
+							{{/list}}
 						</ul> 
 					|*/});
 
@@ -253,8 +257,10 @@ Seed({
 					})
 				})
 
+
+
 				it("add a model and some data", function(){
-					var modelTwo = new Mold.Lib.Model({
+					modelTwo = new Mold.Lib.Model({
 						block : [ 
 							{
 								subblock : [
@@ -264,7 +270,8 @@ Seed({
 									}
 								]
 							}
-						]
+						],
+						list : []
 					});
 
 					templateTwo.connect(modelTwo);
@@ -277,6 +284,12 @@ Seed({
 						]
 					})
 				})
+
+
+				it("add data to the list ", function(){
+					modelTwo.data.list.push("SOME DATA")
+					modelTwo.data.list.push("MORE DATA")
+				});
 			});
 
 

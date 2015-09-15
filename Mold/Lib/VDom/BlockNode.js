@@ -112,7 +112,6 @@ Seed({
 			this.createChildren = function(index){
 			
 				var selected =  this.children[0] || Mold.mixin({}, this.protoChild);
-			
 				for(var name in selected){
 					if(!this.children[index]){
 						this.children[index] = {};
@@ -154,8 +153,11 @@ Seed({
 				
 				if(!this.children[index]){
 					this.createChildren(index);
+
 					//this.bindChildren(data, index);
 				}
+
+
 
 				if(index === 0){
 					//if index is 0 find all children
@@ -173,7 +175,7 @@ Seed({
 				if(!Mold.isArray(this.children)){
 					this.children = [this.children];
 				}
-
+				
 				var specialData = {
 					'.' : data,
 					'+' : index
@@ -204,7 +206,6 @@ Seed({
 			}
 
 			this.setListItemValue = function(selected, index, data, name){
-
 				if(selected){
 					//Handle pointers
 					if(selected.isPointer){
@@ -282,11 +283,13 @@ Seed({
 					}
 				}
 		
-
 				_oldRenderLength = this.renderDom.length;
 				//handle array
 				if(Mold.isArray(data[this.name])){
 					var data = data[this.name];
+					if(!data.length){
+						data = false;
+					}
 				}
 
 				if(Mold.isArray(data)){
@@ -399,10 +402,23 @@ Seed({
 					services : this.services
 				});
 
-				for(var name in this.vdom){
-					newNode.addNode(this.vdom[name].clone())
+				for(var i = 0; i < this.vdom.length; i++){
+					newNode.addNode(this.vdom[i].clone());
 				}
 
+				for(var name in this.children[0]){
+					if(!newNode.children[0]){
+						newNode.children[0] = {};
+					}
+					if(Mold.isArray(this.vdom[name])){
+						var child = newNode.findChild(name, newNode.vdom, true);
+						newNode.children[0][name] = child;
+					}else{
+						var child = newNode.findChild(name, this.vdom);
+						newNode.children[0][name] = child;
+					}
+				}
+		
 				return newNode;
 			}
 

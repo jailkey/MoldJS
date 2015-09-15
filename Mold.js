@@ -83,16 +83,16 @@ var Mold = (function(config){
 		return seed.name.substring(0, seed.name.lastIndexOf("."));
 	};
 	
-	var _isSeedAdded = function(target, parent){
-		var cleanedName = Mold.cleanSeedName(target, parent);
-		return ( _createdMold[ cleanedName ] ) ? true : false;
+	var _isSeedAdded = function(seedName){
+		//var cleanedName = Mold.cleanSeedName(target, parent);
+		return ( _createdMold[ seedName ] ) ? true : false;
 	};
 	
 	var _onlySubSeeds = function(seedList, parent){
 		var output = true;
 
 		Mold.each(seedList, function(seed){
-			if(typeof seed === "string" && !_isSeedAdded(seed, parent)){
+			if(typeof seed === "string" && !_isSeedAdded(Mold.cleanSeedName(seed, parent))){
 				output = false;
 				return Mold.EXIT;
 			}
@@ -100,20 +100,18 @@ var Mold = (function(config){
 
 		return output;
 	}
-	
+	var clearCacheCounter = 0;
 	var _areSeedsAdded = function(included, parent){
-		
-		var output = true;
-
-		Mold.each(included, function(value){
-			var seedName = Mold.cleanSeedName(value, parent);
-			if(! _isSeedAdded(seedName, parent)){
-				output =  false;
-				return Mold.EXIT;
+		var i = 0, len = included.length;
+		for(; i < len; i++){
+			
+			var seedName = Mold.cleanSeedName(included[i], parent);
+			if(! _isSeedAdded(seedName)){
+				return false;
 			}
-		});
+		}
 
-		return output;
+		return true;
 	};
 
 	var _getImports = function(seedList){
@@ -1210,15 +1208,19 @@ var Mold = (function(config){
 		createChain : function(targets){
 			return _createTarget(targets.split("."));
 		},
+		checkSeedCueTimer : false,
 /**
 * @methode checkSeedCue
 * @desc Checks the seedcue for new entrys. If a new entry was found it will be added to Mold.js
 **/
 		checkSeedCue : function(){
-			var seedCue = Mold.cue.getType("seed");
-			Mold.each(seedCue, function(seed){
-				Mold.addSeed(seed);
-			});
+			clearTimeout(this.checkSeedCueTimer)
+			setTimeout(function(){
+				var seedCue = Mold.cue.getType("seed");
+				for(var name in seedCue){
+					Mold.addSeed(seedCue[name]);
+				}
+			}, 2)
 			
 		},
 		checkLoadedSeeds : function(name){
@@ -1237,10 +1239,19 @@ var Mold = (function(config){
 			Mold.cue.add("seednamecleaner", name, action)
 		},
 
+		cleanSeedNameCache : {},
 		cleanSeedName : function(seedName, parent){
-			Mold.each(Mold.cue.getType("seednamecleaner"), function(action){
-				seedName = action.call(null, seedName, parent);
-			});
+			if(this.cleanSeedNameCache[seedName + parent]){
+				return this.cleanSeedNameCache[seedName + parent];
+			}
+
+			var cleaner = Mold.cue.getType("seednamecleaner");
+			for(var name in cleaner){
+				var oldName = seedName;
+				seedName = cleaner[name].call(null, seedName, parent);
+				this.cleanSeedNameCache[oldName + parent.name] = seedName;
+			}
+
 			return seedName;
 		},
 		
@@ -1249,10 +1260,8 @@ var Mold = (function(config){
 * @desc Adds a Seed to Mold.js
 * @param (object) seed - Expects a seed object
 **/
-	
-
 		addSeed : function(seed){
-
+			var that = this;
 			//check platform
 			if(seed.platform){
 				var _reject = function(seed){
@@ -1314,7 +1323,8 @@ var Mold = (function(config){
 								}
 							}else{
 
-								startCreating = _isSeedAdded(seed[property], seed);
+								startCreating = _isSeedAdded(Mold.cleanSeedName(seed[property], seed));
+
 								if(!startCreating){
 									Mold.load({ name : seed[property], isExternal : _externalSeeds[seed.name] || false, parent : seed });
 								}
@@ -1364,7 +1374,6 @@ var Mold = (function(config){
 								var initSeed = function(compiled){
 									Mold.seedList.push(_pathes[seed.name]);
 									//mark as created
-									
 									_createdMold[seed.name] = seed;
 									//replace seed code with compiled code
 									seed.func = compiled;
@@ -1407,6 +1416,7 @@ var Mold = (function(config){
 									if(Mold.cue.get("seed", seed.name)){
 										Mold.cue.remove("seed", seed.name);
 									}
+
 									Mold.checkSeedCue();
 
 								}
@@ -1588,7 +1598,7 @@ var Mold = (function(config){
 		}
 
 		if(!_Mold[seedName]){
-			
+
 			if(!seedName){
 				throw new Error("Seedname ist not defined!");
 			}
@@ -1610,7 +1620,6 @@ var Mold = (function(config){
 				if( typeof _Mold[seedName].loader !== "object" ){
 					_Mold[seedName].loader = new _loader(seedName);
 				}
-
 				Mold.loadScript(filePath, 
 					function(element){
 						if(rule.isScript){

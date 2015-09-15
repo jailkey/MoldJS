@@ -61,7 +61,7 @@ Seed({
 		this.addNode = function(child, addAttribute){
 			
 			if(!addAttribute){
-				_vDom.push(child);
+				this.vdom.push(child);
 			}
 			
 			child.parent = _that;
@@ -205,7 +205,6 @@ Seed({
 
 
 		this.setData = function(data){
-			
 			
 			if(typeof this.data === "string" && this.data === data){
 				this.state = STATE_NO_CHANGES;

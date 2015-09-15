@@ -116,6 +116,7 @@ Seed({
 								name : parts.name,
 								filter : parts.filter
 							});
+						
 							vDom.addNode(blockNode);
 							parentNode = vDom;
 							vDom = blockNode;

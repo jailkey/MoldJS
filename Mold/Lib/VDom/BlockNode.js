@@ -24,13 +24,13 @@ Seed({
 			this._id = Mold.getId();
 			this.referenceNode = _doc.createTextNode("");
 
+
 			var _oldRenderLength = 0;
 			var _oldDataLength = 0;
 			var that = this;
-
+			var undefined;
 			this.createRenderDom = function(index){
 				var i = 0, len = this.vdom.length;
-
 				for(; i < len; i++){
 					var selected = this.vdom[i];
 
@@ -130,8 +130,10 @@ Seed({
 
 			this.addListItem = function(index, data){
 
+
+
 				//if negativ block, remove all items
-				if(this.isNegative && this.renderDom.length){
+				if(this.isNegative && ((Mold.isArray(data) && data.length) || (data !== false && data !== undefined && data !== "show" ))){
 					this.changedItems = [];
 					var from = 0, len = this.renderDom.length;
 					this.children.splice(from, len);
@@ -238,7 +240,8 @@ Seed({
 				this.children.splice(index, 1);
 				this.renderDom.splice(index, 1);
 				this.removeList.push(index);
-				if(!this.isNegative && !this.children.length){
+				
+				if(this.isNegative && !this.children.length){
 					this.addListItem(0, "show")
 				}
 			}
@@ -253,8 +256,6 @@ Seed({
 				this.renderDom.splice(from, len);
 				var i = from;
 				var removeLen = from + len;
-
-
 
 				for(; i < removeLen; i++){
 					this.removeList.push(i);
@@ -399,7 +400,8 @@ Seed({
 				var newNode =  new BlockNode({
 					name : this.name,
 					data : this.data,
-					services : this.services
+					services : this.services,
+					isNegative : this.isNegative
 				});
 
 				for(var i = 0; i < this.vdom.length; i++){
@@ -484,7 +486,7 @@ Seed({
 			}
 
 			this.reRender = function(){
-
+				
 				//remove pointers
 				var y = 0, removeLen = this.removeList.length;
 				for(; y < removeLen; y++){

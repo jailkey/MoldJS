@@ -183,6 +183,7 @@ Seed({
 			});
 
 			it("tests another configuration", function(){
+				var templateTwoTree = false;
 				it("create new template with nested blocks", function(go){
 
 					templateTwo = new Template(function(){/*|
@@ -207,7 +208,7 @@ Seed({
 					|*/});
 
 					templateTwo.tree.then(function(tree){
-						console.log(tree)
+						templateTwoTree = tree;
 						if(!Mold.isNodeJS){
 							templateTwo.appendTo(document.body)
 						}else{
@@ -218,7 +219,7 @@ Seed({
 					})
 				});
 
-				it("add data with subblock ", function(){
+				it("add data with subblock ", function(done){
 					
 					var data = {
 						block : []
@@ -229,9 +230,10 @@ Seed({
 						for(var y = 0; y < 3; y++){
 							if(i !== 1){
 								subdata.push({
-									subitem : Math.random(),
+									subitem : (y === 2) ? "last" : Math.random(),
 									background : Color.randomColor()
 								});
+
 							}else{
 								subdata = false;
 							}
@@ -240,8 +242,40 @@ Seed({
 							subblock : subdata
 						})
 					}
-					console.log("data", data)
+			
 					templateTwo.setData(data);
+
+					templateTwo.on("renderd", function(e){
+						if(templateTwoTree.dom.children.block[0].children.length === 3){
+							expect(templateTwoTree.dom.children.block[0].children[2].subblock[0].children[2].subitem.data).toBe("last")
+							done();
+						}
+					})
+				})
+
+				it("add a model and some data", function(){
+					var modelTwo = new Mold.Lib.Model({
+						block : [ 
+							{
+								subblock : [
+									{
+										background : "string",
+										subitem : "string"
+									}
+								]
+							}
+						]
+					});
+
+					templateTwo.connect(modelTwo);
+
+					modelTwo.data.block.push({
+						subblock : [
+							{ background : Color.randomColor(), subitem : "one"},
+							{ background : Color.randomColor(), subitem : "two"},
+							{ background : Color.randomColor(), subitem : "three"},
+						]
+					})
 				})
 			});
 

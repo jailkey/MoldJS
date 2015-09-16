@@ -4,27 +4,28 @@ Seed({
 		include : [
 			"Mold.Lib.Event",
 			"Mold.Lib.Info"
-		]
+		],
+		test : "Mold.Test.Lib.Worker"
 	},
-	function(workerFunction, name, test){
+	function(workerFunction){
 		
 		Mold.mixin(this, new Mold.Lib.Event(this));
 		var that = this;
 
 		
-		
-		
 		if(Mold.Lib.Info.isSupported("blob") && Mold.Lib.Info.isSupported("url")){
 			var workerString = workerFunction.toString();
-			workerString = "onmessage = "+workerString;
+			workerString = "onmessage = function(incoming) { postMessage(" +workerString+"(incoming.data)); }";
 	 		var workerBlob = new Blob([workerString], { type : 'text/javascript' } );
 			var workerURL = URL.createObjectURL(workerBlob);
 			var worker = new Worker(workerURL);
 			worker.onmessage = function(e) {
-
+				console.log("on message", e)
 				that.trigger("message", e.data);
 			};
 			
+		}else{
+
 		}
 		
 			

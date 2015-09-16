@@ -5,7 +5,7 @@ Seed({
 		include : [
 			"Mold.Lib.Event",
 			"Mold.Lib.Controller",
-			//"Mold.Lib.CssParser",
+			"Mold.Lib.CssParser",
 			"Mold.Lib.Element",
 			"Mold.Lib.Info",
 			"Mold.Lib.DomObserver",
@@ -19,7 +19,7 @@ Seed({
 			_cache = {},
 			_events = {},
 			_events = new Mold.Lib.Event(_events);
-			//cssParser = new Mold.Lib.CssParser(document);
+			cssParser = new Mold.Lib.CssParser(document);
 
 		//Mold.mixin(this, new Mold.Lib.Event(this));
 			
@@ -327,7 +327,7 @@ Seed({
 				if(directive.at !== "style-property"){
 					return false;
 				}
-				//var elementStyles = cssParser.getElementsByStyleProperty(directive.name);
+				var elementStyles = cssParser.getElementsByStyleProperty(directive.name);
 			
 				Mold.each(elementStyles, function(selected){
 					
@@ -429,7 +429,7 @@ Seed({
 				case "class":
 					var elements = scope.getElementsByClassName(directive.name);
 					break;
-				/*
+				
 				case "style-property":
 					
 					var elementStyles = cssParser.getElementsByStyleProperty(directive.name),
@@ -441,7 +441,7 @@ Seed({
 						styleAttributes.push(selected.properties)
 					});
 
-					break;*/
+					break;
 				default:
 					break;
 			}
@@ -530,10 +530,10 @@ Seed({
 					_add(directive, scope, template);
 					
 				}else{
-					/*
+					
 					cssParser.at("ready", function(){
 						_add(directive, scope, template);
-					});*/
+					});
 				}
 			},
 			

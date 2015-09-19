@@ -20,7 +20,7 @@ Seed({
 					<h1 class="topic">Überschrift</h1>
 					<ul class="values" mold-name="mylist">
 						{{#block}}
-							<li style="background:{{color}}">{{i}} - {{value}}</li>
+							<li style="background:{{color}}" export="list">{{i}} - {{value}}</li>
 						{{/block}}
 
 						{{^block}}
@@ -39,6 +39,7 @@ Seed({
 					}
 					go();
 				})
+
 			});
 
 	//model data

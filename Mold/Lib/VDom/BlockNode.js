@@ -459,7 +459,6 @@ Seed({
 					//if items does not change, copy pointer
 					if(!~this.changedItems.indexOf(i)){
 						if(this.pointer[i]){
-				
 							for(; y < subLen; y++){
 								this.domPointer.appendChild(this.pointer[i][y]);
 							}
@@ -501,7 +500,7 @@ Seed({
 				
 
 				for(; i < len; i++){
-					//if items does not change, copy pointer
+					//if items has not change, copy pointer
 					if(!~this.changedItems.indexOf(i)){
 
 						if(this.children[i]){

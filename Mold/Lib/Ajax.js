@@ -54,7 +54,7 @@
 
 			},
 
-			del : function(){
+			delete : function(){
 
 			},
 		

@@ -102,6 +102,7 @@ Seed({
 				if(!this.domPointer){
 					this.domPointer = _doc.createElement(this.name);
 					this.domPointer.moldTemplate = this.services.template;
+					this.domPointer.templatePointer = this;
 					created = true;
 				}
 

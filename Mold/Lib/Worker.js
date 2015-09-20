@@ -20,7 +20,6 @@ Seed({
 			var workerURL = URL.createObjectURL(workerBlob);
 			var worker = new Worker(workerURL);
 			worker.onmessage = function(e) {
-				console.log("on message", e)
 				that.trigger("message", e.data);
 			};
 			

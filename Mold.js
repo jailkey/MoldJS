@@ -525,7 +525,7 @@ var Mold = (function(config){
 * @methode trim
 * @public
 * @param (String) phrase - string with leading and ending whitespaces
-* @retrun (String) - returns a String without leading and ending whitespaces
+* @return (String) - returns a String without leading and ending whitespaces
 */
 
 		trim : function(phrase){
@@ -1128,7 +1128,7 @@ var Mold = (function(config){
 			return this;
 		},
 /**
- * This callback is displayed as part of the Requester class.
+ * @description This callback is displayed as part of the Requester class.
  * @callback onlogCallback
  * @param {String} type The type of the logmessage, default it can be "Error", "Info", or "Debug"
  * @param {String|Object} message The errormessage, if the logtype is "Error" it will be an object 
@@ -1462,7 +1462,6 @@ var Mold = (function(config){
 * @param (loadScriptError) error  - Expects a callback to be executed if there is a loading error
 */
 		loadScript : function(path, success, error, seedConf){
-	
 			if(_isNodeJS){
 				
 				var nodePath = require('fs'),
@@ -1575,6 +1574,7 @@ var Mold = (function(config){
 * @return (Object) A loader Object it offers a "loaded" eventlistener 
 **/
 	load : function(seed){
+		
 		var rule = Mold.getLoadingRule(seed);
 
 		if(!rule){
@@ -1795,7 +1795,7 @@ var Mold = (function(config){
 * @methode wrap
 * @desc Wraps a Class with a second constructor, so you can execute methods in the scope of the targetclass
 * @param (Class) targetClass - Expects the class will be wraped
-* @param (Function) wrappingMethode - Expects the method will be executed, as parameter the scope of the instance will transfered
+* @param (Function) wrappingMethode - Expects the method that will be executed, as parameter the scope of the instance will transfered
 * @return (Class) wrapperClass - Returns a new Class that wrapped the target class
 **/
 		wrap : function(targetClass, wrappingMethode){

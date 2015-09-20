@@ -1,7 +1,10 @@
 "use strict";
 Seed({
 		name : "Mold.Lib.VDom.BlockNode",
-		dna : "static"
+		dna : "static",
+		include : [
+			"Mold.Lib.VDom.ProtoNode"
+		]
 	},
 	function(){
 

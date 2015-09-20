@@ -1,6 +1,9 @@
 Seed({
 		name : "Mold.Lib.VDom.DomNode",
 		dna : "static",
+		include : [
+			"Mold.Lib.VDom.ProtoNode"
+		]
 	},
 	function(){
 

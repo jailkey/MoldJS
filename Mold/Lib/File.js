@@ -5,7 +5,8 @@ Seed({
 		platform : "isomorph",
 		include : [
 			"Mold.Lib.Ajax",
-			"Mold.Lib.Event"
+			"Mold.Lib.Event",
+			"Mold.Lib.Path"
 		]
 	},
 	function(filepath){
@@ -17,7 +18,11 @@ Seed({
 
 		if(Mold.isNodeJS){
 			var fs = require("fs");
-			var path = Mold.LOCAL_REPOSITORY + filepath;
+			if(Mold.Lib.Path.isAbsolute(filepath)){
+				var path = filepath;
+			}else{
+				var path = Mold.LOCAL_REPOSITORY + filepath;
+			}
 			if(fs.existsSync(path)){
 				fs.readFile(path, 'utf8', function (error, data) {
 		

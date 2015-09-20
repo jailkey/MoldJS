@@ -277,7 +277,8 @@ Seed({
 				}
 			});
 			if(command){
-				_that.trigger('command', { command : command, parameter : params})
+				//_that.trigger('command', { command : command, parameter : params });
+				doCommand({ command : command, parameter : params })
 			}
 		}
 
@@ -297,10 +298,26 @@ Seed({
 			console.log(help + "\n")
 		}
 
+		function doCommand(data){
+			var commandObject = _getCommand(data.command);
+			
+			if(!commandObject){
+				cliInterface.showError("command '" + data.command + "' not found!");
+				return;
+			}
 
+			if(Mold.is(data.parameter.help)){
+				_getCommandHelp(commandObject);
+				return;
+			}
+
+			commandObject.execute.call(Mold, data.parameter, cliInterface);
+		}
+
+		/*
 		_that.on('command', function(e){
 			var commandObject = _getCommand(e.data.command);
-
+			
 			if(!commandObject){
 				cliInterface.showError("command '" + e.data.command + "' not found!");
 				return;
@@ -313,14 +330,18 @@ Seed({
 
 			commandObject.execute.call(Mold, e.data.parameter, cliInterface);
 			//console.log("e", e.data.command, e.data.parameter)
-		})
+		})*/
 
 		var fileSystem = require('fs');
 		
 		setTimeout(function(){
+			//console.log("Mold.LOCAL_REPOSITORY", Mold.LOCAL_REPOSITORY)
 			Mold.load({ name : "->Mold.CLI._"}).bind(function(){
+
 				if(fileSystem.existsSync(pathes.normalize(Mold.LOCAL_REPOSITORY + "Mold/CLI/_.js"))){
+
 					Mold.load({ name : "Mold.CLI._", overwrite : true }).bind(function(){
+						console.log("init")
 						init();
 					});
 				}else{
@@ -337,7 +358,7 @@ Seed({
 		 * @param  {object} parameter command parameter
 		 */
 			executeCommand : function(command, parameter){
-
+				console.log("exe command")
 				var commandObject = _getCommand(command);
 
 				if(!commandObject){

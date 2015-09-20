@@ -2189,7 +2189,7 @@ Mold.addDNA({
 }());
 
 Mold.onlog(function(type, test){
-	//console.log(type, test);
+	console.log(type, test);
 });
 
 

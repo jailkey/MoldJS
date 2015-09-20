@@ -15,7 +15,7 @@ Seed({
 					if(as && ~as.indexOf(".")){
 						var asParts = as.split(".");
 						var collected = "";
-						before = "var "
+						before = "var ";
 						for(var i = 0; i < asParts.length - 1; i++){
 							before += collected + asParts[i] + " = " + collected + asParts[i] + " || {};\n";
 							collected += collected + asParts[i] + ".";
@@ -23,7 +23,11 @@ Seed({
 					}
 					
 				}
-				var seed = Mold.getRawSeed(Mold.trim(contents)).func;
+				
+				var seed;
+				if(Mold.getRawSeed(Mold.trim(contents))){
+					seed = Mold.getRawSeed(Mold.trim(contents)).func;
+				}
 	
 				if(typeof seed === "function"){
 					if(as){

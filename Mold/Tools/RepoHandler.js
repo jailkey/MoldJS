@@ -52,6 +52,7 @@ Seed({
 		this.publics = {
 			eachSeed : function(iterator){
 				var path = repoPath;
+
 				if(!Mold.endsWith(path, "Mold/")){
 					path += "/Mold/"
 				}

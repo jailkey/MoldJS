@@ -1217,6 +1217,7 @@ var Mold = (function(config){
 			clearTimeout(this.checkSeedCueTimer)
 			setTimeout(function(){
 				var seedCue = Mold.cue.getType("seed");
+
 				for(var name in seedCue){
 					Mold.addSeed(seedCue[name]);
 				}
@@ -1241,17 +1242,19 @@ var Mold = (function(config){
 
 		cleanSeedNameCache : {},
 		cleanSeedName : function(seedName, parent){
-			if(this.cleanSeedNameCache[seedName + parent]){
-				return this.cleanSeedNameCache[seedName + parent];
+
+			var parentName = (parent) ? parent.name || "" : "" ;
+
+			if(this.cleanSeedNameCache[seedName + parentName]){
+				//return this.cleanSeedNameCache[seedName + parentName];
 			}
 
 			var cleaner = Mold.cue.getType("seednamecleaner");
 			for(var name in cleaner){
 				var oldName = seedName;
 				seedName = cleaner[name].call(null, seedName, parent);
-				this.cleanSeedNameCache[oldName + parent.name] = seedName;
+				this.cleanSeedNameCache[oldName + parentName] = seedName;
 			}
-
 			return seedName;
 		},
 		
@@ -1299,24 +1302,24 @@ var Mold = (function(config){
 					var loadingproperties = Mold.getLoadingproperties();
 					var startCreating = true;
 					seed.imports = seed.imports || [];
+					
 					Mold.each(loadingproperties, function(property){
-				
 						
 						if(seed[property]){
 							seed.imports = seed.imports.concat(_getImports(seed[property]));
 							seed[property] = _removeImports(seed[property]);
 
 							if(typeof seed[property] === "object"){
-								startCreating = _areSeedsAdded(seed[property], seed);
 
+								startCreating = _areSeedsAdded(seed[property], seed);
+							
 								if(!startCreating){
 									Mold.each(seed[property], function(element){
 										if(Mold.isArray(element)){
 											seed[property] = _loadSubSeeds(seed[property], seed.name);
 										}else{
-											if(!_Mold[element]){
-
-												Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false, parent : seed });
+											if(!_Mold[element] || _Mold[seed.name].overwrite){
+												Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false, parent : seed, overwrite : _Mold[seed.name].overwrite });
 											}
 										}
 									});
@@ -1324,14 +1327,14 @@ var Mold = (function(config){
 							}else{
 
 								startCreating = _isSeedAdded(Mold.cleanSeedName(seed[property], seed));
-
+								
 								if(!startCreating){
-									Mold.load({ name : seed[property], isExternal : _externalSeeds[seed.name] || false, parent : seed });
+									Mold.load({ name : seed[property], isExternal : _externalSeeds[seed.name] || false, parent : seed, overwrite : _Mold[seed.name].overwrite});
 								}
 							}
 						}
 					});
-
+					
 					//If the seed has to wait for the DNA a callback will be added
 					if(startCreating){
 						if(typeof Mold.getDNA(seed.dna).wait === "function"){
@@ -1354,7 +1357,6 @@ var Mold = (function(config){
 				if(seed.onlog){
 					Mold.onlog(seed.onlog);
 				}
-
 				if(startCreating){
 				
 					if(Mold.getDNA(seed.dna).create){
@@ -1395,7 +1397,14 @@ var Mold = (function(config){
 									}
 								
 									Mold.log("Info", _seedLoadingCounter + ". Seed " + seed.name + " loaded!");
-									_seedLoadingCounter++;	
+									_seedLoadingCounter++;
+
+									//Remove from seedcue
+									
+									if(Mold.cue.get("seed", seed.name)){
+										Mold.cue.remove("seed", seed.name);
+									}
+
 									//check if registerd
 									if(!_Mold[seed.name]){
 										if(_config.debug){
@@ -1412,10 +1421,7 @@ var Mold = (function(config){
 									if(_Mold[seed.name]){
 										_Mold[seed.name].isLoaded = true;
 									}
-									//Remove from seedcue
-									if(Mold.cue.get("seed", seed.name)){
-										Mold.cue.remove("seed", seed.name);
-									}
+									
 
 									Mold.checkSeedCue();
 
@@ -1425,6 +1431,7 @@ var Mold = (function(config){
 							}
 						
 						}else{
+
 							Mold.checkSeedCue();
 						}
 					}
@@ -1469,16 +1476,17 @@ var Mold = (function(config){
 					pathStart = path.substring(0, 2);
 
 				if(pathStart !== "./" && pathStart !== ".." && path.substring(0, 1) !== "/"){
-					path = "./"+path;
+					path = "./" + path;
 				}
+
 				if(nodePath.existsSync(pathes.normalize(path))){
 					_pathes[seedConf.seedName] = pathes.normalize(path);
 
 					if(seedConf.overwrite){
+
 						var name = require.resolve(pathes.normalize(path));
 						delete require.cache[name];
 					}
-					
 					var testMold = require(pathes.normalize(path));
 					
 				}else{
@@ -2170,7 +2178,6 @@ Mold.addDNA({
 		global.Mold = Mold;
 		Mold.ready(function(){
 			var mainScript = Mold.getMainScript();
-
 			if(mainScript){
 				Mold.load({ name : mainScript });
 			}
@@ -2184,6 +2191,7 @@ Mold.addDNA({
 Mold.onlog(function(type, test){
 	//console.log(type, test);
 });
+
 
 if(Mold.isNodeJS){
 	module.exports = Mold;

@@ -18,8 +18,8 @@ Seed(
 	},
 	function(node, element, collection, component){
 
-
 		//create template
+		//#1
 		var template = new Mold.Lib.Template(function(){
 			/*|
 				<ul class="todo-list">
@@ -41,7 +41,7 @@ Seed(
 				</div>
 			|*/
 		});
-
+		///#1
 
 		//create model for data
 		var model = new Mold.Lib.Model({

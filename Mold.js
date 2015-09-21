@@ -473,8 +473,8 @@ var Mold = (function(config){
 	/**
 	 * @method getDependencies
 	 * @description returns all Depencies from a seed header in a list
-	 * @param  {[type]} header [description]
-	 * @return {[type]}        [description]
+	 * @param  {object} header a seed header with an include property
+	 * @return {void}
 	 */
 		getDependencies : function(header){
 
@@ -605,7 +605,7 @@ var Mold = (function(config){
  * @namespace Mold
  * @method eachShift
  * @description iterates through an array and remove the selected item until the array is empty
- * @param  {array}   collection the array
+ * @param {array} collection the array
  * @param  {function} callback  method will called on each entry, given paramter is the entry value           
  */
 	eachShift : function(collection, callback){
@@ -807,7 +807,7 @@ var Mold = (function(config){
  * @namespace Mold
  * @method is
  * @description test if a variable is defined
- * @param  {mixed}  value 
+ * @param {mixed} value 
  * @return {Boolean}       
  */
 		is : function(value){
@@ -2189,7 +2189,7 @@ Mold.addDNA({
 }());
 
 Mold.onlog(function(type, test){
-	console.log(type, test);
+	//console.log(type, test);
 });
 
 

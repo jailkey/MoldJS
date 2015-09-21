@@ -59,28 +59,33 @@ Seed({
 					var i = 0, len = dom.length;
 
 					for(; i < len; i++){
+						//console.log(" dom[i]",  dom[i].type === BLOCK_NODE);
 						var selectedName = dom[i].name;
-
-						if(selectedName === name){
-							if(all){
-								result.push(dom[i]);
-							}else{
-								return dom[i];
-							}
-						}else{
-							var subResult = this.findChild(name, dom[i].vdom, all);
-
-							if((!subResult || all)  && dom[i].attributes){
-								subResult = (all) ? subResult.concat(this.findChild(name, dom[i].attributes, all)) : this.findChild(name, dom[i].attributes, all);
-							}
-							if(subResult){
+						
+							if(selectedName === name){
 								if(all){
-									result = result.concat(subResult)
+									result.push(dom[i]);
 								}else{
-									return subResult;
+									return dom[i];
+								}
+							}else{
+								if(dom[i].type !== BLOCK_NODE){
+									var subResult = this.findChild(name, dom[i].vdom, all);
+
+									if((!subResult || all) && dom[i].attributes){
+										subResult = (all) ? subResult.concat(this.findChild(name, dom[i].attributes, all)) : this.findChild(name, dom[i].attributes, all);
+									}
+									if(subResult){
+										if(all){
+											result = result.concat(subResult)
+										}else{
+											return subResult;
+										}
+									}
+
 								}
 							}
-						}
+						
 					}
 				}else{
 
@@ -93,16 +98,17 @@ Seed({
 								return dom[selected];
 							}
 						}else{
-
-							var subResult = this.findChild(name, dom[selected].vdom, all);
-							if((!subResult || all) && dom[selected].attributes){
-								subResult = (all) ? subResult.concat(this.findChild(name, dom[selected].attributes, all)) : this.findChild(name, dom[selected].attributes, all);
-							}
-							if(subResult){
-								if(all){
-									result = result.concat(subResult)
-								}else{
-									return subResult;
+							if(dom[i].type !== BLOCK_NODE){
+								var subResult = this.findChild(name, dom[selected].vdom, all);
+								if((!subResult || all) && dom[selected].attributes){
+									subResult = (all) ? subResult.concat(this.findChild(name, dom[selected].attributes, all)) : this.findChild(name, dom[selected].attributes, all);
+								}
+								if(subResult){
+									if(all){
+										result = result.concat(subResult)
+									}else{
+										return subResult;
+									}
 								}
 							}
 						}
@@ -185,7 +191,7 @@ Seed({
 					'.' : data,
 					'+' : index
 				}
-				
+
 				this.setListItems(data, index);
 				this.setListItems(specialData, index);
 
@@ -194,6 +200,7 @@ Seed({
 			}
 
 			this.setListItems = function(data, index){
+
 				for(var name in data){
 					var selected = (that.children[index]) ? that.children[index][name] : false;
 					if(selected){
@@ -212,6 +219,7 @@ Seed({
 
 			this.setListItemValue = function(selected, index, data, name){
 				if(selected){
+					
 					//Handle pointers
 					if(selected.isPointer){
 						selected.setData(data);
@@ -279,7 +287,6 @@ Seed({
 
 
 			this.onSetData = function(data){
-
 				for(var filterName in this.filter){
 					var filter = Mold.Lib.Filter.get(filterName);
 					if(filter){
@@ -556,7 +563,7 @@ Seed({
 
 				var i = 0, len = this.renderDom.length;
 				var output = "";
-
+	
 				for(; i < len; i++){
 					var selected = this.renderDom[i];
 					var y = 0, subLen = selected.length;

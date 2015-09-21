@@ -26,6 +26,7 @@ Seed({
 		var _newDoc = Doc;
 		var _doc = _dom.get();
 		var _template = [];
+		var undefined;
 
 		var BLOCK_START = "{{#";
 		var BLOCK_NEGATIV = "{{^";
@@ -158,12 +159,11 @@ Seed({
 						}
 
 						//Standard text
-						if(Mold.trim(selected.nodeValue)){
+						if(selected.nodeValue !== undefined && selected.nodeValue !== null && selected.nodeValue !== false){
 							var textNode = new TextNode({
 								name : "Text" + Mold.getId(),
 								data : selected.nodeValue
 							});
-
 							vDom.addNode(textNode);
 						}
 

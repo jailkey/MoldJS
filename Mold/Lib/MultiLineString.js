@@ -67,7 +67,7 @@ Seed({
 					return templateVars[prop] || "";
 				});
 			}
-
+		
 			return output;
 		}
 	}

@@ -261,7 +261,8 @@ Seed({
 
 		return {
 			parse : function(markup){
-				return _parse(markup)
+				var parsed = _parse(markup);
+				return parsed;
 			}
 		}
 		

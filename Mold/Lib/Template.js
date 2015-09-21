@@ -1,3 +1,10 @@
+/**
+ * @description creates a template
+ * @author Jan Kaufmann <jan@moldjs.de>
+ * @version 0.3.0
+ * @example examples/simple_todo/Mold/Main.js#1
+ */
+
 Seed({
 		name : "Mold.Lib.Template",
 		dna : "class",
@@ -243,6 +250,12 @@ Seed({
 					
 				});
 			},
+			
+		/**
+		 * @method setData
+		 * @description set the template data
+		 * @param {object} data expects the object data
+		 */
 			setData : function(data){
 				_templateTree.then(function(tree){
 					tree.dom.setData(data);

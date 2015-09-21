@@ -39,6 +39,9 @@ Seed({
 
 			this.renderString = function(){
 				this.state = STATE_NO_CHANGES;
+				if(this.data === null || this.data === false){
+					return "";
+				}
 				return this.data;
 			}
 

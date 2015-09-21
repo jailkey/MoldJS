@@ -127,9 +127,11 @@ Seed({
 
 		this.onSetData = function(data){
 
-				//set children to false if no data is given
+			//set children to false if no data is given
 			for(var name in this.children){
+
 				if(Mold.isArray(this.children[name])){
+
 					var len = this.children[name].length, i = 0;
 					for(; i < len; i++){
 						var selected = this.children[name][i];
@@ -163,6 +165,7 @@ Seed({
 							this.children[name].setData(false);
 						}
 					}else{
+
 						var selected = this.children[name];
 						if(selected.hasParentValue && data[selected.parentName] &&  data[selected.parentName][selected.childName]){
 							selected.setData(data[selected.parentName][selected.childName]);

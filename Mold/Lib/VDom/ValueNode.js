@@ -33,6 +33,7 @@ Seed({
 			}
 
 			this.onSetData = function(data){
+
 				if(Mold.isObject(data)){
 					this.data = data[this.name]
 				}
@@ -47,6 +48,7 @@ Seed({
 						this.data = filter(this.data, this.filter[filterName]);
 					}
 				}
+
 			}
 
 			this.clone = function(){
@@ -78,7 +80,12 @@ Seed({
 			}
 
 			this.renderString = function(){
-				return this.data;
+				var output = this.data;
+				
+				if(output === false || output === null){
+					output = "";
+				}
+				return output;
 			}
 
 			this.setDataAndRender = function(data){

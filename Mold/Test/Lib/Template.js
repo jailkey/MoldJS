@@ -183,7 +183,7 @@ Seed({
 
 			});
 
-			it("tests another configuration", function(){
+			xit("tests another configuration", function(){
 				var templateTwoTree = false, modelTwo = false;
 				it("create new template with nested blocks", function(go){
 
@@ -293,6 +293,149 @@ Seed({
 				});
 			});
 
+
+			it("tests a template with nested propertys with the same name and without html", function(){
+				var templateTwoTree = false, modelTwo = false;
+				it("create a really big new template", function(){
+
+					templateTwoTree = new Template(function(){/*|
+							#{{name}}
+							---------------------------------------
+
+							file: {{url}}  
+							dna: {{dna}}
+					
+							{{#author}}author: {{author}}{{/author}}
+							{{#version}}version: {{version}}{{/version}}
+							{{#description}}
+								{{description}}
+							{{/description}}
+							
+							###Dependencies
+							{{#include}}
+							* [{{name}}]({{path}}.md) {{/include}}
+							
+							###Methods
+							{{#methods}}
+							#####{{name}}
+								{{description}}  
+							Defined in row: {{line}}   
+							Arguments: {{^parameter}}no{{/parameter}}
+							{{#parameter}}
+							* __{{name}}__ (_{{type}}_) - {{description}} {{/parameter}}
+							{{#return}}returns: {{return}}{{/return}}
+							{{/methods}}
+
+							###Properties
+							{{#properties}}
+							#####{{name}}
+								{{description}}  
+							Defined in row: {{line}}  
+							{{#return}}returns: {{return}}{{/return}}
+							{{/properties}}
+
+							###Objects
+							{{#objects}}
+							#####{{name}}
+							Defined in row: {{line}}  
+							Parameter: {{^parameter}}no{{/parameter}}
+							{{#parameter}}
+							* __{{paraname}}__ (_{{type}}_) - description: {{description}}
+							{{/parameter}}
+							returns: {{return}}
+							{{/objects}}
+					|*/}, { renderAsString : true});
+
+					
+				});
+
+				it("add data", function(go){
+					var data = {
+						"name": "Mold.Lib.Template",
+						"url": "/Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Template.js",
+						"parts": [],
+						"properties": [],
+						"methods": [
+							{
+								"parameter": [],
+								"private": true,
+								"public": false,
+								"property": false,
+								"object": false,
+								"method": true,
+								"module": false,
+								"name": "_connector",
+								"description": "collection of methods to bind a model to the template",
+								"type": "{Object}",
+								"line": 74
+							},
+							{
+								"name": "setData",
+								"description": "set the template data",
+								"parameter": [
+									{
+										"name": "data",
+										"type": "object",
+										"description": "expects the object data"
+									}
+								],
+								"private": false,
+								"public": false,
+								"property": false,
+								"object": false,
+								"method": true,
+								"module": false,
+								
+								"line": 251
+							}
+						],
+						"objects": [],
+						"dna": "class",
+						"test": "Mold.Test.Lib.Template",
+						"include": [
+							{
+								"name": "Mold.Lib.VDom.Builder",
+								"path": "../../Mold/Lib/VDom/Builder"
+							},
+							{
+								"name": "Mold.Lib.Ajax",
+								"path": "../../Mold/Lib/Ajax"
+							},
+							{
+								"name": "Mold.Lib.MultiLineString",
+								"path": "../../Mold/Lib/MultiLineString"
+							},
+							{
+								"name": "Mold.Lib.Path",
+								"path": "../../Mold/Lib/Path"
+							},
+							{
+								"name": "Mold.Lib.Promise",
+								"path": "../../Mold/Lib/Promise"
+							},
+							{
+								"name": "Mold.Lib.Event",
+								"path": "../../Mold/Lib/Event"
+							}
+						],
+						"browserInclude": [
+							"Mold.Lib.VDom.Builder",
+							[
+								".VDom.Components.MoldEvent",
+								".VDom.Components.MoldCaptureForms"
+							]
+						]
+					}
+					templateTwoTree.on("renderd", function(e){
+						console.log("e", e.data.tree)
+					})
+
+					templateTwoTree.getString(data).then(function(data){
+						console.log("data", data)
+						go()
+					})
+				});
+			});
 
 		});
 	}

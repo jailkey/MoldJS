@@ -58,8 +58,8 @@ Seed({
 					block : "show"
 				}
 				secondResult.dom.setData(data);
-				expect(secondResult.dom.children.block[0].renderDom.length).toBe(1);
-				expect(secondResult.dom.children.block[1].renderDom.length).toBe(0);
+				expect(secondResult.dom.children.block[0].renderDom.length).toBe(0);
+				expect(secondResult.dom.children.block[1].renderDom.length).toBe(1);
 			});
 
 			it("render block", function(){

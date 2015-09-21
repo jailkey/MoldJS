@@ -65,16 +65,23 @@ Seed({
 				var i = 0, len = nameParts.length;
 
 				for(; i < len; i++){
-					
-					var filterParts = nameParts[i].split(',');
-					var y = 1, paramLength = filterParts.length;
-					var filterName = filterParts[0];
+					if(~nameParts[i].indexOf("(")){
+						var filterName = nameParts[i].substring(0, nameParts[i].indexOf("("))
+						var expression = nameParts[i].substring(nameParts[i].indexOf("(") + 1, nameParts[i].lastIndexOf(")"));
+						filter[filterName] = {
+							expression : expression
+						};
+					}else{
+						var filterParts = nameParts[i].split(':');
+						var y = 1, paramLength = filterParts.length;
+						var filterName = filterParts[0];
 
-					filter[filterName] = {};
+						filter[filterName] = {};
 
-					for(; y < paramLength; y++){
-						var paramParts = filterParts[y].split(":");
-						filter[filterName][paramParts[0]] = (paramParts[1]) ? paramParts[1] : true;
+						for(; y < paramLength; y++){
+							var paramParts = filterParts[y].split("=");
+							filter[filterName][paramParts[0]] = (paramParts[1]) ? paramParts[1] : true;
+						}
 					}
 				}
 			}
@@ -117,7 +124,7 @@ Seed({
 								name : parts.name,
 								filter : parts.filter
 							});
-						
+							console.log(vDom.name, "add", parts.name)
 							vDom.addNode(blockNode);
 							parentNode = vDom;
 							vDom = blockNode;

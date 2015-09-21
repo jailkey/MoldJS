@@ -98,7 +98,7 @@ Seed({
 								return dom[selected];
 							}
 						}else{
-							if(dom[i].type !== BLOCK_NODE){
+							if(dom[selected].type !== BLOCK_NODE){
 								var subResult = this.findChild(name, dom[selected].vdom, all);
 								if((!subResult || all) && dom[selected].attributes){
 									subResult = (all) ? subResult.concat(this.findChild(name, dom[selected].attributes, all)) : this.findChild(name, dom[selected].attributes, all);
@@ -287,10 +287,22 @@ Seed({
 
 
 			this.onSetData = function(data){
+
+				if(typeof data === "string"){
+					var newData = {};
+					newData[this.name] = data;
+					data = newData;
+					this.data = data;
+				}
+
+
 				for(var filterName in this.filter){
 					var filter = Mold.Lib.Filter.get(filterName);
 					if(filter){
-						this.data[this.name] = filter(this.data[this.name], this.filter[filterName]);
+						var copy = Mold.mixin({}, data)
+						copy[this.name] = filter(copy[this.name], this.filter[filterName]);
+						this.data = copy;
+						data = copy;
 					}
 				}
 		
@@ -411,7 +423,8 @@ Seed({
 					name : this.name,
 					data : this.data,
 					services : this.services,
-					isNegative : this.isNegative
+					isNegative : this.isNegative,
+					filter : Mold.mixin({}, this.filter)
 				});
 
 				for(var i = 0; i < this.vdom.length; i++){

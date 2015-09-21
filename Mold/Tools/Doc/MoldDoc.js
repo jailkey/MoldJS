@@ -3,11 +3,14 @@ Seed({
 		dna : "class",
 		include : [
 			{ File : "Mold.Lib.File" },
-			{ Promise : "Mold.Lib.Promise" }	
+			{ Promise : "Mold.Lib.Promise" },
+			{ PathLib : "Mold.Lib.Path" }
 		],
 		test : "Mold.Test.Tools.Doc.MoldDoc"
 	},
 	function(url){
+
+		var fs = require("fs");
 		
 		if(!url){
 			throw new Error("Url is not defined!");
@@ -28,11 +31,16 @@ Seed({
 			var output = {
 				name : false,
 				url : url,
-				parts : []
+				parts : [],
+				properties : [],
+				methods : [],
+				objects : []
 			};
 
 			if(!~url.indexOf("Mold.js")){
 				var header = _getSeedInfo(data);
+				header.include = _dissolveIncludes(header.include, header.name);
+				header.test = _addTestPath(header.test, header.name)
 				Mold.mixin(output, header);
 			}else{
 				output.name = "Mold";
@@ -46,8 +54,11 @@ Seed({
 			var comment = "";
 			var oldState = false;
 			var lineCounter = 1;
+			var undefined;
 
-			while(line){
+			
+			while(line !== undefined){
+
 				oldState = state;
 
 				if(~line.indexOf("/**")){
@@ -69,14 +80,26 @@ Seed({
 				}
 
 				//if state switch from comment to code add to comment collection:
-				if(oldState === STATE_IN_COMMENT && state !== STATE_IN_COMMENT){
+				if(
+					(oldState === STATE_IN_COMMENT && state !== STATE_IN_COMMENT)
+					|| (state !== STATE_IN_COMMENT && dataParts.length === 1)
+				){
 
 					var commentObject = _parseComment(comment.replace("/**", ""));
 					commentObject.line = lineCounter;
-					if(commentObject.modul){
+					if(commentObject.module){
 						Mold.mixin(output, commentObject);
 					}else{
-						output.parts.push(commentObject)
+						if(commentObject.method){
+							output.methods.push(commentObject);
+						}
+						if(commentObject.property){
+							output.properties.push(commentObject);
+						}
+						if(commentObject.object){
+							output.objects.push(commentObject);
+						}
+						//output.parts.push(commentObject)
 					}
 					comment = "";
 				}
@@ -84,8 +107,32 @@ Seed({
 				lineCounter++;
 				line = dataParts.shift();
 			}
-
+			console.log("output", output)
 			return output;
+		}
+
+		var _getExample = function(example){
+			var parts = example.split("#");
+			var filename = Mold.trim(parts[0]);
+			var ancor = "#" + Mold.trim(parts[1]);
+
+			if (PathLib.is(filename)) {
+				var file = fs.readFileSync(filename).toString();
+				var out = file.substring(file.indexOf("//"+ancor) + 4, file.indexOf("///"+ancor))
+				out = out.replace(/\r\n/g, "\n");
+				return {
+					path : filename,
+					code : out
+				};
+			}else{
+				return {
+					path : false,
+					code : example
+				};
+			}
+				
+			//var file = fs.readFileSync(filename);
+			
 		}
 
 		var _getAction = function(comment){
@@ -109,6 +156,45 @@ Seed({
 				output = Mold.trim(output.substring(1, output.length));
 			}
 			return Mold.trim(output);
+		}
+
+		var _dissolveIncludes = function(includes, targetName){
+			var output = [];
+			Mold.each(includes, function(part){
+				if(Mold.isObject(part) || Mold.isArray(part)){
+					output = output.concat(_dissolveIncludes(part, targetName))
+				}else{
+					var path = "";
+					var len = targetName.split(".").length -1;
+					for(var i = 0; i < len; i++){
+						path += "../";
+					}
+					if(Mold.startsWith(part, ".")){
+						part = targetName.split(".").splice(0, targetName.split(".").length - 1).join(".") + part
+					}
+					output.push({
+						name : part,
+						path : path + part.replace(/\./g, "/")
+					});
+				}
+			});
+			return output;
+		}
+
+		var _addTestPath = function(test, targetName){
+			if(!test){
+				return false;
+			}
+			var len = targetName.split(".").length -1;
+			var path = "";
+
+			for(var i = 0; i < len; i++){
+				path += "../";
+			}
+			return {
+				name : test,
+				path : path + test.replace(/\./g, "/")
+			}
 		}
 
 		var _convertType = function(type){
@@ -155,25 +241,29 @@ Seed({
 						case "method":
 						case "methode":
 							output['method'] = true;
+							output['partType'] = "method";
 							output['name'] = _getParameter(selected, 1).replace("\n", "");
 							break;
 						case "object":
 							output['object'] = true;
+							output['partType'] = "object";
 							output['name'] = _getParameter(selected, 1).replace("\n", "");
 							break;
 						case "property":
 							output['property'] = true;
+							output['partType'] = "property";
 							output['name'] = _getParameter(selected, 1).replace("\n", "");
 							break;
 						case "modul":
 						case "module":
 							output['module'] = true;
+							output['partType'] = "module";
 							output['name'] = _getParameter(selected, 1).replace("\n", "");
 							break;
 						case "param":
 						case "parameter":
 							output['parameter'].push({
-								name : _getParameter(selected, 2).replace("\n", ""),
+								paraname : _getParameter(selected, 2).replace("\n", ""),
 								type : _convertType(_getParameter(selected, 1).replace("\n", "")),
 								description : _getFrom(selected, 3)
 							});
@@ -203,7 +293,7 @@ Seed({
 							output['private'] = true;
 							break;
 						case "example":
-							output['example'] = Mold.trim(_getFrom(selected, 1));
+							output['example'] =_getExample( Mold.trim(_getFrom(selected, 1)));
 							break;
 						case "test":
 							output['test'] = Mold.trim(_getFrom(selected, 1));
@@ -235,7 +325,10 @@ Seed({
 					}
 				}
 			}
-
+			if(!output.partType){
+				output.partType = "module";
+				output.module = true;
+			}
 			return output;
 		}
 

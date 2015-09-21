@@ -23,7 +23,7 @@ Seed({
 			normalize : _normalize,
 			is : function(path){
 				if(typeof path === "string"){
-					if(this.isHTTP || this.isFile){
+					if(this.isHTTP(path) || this.isFile(this)){
 						return true;
 					}
 

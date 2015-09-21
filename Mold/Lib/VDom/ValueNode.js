@@ -56,7 +56,8 @@ Seed({
 					name : this.name,
 					data : this.data,
 					isString : this.isString,
-					services : this.services
+					services : this.services,
+					filter : Mold.mixin({}, this.filter)
 				});
 				return newNode;
 			}

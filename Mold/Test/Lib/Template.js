@@ -294,7 +294,7 @@ Seed({
 			});
 
 
-			it("tests a template with nested propertys with the same name and without html", function(){
+			xit("tests a template with nested propertys with the same name and without html", function(){
 				var templateTwoTree = false, modelTwo = false;
 				it("create a really big new template", function(){
 
@@ -333,7 +333,7 @@ Seed({
 							Defined in row: {{line}}  
 							{{#return}}returns: {{return}}{{/return}}
 							{{/properties}}
-
+					
 							###Objects
 							{{#objects}}
 							#####{{name}}
@@ -436,6 +436,64 @@ Seed({
 					})
 				});
 			});
+			
+
+			it("tests special template block filter", function(){
+				var templateFour = false;
+				it("create a new template with filter", function(){
+
+					templateFour = new Template(function(){/*|
+						
+						
+						
+						
+						{{#list|if(this.length === 3)|exists}}
+							if youhu lalal
+						{{/list}}
+						
+						{{#list|exists}}
+							<br>Liste existiert!
+						{{/list}}
+
+
+						{{#list}}
+							<div>
+								{{content}}
+
+								{{#content|case:red}}
+									RED GEFUNDEN
+								{{/content}}
+
+								
+							</div>
+						{{/list}}
+
+							
+					|*/});
+
+					templateFour.tree.then(function(tree){
+						if(!Mold.isNodeJS){
+							templateFour.appendTo(document.body)
+						}
+					})
+				})
+
+				it("add data to template", function(){
+
+					templateFour.on("renderd", function(e){
+						console.log("e", e)
+					})
+
+					templateFour.setData({
+						list : [
+							{ content :  "red" },
+							{ content :  "noch eint test" },
+							{ content :  "wieder ein test" }
+						]
+					})
+				})
+			})
+
 
 		});
 	}

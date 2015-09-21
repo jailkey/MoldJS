@@ -78,7 +78,9 @@ Seed({
 				if(this.type !== BLOCK_NODE){
 					if(this.children[child.name]){
 						//if there are two nodes with the same name create an array
-						this.children[child.name] = [this.children[child.name]]
+						if(!Mold.isArray(this.children[child.name])){
+							this.children[child.name] = [this.children[child.name]]
+						}
 						this.children[child.name].push(child); 
 					}else{
 						this.children[child.name] = child;
@@ -106,6 +108,7 @@ Seed({
 					if(!this.children[index]){
 						this.children[index] = {};
 					}
+
 					this.children[index][child.name] = child;
 				}
 			}

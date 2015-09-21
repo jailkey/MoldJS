@@ -5,6 +5,7 @@ Seed({
 	function(){
 
 		var _filter = {};
+		var undefined;
 
 		var _add = function(name, code){
 			_filter[name] = code;
@@ -53,6 +54,39 @@ Seed({
 				}
 			}
 			return data;
+		});
+
+		_add("exists", function(data, conf){
+			if(data !== undefined && data !== null && data !== false){
+				return true;
+			}else{
+				return false;
+			}
+			
+		})
+
+		_add("case", function(data, conf){
+			for(var prop in conf){
+				break;
+			}
+			if(data === prop){
+
+				return true;
+			}else{
+				return false;
+			}
+		})
+
+		_add("if", function(data, conf){
+			if(conf.expression){
+				conf.expression = conf.expression.replace(/this/g, "data");
+				if(eval(conf.expression)){
+					return data;
+				}
+				return false;
+			}else{
+				return true;
+			}
 		});
 
 		return {

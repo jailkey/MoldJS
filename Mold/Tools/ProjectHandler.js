@@ -335,6 +335,9 @@ Seed({
 			},
 			edit : function(property, value){
 
+			},
+			createDirPath : function(path){
+				return _createDir(path, path.split("/"));
 			}
 		}
 	}

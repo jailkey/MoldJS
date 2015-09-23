@@ -24,6 +24,17 @@ Seed({
 				return newNode;
 			}
 
+			this.onSetData = function(data){
+
+				if(Mold.isObject(data)){
+					this.data = data[this.name]
+				}
+
+				if(data === false || !Mold.is(data)){
+					this.data = "";
+				}
+			}
+
 			this.render = function(){
 
 				if(!this.domPointer){

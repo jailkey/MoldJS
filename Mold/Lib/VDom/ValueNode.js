@@ -22,10 +22,40 @@ Seed({
 
 			var that = this;
 
-			if(!this.isPointer && ~this.name.indexOf(".")){
-				this.hasParentValue = true;
-				this.parentName = config.name.split(".")[0];
-				this.childName = config.name.split(".")[1];
+			var _findParentBlock = function(node){
+				while(node.type !== BLOCK_NODE && node.type !== ROOT_NODE){
+				
+					node = node.parent;
+				}
+				
+				return node;
+			}
+
+			var newPath = [];
+			this.afterAddedToParent = function(){
+				var namePath = this.name;
+				if(!this.isPointer && ~this.name.indexOf(".")){
+					
+					var parts = namePath.split(".");
+					var registerNode = false;
+					
+
+					for(var i = 0; i < parts.length; i++){
+						if(parts[i] === "$parent"){
+							registerNode = registerNode.parent || this.parent;
+							registerNode = _findParentBlock(registerNode);
+
+						}else{
+							newPath.push(parts[i])
+						}
+					}
+
+					this.hasParentValue = true;
+					this.parentName = newPath[0];
+					if(registerNode){
+						registerNode.registerForSetData(this);
+					}
+				}
 			}
 
 			if(!this.isPointer && ~this.name.indexOf("+")){
@@ -34,6 +64,15 @@ Seed({
 
 			this.onSetData = function(data){
 
+				if(this.hasParentValue){
+					for(var i = 1; i < newPath.length; i++){
+						if(data[newPath[i]]){
+							data = data[newPath[i]];
+						}
+					}
+					this.data = data;
+				}
+				
 				if(Mold.isObject(data)){
 					this.data = data[this.name]
 				}

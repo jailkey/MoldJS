@@ -51,11 +51,24 @@ Seed({
 
 		this.vdom = _vDom;
 		this.protoChild = {};
+		this.registered = [];
 		
 		this.renderDom = false;
 
+
 		this.afterAddChild = function(child){
 
+		}
+
+		this.registerForSetData = function(child){
+			this.registered.push(child);
+		}
+
+		this.setDataToRegisterd = function(data){
+			var i = 0, len = this.registered.length;
+			for(; i < len; i++){
+				this.registered[i].setData(data[this.registered[i].parentName]);
+			}
 		}
 	
 		this.addNode = function(child, addAttribute){
@@ -114,6 +127,9 @@ Seed({
 			}
 
 			this.afterAddChild(child);
+			if(child.afterAddedToParent){
+				child.afterAddedToParent();
+			}
 			
 		}
 
@@ -130,6 +146,9 @@ Seed({
 
 		this.onSetData = function(data){
 
+			//set data to registerd
+			this.setDataToRegisterd(data);
+
 			//set children to false if no data is given
 			for(var name in this.children){
 
@@ -138,46 +157,46 @@ Seed({
 					var len = this.children[name].length, i = 0;
 					for(; i < len; i++){
 						var selected = this.children[name][i];
-
+						/*
 						if(selected.type === BLOCK_NODE){
 							//if type is a blocknode add parent data
 							if(data){
-								selected.setData(data);
+								selected.setData(data[name]);
 							}else{
 								selected.setData(false);
 							}
-						}else{
-							if(selected.hasParentValue && data[selected.parentName] &&  data[selected.parentName][selected.childName]){
-								selected.setData(data[selected.parentName][selected.childName]);
+						}else{*/
+							if(selected.hasParentValue && data[selected.parentName]){
+								selected.setData(data[selected.parentName]);
 							}else if(data[name]){
 								selected.setData(data[name]);	
 							}else{
-								selected.setData("");	
+								selected.setData(false);	
 							}
 							
 							
-						}
+						//}
 					}
 				}else{
-
+					/*
 					if(this.children[name].type === BLOCK_NODE){
 						//if type is a blocknode add parent data
 						if(data){
-							this.children[name].setData(data);
+							this.children[name].setData(data[name]);
 						}else{
 							this.children[name].setData(false);
 						}
 					}else{
-
+						*/
 						var selected = this.children[name];
-						if(selected.hasParentValue && data[selected.parentName] &&  data[selected.parentName][selected.childName]){
-							selected.setData(data[selected.parentName][selected.childName]);
+						if(selected.hasParentValue && data[selected.parentName]){
+							selected.setData(data[selected.parentName]);
 						}else if(data[name]){
 							this.children[name].setData(data[name]);
 						}else{
-							this.children[name].setData("");
+							this.children[name].setData(false);
 						}
-					}
+					//}
 					
 				}
 			}

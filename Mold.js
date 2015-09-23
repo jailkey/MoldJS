@@ -1773,6 +1773,33 @@ var Mold = (function(config){
 			}
 			return target;
 		},
+
+/**
+ * @method copy 
+ * @description copys an array or an object
+ * @param  {mixed} target the array or object to copy
+ * @return {mixed} returns a deep copy 
+ */
+		copy : function(target){
+			if(Mold.isArray(target)){
+				var output = [];
+				var i = 0, len = target.length;
+				for(; i < len; i++){
+					output.push(
+						(Mold.isObject(target[i]) || Mold.isArray(target[i]) ? Mold.copy(target[i]) : target[i])
+					);
+				}
+
+			}else if(Mold.isObject(target)){
+				var output = {};
+				for(var prop in target){
+					output[prop] = (Mold.isObject(target[prop]) || Mold.isArray(target[prop]) ? Mold.copy(target[prop]) : target[prop]);
+				}
+			}else{
+				var output = target;
+			}
+			return output;
+		},
 		
 /**
 * @methode getId

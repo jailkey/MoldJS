@@ -2,11 +2,13 @@
 #Mold.Lib.VDom.ValueNode
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/ValueNode.js  
-dna: static
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/ValueNode.js  
+__dna__: static  
 
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ dna: static
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

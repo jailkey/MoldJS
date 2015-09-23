@@ -2,11 +2,13 @@
 #Mold.Tools.Test.CLIReporter
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Test/CLIReporter.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Test/CLIReporter.js  
+__dna__: class  
 
 
 	
+
+
 
 
 
@@ -20,14 +22,19 @@ dna: class
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

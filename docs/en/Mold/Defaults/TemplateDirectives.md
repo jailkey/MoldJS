@@ -2,11 +2,13 @@
 #Mold.Defaults.TemplateDirectives
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Defaults/TemplateDirectives.js  
-dna: data
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Defaults/TemplateDirectives.js  
+__dna__: data  
 
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ dna: data
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

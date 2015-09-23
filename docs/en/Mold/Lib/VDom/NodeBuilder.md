@@ -2,11 +2,13 @@
 #Mold.Lib.VDom.NodeBuilder
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/NodeBuilder.js  
-dna: static
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/NodeBuilder.js  
+__dna__: static  
 
 
 	
+
+
 
 
 
@@ -25,14 +27,19 @@ dna: static
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

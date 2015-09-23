@@ -2,11 +2,13 @@
 #Mold.CLI.Project
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/CLI/Project.js  
-dna: cli
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/CLI/Project.js  
+__dna__: cli  
 
 
 	
+
+
 
 
 
@@ -22,14 +24,19 @@ dna: cli
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

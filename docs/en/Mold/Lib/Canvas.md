@@ -2,11 +2,13 @@
 #Mold.Lib.Canvas
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Canvas.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Canvas.js  
+__dna__: class  
 
 
 	
+
+
 
 
 
@@ -25,14 +27,19 @@ dna: class
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

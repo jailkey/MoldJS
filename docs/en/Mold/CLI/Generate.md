@@ -2,11 +2,13 @@
 #Mold.CLI.Generate
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/CLI/Generate.js  
-dna: cli
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/CLI/Generate.js  
+__dna__: cli  
 
 
 	
+
+
 
 
 
@@ -22,14 +24,19 @@ dna: cli
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

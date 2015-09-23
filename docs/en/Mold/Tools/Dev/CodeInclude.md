@@ -2,11 +2,13 @@
 #Mold.Tools.Dev.CodeInclude
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Dev/CodeInclude.js  
-dna: action
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Dev/CodeInclude.js  
+__dna__: action  
 
 
 	
+
+
 
 
 
@@ -20,14 +22,19 @@ dna: action
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

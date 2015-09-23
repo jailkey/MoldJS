@@ -2,12 +2,14 @@
 #Mold.Adapter.Rest
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Adapter/Rest.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Adapter/Rest.js  
+__dna__: class  
 
 
 	
 
+
+__extends__: Mold.Lib.Ajax  
 
 
 
@@ -20,14 +22,19 @@ dna: class
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

@@ -2,11 +2,13 @@
 #Mold.Lib.UrlRouter
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/UrlRouter.js  
-dna: class
-author: Jan Kaufmann
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/UrlRouter.js  
+__dna__: class  
+__author__: Jan Kaufmann  
 
 	
+
+
 
 
 
@@ -23,14 +25,19 @@ author: Jan Kaufmann
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

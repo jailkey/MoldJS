@@ -2,13 +2,15 @@
 #Mold.Lib.Promise
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Promise.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Promise.js  
+__dna__: class  
 
 
 	
 
-test: [Mold.Test.Lib.Promise](../../Mold/Test/Lib/Promise.md) 
+__test__: [Mold.Test.Lib.Promise](../../Mold/Test/Lib/Promise.md) 
+
+
 
 
 
@@ -22,14 +24,19 @@ test: [Mold.Test.Lib.Promise](../../Mold/Test/Lib/Promise.md)
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

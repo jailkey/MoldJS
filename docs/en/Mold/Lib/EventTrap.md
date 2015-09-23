@@ -2,11 +2,13 @@
 #Mold.Lib.EventTrap
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/EventTrap.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/EventTrap.js  
+__dna__: class  
 
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ dna: class
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

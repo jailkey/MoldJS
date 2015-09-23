@@ -2,11 +2,13 @@
 #Mold.Lib.Observer
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Observer.js  
-dna: static
-author: Jan Kaufmann
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Observer.js  
+__dna__: static  
+__author__: Jan Kaufmann  
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ author: Jan Kaufmann
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

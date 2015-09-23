@@ -2,11 +2,13 @@
 #Mold.Test.Lib.Sanitize
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Test/Lib/Sanitize.js  
-dna: test
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Test/Lib/Sanitize.js  
+__dna__: test  
 
 
 	
+
+
 
 
 
@@ -20,14 +22,19 @@ dna: test
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

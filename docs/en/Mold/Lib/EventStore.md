@@ -2,11 +2,13 @@
 #Mold.Lib.EventStore
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/EventStore.js  
-dna: static
-author: Jan Kaufmann
-version: 0.1
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/EventStore.js  
+__dna__: static  
+__author__: Jan Kaufmann  
+__version__: 0.1  
 	
+
+
 
 
 
@@ -20,14 +22,19 @@ version: 0.1
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

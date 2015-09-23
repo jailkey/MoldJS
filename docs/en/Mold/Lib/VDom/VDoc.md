@@ -2,11 +2,13 @@
 #Mold.Lib.VDom.VDoc
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/VDoc.js  
-dna: static
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/VDoc.js  
+__dna__: static  
 
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ dna: static
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

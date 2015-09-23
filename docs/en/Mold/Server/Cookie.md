@@ -2,11 +2,13 @@
 #Mold.Server.Cookie
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Cookie.js  
-dna: static
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Cookie.js  
+__dna__: static  
 
 
 	
+
+
 
 
 
@@ -20,14 +22,19 @@ dna: static
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

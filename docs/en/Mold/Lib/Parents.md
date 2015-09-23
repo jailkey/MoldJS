@@ -2,11 +2,13 @@
 #Mold.Lib.Parents
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Parents.js  
-dna: class
-author: Jan Kaufmann
-version: 0.1
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Parents.js  
+__dna__: class  
+__author__: Jan Kaufmann  
+__version__: 0.1  
 	
+
+
 
 
 
@@ -20,14 +22,19 @@ version: 0.1
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

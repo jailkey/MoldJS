@@ -2,11 +2,13 @@
 #Mold.CLI.Test
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/CLI/Test.js  
-dna: cli
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/CLI/Test.js  
+__dna__: cli  
 
 
 	
+
+
 
 
 
@@ -26,14 +28,19 @@ dna: cli
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

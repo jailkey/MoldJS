@@ -2,11 +2,13 @@
 #Mold.Lib.Color
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Color.js  
-dna: static
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Color.js  
+__dna__: static  
 
-version: 0.0.1
+__version__: 0.0.1  
 	
+
+
 
 
 
@@ -20,14 +22,19 @@ version: 0.0.1
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

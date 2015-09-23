@@ -2,11 +2,13 @@
 #Mold.Lib.HTMLEntitys
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/HTMLEntitys.js  
-dna: static
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/HTMLEntitys.js  
+__dna__: static  
 
 
 	
+
+
 
 
 
@@ -20,14 +22,19 @@ dna: static
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

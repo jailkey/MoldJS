@@ -2,13 +2,17 @@
 #Mold.Tools.SeedHandler
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/SeedHandler.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/SeedHandler.js  
+__dna__: class  
 
 
 	
 
 
+
+
+
+	creates a seed in the current dire
 
 
 ###Dependencies
@@ -24,32 +28,39 @@ dna: class
    
 ###Methods
 --------------
+ 
 
 #####info
 	returns infos about the given seed  
 Defined in row: 202   
-Arguments: 
+
 
 * __path__ (_string_) - path to the seed / seed code 
 * __fromCode__ (_boolean_) - if true, path will parsed as code string 
 
 
+
 #####infos
 	returns infos about a seed and it dependencies  
 Defined in row: 223   
-Arguments: 
+
 
 * __path__ (_string_) - the path to the seed. 
 * __seed__ (_string_) - name of the seed 
 
 
-   
+
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

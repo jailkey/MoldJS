@@ -2,11 +2,13 @@
 #Mold.CLI.Build
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/CLI/Build.js  
-dna: cli
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/CLI/Build.js  
+__dna__: cli  
 
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ dna: cli
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

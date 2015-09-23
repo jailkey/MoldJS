@@ -2,11 +2,13 @@
 #Mold.Tools.Debug.ComLog
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Debug/ComLog.js  
-dna: action
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Debug/ComLog.js  
+__dna__: action  
 
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ dna: action
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

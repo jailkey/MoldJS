@@ -2,13 +2,15 @@
 #Mold.Lib.VDom.StringParser
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/StringParser.js  
-dna: static
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/StringParser.js  
+__dna__: static  
 
 
 	
 
-test: [Mold.Test.Lib.VDom.StringParser](../../../Mold/Test/Lib/VDom/StringParser.md) 
+__test__: [Mold.Test.Lib.VDom.StringParser](../../../Mold/Test/Lib/VDom/StringParser.md) 
+
+
 
 
 
@@ -23,14 +25,19 @@ test: [Mold.Test.Lib.VDom.StringParser](../../../Mold/Test/Lib/VDom/StringParser
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

@@ -2,11 +2,13 @@
 #Mold.CLI.Install
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/CLI/Install.js  
-dna: cli
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/CLI/Install.js  
+__dna__: cli  
 
 
 	
+
+
 
 
 
@@ -24,14 +26,19 @@ dna: cli
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

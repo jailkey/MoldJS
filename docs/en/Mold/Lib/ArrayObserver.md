@@ -2,13 +2,15 @@
 #Mold.Lib.ArrayObserver
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/ArrayObserver.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/ArrayObserver.js  
+__dna__: class  
 
-version: 0.0.1
+__version__: 0.0.1  
 	
 
-test: [Mold.Test.Lib.ArrayObserver](../../Mold/Test/Lib/ArrayObserver.md) 
+__test__: [Mold.Test.Lib.ArrayObserver](../../Mold/Test/Lib/ArrayObserver.md) 
+
+
 
 
 
@@ -24,14 +26,19 @@ test: [Mold.Test.Lib.ArrayObserver](../../Mold/Test/Lib/ArrayObserver.md)
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

@@ -2,13 +2,15 @@
 #Mold.Lib.ObjectObserver
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/ObjectObserver.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/ObjectObserver.js  
+__dna__: class  
 
 
 	
 
-test: [Mold.Test.Lib.ObjectObserver](../../Mold/Test/Lib/ObjectObserver.md) 
+__test__: [Mold.Test.Lib.ObjectObserver](../../Mold/Test/Lib/ObjectObserver.md) 
+
+
 
 
 
@@ -23,14 +25,19 @@ test: [Mold.Test.Lib.ObjectObserver](../../Mold/Test/Lib/ObjectObserver.md)
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

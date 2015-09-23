@@ -2,13 +2,15 @@
 #Mold.Tools.Doc.HTML
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Doc/HTML.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Doc/HTML.js  
+__dna__: class  
 
 
 	
 
-test: [Mold.Test.Tools.Doc.HTML](../../../Mold/Test/Tools/Doc/HTML.md) 
+__test__: [Mold.Test.Tools.Doc.HTML](../../../Mold/Test/Tools/Doc/HTML.md) 
+
+
 
 
 
@@ -24,14 +26,19 @@ test: [Mold.Test.Tools.Doc.HTML](../../../Mold/Test/Tools/Doc/HTML.md)
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

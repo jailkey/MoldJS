@@ -1,12 +1,14 @@
 
-#Mold.Lib.Mongo
+#Mold.Lib.JSParser
 ---------------------------------------
 
-__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Mongo.js  
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/JSParser.js  
 __dna__: class  
 
 
 	
+
+__test__: [Mold.Test.Lib.JSParser](../../Mold/Test/Lib/JSParser.md) 
 
 
 
@@ -16,8 +18,6 @@ __dna__: class
 ###Dependencies
 --------------
 
-* [Mold.Lib.Event](../../Mold/Lib/Event.md) 
-* [Mold.Lib.Promise](../../Mold/Lib/Promise.md) 
 
 
 

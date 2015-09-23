@@ -2,11 +2,13 @@
 #Mold.DNA.SessionRouter
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/DNA/SessionRouter.js  
-dna: dna
-author: Jan Kaufmann
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/DNA/SessionRouter.js  
+__dna__: dna  
+__author__: Jan Kaufmann  
 
 	
+
+
 
 
 
@@ -22,14 +24,19 @@ author: Jan Kaufmann
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

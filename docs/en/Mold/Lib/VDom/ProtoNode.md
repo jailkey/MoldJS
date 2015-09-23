@@ -2,11 +2,13 @@
 #Mold.Lib.VDom.ProtoNode
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/ProtoNode.js  
-dna: data
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/ProtoNode.js  
+__dna__: data  
 
 
 	
+
+
 
 
 
@@ -23,14 +25,19 @@ dna: data
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

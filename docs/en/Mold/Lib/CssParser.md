@@ -2,11 +2,13 @@
 #Mold.Lib.CssParser
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/CssParser.js  
-dna: singelton
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/CssParser.js  
+__dna__: singelton  
 
 
 	
+
+
 
 
 
@@ -22,14 +24,19 @@ dna: singelton
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

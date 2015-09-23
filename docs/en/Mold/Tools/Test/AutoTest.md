@@ -2,11 +2,13 @@
 #Mold.Tools.Test.AutoTest
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Test/AutoTest.js  
-dna: action
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Test/AutoTest.js  
+__dna__: action  
 
 
 	
+
+
 
 
 
@@ -23,14 +25,19 @@ dna: action
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

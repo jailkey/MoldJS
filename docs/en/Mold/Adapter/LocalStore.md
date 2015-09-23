@@ -2,11 +2,13 @@
 #Mold.Adapter.LocalStore
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Adapter/LocalStore.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Adapter/LocalStore.js  
+__dna__: class  
 
 
 	
+
+
 
 
 
@@ -23,14 +25,19 @@ dna: class
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

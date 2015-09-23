@@ -2,13 +2,15 @@
 #Mold.Lib.DomNode
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/DomNode.js  
-dna: static
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/DomNode.js  
+__dna__: static  
 
 
 	
 
-test: [Mold.Test.Lib.DomNode](../../Mold/Test/Lib/DomNode.md) 
+__test__: [Mold.Test.Lib.DomNode](../../Mold/Test/Lib/DomNode.md) 
+
+
 
 
 
@@ -23,14 +25,19 @@ test: [Mold.Test.Lib.DomNode](../../Mold/Test/Lib/DomNode.md)
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

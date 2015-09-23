@@ -2,15 +2,19 @@
 #Mold.Tools.Test.Tester
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Test/Tester.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Test/Tester.js  
+__dna__: class  
 
 
 	
 
-test: [Mold.Test.Lib.Tester](../../../Mold/Test/Lib/Tester.md) 
+__test__: [Mold.Test.Lib.Tester](../../../Mold/Test/Lib/Tester.md) 
 
 
+
+
+
+	adds a complete testsuit
 
 
 ###Dependencies
@@ -24,14 +28,19 @@ test: [Mold.Test.Lib.Tester](../../../Mold/Test/Lib/Tester.md)
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

@@ -2,11 +2,13 @@
 #Mold.DNA.Interface
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/DNA/Interface.js  
-dna: dna
-author: Jan Kaufmann
-version: 0.1
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/DNA/Interface.js  
+__dna__: dna  
+__author__: Jan Kaufmann  
+__version__: 0.1  
 	
+
+
 
 
 
@@ -20,14 +22,19 @@ version: 0.1
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

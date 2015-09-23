@@ -2,11 +2,13 @@
 #Mold.DNA.Server
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/DNA/Server.js  
-dna: dna
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/DNA/Server.js  
+__dna__: dna  
 
 
 	
+
+
 
 
 
@@ -22,14 +24,19 @@ dna: dna
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

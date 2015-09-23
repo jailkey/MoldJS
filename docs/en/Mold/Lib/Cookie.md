@@ -2,13 +2,15 @@
 #Mold.Lib.Cookie
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Cookie.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Cookie.js  
+__dna__: class  
 
 
 	
 
-test: [Mold.Test.Lib.Cookie](../../Mold/Test/Lib/Cookie.md) 
+__test__: [Mold.Test.Lib.Cookie](../../Mold/Test/Lib/Cookie.md) 
+
+
 
 
 
@@ -22,14 +24,19 @@ test: [Mold.Test.Lib.Cookie](../../Mold/Test/Lib/Cookie.md)
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

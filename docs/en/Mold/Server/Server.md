@@ -2,11 +2,13 @@
 #Mold.Server.Server
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Server.js  
-dna: class
-author: Jan Kaufmann
-version: 0.1
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Server.js  
+__dna__: class  
+__author__: Jan Kaufmann  
+__version__: 0.1  
 	
+
+
 
 
 
@@ -29,14 +31,19 @@ version: 0.1
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

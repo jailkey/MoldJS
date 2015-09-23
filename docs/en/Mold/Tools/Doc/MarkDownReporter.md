@@ -2,11 +2,13 @@
 #Mold.Tools.Doc.MarkDownReporter
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Doc/MarkDownReporter.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Doc/MarkDownReporter.js  
+__dna__: class  
 
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ dna: class
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

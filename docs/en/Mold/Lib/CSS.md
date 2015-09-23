@@ -2,13 +2,15 @@
 #Mold.Lib.CSS
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/CSS.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/CSS.js  
+__dna__: class  
 
 
 	
 
-test: [Mold.Test.Lib.CSS](../../Mold/Test/Lib/CSS.md) 
+__test__: [Mold.Test.Lib.CSS](../../Mold/Test/Lib/CSS.md) 
+
+
 
 
 
@@ -28,14 +30,19 @@ test: [Mold.Test.Lib.CSS](../../Mold/Test/Lib/CSS.md)
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

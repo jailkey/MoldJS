@@ -2,11 +2,13 @@
 #Mold.Server.Middlewares.JsonParser
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Middlewares/JsonParser.js  
-dna: middleware
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Middlewares/JsonParser.js  
+__dna__: middleware  
 
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ dna: middleware
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

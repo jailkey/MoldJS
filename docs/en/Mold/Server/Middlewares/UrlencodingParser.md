@@ -2,11 +2,13 @@
 #Mold.Server.Middlewares.UrlencodingParser
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Middlewares/UrlencodingParser.js  
-dna: middleware
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Middlewares/UrlencodingParser.js  
+__dna__: middleware  
 
 
 	
+
+
 
 
 
@@ -22,14 +24,19 @@ dna: middleware
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

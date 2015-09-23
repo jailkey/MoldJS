@@ -2,11 +2,13 @@
 #Mold.Interface.ModelAdapter
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Interface/ModelAdapter.js  
-dna: interface
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Interface/ModelAdapter.js  
+__dna__: interface  
 
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ dna: interface
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

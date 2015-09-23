@@ -2,13 +2,15 @@
 #Mold.Lib.Worker
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Worker.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Worker.js  
+__dna__: class  
 
 
 	
 
-test: [Mold.Test.Lib.Worker](../../Mold/Test/Lib/Worker.md) 
+__test__: [Mold.Test.Lib.Worker](../../Mold/Test/Lib/Worker.md) 
+
+
 
 
 
@@ -24,14 +26,19 @@ test: [Mold.Test.Lib.Worker](../../Mold/Test/Lib/Worker.md)
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

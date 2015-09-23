@@ -2,11 +2,13 @@
 #Mold.DNA.Controller
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/DNA/Controller.js  
-dna: dna
-author: Jan Kaufmann
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/DNA/Controller.js  
+__dna__: dna  
+__author__: Jan Kaufmann  
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ author: Jan Kaufmann
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

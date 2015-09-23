@@ -2,11 +2,13 @@
 #Mold.Lib.Stack
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Stack.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Stack.js  
+__dna__: class  
 
-version: 0.0.1
+__version__: 0.0.1  
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ version: 0.0.1
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

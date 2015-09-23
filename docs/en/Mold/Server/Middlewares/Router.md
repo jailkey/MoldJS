@@ -2,11 +2,13 @@
 #Mold.Server.Middlewares.Router
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Middlewares/Router.js  
-dna: middleware
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Middlewares/Router.js  
+__dna__: middleware  
 
 
 	
+
+
 
 
 
@@ -22,14 +24,19 @@ dna: middleware
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

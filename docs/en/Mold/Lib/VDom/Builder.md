@@ -2,13 +2,15 @@
 #Mold.Lib.VDom.Builder
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/Builder.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/Builder.js  
+__dna__: class  
 
 
 	
 
-test: [Mold.Test.Lib.VDom.Builder](../../../Mold/Test/Lib/VDom/Builder.md) 
+__test__: [Mold.Test.Lib.VDom.Builder](../../../Mold/Test/Lib/VDom/Builder.md) 
+
+
 
 
 
@@ -32,21 +34,43 @@ test: [Mold.Test.Lib.VDom.Builder](../../../Mold/Test/Lib/VDom/Builder.md)
    
 ###Methods
 --------------
+ 
 
 #####render
 	trigger the renderservice  
-Defined in row: 191   
-Arguments: no
+Defined in row: 198   
 
 
 
-   
+
+
+#####reRender
+	reRenders the vdom  
+Defined in row: 205   
+
+
+
+
+
+#####renderString
+	renders the vdom as a string  
+Defined in row: 214   
+
+
+
+
+
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

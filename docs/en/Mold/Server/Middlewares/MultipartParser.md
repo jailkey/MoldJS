@@ -2,11 +2,13 @@
 #Mold.Server.Middlewares.MultipartParser
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Middlewares/MultipartParser.js  
-dna: middleware
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Server/Middlewares/MultipartParser.js  
+__dna__: middleware  
 
 
 	
+
+
 
 
 
@@ -22,14 +24,19 @@ dna: middleware
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

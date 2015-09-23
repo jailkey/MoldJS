@@ -2,11 +2,13 @@
 #Mold.Lib.VDom.Components.MoldCaptureForms
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/Components/MoldCaptureForms.js  
-dna: component
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/Components/MoldCaptureForms.js  
+__dna__: component  
 
 
 	
+
+
 
 
 
@@ -21,14 +23,19 @@ dna: component
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

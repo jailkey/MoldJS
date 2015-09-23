@@ -2,13 +2,15 @@
 #Mold.Lib.Event
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Event.js  
-dna: class
-author: Jan Kaufmann
-version: 0.1
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Event.js  
+__dna__: class  
+__author__: Jan Kaufmann  
+__version__: 0.1  
 	
 
-test: [Mold.Test.Lib.Event](../../Mold/Test/Lib/Event.md) 
+__test__: [Mold.Test.Lib.Event](../../Mold/Test/Lib/Event.md) 
+
+
 
 
 
@@ -23,14 +25,19 @@ test: [Mold.Test.Lib.Event](../../Mold/Test/Lib/Event.md)
    
 ###Methods
 --------------
+ 
 
-   
+ 
+  
 ###Properties
 -------------
 
-   
+
+ 
+
 ###Objects
 ------------
+
 
 
 		

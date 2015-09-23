@@ -22,17 +22,19 @@ Seed({
 			__test__: [{{name}}]({{path}}.md) 
 			{{/test}}
 
+			{{#extend|exists}}}__extends__: {{extend}}  {{/extend}}
+
 			{{#description}}
-				{{description}}
+			__{{description}}__
 			{{/description}}
 			
-			###Dependencies
+			##Dependencies
 			--------------
 			{{#include}}
 			* [{{name}}]({{path}}.md) {{/include}}
 			
 			{{#example}}
-			###Example
+			##Example
 			--------------
 			*{{path}}*
 
@@ -40,39 +42,52 @@ Seed({
 			{{code}}
 			```
 			
-
 			{{/example}}
-			   
-			###Methods
-			--------------
+
+			{{#methods|exists}}   
+			##Methods
+	
+			{{/methods}} 
 			{{#methods}}
-			#####{{name}}
-				{{description}}  
-			Defined in row: {{line}}   
-			Arguments: {{^parameter}}no{{/parameter}}
-			{{#parameter}}
-			* __{{paraname}}__ (_{{type}}_) - {{description}} {{/parameter}}
+			###{{name}}
+			{{#public}}scope: public  {{/public}}
+			{{#private}}scope: private   {{/private}}
+			{{#asyc}}scope: async   {{/async}}
+			__{{description}}__  
+			Defined in row: {{line}}  
+			
+			{{#parameter|exists}}__Arguments:__{{/parameter}}  
+			{{#parameter}} * __{{paraname}}__ (_{{type}}_) - {{description}}  {{/parameter}}
 			{{#return}}returns: {{return}}{{/return}}
+			
 			{{#example}}
 			__Example:__  
-			``{{example}}`
+			*{{path}}*
+
+			```
+			{{code}}
+			```  
 			{{/example}}
+
 			{{/methods}}
-			   
-			###Properties
-			-------------
+			 
+			{{#properties|exists}}  
+			##Properties
+
+			{{/properties}}
 			{{#properties}}
-			#####{{name}}
+			####{{name}}
 				{{description}}  
 			Defined in row: {{line}}  
 			{{#return}}returns: {{return}}{{/return}}
 			{{/properties}}
 			 
-			
-			###Objects
-			------------
+			{{#objects|exists}}
+			##Objects
+		
+			{{/objects}}
 			{{#objects}}
-			#####{{name}}
+			####{{name}}
 			Defined in row: {{line}}  
 			Parameter: {{^parameter}}no{{/parameter}}
 			{{#parameter}}

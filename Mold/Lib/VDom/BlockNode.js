@@ -1,7 +1,10 @@
+
+
 "use strict";
 Seed({
 		name : "Mold.Lib.VDom.BlockNode",
 		dna : "static",
+		version : "0.0.2",
 		include : [
 			"Mold.Lib.VDom.ProtoNode"
 		]
@@ -32,6 +35,24 @@ Seed({
 			var _oldDataLength = 0;
 			var that = this;
 			var undefined;
+
+			this.dataExists = function(data){
+				if(Mold.isArray(data)){
+					return (data.length) ? true : false;
+				}else if(Mold.isObject(data)){
+					for(var prop in data){
+						if(prop === this.name){
+							return this.dataExists(data[this.name]);
+						}else if(prop !== this.name){
+							return true;
+						}
+					}
+				}else if(data !== undefined && data !== null && data !== false){
+					return true;
+				}
+				return false;
+			}
+
 			this.createRenderDom = function(index){
 				var i = 0, len = this.vdom.length;
 				for(; i < len; i++){
@@ -59,7 +80,6 @@ Seed({
 					var i = 0, len = dom.length;
 
 					for(; i < len; i++){
-						//console.log(" dom[i]",  dom[i].type === BLOCK_NODE);
 						var selectedName = dom[i].name;
 						
 							if(selectedName === name){
@@ -137,12 +157,10 @@ Seed({
 				}
 			}
 
-			this.addListItem = function(index, data){
-
-
+			this.addListItem = function(index, data, skipNegativTest){
 
 				//if negativ block, remove all items
-				if(this.isNegative && ((Mold.isArray(data) && data.length) || (data !== false && data !== undefined && data !== "show" ))){
+				if(this.isNegative && this.dataExists(data) && !skipNegativTest){
 					this.changedItems = [];
 					var from = 0, len = this.renderDom.length;
 					this.children.splice(from, len);
@@ -155,20 +173,13 @@ Seed({
 					return;
 				}
 
-				
-				var bind = false;
-
 				if(!this.renderDom[index]){
 					this.createRenderDom(index);
 				}
 				
 				if(!this.children[index]){
 					this.createChildren(index);
-
-					//this.bindChildren(data, index);
 				}
-
-
 
 				if(index === 0){
 					//if index is 0 find all children
@@ -180,7 +191,6 @@ Seed({
 							this.children[index][name] = child[0]
 						}
 					}
-					
 				}
 
 				if(!Mold.isArray(this.children)){
@@ -252,8 +262,8 @@ Seed({
 				this.renderDom.splice(index, 1);
 				this.removeList.push(index);
 				
-				if(this.isNegative && !this.children.length){
-					this.addListItem(0, "show")
+				if(this.isNegative && !this.dataExists(this.data)){
+					this.addListItem(0, "show", true)
 				}
 			}
 
@@ -263,6 +273,7 @@ Seed({
 						this.protoChild = this.children[0];
 					}
 				}
+
 				this.children.splice(from, len);
 				this.renderDom.splice(from, len);
 				var i = from;
@@ -272,8 +283,9 @@ Seed({
 					this.removeList.push(i);
 				}
 
-				if(this.isNegative && !this.children.length){
-					this.addListItem(0, "show")
+				if(this.isNegative && !this.dataExists(this.data)){
+
+					this.addListItem(0, "show", true)
 				}
 			}
 
@@ -281,8 +293,50 @@ Seed({
 				this.removeListItems(0, this.renderDom.length, force);
 			}
 
+			/**
+			 * @deleteListeItems 
+			 * @description deletes an amount of listitems and executs filters
+			 * @param  {number} from startIndex
+			 * @param  {number} len  len of 
+			 */
+			this.deleteListeItems = function(from, len){
+				console.log("deleteListeItems")
+				this.data.splice(from, len);
+				var result = this.execFilter(this.data);
+
+				this.removeListItems(from, len);
+			}
+
 			this.changeListItem = function(index, data){
-				this.addListItem(index, data)
+
+				if(Mold.isArray(this.data)){
+					this.data[index] = data
+				}
+				var result = this.execFilter(this.data);
+				if(result[index] !== false){
+					this.addListItem(index, data)
+				}
+			}
+
+
+			this.execFilter = function(data){
+
+				for(var filterName in this.filter){
+					console.log("exec data",filterName, data)
+					var filter = Mold.Lib.Filter.get(filterName);
+					if(filter){
+
+						var copy = Mold.copy(data)
+						copy = filter(copy, this.filter[filterName]);
+						if(copy === true){
+							copy = {};
+							copy[this.name] = true
+						}
+						this.data = copy;
+						data = copy;
+					}
+				}
+				return data;
 			}
 
 
@@ -293,20 +347,13 @@ Seed({
 					newData[this.name] = data;
 					data = newData;
 					this.data = data;
-				}
 
-
-				for(var filterName in this.filter){
-					var filter = Mold.Lib.Filter.get(filterName);
-					if(filter){
-						var copy = Mold.mixin({}, data)
-						copy[this.name] = filter(copy[this.name], this.filter[filterName]);
-						this.data = copy;
-						data = copy;
-					}
 				}
+			
+				var data = this.execFilter(data);
 		
 				_oldRenderLength = this.renderDom.length;
+
 				//handle array
 				if(Mold.isArray(data[this.name])){
 					var data = data[this.name];
@@ -315,7 +362,12 @@ Seed({
 					}
 				}
 
-				if(Mold.isArray(data)){
+				if(data === false && !this.isNegative){
+					this.removeAllListItems(true);
+					this.renderDom = [];
+					this.children = [];
+
+				}else if(Mold.isArray(data)){
 					if(!Mold.isArray(this.children)){
 						this.children = [this.children];
 					}
@@ -332,13 +384,14 @@ Seed({
 						this.removeListItems(data.length, dif);
 					}
 					_oldDataLength = data.length;
-				}else if((!data || !data[this.name]) && data[this.name] !== 0){
+				}else if((!data || !data[this.name]) && data !== 0 && !Mold.isObject(data) ){
 					this.removeAllListItems(true);
 				}else{
-
+					
 					//data from object
 					if(Mold.isObject(data)){
 
+				
 						if(!this.renderDom[0]){
 							this.createRenderDom(0);
 						}
@@ -347,8 +400,8 @@ Seed({
 							this.createChildren(0);
 						}
 						
-						this.addListItem(0, data[this.name], true)
-						
+						this.addListItem(0, data, true)
+
 						if(this.children[0]){
 							for(var name in this.children[0]){
 						
@@ -366,8 +419,8 @@ Seed({
 									if(selected){
 										if(selected.hasParentValue){
 											
-											if(data[selected.parentName] && data[selected.parentName][selected.childName]){
-												selected.setData(data[selected.parentName][selected.childName]);
+											if(data[selected.parentName] ){
+												selected.setData(data[selected.parentName]);
 											}
 										}else{
 											selected.setData(data[name]);
@@ -378,7 +431,7 @@ Seed({
 
 
 							//nested data
-							for(var name in data[this.name]){
+							for(var name in data){
 							
 								if(Mold.isArray(this.children[0][name])){
 									var childLength = this.children[0][name].length, i = 0;
@@ -386,9 +439,9 @@ Seed({
 										var selected = this.children[0][name][i];
 										if(selected){
 											if(selected.hasParentValue){
-												selected.setData(data[selected.parentName][selected.childName]);
+												selected.setData(data[selected.parentName]);
 											}else{
-												selected.setData(data[this.name]);
+												selected.setData(data);
 											}
 										}
 									}
@@ -397,17 +450,15 @@ Seed({
 
 									if(selected){
 										if(selected.hasParentValue){
-
-											selected.setData(data[this.parentName][this.childName]);
+											selected.setData(data[this.parentName]);
 										}else{
-											
-											selected.setData(data[this.name]);
+											selected.setData(data);
 										}
 									}
 								}
 							}
-
-							if(!Mold.is(data[this.name]) || data[this.name] === false){
+							
+							if(!Mold.is(data) || data === false || data[this.name] === false){
 								this.renderDom = [];
 								this.children = [];
 							}
@@ -460,7 +511,6 @@ Seed({
 					if(!this.pointer){
 						this.pointer = [];
 					}
-
 				}
 
 			}
@@ -576,7 +626,7 @@ Seed({
 
 				var i = 0, len = this.renderDom.length;
 				var output = "";
-	
+			
 				for(; i < len; i++){
 					var selected = this.renderDom[i];
 					var y = 0, subLen = selected.length;

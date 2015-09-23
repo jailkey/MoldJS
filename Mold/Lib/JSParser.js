@@ -17,7 +17,7 @@ Seed({
 			this.number = 0;
 		}
 
-		console.log("STARTS")
+
 
 		//states
 		var END = "end";
@@ -38,7 +38,7 @@ Seed({
 		}
 
 		var _getBlockType = function(state, lastState, collected, tree){
-			console.log("get blocktype", tree.lines[tree.lines.length - 1])
+			//console.log("get blocktype", tree.lines[tree.lines.length - 1])
 			return "block";
 		}
 		
@@ -166,7 +166,7 @@ Seed({
 
 		this.publics = {
 			parse : function(input){
-				console.log("tree", _parse(input));
+				//console.log("tree", _parse(input));
 			}
 		}
 	}

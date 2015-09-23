@@ -111,6 +111,27 @@ Seed({
 			return output;
 		}
 
+		var _removeTabs = function(input){
+			var lines = input.split("\n"),
+				shortest = 100;
+
+			lines.forEach(function(value){
+				var result = value.match(/^(.*?)[\S]/g);
+				if(result){
+					if((result[0].split("\t").length - 1) < shortest){
+						shortest = (result[0].split("\t").length - 1)
+					}
+				}
+			})
+			var regExp = new RegExp("^\t{" + shortest + "}(.*?)", "g");
+			input = "";
+			lines.forEach(function(value){
+				input += value.replace(regExp, "") + "\n";
+			});
+
+			return input;
+		}
+
 		var _getExample = function(example){
 			var parts = example.split("#");
 			var filename = Mold.trim(parts[0]);
@@ -118,16 +139,16 @@ Seed({
 
 			if (PathLib.is(filename)) {
 				var file = fs.readFileSync(filename).toString();
-				var out = file.substring(file.indexOf("//"+ancor) + 4, file.indexOf("///"+ancor))
+				var out = file.substring(file.indexOf("//"+ancor) + ancor.length + 2, file.indexOf("///"+ancor))
 				out = out.replace(/\r\n/g, "\n");
 				return {
 					path : filename,
-					code : out
+					code : _removeTabs(out)
 				};
 			}else{
 				return {
 					path : false,
-					code : example
+					code : _removeTabs(example)
 				};
 			}
 				
@@ -318,12 +339,22 @@ Seed({
 						case "values":
 							output['values'] = Mold.trim(_getFrom(selected, 1));
 							break;
+						case "public":
+							output['public'] = true;
+							break;
+						case "private":
+							output['private'] = true;
+							break;
+						case "async":
+							output['async'] = true;
+							break;
 						default:
 							console.log("not found", action, selected)
 
 
 					}
 				}
+
 			}
 			if(!output.partType){
 				output.partType = "module";

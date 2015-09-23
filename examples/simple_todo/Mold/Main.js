@@ -56,8 +56,9 @@ Seed(
 
 		model.connect(new Mold.Adapter.LocalStore());
 
-		//connect model on template
+		//#2 connect model on template
 		template.connect(model);
+		///#2
 
 		//load template list if it is in local storage
 		model.load("my-todo");

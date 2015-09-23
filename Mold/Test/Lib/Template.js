@@ -30,15 +30,19 @@ Seed({
 					<a mold-event="click:@add.entry">Add Entry</a>
 				|*/});
 
+				//#appendTo
 				template.tree.then(function(tree){
 					if(!Mold.isNodeJS){
+						
 						template.appendTo(document.body)
+						
 					}else{
 						var doc = new Doc();
 						template.appendTo(doc.get())
 					}
 					go();
 				})
+				///#appendTo
 
 			});
 
@@ -185,6 +189,7 @@ Seed({
 
 			xit("tests another configuration", function(){
 				var templateTwoTree = false, modelTwo = false;
+
 				it("create new template with nested blocks", function(go){
 
 					templateTwo = new Template(function(){/*|
@@ -204,6 +209,10 @@ Seed({
 
 							{{^block}}
 								<li>Keine Daten</li>
+							{{/block}}
+
+							{{#block|exists}}
+								Exists
 							{{/block}}
 
 							{{#list}}
@@ -258,9 +267,13 @@ Seed({
 					})
 				})
 
+				it("removes the data", function(){
+					templateTwo.setData(false);
+				})
 
+				//#connect
+				it("adds a model and some data", function(){
 
-				it("add a model and some data", function(){
 					modelTwo = new Mold.Lib.Model({
 						block : [ 
 							{
@@ -284,10 +297,31 @@ Seed({
 							{ background : Color.randomColor(), subitem : "three"},
 						]
 					})
+
+					templateTwo.on("renderd", function(e){
+						if(templateTwoTree.dom.children.block[0].children.length === 3){
+
+						}
+					})
+				})
+				///#connect
+
+				it("removes the data from model", function(){
+					modelTwo.data.block = [];
 				})
 
+				it("read some", function(){
+					modelTwo.data.block.push({
+						subblock : [
+							{
+								background : Color.randomColor(),
+								subitem: "test"
+							}
+						]
+					});
+				});
 
-				it("add data to the list ", function(){
+				xit("add data to the list ", function(){
 					modelTwo.data.list.push("SOME DATA")
 					modelTwo.data.list.push("MORE DATA")
 				});
@@ -315,15 +349,33 @@ Seed({
 							{{#include}}
 							* [{{name}}]({{path}}.md) {{/include}}
 							
+
+							{{#example}}
+							###Example
+							--------------
+							*{{path}}*
+
+							```
+							{{code}}
+							```
+							
+							{{/example}}
+							
 							###Methods
 							{{#methods}}
 							#####{{name}}
 								{{description}}  
 							Defined in row: {{line}}   
-							Arguments: {{^parameter}}no{{/parameter}}
+							{{#parameter|exists}}Arguments: {{/parameter}}
 							{{#parameter}}
 							* __{{name}}__ (_{{type}}_) - {{description}} {{/parameter}}
 							{{#return}}returns: {{return}}{{/return}}
+
+							{{#example}}
+								hier example und so
+								{{path}}
+							{{/example}}
+
 							{{/methods}}
 
 							###Properties
@@ -355,6 +407,7 @@ Seed({
 						"url": "/Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Template.js",
 						"parts": [],
 						"properties": [],
+
 						"methods": [
 							{
 								"parameter": [],
@@ -367,6 +420,10 @@ Seed({
 								"name": "_connector",
 								"description": "collection of methods to bind a model to the template",
 								"type": "{Object}",
+								"example" : {
+									"path" : "irgedwas",
+									"name" : "lalal"
+								},
 								"line": 74
 							},
 							{
@@ -424,7 +481,12 @@ Seed({
 								".VDom.Components.MoldEvent",
 								".VDom.Components.MoldCaptureForms"
 							]
-						]
+						],
+						"example": 
+						   { path: 'examples/simple_todo/Mold/Main.js',
+						     code: '\nvar template = new Mold.Lib.Template(function(){\n\t/*|\n\t\t<ul class="todo-list">\n\t\t\t{{#list}}\n\t\t\t\t<li style="color:{{color}};">\n\t\t\t\t\t{{+}}. {{entry}}\n\t\t\t\t\t<a href="#" mold-event="click:@delete.entry:{{+}}">delete</a>\n\t\t\t\t</li>\n\t\t\t{{/list}}\n\t\t</ul>\n\t\t<input name="entry" type="text" value="">\n\t\t{{#error}}\n\t\t\t<p class="error">{{error}}</p>\n\t\t{{/error}}\n\t\t<br>\n\t\t<div class="actions">\n\t\t\t<a href="#" mold-event="click:@add.entry">add</a>\n\t\t\t<a href="#" mold-event="click:@delete.all">delete all</a>\n\t\t</div>\n\t|*/\n});\n\n' },
+						
+
 					}
 					templateTwoTree.on("renderd", function(e){
 						console.log("e", e.data.tree)
@@ -438,7 +500,7 @@ Seed({
 			});
 			
 
-			it("tests special template block filter", function(){
+			xit("tests special template block filter", function(){
 				var templateFour = false;
 				it("create a new template with filter", function(){
 
@@ -483,7 +545,7 @@ Seed({
 					templateFour.on("renderd", function(e){
 						console.log("e", e)
 					})
-
+					//#setData
 					templateFour.setData({
 						list : [
 							{ content :  "red" },
@@ -491,6 +553,29 @@ Seed({
 							{ content :  "wieder ein test" }
 						]
 					})
+					///#setData
+				})
+			})
+
+			it("tests two way model binding", function(){
+				var template = false, model = false;
+
+				it("create new template with nested blocks", function(go){
+
+					template = new Template(function(){/*|
+						<div>{{model}}</div>
+
+						<input type="text" value="{{>model}}">
+					|*/});
+
+					model = new Mold.Lib.Model({
+						model : string
+					});
+
+
+					template.connect(model);
+
+					
 				})
 			})
 

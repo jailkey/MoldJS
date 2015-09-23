@@ -32,6 +32,11 @@ Seed({
 			return data;
 		})
 
+		_add("topath", function(data, conf){
+			var target = (conf.prefix) ? conf.prefix : "" + data.replace(/./g, "/");
+			return target + (conf.ending) ? conf.ending : '.js';
+		})
+
 		_add("sort", function(data, conf){
 			if(Mold.isArray(data)){
 				if(conf.value){
@@ -57,12 +62,30 @@ Seed({
 		});
 
 		_add("exists", function(data, conf){
-			if(data !== undefined && data !== null && data !== false){
-				return true;
-			}else{
+			console.log("data", data)
+
+			if(Mold.isArray(data) && !data.length){
 				return false;
 			}
-			
+
+			if(Mold.isObject(data)){
+				var test = 0;
+				for(var prop in data){
+					test++;
+					if(data.hasProperty(prop)){
+						
+					}
+				}
+				if(test === 0){
+					return false;
+				}
+			}
+
+			if(data == undefined && data == null && data == false){
+				return false;
+			}
+
+			return true;
 		})
 
 		_add("case", function(data, conf){

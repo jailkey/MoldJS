@@ -52,7 +52,6 @@ Seed({
 		".Sequence",
 		".Stack",
 		".Template",
-		".TemplateFilter",
 		".Text",
 		".TextFinder",
 		".Touch",

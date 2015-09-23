@@ -6,6 +6,7 @@ Seed({
 
 		describe("Test Mold.Lib.VDom.Builder", function(){
 			var result = false;
+			//#parse
 			it("parse some value nodes", function(){
 				result = new Builder(' <ul class="irgendwas" test="hasnwurs" height="asd">{{#block}} <li class="lalala"> {{irgendwas}} <span style="color:{{farbe}};" test="irgendw as">  {{wasanders}} </span> anders </li> {{/block}} </ul> -- {{#block}} {{farbe}} -- {{farbe}} <br> {{/block}}');
 				
@@ -13,6 +14,7 @@ Seed({
 				expect(result.dom.children.block[1].children.length).toBe(1);
 				expect(result.dom.children.block[1].children[0].farbe).toBeDefined(2);
 			});
+			///#parse
 
 			it("add some data", function(){
 				var start = now();
@@ -48,6 +50,8 @@ Seed({
 			});
 
 			var secondResult = false;
+
+			//#render
 			it("create vdom with negative block", function(){
 				secondResult = new Builder('{{#block}}<div> show if data is set</div>{{/block}} - {{^block}} show if data is not set {{/block}}');
 				expect(secondResult.dom.children.block[1].isNegative).toBe(true);
@@ -58,8 +62,8 @@ Seed({
 					block : "show"
 				}
 				secondResult.dom.setData(data);
-				expect(secondResult.dom.children.block[0].renderDom.length).toBe(0);
-				expect(secondResult.dom.children.block[1].renderDom.length).toBe(1);
+				expect(secondResult.dom.children.block[0].renderDom.length).toBe(1);
+				expect(secondResult.dom.children.block[1].renderDom.length).toBe(0);
 			});
 
 			it("render block", function(){
@@ -68,6 +72,7 @@ Seed({
 				
 				expect(insert.getElementsByTagName("div").length).toBe(1);
 			});
+			///#render
 
 			it("remove blockdata", function(){
 				secondResult.dom.setData(false);
@@ -126,8 +131,8 @@ Seed({
 
 			var fivesResult = false;
 			it("create a block with parent pointer value nodes", function(){
-				fivesResult = new Builder('{{#block}} <div>{{block.name}} {{irgendwas.anderes}}</div> {{/block}}');
-				expect(fivesResult.dom.children.block.children[0]['block.name'].hasParentValue).toBe(true);
+				fivesResult = new Builder('{{#block}} <div>{{$parent.name}} {{$parent.$parent.irgendwas.anderes}}</div> {{/block}}');
+				expect(fivesResult.dom.children.block.children[0]['$parent.name'].hasParentValue).toBe(true);
 			});
 
 			it("parent data", function(){
@@ -140,17 +145,17 @@ Seed({
 					}
 				}
 				fivesResult.dom.setData(data);
-				expect(fivesResult.dom.children.block.children[0]['block.name'].data).toBe("hans peter");
-				expect(fivesResult.dom.children.block.children[0]['irgendwas.anderes'].data).toBe("test");
+				expect(fivesResult.dom.children.block.children[0]['$parent.name'].data).toBe("hans peter");
+				expect(fivesResult.dom.children.block.children[0]['$parent.$parent.irgendwas.anderes'].data).toBe("test");
 			});
 
 			var filterResult = false;
-			it("create a value filter", function(){
+			xit("create a value filter", function(){
 				filterResult = new Builder('{{#block}} <div>{{test|currency}}</div> {{/block}}');
 				expect(filterResult.dom.children.block.children[0].test.filter.currency).toBeObject();
 			});
 
-			it("set data for value filter", function(){
+			xit("set data for value filter", function(){
 				filterResult.dom.setData({
 					block : {
 						test : "2000"
@@ -160,13 +165,13 @@ Seed({
 			});
 
 			var filterResult = false;
-			it("create a block filter", function(){
-				filterResult = new Builder('{{#block|sort,value:test,desc|maxlen,len:2}} <div>{{test}}</div> {{/block}}');
+			xit("create a block filter", function(){
+				filterResult = new Builder('{{#block|sort:value=test:desc|maxlen:len=2}} <div>{{test}}</div> {{/block}}');
 				expect(filterResult.dom.children.block.filter.maxlen).toBeObject();
 			});
 
 
-			it("set data for value filter", function(){
+			xit("set data for value filter", function(){
 
 				filterResult.dom.setData({
 					block : [

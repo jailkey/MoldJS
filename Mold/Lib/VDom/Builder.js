@@ -1,3 +1,9 @@
+/**
+ * @author Jan Kaufmann <jan@moldjs.de>
+ * @description build a vdom from a content-template string
+ * @example Mold/Test/Lib/VDom/Builder#build
+ */
+
 "user strict";
 Seed({
 		name : "Mold.Lib.VDom.Builder",
@@ -124,7 +130,6 @@ Seed({
 								name : parts.name,
 								filter : parts.filter
 							});
-							console.log(vDom.name, "add", parts.name)
 							vDom.addNode(blockNode);
 							parentNode = vDom;
 							vDom = blockNode;
@@ -191,17 +196,28 @@ Seed({
 		this.dom = _parseNode(_doc, rootNode);
 
 		this.publics = {
-			/**
-			 * @method render
-			 * @description trigger the renderservice
-			 * @return {[type]} [description]
-			 */
+		/**
+		 * @method render
+		 * @description trigger the renderservice
+		 * @return {object} returns the renderd vdom
+		 * @example Mold/Test/Lib/VDom/Builder.js#render
+		 */
 			render : function(){
 				return rootNode.render();
 			},
+		/**
+		 * @method reRender 
+		 * @description reRenders the vdom, recreat dom elements only if needed
+		 */
 			reRender : function(){
 				rootNode.reRender();
 			},
+
+		/**
+		 * @method renderString 
+		 * @description renders the vdom as a string
+		 * @return {string} returns a string from the renderd vdom
+		 */
 			renderString : function(){
 				return rootNode.renderString();
 			}

@@ -107,8 +107,7 @@ Seed({
 				//if blocknode
 				if(child.type === 2){
 					var blockData = {};
-					blockData[name] = (data[name] === undefined) ? data : data[name];
-					child.setData(blockData);
+					child.setData(data);
 				}else{
 					child.setData(data);
 				}
@@ -139,10 +138,10 @@ Seed({
 							if(!e.data.addedCount && e.data.removed.length){
 								if(Mold.isArray(subTree)){
 									for(var i = 0; i < subTree.length; i++){
-										subTree[i].removeListItems(e.data.index, e.data.removed.length);
+										subTree[i].deleteListeItems(e.data.index, e.data.removed.length);
 									}
 								}else{
-									subTree.removeListItems(e.data.index, e.data.removed.length);
+									subTree.deleteListeItems(e.data.index, e.data.removed.length);
 								}
 								
 							}
@@ -237,10 +236,19 @@ Seed({
 
 
 		this.publics = {
-			snatch : function(){
 
-			},
+		/**
+		 * @object forms 
+		 * @description an object with the collected forms
+		 */
 			forms : _forms,
+
+		/**
+		 * @method connect 
+		 * @description connects a model to the template
+		 * @param  {Mold.Lib.Model} model
+		 * @example Mold/Test/Lib/Template.js#connect
+		 */
 			connect : function(model){
 				_templateTree.then(function(tree){
 					_connect(model, tree.dom, model.getProperties(), "data", tree);
@@ -255,24 +263,51 @@ Seed({
 		 * @method setData
 		 * @description set the template data
 		 * @param {object} data expects the object data
+		 * @event renderd triggers the renderd event when the template is rendert
+		 * @example Mold/Test/Lib/Template.js#setData
+		 * @return {promise} returns a promise
 		 */
 			setData : function(data){
-				_templateTree.then(function(tree){
-					tree.dom.setData(data);
-					if(!_parseAsString){
-						tree.render();
-					}else{
-						tree.renderString();
-					}
-					_that.trigger("renderd", { tree : _tree });
-				});
-			},
-			appendTo : function(element){
-				_templateTree.then(function(tree){
-					element.appendChild(tree.render())
-					_that.trigger("renderd", { tree : _tree });
+				return new Promise(function(resolve, reject){
+					_templateTree.then(function(tree){
+						tree.dom.setData(data);
+						if(!_parseAsString){
+							tree.render();
+						}else{
+							tree.renderString();
+						}
+						resolve(tree);
+						_that.trigger("renderd", { tree : _tree });
+					});
 				})
 			},
+
+		/**
+		 * @method appendTo 
+		 * @description appends the template to an element and render the template
+		 * @async
+		 * @param {element} element the element where the template has to be appended
+		 * @event renderd triggers the renderd event when the template is rendert
+		 * @example Mold/Test/Lib/Template.js#appendTo
+		 * @return {promise} returns a promise
+		 */
+			appendTo : function(element){
+				return new Promise(function(resolve, reject){
+					_templateTree.then(function(tree){
+						element.appendChild(tree.render());
+						resolve(tree);
+						_that.trigger("renderd", { tree : _tree });
+					})
+				})
+			},
+
+		/**
+		 * @method getString 
+		 * @description set data to the template and renders the template
+		 * @async
+		 * @param  {object} data the data has to set
+		 * @return {promise} returns a promise
+		 */
 			getString : function(data){
 				return new Promise(function(resolve, reject){
 					_templateTree.then(function(tree){

@@ -18,6 +18,37 @@ Seed({
 		var NEGATIVE_BLOCK = "^";
 		var BLOCK_END = "/";
 
+		var _getFilter = function(name){
+			var filter = {};
+			if(~name.indexOf("|")){
+				var nameParts = name.split("|");
+				name = nameParts.shift();
+				var i = 0, len = nameParts.length;
+
+				for(; i < len; i++){
+					if(~nameParts[i].indexOf("(")){
+						var filterName = nameParts[i].substring(0, nameParts[i].indexOf("("))
+						var expression = nameParts[i].substring(nameParts[i].indexOf("(") + 1, nameParts[i].lastIndexOf(")"));
+						filter[filterName] = {
+							expression : expression
+						};
+					}else{
+						var filterParts = nameParts[i].split(':');
+						var y = 1, paramLength = filterParts.length;
+						var filterName = filterParts[0];
+
+						filter[filterName] = {};
+
+						for(; y < paramLength; y++){
+							var paramParts = filterParts[y].split("=");
+							filter[filterName][paramParts[0]] = (paramParts[1]) ? paramParts[1] : true;
+						}
+					}
+				}
+			}
+			return { name : name, filter : filter}
+		}
+
 		return function(markup){
 
 			var length = markup.length,
@@ -109,19 +140,26 @@ Seed({
 				}
 
 				if(writeState === WRITE_VAR){
+					var filter = _getFilter(collected);
+					var binding = Mold.startsWith(filter.name, "*") ? true : false;
+					filter.name = filter.name.replace("*", "")
 					parts.push({
 						type : "node",
-						name : collected,
+						name : filter.name,
+						filter : filter.filter,
+						binding : binding,
 						nodeType : VALUE_NODE
 					});
 					collected = "";
 				}
 
 				if(writeState === WRITE_BLOCK){
+					var filter = _getFilter(blockName);
 					parts.push({
 						type : "node",
 						value : collected,
-						name : blockName,
+						name : filter.name,
+						filter : filter.filter,
 						nodeType : nodeType
 					});
 					collected = "";

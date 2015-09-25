@@ -18,6 +18,7 @@ Seed({
 			this.filter = config.filter || false;
 			this.parentName = false;
 			this.childName = false;
+			this.hasBinding = config.binding || false;
 			this.id = Mold.getId();
 
 			var that = this;
@@ -96,7 +97,8 @@ Seed({
 					data : this.data,
 					isString : this.isString,
 					services : this.services,
-					filter : Mold.mixin({}, this.filter)
+					filter : Mold.mixin({}, this.filter),
+					binding : this.hasBinding
 				});
 				return newNode;
 			}
@@ -106,14 +108,14 @@ Seed({
 				if(!this.domPointer){
 					this.domPointer = _doc.createTextNode(this.data);
 				}else{
-					this.domPointer.nodeValue = this.data;
+					this.domPointer.nodeValue = (this.data === false) ? "" : this.data;
 				}
 
 				return this.domPointer;
 			}
 
 			this.reRender = function(){
-				this.domPointer.nodeValue = this.data;
+				this.domPointer.nodeValue = (this.data === false) ? "" : this.data;
 				if(this.parent.type === ATTRIBUTE_NODE){
 					this.parent.renderAttribute();
 				}
@@ -139,7 +141,7 @@ Seed({
 					}
 				}else{
 					this.render();
-					this.domPointer.nodeValue = this.data;
+					this.domPointer.nodeValue = (this.data === false) ? "" : this.data;
 				}
 			
 

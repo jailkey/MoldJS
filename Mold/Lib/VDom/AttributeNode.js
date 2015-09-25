@@ -63,7 +63,6 @@ Seed({
 
 			this.reRender = function(){
 				var output = this.render();
-				console.log("reRender Attribute", this.name, output)
 				return output;
 			}
 

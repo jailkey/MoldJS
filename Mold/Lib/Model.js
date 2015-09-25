@@ -61,7 +61,7 @@ Seed({
 	
 				var observabelArray = new ArrayObserver(data);
 				observabelArray.observe(function(e){
-					
+			
 					if(e.type === "splice"){
 						var spliceIdend = e.index + "." +  e.addedCount + "." + e.object.length + e.removed.length;
 						if(spliceIdend !== _lastSplice){
@@ -93,10 +93,13 @@ Seed({
 					if(!Mold.isArray(properties[e.name]) && !Mold.isObject(properties[e.name]) && properties[e.name] !== undefined){
 						_validateValue(e.object[e.name], properties[e.name]);
 					}
-					
+					console.log(name + ".changed");
+					console.log(name + "." + e.name + ".changed")
 					if(!Mold.isArray(e.object[e.name]) || e.type === "update"){
+
 						_that.trigger(name + ".changed", e);
 						_that.trigger(name + "." + e.name + ".changed", e);
+
 					}
 					_watchData(e.object[e.name], name + "." + e.name, properties[e.name]);
 				})
@@ -162,7 +165,48 @@ Seed({
 
 		this.publics = {
 /**
- * @name data 
+ * @method query
+ * @description returns the model data by a path query
+ * @return {mixed} returns the queryed data or null
+ */
+ 			query : function(path){
+ 				var parts = path.split(".");
+ 				var data = this;
+ 				var selected = false;
+
+ 				while(selected = parts.shift()){
+ 					if(data[selected]){
+ 						data = data[selected];
+ 					}else{
+ 						data = null;
+ 						break;
+ 					}
+ 				}
+ 				return data;
+ 			},
+
+ 			create : function(){
+
+ 			},
+
+ 			set : function(path, data){
+ 				console.log("path", path, data)
+ 				var prop = path.substring(path.lastIndexOf(".") + 1,  path.length);
+ 				var path = path.substring(0,  path.lastIndexOf("."));
+ 				console.log("query", this.query(path)[prop])
+ 				var result = this.query(path);
+ 				console.log("resul", result)
+ 				if(Mold.isArray(result)){
+ 					console.log("result is array")
+ 					result.splice(+prop, 1, data);
+ 				}else{
+ 					result[prop] = data
+ 				}
+ 				//this.query(path)[prop] = data;
+ 			},
+
+/**
+ * @object data 
  * @description an object with the current model data
  * @type {object}
  */
@@ -185,7 +229,8 @@ Seed({
 			},
 /**
  * @method save  
- * @saves the model data to the specified adapter
+ * @async
+ * @description saves the model data to the specified adapter
  * @return {promise} returns a promise
  */
 			save : function(){
@@ -208,6 +253,7 @@ Seed({
 			},
 /**
  * @method load
+ * @async
  * @description loads data by the specified resourceID
  * @param  {number|string} id - the resource id
  * @returns {promise} - returns a promise
@@ -223,6 +269,7 @@ Seed({
 			},
 /**
  * @method  remove 
+ * @async
  * @description removes model from the resource
  * @return {promise} returns a promise
  */

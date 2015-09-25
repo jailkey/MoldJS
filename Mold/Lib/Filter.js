@@ -62,7 +62,6 @@ Seed({
 		});
 
 		_add("exists", function(data, conf){
-			console.log("data", data)
 
 			if(Mold.isArray(data) && !data.length){
 				return false;
@@ -73,7 +72,7 @@ Seed({
 				for(var prop in data){
 					test++;
 					if(data.hasProperty(prop)){
-						
+
 					}
 				}
 				if(test === 0){

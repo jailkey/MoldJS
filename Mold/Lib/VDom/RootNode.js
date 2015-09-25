@@ -13,6 +13,10 @@ Seed({
 			this.type = ROOT_NODE;
 			this.domPointer = false;
 			this.renderDom = this.vdom;
+			this.moldModel = {
+				model : null,
+				path : null
+			}
 
 
 			this.clone = function(){
@@ -22,6 +26,7 @@ Seed({
 			this.render = function(){
 				if(!this.domPointer){
 					this.domPointer = _doc.createElement(this.name);
+					this.domPointer.moldModel = this.moldModel;
 				}
 
 				var i = 0, len = this.renderDom.length;

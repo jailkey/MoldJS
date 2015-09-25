@@ -15,6 +15,10 @@ Seed({
 			this.domPointer = false; 
 			this.renderDom = this.vdom;
 			this.stopDirective = true;
+			this.moldModel = {
+				model : null,
+				path : null
+			}
 
 			this.onSetData = function(data, bind){
 
@@ -105,6 +109,7 @@ Seed({
 				if(!this.domPointer){
 					this.domPointer = _doc.createElement(this.name);
 					this.domPointer.moldTemplate = this.services.template;
+					this.domPointer.moldModel = this.moldModel;
 					this.domPointer.templatePointer = this;
 					created = true;
 				}

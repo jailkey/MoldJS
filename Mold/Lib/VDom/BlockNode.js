@@ -36,6 +36,11 @@ Seed({
 			var that = this;
 			var undefined;
 
+			this.moldModel = {
+				model : null,
+				path : null
+			}
+
 			this.dataExists = function(data){
 				if(Mold.isArray(data)){
 					return (data.length) ? true : false;

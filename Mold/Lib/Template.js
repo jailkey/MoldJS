@@ -24,7 +24,8 @@ Seed({
 			"Mold.Lib.VDom.Builder",
 			[	
 				".VDom.Components.MoldEvent",
-				".VDom.Components.MoldCaptureForms" 
+				".VDom.Components.MoldCaptureForms",
+				".VDom.Components.MoldBind" 
 			]
 		]
 	},
@@ -81,6 +82,40 @@ Seed({
 		 */
 		var _connector = {
 			renderTimer : false,
+			addModelToElement : function(element, model, path){
+
+				if(element.type === 5 || element.type === 9 || element.type === 2){
+					element.moldModel.model = model;
+					element.moldModel.path = path;
+					if(element.renderDom){
+						
+						this.addModelToDomElements(element.renderDom, model, path);
+					}
+				}
+			},
+			addModelToDomElements : function(subTree, model, path){
+			
+				if(subTree.renderDom){
+					this.addModelToElement(subTree, model, path)	
+				}else if(Mold.isArray(subTree)){
+
+					for(var i = 0; i < subTree.length; i++){
+					
+						if(Mold.isArray(subTree[i])){
+							for(var y = 0; y < subTree[i].length; y++){
+								this.addModelToElement(subTree[i][y], model, path + "." + i);
+							}
+						}else if(subTree[i].renderDom){
+							this.addModelToElement(subTree[i], model, path + "." + i);
+						}
+					
+					}
+				}else if(Mold.isObject(subTree)){
+					for(var prop in subTree){
+						this.addModelToElement(subTree[prop], model, path)	
+					}
+				}
+			},
 			reRender : function(tree){
 				clearTimeout(_connector.renderTimer);
 				_connector.renderTimer = setTimeout(function(){
@@ -123,6 +158,7 @@ Seed({
 						case "update":
 							//if subtree is an array update all childnodes
 							if(Mold.isArray(subTree)){
+								
 								var i = 0, len = subTree.length;
 								for(; i < len; i++){
 									_connector.updateChild(subTree[i], e.data.object, tree, name);
@@ -131,9 +167,16 @@ Seed({
 							}else if(subTree.children && subTree.children[name]){
 								_connector.updateChild(subTree, e.data.object, tree, name);
 							}else if(subTree.name === name){
+								
 								_connector.updateChild(subTree, e.data.object, tree, name);
+								if(Mold.isArray(e.data.object)){
+									_connect(model, subTree, properties, path, tree);
+								}
+							}else{
+								console.log("ELSE")
 							}
 							break;
+
 						case "splice":
 							if(!e.data.addedCount && e.data.removed.length){
 								if(Mold.isArray(subTree)){
@@ -172,6 +215,7 @@ Seed({
 			watchArray : function(model, subTree, properties, path, tree){
 				model.off(path + ".changed");
 				model.on(path + ".changed", function(e){
+
 					switch(e.data.type){
 						case "update":
 							if(Mold.isObject(e.data.object)){
@@ -189,6 +233,7 @@ Seed({
 				});
 			},
 			parseArray : function(model, subTree, properties, path, tree){
+				this.addModelToDomElements(subTree, model, path);
 				var i = 0, len = subTree.children.length;
 				for(; i < len; i++){
 					var newPath = path + "." + i;
@@ -197,12 +242,15 @@ Seed({
 				}
 			},
 			parseObject : function(model, subTree, properties, path, tree){
+				this.addModelToDomElements(subTree, model, path);
+
 				for(var prop in properties){
 				
 					var newPath = path + "." + prop;
 
 					if(subTree.children){
 						if(subTree.children[prop]){
+
 							_connector.watchObjectProp(model, subTree.children[prop], properties[prop], newPath, tree, prop)
 						}
 					}else{
@@ -216,7 +264,6 @@ Seed({
 		
 		
 		var _connect = function(model, subTree, properties, path, tree){
-
 			if(Mold.isArray(properties)){
 				_connector.parseArray(model, subTree, properties, path, tree);
 			}else if(Mold.isObject(properties)){

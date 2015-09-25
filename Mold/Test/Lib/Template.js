@@ -560,22 +560,38 @@ Seed({
 			it("tests two way model binding", function(){
 				var template = false, model = false;
 
-				it("create new template with nested blocks", function(go){
+				it("create new template", function(){
 
 					template = new Template(function(){/*|
-						<div>{{model}}</div>
 
-						<input type="text" value="{{>model}}">
+						{{#test}}
+						<div>{{model}}</div>
+						<input type="text" mold-bind="model" value="">
+						{{/test}}
+
+						
 					|*/});
 
+
+					if(!Mold.isNodeJS){
+						template.appendTo(document.body)
+					}
+				
+
 					model = new Mold.Lib.Model({
-						model : string
+						test : [
+							{ model : "string" }
+						]
 					});
 
+					template.tree.then(function(tree){
+						console.log(tree)
+						template.connect(model);
+					})
 
-					template.connect(model);
+				
+					model.data.test = data;
 
-					
 				})
 			})
 

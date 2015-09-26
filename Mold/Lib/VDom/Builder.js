@@ -38,6 +38,7 @@ Seed({
 		var BLOCK_NEGATIV = "{{^";
 		var BLOCK_END = "{{/";
 		var VALUE = "{{";
+		var BINDED_VALUE = "{{*";
 		var END = "}}";
 
 		var _parseAttributes = function(attributes, domNode){
@@ -157,12 +158,18 @@ Seed({
 						}
 
 						//Value
-						if(Mold.startsWith(selected.nodeValue, VALUE)){
-							var name = selected.nodeValue.replace(VALUE, "").replace(END, "");
+						if(Mold.startsWith(selected.nodeValue, VALUE) || Mold.startsWith(selected.nodeValue, BINDED_VALUE)){
+
+							var binding = (Mold.startsWith(selected.nodeValue, BINDED_VALUE)) ? true : false;
+							var name = selected.nodeValue.replace(BINDED_VALUE, "").replace(VALUE, "").replace(END, "");
+					
+					
 							var parts = _getFilter(name);
+							console.log("name", name, parts)
 							var valueNode = new ValueNode({
 								name : parts.name,
 								filter : parts.filter,
+								binding : binding,
 								isPointer : (parts.name === ".") ? true : false
 							});
 

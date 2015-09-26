@@ -23,7 +23,7 @@ Seed({
 		
 		switch(element.attr('type')){
 			case "text" :
-				element.on('keyup', function(e){
+				element.on('keydown', function(e){
 
 					setValue(element.attr("name"), element.val());
 				})

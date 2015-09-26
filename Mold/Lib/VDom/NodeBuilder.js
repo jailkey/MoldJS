@@ -62,7 +62,9 @@ Seed({
 							_addToCollection(vDomNodes, getArray, selected.name, new ValueNode({
 								name : selected.name,
 								parent : parent || false,
-								isString : isStringNode
+								isString : isStringNode,
+								binding : selected.binding,
+								filter : selected.filter
 							}));
 							break;
 
@@ -71,13 +73,15 @@ Seed({
 							if(isStringNode){
 								var vdom = _createProtoString(selected.value);
 							}else{
-								console.log("create block node", parent)
+								
 								var vdom = _createProtoDom(selected.value, parent)[1];
 							}
 							_addToCollection(vDomNodes, getArray, selected.name, new BlockNode({
 								name : selected.name,
 								parent : parent || false,
-								isString : isStringNode
+								isString : isStringNode,
+								binding : selected.binding,
+								filter : selected.filter
 							}));
 							break;
 					}

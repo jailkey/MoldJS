@@ -557,16 +557,16 @@ Seed({
 				})
 			})
 
-			it("tests two way model binding", function(){
+			it("tests two way model binding with array", function(){
 				var template = false, model = false;
 
-				it("create new template", function(){
+				it("create new template add a model with a list ", function(done){
 
 					template = new Template(function(){/*|
 
 						{{#test}}
-						<div>{{model}}</div>
-						<input type="text" mold-bind="model" value="">
+							<div>{{model}}</div>
+							<input type="text" mold-bind="model" value="">
 						{{/test}}
 
 						
@@ -585,12 +585,74 @@ Seed({
 					});
 
 					template.tree.then(function(tree){
-						console.log(tree)
 						template.connect(model);
 					})
 
+					template.on("renderd", function(e){
+						//console.log("e", e.data.tree.dom.children.test.children[0].model.data)
+						if(e.data.tree.dom.children.test.children[0].model.data){
+							expect(e.data.tree.dom.children.test.children[0].model.data).toBe("test")
+							done();
+						}
+					})
 				
-					model.data.test = data;
+					model.data.test = [
+						{ model : "test" }
+					];
+
+				})
+			})
+
+			it("tests two way model binding with object", function(){
+				var template = false, model = false;
+
+				it("create new template add a model with a object ", function(done){
+
+					template = new Template(function(){/*|
+
+						{{#test}}
+							<div>{{model}}</div>
+							<input type="text" mold-bind="model" value="">
+						{{/test}}
+							
+						{{anders}}
+
+
+						<input type="text" mold-bind="anders" value="">
+						
+					|*/});
+
+
+					if(!Mold.isNodeJS){
+						template.appendTo(document.body)
+					}
+				
+
+					model = new Mold.Lib.Model({
+						test : {
+							model : "string"
+						},
+						anders : "string"
+					});
+
+					template.tree.then(function(tree){
+						template.connect(model);
+					})
+
+					template.on("renderd", function(e){
+						console.log("R->", e.data.tree.dom)
+						/*if(e.data.tree.dom.children.test.children.model.data){
+							expect(e.data.tree.dom.children.test.children.model.data).toBe("test")
+							done();
+						}*/
+					})
+				
+					model.data.test = {
+						model : "noch ein test"
+					}
+
+					model.data.anders = "test"
+					
 
 				})
 			})

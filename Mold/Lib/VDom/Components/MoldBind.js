@@ -22,28 +22,59 @@ Seed({
 		var model = element.moldModel.model;
 
 
-		var initBinding = function(){
-			
-			if(path && model){
-				switch(element.attr('type')){
-					case "text":
-						element.on("keyup", function(){
-							console.log("path", path)
-							model.set(path + "." + collection["mold-bind"], element.val());
-						})
-						break;
-				}
+		var setData = function(data){
+			if(element.val() !== data){
+				element.val(data);
 			}
 		}
 
+		var bindingName = collection["mold-bind"];
+	
+		var initBinding = function(){
+			
+			if(path && model){
+
+				if(~bindingName.indexOf('.')){
+					var subPath = bindingName.substring(0, bindingName.indexOf('.'))
+					var modelName = bindingName.substring(bindingName.indexOf('.') + 1, bindingName.length);
+				}else{
+					var modelName = bindingName;
+				}
+				switch(element.attr('type')){
+					case "text":
+						element.on("keyup", function(){
+							console.log("path", path + "." + collection["mold-bind"]);
+
+							model.set(path + "." + collection["mold-bind"], element.val());
+						})
+						break;
+					case "radio":
+						//element.on
+				}
+
+				model.on(path + ".changed", function(e){
+					setData(e.data[modelName]);
+				})
+
+			
+				if(subPath){
+					var data = model.get(path + "." + subPath);
+				}else{
+					var data = model.get(path);
+				}
+
+				setData(data[modelName]);
+			}
+		}
+
+		
+
 		Mold.watch(element.moldModel, "model", function(name, value, newValue){
-			console.log("init model", model)
 			model = newValue;
 			initBinding();
 		})
 
 		Mold.watch(element.moldModel, "path", function(name, value, newValue){
-			console.log("init path", path)
 			path = newValue;
 			initBinding();
 		})

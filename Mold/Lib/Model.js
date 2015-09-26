@@ -165,11 +165,12 @@ Seed({
 
 		this.publics = {
 /**
- * @method query
- * @description returns the model data by a path query
- * @return {mixed} returns the queryed data or null
+ * @method get
+ * @description returns the model data by a given path
+ * @parameter {string} an object path
+ * @return {mixed} returns requested data or null
  */
- 			query : function(path){
+ 			get : function(path){
  				var parts = path.split(".");
  				var data = this;
  				var selected = false;
@@ -185,24 +186,21 @@ Seed({
  				return data;
  			},
 
- 			create : function(){
-
- 			},
-
+/**
+ * @method set 
+ * @description set the model data by a given path
+ * @param {string} path the object path
+ * @param {mixed} data the data
+ */
  			set : function(path, data){
- 				console.log("path", path, data)
  				var prop = path.substring(path.lastIndexOf(".") + 1,  path.length);
  				var path = path.substring(0,  path.lastIndexOf("."));
- 				console.log("query", this.query(path)[prop])
- 				var result = this.query(path);
- 				console.log("resul", result)
+ 				var result = this.get(path);
  				if(Mold.isArray(result)){
- 					console.log("result is array")
  					result.splice(+prop, 1, data);
  				}else{
  					result[prop] = data
  				}
- 				//this.query(path)[prop] = data;
  			},
 
 /**

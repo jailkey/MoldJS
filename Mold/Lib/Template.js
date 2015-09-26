@@ -82,37 +82,41 @@ Seed({
 		 */
 		var _connector = {
 			renderTimer : false,
-			addModelToElement : function(element, model, path){
-
+			addModelToElement : function(element, model, path, properties){
 				if(element.type === 5 || element.type === 9 || element.type === 2){
+					console.log("bind", element.name, path, properties)
 					element.moldModel.model = model;
 					element.moldModel.path = path;
 					if(element.renderDom){
-						
-						this.addModelToDomElements(element.renderDom, model, path);
+						this.addModelToDomElements(element.renderDom, model, path, properties);
 					}
 				}
 			},
-			addModelToDomElements : function(subTree, model, path){
-			
-				if(subTree.renderDom){
-					this.addModelToElement(subTree, model, path)	
-				}else if(Mold.isArray(subTree)){
+			addModelToDomElements : function(subTree, model, path, properties){
+				if(Mold.isObject(properties) || Mold.isArray(properties)){
+					if(subTree.renderDom){
+						this.addModelToElement(subTree, model, path, properties)	
+					}else if(Mold.isArray(subTree)){
 
-					for(var i = 0; i < subTree.length; i++){
-					
-						if(Mold.isArray(subTree[i])){
-							for(var y = 0; y < subTree[i].length; y++){
-								this.addModelToElement(subTree[i][y], model, path + "." + i);
+						for(var i = 0; i < subTree.length; i++){
+							
+							if(Mold.isArray(subTree[i])){
+								for(var y = 0; y < subTree[i].length; y++){
+									if(Mold.isArray(properties)){
+										this.addModelToElement(subTree[i][y], model, path + "." + i, properties[i]);
+									}else if(Mold.isObject(properties)){
+										this.addModelToElement(subTree[i][y], model, path, properties);
+									}
+								}
+							}else if(subTree[i].renderDom){
+								this.addModelToDomElements(subTree[i], model, path, properties);
 							}
-						}else if(subTree[i].renderDom){
-							this.addModelToElement(subTree[i], model, path + "." + i);
+						
 						}
-					
-					}
-				}else if(Mold.isObject(subTree)){
-					for(var prop in subTree){
-						this.addModelToElement(subTree[prop], model, path)	
+					}else if(Mold.isObject(subTree)){
+						for(var prop in subTree){
+							this.addModelToElement(subTree[prop], model, path, properties)	
+						}
 					}
 				}
 			},
@@ -150,10 +154,11 @@ Seed({
 				
 			},
 			watchObjectProp : function(model, subTree, properties, path, tree, name){
-
+					//console.log("watch onject", path)
+				//this.addModelToDomElements(subTree, model, path, properties);
 				model.off(path + ".changed");
 				model.on(path + ".changed", function(e){
-
+					
 					switch(e.data.type){
 						case "update":
 							//if subtree is an array update all childnodes
@@ -175,6 +180,8 @@ Seed({
 							}else{
 								console.log("ELSE")
 							}
+
+							_connector.addModelToDomElements(subTree, model, path, properties);
 							break;
 
 						case "splice":
@@ -233,7 +240,7 @@ Seed({
 				});
 			},
 			parseArray : function(model, subTree, properties, path, tree){
-				this.addModelToDomElements(subTree, model, path);
+				this.addModelToDomElements(subTree, model, path, properties);
 				var i = 0, len = subTree.children.length;
 				for(; i < len; i++){
 					var newPath = path + "." + i;
@@ -242,7 +249,7 @@ Seed({
 				}
 			},
 			parseObject : function(model, subTree, properties, path, tree){
-				this.addModelToDomElements(subTree, model, path);
+				this.addModelToDomElements(subTree, model, path, properties);
 
 				for(var prop in properties){
 				

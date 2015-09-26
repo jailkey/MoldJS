@@ -605,17 +605,23 @@ Seed({
 						var y = 0, subLen = selected.length;
 						this.pointer[i] = [];
 						for(; y < subLen; y++){
-							selected.parentElement = this.parentElement;
-							var item = selected[y].render();
-							item.stopDirective = false;
-
-							if(lastElement){
-								lastElement.parentNode.insertBefore(item, lastElement.nextSibling);
+							if(selected[y].parentElement === this.parentElement && selected[y].type !== 2){
+								var item = selected[y];
+								item.render(); 
 							}else{
+								selected[y].parentElement = this.parentElement;
 
-								this.parentElement.insertBefore(item, this.referenceNode);
+								var item = selected[y].render();
+								item.stopDirective = false;
+
+								if(lastElement){
+									lastElement.parentNode.insertBefore(item, lastElement.nextSibling);
+								}else{
+
+									this.parentElement.insertBefore(item, this.referenceNode);
+								}
+								this.pointer[i][y] = item;
 							}
-							this.pointer[i][y] = item;
 							lastElement = item;
 						}
 					}

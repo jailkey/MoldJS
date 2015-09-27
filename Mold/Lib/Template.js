@@ -84,7 +84,6 @@ Seed({
 			renderTimer : false,
 			addModelToElement : function(element, model, path, properties){
 				if(element.type === 5 || element.type === 9 || element.type === 2){
-					console.log("bind", element.name, path, properties)
 					element.moldModel.model = model;
 					element.moldModel.path = path;
 					if(element.renderDom){
@@ -142,7 +141,6 @@ Seed({
 				}
 			},
 			updateChild : function(child, data, tree, name){
-				
 				//if blocknode
 				if(child.type === 2){
 					var blockData = {};
@@ -154,11 +152,8 @@ Seed({
 				
 			},
 			watchObjectProp : function(model, subTree, properties, path, tree, name){
-					//console.log("watch onject", path)
-				//this.addModelToDomElements(subTree, model, path, properties);
 				model.off(path + ".changed");
 				model.on(path + ".changed", function(e){
-					
 					switch(e.data.type){
 						case "update":
 							//if subtree is an array update all childnodes
@@ -177,8 +172,6 @@ Seed({
 								if(Mold.isArray(e.data.object)){
 									_connect(model, subTree, properties, path, tree);
 								}
-							}else{
-								console.log("ELSE")
 							}
 
 							_connector.addModelToDomElements(subTree, model, path, properties);

@@ -107,7 +107,7 @@ Seed({
 				lineCounter++;
 				line = dataParts.shift();
 			}
-			console.log("output", output)
+			//console.log("output", output)
 			return output;
 		}
 
@@ -347,6 +347,9 @@ Seed({
 							break;
 						case "async":
 							output['async'] = true;
+							break;
+						case "deprecated":
+							output['deprecated'] = true;
 							break;
 						default:
 							console.log("not found", action, selected)

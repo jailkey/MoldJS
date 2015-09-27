@@ -22,7 +22,9 @@ Seed({
 			__test__: [{{name}}]({{path}}.md) 
 			{{/test}}
 
-			{{#extend|exists}}}__extends__: {{extend}}  {{/extend}}
+			{{#extend}}
+			__extends__: {{$parent.extend}}  
+			{{/extend}}
 
 			{{#description}}
 			__{{description}}__
@@ -99,11 +101,25 @@ Seed({
 		|*/}, { parseAsString : true});
 
 
+		var overview = new Mold.Lib.Template(function(){/*|
+			{{#overview|sort:value=name:asc}}
+			__[{{name}}]({{path}}.md)__  
+			{{/overview}}
 
+		|*/}, { parseAsString : true});
 		
 		this.publics = {
+		/**
+		 * @method report 
+		 * @description returns a markdown document genereated by the given data
+		 * @param  {object} data 
+		 * @return {promise}    
+		 */
 			report : function(data){
-				return template.getString(data)
+				return template.getString(data);
+			},
+			overview : function(data){
+				return overview.getString(data);
 			},
 			getFileExtension : function(){
 				return ".md";

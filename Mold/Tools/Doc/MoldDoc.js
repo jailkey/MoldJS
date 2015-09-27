@@ -366,7 +366,7 @@ Seed({
 		var file = new File(url);
 
 		this.publics = {
-			get : function(callback){
+			get : function(){
 				return new Promise(function(resolve, reject){
 					file
 						.content(function(data){

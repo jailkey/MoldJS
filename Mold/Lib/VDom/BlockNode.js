@@ -305,7 +305,6 @@ Seed({
 			 * @param  {number} len  len of 
 			 */
 			this.deleteListeItems = function(from, len){
-				console.log("deleteListeItems")
 				this.data.splice(from, len);
 				var result = this.execFilter(this.data);
 
@@ -327,7 +326,6 @@ Seed({
 			this.execFilter = function(data){
 
 				for(var filterName in this.filter){
-					console.log("exec data",filterName, data)
 					var filter = Mold.Lib.Filter.get(filterName);
 					if(filter){
 

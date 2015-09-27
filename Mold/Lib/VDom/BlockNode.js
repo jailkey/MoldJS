@@ -6,7 +6,8 @@ Seed({
 		dna : "static",
 		version : "0.0.2",
 		include : [
-			"Mold.Lib.VDom.ProtoNode"
+			"Mold.Lib.VDom.ProtoNode",
+			"Mold.Lib.Filter"
 		]
 	},
 	function(){
@@ -328,7 +329,6 @@ Seed({
 				for(var filterName in this.filter){
 					var filter = Mold.Lib.Filter.get(filterName);
 					if(filter){
-
 						var copy = Mold.copy(data)
 						copy = filter(copy, this.filter[filterName]);
 						if(copy === true){

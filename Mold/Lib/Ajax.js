@@ -1,4 +1,18 @@
-﻿Seed({
+﻿/**
+ * @description ajax class provids methods to communicate via xhr
+ * @param {object} ajaxConf configuration object
+ * @event ajax.error fires on error
+ * @event ajax.not.initialized fires on xhr state initialized
+ * @event ajax.connection.established fires on xhr state connection established
+ * @event ajax.request.received fires on xhr state request received
+ * @event ajax.request.processing fires on xhr state request processing
+ * @event ajax.progress fires on progess when an upload occurs
+ * @event ajax.get.success
+ * @event ajax.post.success
+ * @event ajax.put.success
+ * @event ajax.delete.success
+ */
+Seed({
 		name : "Mold.Lib.Ajax",
 		dna : "class",
 		author : "Jan Kaufmann",
@@ -18,9 +32,13 @@
 		Mold.mixin(this, events);
 
 		this.publics = {
-
-
-			get : function(url, data){
+		/**
+		 * method get 
+		 * @description creates a get request
+		 * @param  {string} url the url to request
+		 * @return {promise} returns a promise
+		 */
+			get : function(url){
 				
 				return new Mold.Lib.Promise(function(fulfilled, rejected){
 
@@ -34,7 +52,14 @@
 
 				});
 			},
-
+		
+		/**
+		 * @method post 
+		 * @description creates a post request
+		 * @param  {string} url a string with the request url
+		 * @param  {object} data an object with request data
+		 * @return {promise} returns a promise
+		 */
 			post : function(url, data, type){
 				return  new Mold.Lib.Promise(function(fulfilled, rejected){
 
@@ -50,14 +75,58 @@
 				});
 			},
 
-			put : function(){
+		/**
+		 * @method put
+		 * @description creates a put request
+		 * @param  {string} url a string with the request url
+		 * @param  {object}  data an object with request data
+		 * @return {promise} returns a promise
+		 */
+			put : function(url, data){
+				return  new Mold.Lib.Promise(function(fulfilled, rejected){
 
+					events.on("ajax.put.success", function(value){
+						fulfilled(value);
+					}).on("ajax.error", function(value){
+						rejected(value);
+					});
+					
+					type = type || 'text';
+					that.send(url, data, { method : "PUT", type : type});
+
+				});
 			},
 
-			delete : function(){
+		/**
+		 * @method delete 
+		 * @description creates a delete request
+		 * @param  {string]} url a string with the request url
+		 * @return {promise} returns a promise
+		 */
+			delete : function(url){
+				return  new Mold.Lib.Promise(function(fulfilled, rejected){
 
+					events.on("ajax.delete.success", function(value){
+						fulfilled(value);
+					}).on("ajax.error", function(value){
+						rejected(value);
+					});
+					
+					type = type || 'text';
+					that.send(url, data, { method : "DELETE", type : type});
+
+				});
 			},
-		
+			
+		/**
+		 * @method request 
+		 * @description creates a ajax request 
+		 * @param  {string]} url a string with the request url
+		 * @param  {object} data an object with request data
+		 * @param  {object} config an configuration object
+		 * @return {promise} returns a promise
+		 */
+			request : this.send,
 			send : function(url, data, config){
 				var xhr; 
 

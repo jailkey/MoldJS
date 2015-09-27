@@ -537,18 +537,91 @@ Seed (
 		element.val = function(value){
 			if(Mold.is(value)){
 				switch(element.tagName.toLowerCase()){
+
 					case "input":
-						element.value = value;
+						switch(element.attr("type")){
+
+							case "radio":
+								var selector = 'input[type=radio][name=' + element.attr("name") + ']'
+								var radioButtons = document.querySelectorAll(selector);
+								for(var y = 0; y < radioButtons.length; y++){
+									if(radioButtons[y].value == value){
+										radioButtons[y].checked = true;
+									}else{
+										radioButtons[y].checked = false;
+									}
+								}
+								break;
+
+							case "checkbox":
+								if(element.value === value){
+									element.checked = true;
+								}else{
+									element.checked = false;
+								}
+								break;
+
+							default:
+								element.value = value;
+						}
 						break;
+
 					case "select":
+						var options = element.querySelectorAll("option");
+						for(var i = 0; i < options.length; i++){
+							if(options[i].value === value || options[i].textContent === value){
+								options[i].selected = true;
+							}else{
+								options[i].selected = false;
+							}
+						}
+						break;
+
 					default:
 						element.textContent = value;
 						break;
 				}
 			}
 			switch(element.tagName.toLowerCase()){
+
 				case "input":
+					switch(element.attr("type")){
+
+						case "radio":
+							var selector = 'input[type=radio][name=' + element.attr("name") + ']';
+							var radioButtons = document.querySelectorAll(selector);
+							for(var y = 0; y < radioButtons.length; y++){
+								if(radioButtons[y].checked){
+									return radioButtons[y].value;
+								}
+							}
+							break;
+
+						case "checkbox":
+							if(element.checked){
+								return element.value;
+							}else{
+								if(element.attr("false-value")){
+									return element.attr("false-value");
+								}
+								return false;
+							}
+							break;
+
+						default:
+							return element.value; 
+					}
 					return element.value;
+
+				case "select":
+					var options = element.querySelectorAll("option");
+					for(var i = 0; i < options.length; i++){
+						if(options[i].selected){
+							return (Mold.is(options[i].value)) ? options[i].value : options[i].textContent;
+						}
+					}
+					break;
+
 				default:
 					return element.textContent;
 			}

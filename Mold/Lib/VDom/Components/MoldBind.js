@@ -1,3 +1,7 @@
+/**
+ * @description binds model data to an element
+ * @example Mold/Test/Lib/Template#binding
+ */
 Seed({
 		name : "Mold.Lib.VDom.Components.MoldBind",
 		dna : "component",
@@ -41,18 +45,32 @@ Seed({
 					var modelName = bindingName;
 				}
 				switch(element.attr('type')){
-					case "text":
-						element.on("keyup", function(){
-							console.log("path", path + "." + collection["mold-bind"]);
 
+					case "range":
+					case "radio":
+					case "checkbox":
+						element.on("change", function(){
+							console.log("value", element.val())
 							model.set(path + "." + collection["mold-bind"], element.val());
 						})
 						break;
-					case "radio":
-						//element.on
+
+					default :
+						element.on("keyup", function(){
+							model.set(path + "." + collection["mold-bind"], element.val());
+						})
+						break;
+				}
+
+				if(element.tagName.toLowerCase() === "select"){
+					element.on("change", function(){
+						console.log("value", element.val())
+						model.set(path + "." + collection["mold-bind"], element.val());
+					})
 				}
 
 				model.on(path + ".changed", function(e){
+
 					setData(e.data[modelName]);
 				})
 

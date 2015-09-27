@@ -173,6 +173,8 @@ Seed({
 					})
 					return promise
 				}
+				_fulfill(value);
+				return this;
 			}
 		}
 	}

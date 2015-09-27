@@ -93,8 +93,6 @@ Seed({
 					if(!Mold.isArray(properties[e.name]) && !Mold.isObject(properties[e.name]) && properties[e.name] !== undefined){
 						_validateValue(e.object[e.name], properties[e.name]);
 					}
-					console.log(name + ".changed");
-					console.log(name + "." + e.name + ".changed")
 					if(!Mold.isArray(e.object[e.name]) || e.type === "update"){
 
 						_that.trigger(name + ".changed", e);
@@ -161,6 +159,8 @@ Seed({
 				_that.trigger("data." + name + ".changed", e);
 			});
 		}
+
+
 
 
 		this.publics = {

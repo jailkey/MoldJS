@@ -18,7 +18,7 @@ Seed({
 
 
 		var _that = this,
-			_commands = [],
+			_commands = {},
 			readline = require('readline'),
 			fs = require("fs"),
 			_reader = false,
@@ -222,11 +222,8 @@ Seed({
 
 		//CLI private methodes
 		var _getCommand = function(name){
-			return Mold.find(_commands, function(value){
-				if(value.command === name){
-					return value;
-				}
-			})
+			return _commands[name];
+			
 		}
 
 		var init = function(){
@@ -392,7 +389,7 @@ Seed({
 	
 		 */
 			addCommand : function(command){
-				_commands.push(command, this);
+				_commands[command.command] = command;
 			}
 		}
 	}

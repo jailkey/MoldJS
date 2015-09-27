@@ -232,6 +232,7 @@ Seed({
 		var _parseComment = function(comment){
 			var output = {
 				parameter : [],
+				events : [],
 				private : false,
 				public : false,
 				property : false,
@@ -322,7 +323,10 @@ Seed({
 						case "fires":
 						case "trigger":
 						case "event":
-							output['trigger'] = Mold.trim(_getFrom(selected, 1));
+							output['events'].push({
+								name : Mold.trim(trim_getParameter(selected, 1)),
+								description : Mold.trim(_getFrom(selected, 2))
+							})
 							break;
 						case "callback":
 							output['callback'] = Mold.trim(_getFrom(selected, 1));

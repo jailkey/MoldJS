@@ -7,7 +7,8 @@ Seed({
 			"Mold.Tools.ProjectHandler",
 			"Mold.Tools.Doc.MoldDoc",
 			"Mold.Tools.Doc.MarkDownReporter",
-			"Mold.Tools.ProjectHandler"
+			"Mold.Tools.ProjectHandler",
+			"Mold.Lib.Promise"
 		],
 		npm : {
 			"mkdirp" : "*"
@@ -29,6 +30,7 @@ Seed({
 			'-reporter' : {
 				'description' : 'Defines the reporter, possible values are "markdown", "html", "json", or a reporter seed'
 			}
+
 		},
 		execute : function(parameter, cli){
 
@@ -39,20 +41,36 @@ Seed({
 			var exportPath = Mold.LOCAL_REPOSITORY + "docs/en/";
 			var reporter = new Mold.Tools.Doc.MarkDownReporter();
 			var projectHandler = new Mold.Tools.ProjectHandler()
+			var overviewData = [];
+			var fileCounter = 0;
 
+			var promise = new Mold.Lib.Promise();
+
+			var repo = new Mold.Tools.RepoHandler(Mold.LOCAL_REPOSITORY);
+
+			console.log("LOAD LOCAL DOC")
 
 			var _docFile = function(path){
-			
+				
 				if(fs.existsSync(path)){
 					var doc = new Mold.Tools.Doc.MoldDoc(path);
 					doc.get().then(function(data){
-	
+						
+						var target = exportPath + data.name.replace(/\./g, "/") + reporter.getFileExtension();
+						var targetPath = target.split("/").splice(0, target.split("/").length - 1).join("/") + "/";
+						overviewData.push({
+							name : data.name,
+							path : data.name.replace(/\./g, "/"),
+						})
+						fileCounter++;
+						if(repo.getLength() === fileCounter){
+							promise.resolve()
+						}
 						reporter
 							.report(data)
 							.then(function(fileData){
 						
-								var target = exportPath + data.name.replace(/\./g, "/") + reporter.getFileExtension();
-								var targetPath = target.split("/").splice(0, target.split("/").length - 1).join("/") + "/";
+							
 								mkdirp(targetPath, function(){
 								 	fs.writeFile(pathes.normalize(target), fileData, function(err) {
 								 		console.log("\u001b[32m" + target + " successfully created!" +  "\u001b[39m");
@@ -67,19 +85,36 @@ Seed({
 			}
 
 			//Test Local Repo
-			var documentedRepo = function(repo, external){
-				var repo = new Mold.Tools.RepoHandler(Mold.LOCAL_REPOSITORY);
+			var documentedRepo = function(){
+			
 				
 				repo.eachSeed(function(path){
 					_docFile(path)
+
 				});
+
+				promise.then(function(){
+					console.log("START INDEX")
+					reporter
+						.overview({ overview : overviewData })
+						.then(function(fileData){
+							var target = exportPath + "index" + reporter.getFileExtension();
+							fs.writeFile(pathes.normalize(target), fileData, function(err) {
+								console.log("\u001b[32m" + target + " successfully created!" +  "\u001b[39m");
+								fs.chmodSync(pathes.normalize(target), 0755);
+							})
+
+						})
+				})
+				
+
 			}
 
 			if(parameter.only){
 				_docFile(Mold.LOCAL_REPOSITORY + parameter.only.replace(/\./g, "/") + ".js");
 			}else{
 				//test standard local
-				documentedRepo(Mold.LOCAL_REPOSITORY);
+				documentedRepo();
 				_docFile(Mold.LOCAL_REPOSITORY + "Mold.js")
 			}
 			

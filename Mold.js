@@ -27,6 +27,7 @@ var Mold = (function(config){
 		_inProzess = {},
 		_isDom = false,
 		_pathes = {},
+		_loadedConfs = {},
 		undefined;
 	
 	//test if Mold run in browser or not
@@ -102,6 +103,9 @@ var Mold = (function(config){
 	}
 	var clearCacheCounter = 0;
 	var _areSeedsAdded = function(included, parent){
+		if(_Mold[parent.name].overwrite && !_Mold[parent.name].overwritten){
+			return false;
+		}
 		var i = 0, len = included.length;
 		for(; i < len; i++){
 			
@@ -335,13 +339,22 @@ var Mold = (function(config){
 				}else{
 					if(!_Mold[subElement]){
 
-						Mold.load({ name : subElement, isExternal : _externalSeeds[seedName] || false, parent : { name : seedName } });
+						Mold.load({ name : subElement, isExternal : _externalSeeds[seedName] || false, parent : { name : seedName }, overwrite : _Mold[seedName].overwrite});
 					}
 				}
 			});
 			return subSeedList;
 		}
 		return seedList;
+	}
+
+	var _deleteLoaded = function(seedName){
+		_Mold[seedName] = false;
+		_externalSeeds[seedName] = false;
+		_createdMold[Mold.cleanSeedName(seedName)] = false;
+		delete _Mold[seedName];
+		delete _externalSeeds[seedName];
+		delete _createdMold[Mold.cleanSeedName(seedName)];
 	}
 
 	var _postProcess = function(createdSeed, rawSeed){
@@ -1264,6 +1277,8 @@ var Mold = (function(config){
 * @param (object) seed - Expects a seed object
 **/
 		addSeed : function(seed){
+		
+
 			var that = this;
 			//check platform
 			if(seed.platform){
@@ -1303,35 +1318,49 @@ var Mold = (function(config){
 					var startCreating = true;
 					seed.imports = seed.imports || [];
 					
+					//if overwrite is defined and overwritten is false force loading subelements
+					var forceLoading = false;
+					if(_Mold[seed.name].overwrite && !_Mold[seed.name].overwritten){
+						forceLoading = true;
+						_Mold[seed.name].overwritten = true;
+
+					}
+
 					Mold.each(loadingproperties, function(property){
 						
 						if(seed[property]){
+
 							seed.imports = seed.imports.concat(_getImports(seed[property]));
 							seed[property] = _removeImports(seed[property]);
 
 							if(typeof seed[property] === "object"){
 
 								startCreating = _areSeedsAdded(seed[property], seed);
-							
-								if(!startCreating){
+
+								if(!startCreating || forceLoading){
+
 									Mold.each(seed[property], function(element){
+
 										if(Mold.isArray(element)){
+
 											seed[property] = _loadSubSeeds(seed[property], seed.name);
 										}else{
-											if(!_Mold[element] || _Mold[seed.name].overwrite){
-												Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false, parent : seed, overwrite : _Mold[seed.name].overwrite });
+											if(!_Mold[element] || forceLoading){
+												Mold.load({ name : element, isExternal : _externalSeeds[seed.name] || false, parent : seed, overwrite : _Mold[seed.name].overwrite});
 											}
 										}
 									});
+
 								}
 							}else{
 
 								startCreating = _isSeedAdded(Mold.cleanSeedName(seed[property], seed));
-								
-								if(!startCreating){
+							
+								if(!startCreating || forceLoading){
 									Mold.load({ name : seed[property], isExternal : _externalSeeds[seed.name] || false, parent : seed, overwrite : _Mold[seed.name].overwrite});
 								}
 							}
+							
 						}
 					});
 					
@@ -1480,6 +1509,7 @@ var Mold = (function(config){
 				}
 
 				if(nodePath.existsSync(pathes.normalize(path))){
+
 					_pathes[seedConf.seedName] = pathes.normalize(path);
 
 					if(seedConf.overwrite){
@@ -1575,6 +1605,28 @@ var Mold = (function(config){
 		return rule
  	},
 
+ 	loadedConf : [],
+ /**
+  * @method  checkLoadedConf 
+  * @description checks if a config ist loaded
+  * @param  {object} conf the configuration
+  * @return {boolean} returns true if config was loaded else false
+  */
+ 	checkLoadedConf : function(conf){
+ 		var i = 0, len = this.loadedConf.length;
+ 		for(; i < len; i++){
+ 			if(
+ 				this.loadedConf[i].name === conf.name
+ 				&& this.loadedConf[i].isExternal === conf.isExternal
+ 				&& this.loadedConf[i].isScript === conf.isScript
+ 				&& this.loadedConf[i].overwrite === conf.overwrite
+ 			){
+ 				return true;
+ 			}
+ 		}
+ 		return false;
+ 	},
+
 /**
 * @methode load
 * @desc Load the specified Seed
@@ -1583,15 +1635,23 @@ var Mold = (function(config){
 **/
 	load : function(seed){
 		
+	
+
 		var rule = Mold.getLoadingRule(seed);
+
+		if(this.checkLoadedConf(seed)){
+			return new _loader(rule.seedName);
+		}
+		this.loadedConf.push(seed);
 
 		if(!rule){
 			throw new Error("No loading rule found!");
 		}
 		
 		var seedName = seed.name = rule.seedName;
+		
+		if(seed.overwrite && _Mold[seedName] && !_Mold[seedName].locked){
 
-		if(seed.overwrite && _Mold[seedName]){
 			_Mold[seedName] = false;
 			_externalSeeds[seedName] = false;
 			_createdMold[Mold.cleanSeedName(seedName)] = false;
@@ -2206,7 +2266,7 @@ Mold.addDNA({
 		Mold.ready(function(){
 			var mainScript = Mold.getMainScript();
 			if(mainScript){
-				Mold.load({ name : mainScript });
+				Mold.load({ name : mainScript, locked : true });
 			}
 		});
 	}else{

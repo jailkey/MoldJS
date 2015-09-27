@@ -557,7 +557,7 @@ Seed({
 				})
 			})
 
-			it("tests two way model binding with array", function(){
+			xit("tests two way model binding with array", function(){
 				var template = false, model = false;
 
 				it("create new template add a model with a list ", function(done){
@@ -603,7 +603,7 @@ Seed({
 				})
 			})
 
-			it("tests two way model binding with object", function(){
+			xit("tests two way model binding with object", function(){
 				var template = false, model = false;
 
 				it("create new template add a model with a object ", function(done){
@@ -655,6 +655,60 @@ Seed({
 					
 
 				})
+			})
+
+
+			it("tests diffrent form bindings", function(){
+				var template = false, model = false;
+
+				//#binding
+				it("create new template with bindings and add a model to it ", function(done){
+
+					template = new Template(function(){/*|
+
+						{{radio}}
+
+						<input type="radio" name="r" mold-bind="radio" value="1">
+						<input type="radio" name="r" mold-bind="radio" value="2">
+						<br>
+						{{checkbox}}
+						<input type="checkbox" mold-bind="checkbox" value="true" false-value="notrue">
+						<br>
+						{{selectbox}}
+						<select mold-bind="selectbox" mold-select="items.id as value items.val as label">
+							<option value="test1">label1</option>
+							<option value="test2">label2</option>
+						</select>
+						<br>
+						{{range}}
+						<input mold-bind="range" type="range" min="1" max="100" value="0">
+
+						
+					|*/});
+
+
+					if(!Mold.isNodeJS){
+						template.appendTo(document.body)
+					}
+				
+
+					model = new Mold.Lib.Model({
+						radio : "string",
+						checkbox : "string",
+						selectbox : "string",
+						range : "string"
+					});
+
+					template.connect(model);
+					
+					model.data.radio = 1;
+					model.data.checkbox = "true";
+					model.data.selectbox = "test2";
+					model.data.range = 20;
+					
+
+				})
+				///#binding
 			})
 
 

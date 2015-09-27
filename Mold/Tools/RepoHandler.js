@@ -49,7 +49,26 @@ Seed({
 			});		
 		}
 
+		var _repoLength = 0;
+		var _countRepo = function(){
+			var path = repoPath;
+			
+			if(!Mold.endsWith(path, "Mold/")){
+				path += "/Mold/"
+			}
+
+			_iterateThroughDir(path, function(){
+				_repoLength++;
+			});
+
+		}
+		_countRepo();
+	
+
 		this.publics = {
+			getLength : function(){
+				return _repoLength;
+			},
 			eachSeed : function(iterator){
 				var path = repoPath;
 

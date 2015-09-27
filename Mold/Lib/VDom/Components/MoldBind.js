@@ -50,7 +50,6 @@ Seed({
 					case "radio":
 					case "checkbox":
 						element.on("change", function(){
-							console.log("value", element.val())
 							model.set(path + "." + collection["mold-bind"], element.val());
 						})
 						break;
@@ -64,7 +63,6 @@ Seed({
 
 				if(element.tagName.toLowerCase() === "select"){
 					element.on("change", function(){
-						console.log("value", element.val())
 						model.set(path + "." + collection["mold-bind"], element.val());
 					})
 				}

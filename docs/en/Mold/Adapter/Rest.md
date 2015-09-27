@@ -9,31 +9,24 @@ __dna__: class
 	
 
 
+
 __extends__: Mold.Lib.Ajax  
 
 
 
-###Dependencies
+
+##Dependencies
 --------------
 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

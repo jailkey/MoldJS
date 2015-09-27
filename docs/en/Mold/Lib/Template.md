@@ -67,22 +67,28 @@ var template = new Mold.Lib.Template(function(){
  
 
 ###_connector
+
+
+
 __collection of methods to bind a model to the template__  
-Defined in row: 81  
+Defined in row: 82  
 
   
 
-
+returns: 
 
 
 
 
 ###connect
+
+
+
 __connects a model to the template__  
-Defined in row: 252  
+Defined in row: 298  
 
 __Arguments:__  
-* __model__ (_mold.lib.model_) -   
+ * __model__ (_mold.lib.model_) -   
 
 
 
@@ -93,7 +99,6 @@ __Example:__
 
 it("adds a model and some data", function(){
 
-	
 	modelTwo = new Mold.Lib.Model({
 		block : [ 
 			{
@@ -110,13 +115,18 @@ it("adds a model and some data", function(){
 
 	templateTwo.connect(modelTwo);
 
-
 	modelTwo.data.block.push({
 		subblock : [
 			{ background : Color.randomColor(), subitem : "one"},
 			{ background : Color.randomColor(), subitem : "two"},
 			{ background : Color.randomColor(), subitem : "three"},
 		]
+	})
+
+	templateTwo.on("renderd", function(e){
+		if(templateTwoTree.dom.children.block[0].children.length === 3){
+
+		}
 	})
 })
 
@@ -126,11 +136,14 @@ it("adds a model and some data", function(){
 
 
 ###setData
+
+
+
 __set the template data__  
-Defined in row: 270  
+Defined in row: 316  
 
 __Arguments:__  
-* __data__ (_object_) - expects the object data  
+ * __data__ (_object_) - expects the object data  
 returns: 
 
 
@@ -153,11 +166,14 @@ templateFour.setData({
 
 
 ###appendTo
+
+
+
 __appends the template to an element and render the template__  
-Defined in row: 294  
+Defined in row: 340  
 
 __Arguments:__  
-* __element__ (_element_) - the element where the template has to be appended  
+ * __element__ (_element_) - the element where the template has to be appended  
 returns: 
 
 
@@ -184,11 +200,14 @@ template.tree.then(function(tree){
 
 
 ###getString
+
+
+
 __set data to the template and renders the template__  
-Defined in row: 311  
+Defined in row: 357  
 
 __Arguments:__  
-* __data__ (_object_) - the data has to set  
+ * __data__ (_object_) - the data has to set  
 returns: 
 
 
@@ -204,7 +223,7 @@ returns:
 
 
 ####forms
-Defined in row: 244  
+Defined in row: 290  
 Parameter: 
 
 returns: 

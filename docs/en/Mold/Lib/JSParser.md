@@ -15,27 +15,18 @@ __test__: [Mold.Test.Lib.JSParser](../../Mold/Test/Lib/JSParser.md)
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

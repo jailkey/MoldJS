@@ -13,27 +13,18 @@ __dna__: class
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

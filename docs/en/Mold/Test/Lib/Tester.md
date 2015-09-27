@@ -13,27 +13,18 @@ __dna__: test
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

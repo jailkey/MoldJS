@@ -5,7 +5,7 @@
 __file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Event.js  
 __dna__: class  
 __author__: Jan Kaufmann  
-__version__: 0.1  
+
 	
 
 __test__: [Mold.Test.Lib.Event](../../Mold/Test/Lib/Event.md) 
@@ -15,28 +15,19 @@ __test__: [Mold.Test.Lib.Event](../../Mold/Test/Lib/Event.md)
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.EventStore](../../Mold/Lib/EventStore.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

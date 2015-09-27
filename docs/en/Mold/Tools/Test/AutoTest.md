@@ -13,7 +13,7 @@ __dna__: action
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Tools.Test.Tester](../../../Mold/Tools/Test/Tester.md) 
@@ -22,21 +22,12 @@ __dna__: action
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

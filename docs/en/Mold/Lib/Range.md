@@ -13,28 +13,19 @@ __dna__: class
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Info](../../Mold/Lib/Info.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

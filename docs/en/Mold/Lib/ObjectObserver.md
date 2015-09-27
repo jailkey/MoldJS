@@ -15,28 +15,19 @@ __test__: [Mold.Test.Lib.ObjectObserver](../../Mold/Test/Lib/ObjectObserver.md)
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Event](../../Mold/Lib/Event.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

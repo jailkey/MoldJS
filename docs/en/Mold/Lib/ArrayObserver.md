@@ -15,7 +15,7 @@ __test__: [Mold.Test.Lib.ArrayObserver](../../Mold/Test/Lib/ArrayObserver.md)
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Info](../../Mold/Lib/Info.md) 
@@ -23,21 +23,12 @@ __test__: [Mold.Test.Lib.ArrayObserver](../../Mold/Test/Lib/ArrayObserver.md)
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

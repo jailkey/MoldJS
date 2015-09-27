@@ -5,7 +5,7 @@
 __file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Document.js  
 __dna__: class  
 __author__: Jan Kaufmann  
-__version__: 0.1  
+
 	
 
 __test__: [Mold.Test.Lib.Document](../../Mold/Test/Lib/Document.md) 
@@ -15,7 +15,7 @@ __test__: [Mold.Test.Lib.Document](../../Mold/Test/Lib/Document.md)
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.DomNode](../../Mold/Lib/DomNode.md) 
@@ -23,21 +23,12 @@ __test__: [Mold.Test.Lib.Document](../../Mold/Test/Lib/Document.md)
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

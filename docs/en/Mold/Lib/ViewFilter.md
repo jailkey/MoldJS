@@ -13,27 +13,18 @@ __author__: Jan Kaufmann
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

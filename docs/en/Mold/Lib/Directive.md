@@ -13,7 +13,7 @@ __dna__: static
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Event](../../Mold/Lib/Event.md) 
@@ -25,21 +25,12 @@ __dna__: static
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

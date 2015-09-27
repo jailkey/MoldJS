@@ -5,7 +5,7 @@
 __file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/EventStore.js  
 __dna__: static  
 __author__: Jan Kaufmann  
-__version__: 0.1  
+
 	
 
 
@@ -13,27 +13,18 @@ __version__: 0.1
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

@@ -13,7 +13,7 @@ __dna__: data
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.VDom.VDoc](../../../Mold/Lib/VDom/VDoc.md) 
@@ -22,21 +22,12 @@ __dna__: data
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

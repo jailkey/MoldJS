@@ -13,7 +13,7 @@ __version__: 0.0.1
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Promise](../../Mold/Lib/Promise.md) 
@@ -22,21 +22,12 @@ __version__: 0.0.1
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

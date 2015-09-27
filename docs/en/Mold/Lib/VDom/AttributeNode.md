@@ -13,28 +13,19 @@ __dna__: static
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.VDom.StringParser](../../../Mold/Lib/VDom/StringParser.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

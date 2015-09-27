@@ -13,28 +13,19 @@ __dna__: static
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [->Mold.Lib.Dom](../../../->Mold/Lib/Dom.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

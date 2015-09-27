@@ -15,7 +15,7 @@ __test__: [Mold.Test.Lib.CSS](../../Mold/Test/Lib/CSS.md)
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Event](../../Mold/Lib/Event.md) 
@@ -27,21 +27,12 @@ __test__: [Mold.Test.Lib.CSS](../../Mold/Test/Lib/CSS.md)
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

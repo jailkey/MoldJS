@@ -14,10 +14,10 @@ __test__: [Mold.Test.Lib.Tester](../../../Mold/Test/Lib/Tester.md)
 
 
 
-	adds a complete testsuit
+__adds a complete testsuit__
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Sequence](../../../Mold/Lib/Sequence.md) 
@@ -25,21 +25,12 @@ __test__: [Mold.Test.Lib.Tester](../../../Mold/Test/Lib/Tester.md)
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

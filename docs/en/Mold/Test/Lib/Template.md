@@ -13,7 +13,7 @@ __dna__: test
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Color](../../../Mold/Lib/Color.md) 
@@ -22,21 +22,12 @@ __dna__: test
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

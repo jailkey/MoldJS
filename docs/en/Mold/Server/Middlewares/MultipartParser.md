@@ -13,7 +13,7 @@ __dna__: middleware
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.DNA.Middleware](../../../Mold/DNA/Middleware.md) 
@@ -21,21 +21,12 @@ __dna__: middleware
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

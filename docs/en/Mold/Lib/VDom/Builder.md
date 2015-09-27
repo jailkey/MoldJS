@@ -4,7 +4,7 @@
 
 __file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/VDom/Builder.js  
 __dna__: class  
-
+__author__: Jan Kaufmann <jan@moldjs.de>  
 
 	
 
@@ -14,8 +14,10 @@ __test__: [Mold.Test.Lib.VDom.Builder](../../../Mold/Test/Lib/VDom/Builder.md)
 
 
 
+__build a vdom from a content-template string__
 
-###Dependencies
+
+##Dependencies
 --------------
 
 * [Mold.Lib.Dom](../../../Mold/Lib/Dom.md) 
@@ -30,46 +32,97 @@ __test__: [Mold.Test.Lib.VDom.Builder](../../../Mold/Test/Lib/VDom/Builder.md)
 * [Mold.Lib.VDom.VDoc](../../../Mold/Lib/VDom/VDoc.md) 
 
 
+##Example
+--------------
+**
+
+```
+Mold/Test/Lib/VDom/Builder#build
+
+```
+
+
 
    
-###Methods
---------------
+##Methods
+	
  
 
-#####render
-	trigger the renderservice  
-Defined in row: 198   
+###render
 
 
 
+__trigger the renderservice__  
+Defined in row: 211  
 
-
-#####reRender
-	reRenders the vdom  
-Defined in row: 205   
-
-
-
-
-
-#####renderString
-	renders the vdom as a string  
-Defined in row: 214   
-
-
-
-
-
- 
   
-###Properties
--------------
+
+returns: 
+
+
+__Example:__  
+*Mold/Test/Lib/VDom/Builder.js*
+
+```
+
+it("create vdom with negative block", function(){
+	secondResult = new Builder('{{#block}}<div> show if data is set</div>{{/block}} - {{^block}} show if data is not set {{/block}}');
+	expect(secondResult.dom.children.block[1].isNegative).toBe(true);
+});
+
+it("add some blockdata", function(){
+	var data = {
+		block : "show"
+	}
+	secondResult.dom.setData(data);
+	expect(secondResult.dom.children.block[0].renderDom.length).toBe(1);
+	expect(secondResult.dom.children.block[1].renderDom.length).toBe(0);
+});
+
+it("render block", function(){
+
+	var insert = secondResult.dom.render();
+	
+	expect(insert.getElementsByTagName("div").length).toBe(1);
+});
+
+
+```  
+
+
+
+###reRender
+
+
+
+__reRenders the vdom, recreat dom elements only if needed__  
+Defined in row: 218  
+
+  
+
+
+
+
+
+
+###renderString
+
+
+
+__renders the vdom as a string__  
+Defined in row: 227  
+
+  
+
+returns: 
+
+
 
 
  
 
-###Objects
-------------
+
+ 
 
 
 

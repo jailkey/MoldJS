@@ -13,28 +13,19 @@ __dna__: class
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Promise](../../Mold/Lib/Promise.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

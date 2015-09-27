@@ -13,7 +13,7 @@ __dna__: static
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Promise](../../Mold/Lib/Promise.md) 
@@ -21,29 +21,28 @@ __dna__: static
 
 
    
-###Methods
---------------
+##Methods
+	
  
 
-#####waterfall
-	execute all given paramters in sequence  
-Defined in row: 16   
+###waterfall
 
 
-* __/__ (_array_) - function} input 
+
+__execute all given paramters in sequence__  
+Defined in row: 16  
+
+__Arguments:__  
+ * __/__ (_array_) - function} input  
+returns: 
+
 
 
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

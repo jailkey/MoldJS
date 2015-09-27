@@ -13,7 +13,7 @@ __dna__: class
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Event](../../Mold/Lib/Event.md) 
@@ -21,21 +21,12 @@ __dna__: class
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

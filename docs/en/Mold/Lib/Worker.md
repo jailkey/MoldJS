@@ -15,7 +15,7 @@ __test__: [Mold.Test.Lib.Worker](../../Mold/Test/Lib/Worker.md)
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Event](../../Mold/Lib/Event.md) 
@@ -23,21 +23,12 @@ __test__: [Mold.Test.Lib.Worker](../../Mold/Test/Lib/Worker.md)
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

@@ -15,28 +15,19 @@ __test__: [Mold.Test.Lib.Sanitize](../../Mold/Test/Lib/Sanitize.md)
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Encode](../../Mold/Lib/Encode.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

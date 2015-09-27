@@ -13,7 +13,7 @@ __dna__: test
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Ajax](../../../Mold/Lib/Ajax.md) 
@@ -21,21 +21,12 @@ __dna__: test
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

@@ -13,28 +13,19 @@ __dna__: static
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.HTMLEntitys](../../Mold/Lib/HTMLEntitys.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

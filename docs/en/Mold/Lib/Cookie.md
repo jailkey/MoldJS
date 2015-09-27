@@ -15,27 +15,18 @@ __test__: [Mold.Test.Lib.Cookie](../../Mold/Test/Lib/Cookie.md)
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

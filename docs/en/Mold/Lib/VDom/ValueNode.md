@@ -13,28 +13,19 @@ __dna__: static
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.VDom.ProtoNode](../../../Mold/Lib/VDom/ProtoNode.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

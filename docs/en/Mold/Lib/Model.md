@@ -2,18 +2,20 @@
 #Mold.Lib.Model
 ---------------------------------------
 
-file: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Model.js  
-dna: class
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/Model.js  
+__dna__: class  
 
-version: 0.0.4
+__version__: 0.0.4  
 	
 
-test: [Mold.Test.Lib.Model](../../Mold/Test/Lib/Model.md) 
+__test__: [Mold.Test.Lib.Model](../../Mold/Test/Lib/Model.md) 
 
 
 
 
-###Dependencies
+
+
+##Dependencies
 --------------
 
 * [Mold.Lib.Event](../../Mold/Lib/Event.md) 
@@ -25,77 +27,164 @@ test: [Mold.Test.Lib.Model](../../Mold/Test/Lib/Model.md)
 
 
    
-###Methods
---------------
+##Methods
+	
+ 
 
-#####_validateValue
-	validate model propertys  
-Defined in row: 39   
-Arguments: 
-
-* __value__ (_string|number_) - value to validate 
-* __validation__ (_string_) - name of the validation method 
-
-
-#####validation
-	enables the model validation  
-Defined in row: 174   
-Arguments: 
-
-* __state__ (_boolean_) - a boolean value with true enables the validation / false disable it 
-
-
-#####getProperties
-	returns the model properties:  
-Defined in row: 182   
-Arguments: 
+###_validateValue
 
 
 
-#####save
-	validate model propertys  
-Defined in row: 190   
-Arguments: 
+__validate model propertys__  
+Defined in row: 39  
+
+__Arguments:__  
+ * __value__ (_string|number_) - value to validate   * __validation__ (_string_) - name of the validation method  
+returns: 
 
 
 
-#####load
-	loads data by the specified resourceID  
-Defined in row: 214   
-Arguments: 
 
-* __id__ (_number|string_) - the resource id 
-
-
-#####remove
-	removes model from the resource  
-Defined in row: 228   
-Arguments: 
+###get
 
 
 
-#####connect
-	connects a adapter to the model  
-Defined in row: 238   
-Arguments: 
+__returns the model data by a given path__  
+Defined in row: 172  
 
-* __adapter__ (_object_) -  
-
-
-#####json
-	returns a JSON string with the current model data  
-Defined in row: 256   
-Arguments: 
+__Arguments:__  
+ * __an__ (_string_) - object path  
+returns: 
 
 
 
-   
-###Properties
--------------
 
-   
-###Objects
-------------
+###set
+
+
+
+__set the model data by a given path__  
+Defined in row: 194  
+
+__Arguments:__  
+ * __path__ (_string_) - the object path   * __data__ (_mixed_) - the data  
+
+
+
+
+
+###validation
+
+
+
+__enables the model validation__  
+Defined in row: 216  
+
+__Arguments:__  
+ * __state__ (_boolean_) - a boolean value with true enables the validation / false disable it  
+
+
+
+
+
+###getProperties
+
+
+
+__returns the model properties:__  
+Defined in row: 224  
+
+  
+
+returns: 
+
+
+
+
+###save
+
+
+
+__saves the model data to the specified adapter__  
+Defined in row: 233  
+
+  
+
+returns: 
+
+
+
+
+###load
+
+
+
+__loads data by the specified resourceID__  
+Defined in row: 258  
+
+__Arguments:__  
+ * __id__ (_number|string_) - the resource id  
+returns: 
+
+
+
+
+###remove
+
+
+
+__removes model from the resource__  
+Defined in row: 273  
+
+  
+
+returns: 
+
+
+
+
+###connect
+
+
+
+__connects a adapter to the model__  
+Defined in row: 283  
+
+__Arguments:__  
+ * __adapter__ (_object_) -   
+
+
+
+
+
+###json
+
+
+
+__returns a JSON string with the current model data__  
+Defined in row: 301  
+
+  
+
+returns: 
+
+
+
+
+ 
+
+
+ 
+
+##Objects
+		
+
+
+####data
+Defined in row: 210  
+Parameter: 
+
+returns: 
 
 
 		

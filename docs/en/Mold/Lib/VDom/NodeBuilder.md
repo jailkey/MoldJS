@@ -13,7 +13,7 @@ __dna__: static
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.VDom.BlockNode](../../../Mold/Lib/VDom/BlockNode.md) 
@@ -24,21 +24,12 @@ __dna__: static
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

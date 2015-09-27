@@ -13,7 +13,7 @@ __dna__: class
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Ajax](../../Mold/Lib/Ajax.md) 
@@ -22,21 +22,12 @@ __dna__: class
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

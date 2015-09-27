@@ -13,28 +13,19 @@ __dna__: cli
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Path](../../Mold/Lib/Path.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

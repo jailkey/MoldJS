@@ -13,28 +13,19 @@ __author__: Jan Kaufmann
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Server.Middleware](../../Mold/Server/Middleware.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

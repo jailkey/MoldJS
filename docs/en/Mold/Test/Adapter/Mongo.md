@@ -13,7 +13,7 @@ __dna__: test
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Model](../../../Mold/Lib/Model.md) 
@@ -21,21 +21,12 @@ __dna__: test
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

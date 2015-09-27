@@ -13,7 +13,7 @@ __dna__: static
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Info](../../Mold/Lib/Info.md) 
@@ -22,21 +22,12 @@ __dna__: static
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

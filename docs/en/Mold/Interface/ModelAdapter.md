@@ -13,28 +13,19 @@ __dna__: interface
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.DNA.Interface](../../Mold/DNA/Interface.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

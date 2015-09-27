@@ -13,28 +13,19 @@ __dna__: test
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.File](../../../Mold/Lib/File.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

@@ -13,7 +13,7 @@ __dna__: class
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Directive](../../Mold/Lib/Directive.md) 
@@ -23,21 +23,12 @@ __dna__: class
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

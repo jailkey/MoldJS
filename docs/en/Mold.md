@@ -12,469 +12,732 @@ __version__: 0.0.28;  *
 
 
 
-	This callback is displayed as part of the Requester class.
+__This callback is displayed as part of the Requester class.__
 
 
-###Dependencies
+##Dependencies
 --------------
 
 
 
 
    
-###Methods
---------------
+##Methods
+	
  
 
-#####getDependencies
-	returns all Depencies from a seed header in a list  
-Defined in row: 478   
+###getDependencies
 
 
-* __header__ (_object_) - a seed header with an include property 
 
+__returns all Depencies from a seed header in a list__  
+Defined in row: 491  
 
+__Arguments:__  
+ * __header__ (_object_) - a seed header with an include property  
+returns: 
 
-#####trim
-	Mold  
-Defined in row: 529   
 
+__Example:__  
+*Mold/Test/Lib/VDom/Builder.js*
 
-* __phrase__ (_string_) - string with leading and ending whitespaces 
+```
 
+it("create vdom with negative block", function(){
+	secondResult = new Builder('{{#block}}<div> show if data is set</div>{{/block}} - {{^block}} show if data is not set {{/block}}');
+	expect(secondResult.dom.children.block[1].isNegative).toBe(true);
+});
 
+it("add some blockdata", function(){
+	var data = {
+		block : "show"
+	}
+	secondResult.dom.setData(data);
+	expect(secondResult.dom.children.block[0].renderDom.length).toBe(1);
+	expect(secondResult.dom.children.block[1].renderDom.length).toBe(0);
+});
 
-#####each
-	iterates through an List (Object, Array)  
-Defined in row: 564   
+it("render block", function(){
 
+	var insert = secondResult.dom.render();
+	
+	expect(insert.getElementsByTagName("div").length).toBe(1);
+});
 
-* __collection__ (_object_) - the list 
-* __iterator__ (_function_) - a callback function 
-* __context__ (_object_) - optional context Object 
 
+```  
 
 
-#####eachShift
-	iterates through an array and remove the selected item until the array is empty  
-Defined in row: 610   
 
+###trim
 
-* __collection__ (_array_) - the array 
-* __callback__ (_function_) - method will called on each entry, given paramter is the entry value 
 
 
+__Mold__  
+Defined in row: 542  
 
-#####find
-	find a specified value in an array  
-Defined in row: 633   
+__Arguments:__  
+ * __phrase__ (_string_) - string with leading and ending whitespaces  
+returns: 
 
 
-* __collection__ (_object_) - the list 
-* __iterator__ (_function_) - a callback function 
-* __context__ (_object_) - context Object 
 
 
+###each
 
-#####some
-	iterates through an array until the specified callback returns false  
-Defined in row: 654   
 
 
-* __collection__ (_object_) - the list 
-* __iterator__ (_function_) - a callback function 
-* __context__ (_object_) - context Object 
+__iterates through an List (Object, Array)__  
+Defined in row: 577  
 
+__Arguments:__  
+ * __collection__ (_object_) - the list   * __iterator__ (_function_) - a callback function   * __context__ (_object_) - optional context Object  
+returns: 
 
 
-#####reject
-	compares all values in an array  
-Defined in row: 693   
 
 
-* __collection__ (_array_) - an array to compare 
-* __iterator__ (_function_) - callback that wich is executet on every entry 
+###eachShift
 
 
 
-#####keys
-	returns an Array with the key of an object  
-Defined in row: 768   
+__iterates through an array and remove the selected item until the array is empty__  
+Defined in row: 623  
 
+__Arguments:__  
+ * __collection__ (_array_) - the array   * __callback__ (_function_) - method will called on each entry, given paramter is the entry value  
 
-* __collection__ (_object_) - Expects an object 
 
 
 
-#####contains
-	checks if a list contains a value  
-Defined in row: 793   
 
+###find
 
-* __list__ (_array/object/sting_) -  
-* __needel__ (_stirng_) -  
 
 
+__find a specified value in an array__  
+Defined in row: 646  
 
-#####is
-	test if a variable is defined  
-Defined in row: 812   
+__Arguments:__  
+ * __collection__ (_object_) - the list   * __iterator__ (_function_) - a callback function   * __context__ (_object_) - context Object  
+returns: 
 
 
-* __value__ (_mixed_) -  
 
 
+###some
 
-#####isArray
-	checks if the give value is an array  
-Defined in row: 866   
 
 
-* __collection__ (_object_) - the value 
+__iterates through an array until the specified callback returns false__  
+Defined in row: 667  
 
+__Arguments:__  
+ * __collection__ (_object_) - the list   * __iterator__ (_function_) - a callback function   * __context__ (_object_) - context Object  
+returns: 
 
 
-#####isObject
-	checks if the give value is an object  
-Defined in row: 884   
 
 
-* __collection__ (_object_) - the value 
+###reject
 
 
 
-#####isNodeList
-	checks if the give value is a NodeListe  
-Defined in row: 899   
+__compares all values in an array__  
+Defined in row: 706  
 
+__Arguments:__  
+ * __collection__ (_array_) - an array to compare   * __iterator__ (_function_) - callback that wich is executet on every entry  
+returns: 
 
-* __collection__ (_object_) - the value 
 
 
 
-#####ready
-	Fires if the dom is ready  
-Defined in row: 947   
+###keys
 
 
-* __callback__ (_readycallback_) - Expected a callback, fires if the dom and Mold.js is ready 
 
+__returns an Array with the key of an object__  
+Defined in row: 781  
 
+__Arguments:__  
+ * __collection__ (_object_) - Expects an object  
+returns: 
 
-#####addDNA
-	Add a DNA pattern to Mold.js  
-Defined in row: 971   
 
 
-* __dna__ (_object_) - Expected an object of type DNA 
 
+###contains
 
 
-#####getDNA
-	Returns a DNA pattern from the specified name  
-Defined in row: 984   
 
+__checks if a list contains a value__  
+Defined in row: 806  
 
-* __Expected__ (_dnaname_) - the name of the pattern 
+__Arguments:__  
+ * __list__ (_array/object/sting_) -    * __needel__ (_stirng_) -   
+returns: 
 
 
 
-#####add
-	Adds a value to an specified cue  
-Defined in row: 1014   
 
+###is
 
-* __type__ (_string_) - Expects the name of the cue 
-* __name__ (_string_) - Expects the name of the entry 
-* __value__ (_mixing_) - Expects the value 
 
 
+__test if a variable is defined__  
+Defined in row: 825  
 
-#####remove
-	Removes an entry from the specified cue  
-Defined in row: 1026   
+__Arguments:__  
+ * __value__ (_mixed_) -   
+returns: 
 
 
-* __type__ (_string_) - Expects the name of the cue 
-* __name__ (_string_) - Expects the name of the entry 
 
 
+###isArray
 
-#####get
-	Returns a specified cue value  
-Defined in row: 1037   
 
 
-* __type__ (_string_) - Expects the name of the cue 
-* __name__ (_string_) - Expects the name of the entry 
+__checks if the give value is an array__  
+Defined in row: 879  
 
+__Arguments:__  
+ * __collection__ (_object_) - the value  
+returns: 
 
 
-#####getType
-	Returns a specified cue object  
-Defined in row: 1047   
 
 
-* __type__ (_string_) - Expects the name of the cue 
+###isObject
 
 
 
-#####removeType
-	Deletes a specified cue  
-Defined in row: 1057   
+__checks if the give value is an object__  
+Defined in row: 897  
 
+__Arguments:__  
+ * __collection__ (_object_) - the value  
+returns: 
 
-* __name__ (_string_) - Expects the name of the entry, to be deleted 
 
 
 
-#####log
-	Logs an entry  
-Defined in row: 1069   
+###isNodeList
 
 
-* __type__ (_string_) - Expects the entry type of the logmessage. Predefined values are "Error", "Info" and "Debug", but you can define your own, if necessary. 
-* __message__ (_string|object_) - Expects the message that will be logged, when the type is "Error" the parameter expects an object with the property "code". This property contains the errorcode. 
 
+__checks if the give value is a NodeListe__  
+Defined in row: 912  
 
+__Arguments:__  
+ * __collection__ (_object_) - the value  
+returns: 
 
-#####onlog
-	Fires if a Message wil be logged  
-Defined in row: 1089   
 
 
-* __callback__ (_onlogcallback_) - Expects a callback to be fired if a message will be logged 
 
+###ready
 
 
-#####getScope
-	returns an object with the current scope  
-Defined in row: 1098   
 
+__Fires if the dom is ready__  
+Defined in row: 960  
 
+__Arguments:__  
+ * __callback__ (_readycallback_) - Expected a callback, fires if the dom and Mold.js is ready  
 
 
 
-#####addLoadingProperty
-	Tells Mold.js which properties of a Seed are "loading properties". These properties include a reference to other seeds. This method will be used to build new DNA.  
-Defined in row: 1150   
 
 
-* __propertyName__ (_string_) - The name of the property to be added. 
+###addDNA
 
 
 
-#####getLoadingproperties
-	Returns a list of all "loading properties"  
-Defined in row: 1158   
+__Add a DNA pattern to Mold.js__  
+Defined in row: 984  
 
+__Arguments:__  
+ * __dna__ (_object_) - Expected an object of type DNA  
 
 
 
 
-#####getSeed
-	Returns a seed specified by name  
-Defined in row: 1171   
 
+###getDNA
 
-* __name__ (_string_) - Expects the name of the seed (seed chain) 
 
 
+__Returns a DNA pattern from the specified name__  
+Defined in row: 997  
 
-#####getSeedChainName
-	Returns the seed chain from the seed object without the root object  
-Defined in row: 1189   
+__Arguments:__  
+ * __Expected__ (_dnaname_) - the name of the pattern  
+returns: 
 
 
-* __seed__ (_object_) - Expects a seed object 
 
 
+###add
 
-#####getTargetName
-	Returns the name of the root object of a Seed  
-Defined in row: 1198   
 
 
-* __seed__ (_object_) - Expects a seed object 
+__Adds a value to an specified cue__  
+Defined in row: 1027  
 
+__Arguments:__  
+ * __type__ (_string_) - Expects the name of the cue   * __name__ (_string_) - Expects the name of the entry   * __value__ (_mixing_) - Expects the value  
 
 
-#####createChain
-	Creats a seed object chain in Mold.js scope. If an object allready exists it will not overwritten. For nonexistent objects an empty namespace will created.  
-Defined in row: 1207   
 
 
-* __targets__ (_string_) - Expects an String with the seed chain 
 
+###remove
 
 
-#####checkSeedCue
-	Checks the seedcue for new entrys. If a new entry was found it will be added to Mold.js  
-Defined in row: 1215   
 
+__Removes an entry from the specified cue__  
+Defined in row: 1039  
 
+__Arguments:__  
+ * __type__ (_string_) - Expects the name of the cue   * __name__ (_string_) - Expects the name of the entry  
 
 
 
-#####addSeed
-	Adds a Seed to Mold.js  
-Defined in row: 1265   
 
 
-* __seed__ (_object_) - Expects a seed object 
+###get
 
 
 
-#####loadScript
-	Loads a specified Script  
-Defined in row: 1470   
+__Returns a specified cue value__  
+Defined in row: 1050  
 
+__Arguments:__  
+ * __type__ (_string_) - Expects the name of the cue   * __name__ (_string_) - Expects the name of the entry  
+returns: 
 
-* __path__ (_string_) - Expects the scriptpath 
-* __success__ (_loadscriptsuccsess_) - Expects a callback to be executed when the script is successfully loaded 
-* __error__ (_loadscripterror_) - Expects a callback to be executed if there is a loading error 
 
 
 
-#####loadScriptSuccsess
+###getType
 
-	returns all Depencies from a seed header in a list  
-Defined in row: 1542   
 
 
+__Returns a specified cue object__  
+Defined in row: 1060  
 
+__Arguments:__  
+ * __type__ (_string_) - Expects the name of the cue  
+returns: 
 
 
-#####loadScriptError
-	Creats a seed object chain in Mold.js scope, if an object allready exists it will not be overwritten. For not existing object an empty namespace will created.  
-Defined in row: 1547   
 
 
+###removeType
 
 
 
-#####addLoadingRule
-	adds a rule to control the loading process  
-Defined in row: 1555   
+__Deletes a specified cue__  
+Defined in row: 1070  
 
+__Arguments:__  
+ * __name__ (_string_) - Expects the name of the entry, to be deleted  
 
-* __name__ (_string_) - Expects the name of the rule 
-* __a__ (_function_) - function with a control statement 
 
 
 
-#####load
-	Load the specified Seed  
-Defined in row: 1583   
 
+###log
 
-* __seed__ (_object_) - Expects a seed object 
 
 
+__Logs an entry__  
+Defined in row: 1082  
 
-#####addMethod
-	Add a method to Mold.js, methodes with equal names will overwriten  
-Defined in row: 1656   
+__Arguments:__  
+ * __type__ (_string_) - Expects the entry type of the logmessage. Predefined values are "Error", "Info" and "Debug", but you can define your own, if necessary.   * __message__ (_string|object_) - Expects the message that will be logged, when the type is "Error" the parameter expects an object with the property "code". This property contains the errorcode.  
 
 
-* __name__ (_string_) - Expects the method name 
-* __method__ (_function_) - Expects a function with the method code 
 
 
 
-#####importSeeds
-	Import Seeds from array of objects to target seed  
-Defined in row: 1668   
+###onlog
 
 
-* __target__ (_function_) - the target seed 
-* __method__ (_array_) - an array of objects 
 
+__Fires if a Message wil be logged__  
+Defined in row: 1102  
 
+__Arguments:__  
+ * __callback__ (_onlogcallback_) - Expects a callback to be fired if a message will be logged  
 
-#####injectBefore
-	Injects code at the beginning of a Functionobject;  
-Defined in row: 1688   
 
 
-* __func__ (_function_) - Expects a function object 
-* __code__ (_string_) - Expects code to be injected 
 
 
+###getScope
 
-#####extend
-	Inherited methods from a superclass to a class  
-Defined in row: 1718   
 
 
-* __superClass__ (_class_) - Expected the superclass 
-* __subClass__ (_class_) - Expeted a Class 
+__returns an object with the current scope__  
+Defined in row: 1111  
 
+  
 
+returns: 
 
-#####mixin
-	Adds Methods from one Object to another  
-Defined in row: 1755   
 
 
-* __target__ (_object_) - Expects the target object 
-* __origin__ (_object_) - Expects the origin object 
-* __selected__ (_array_) - Expects an array with the property- and methodenames that will be copied, the parameter is optional, if it is not given, all methodes an parametes will be copied 
 
+###addLoadingProperty
 
 
-#####getId
-	returns a uinque ID  
-Defined in row: 1781   
 
+__Tells Mold.js which properties of a Seed are "loading properties". These properties include a reference to other seeds. This method will be used to build new DNA.__  
+Defined in row: 1163  
 
+__Arguments:__  
+ * __propertyName__ (_string_) - The name of the property to be added.  
 
 
 
-#####callWithDynamicArguments
-	Wraps a constructor and call it with dynamic arguments;  
-Defined in row: 1794   
 
 
-* __constructor__ (_function_) - Expects the target constructor 
-* __arguments__ (_array_) - Expects an array with the arguments 
+###getLoadingproperties
 
 
 
-#####wrap
-	Wraps a Class with a second constructor, so you can execute methods in the scope of the targetclass  
-Defined in row: 1808   
+__Returns a list of all "loading properties"__  
+Defined in row: 1171  
 
+  
 
-* __targetClass__ (_class_) - Expects the class will be wraped 
-* __wrappingMethode__ (_function_) - Expects the method that will be executed, as parameter the scope of the instance will transfered 
+returns: 
+
+
+
+
+###getSeed
+
+
+
+__Returns a seed specified by name__  
+Defined in row: 1184  
+
+__Arguments:__  
+ * __name__ (_string_) - Expects the name of the seed (seed chain)  
+returns: 
+
+
+
+
+###getSeedChainName
+
+
+
+__Returns the seed chain from the seed object without the root object__  
+Defined in row: 1202  
+
+__Arguments:__  
+ * __seed__ (_object_) - Expects a seed object  
+returns: 
+
+
+
+
+###getTargetName
+
+
+
+__Returns the name of the root object of a Seed__  
+Defined in row: 1211  
+
+__Arguments:__  
+ * __seed__ (_object_) - Expects a seed object  
+returns: 
+
+
+
+
+###createChain
+
+
+
+__Creats a seed object chain in Mold.js scope. If an object allready exists it will not overwritten. For nonexistent objects an empty namespace will created.__  
+Defined in row: 1220  
+
+__Arguments:__  
+ * __targets__ (_string_) - Expects an String with the seed chain  
+returns: 
+
+
+
+
+###checkSeedCue
+
+
+
+__Checks the seedcue for new entrys. If a new entry was found it will be added to Mold.js__  
+Defined in row: 1228  
+
+  
+
+
+
+
+
+
+###addSeed
+
+
+
+__Adds a Seed to Mold.js__  
+Defined in row: 1278  
+
+__Arguments:__  
+ * __seed__ (_object_) - Expects a seed object  
+
+
+
+
+
+###loadScript
+
+
+
+__Loads a specified Script__  
+Defined in row: 1499  
+
+__Arguments:__  
+ * __path__ (_string_) - Expects the scriptpath   * __success__ (_loadscriptsuccsess_) - Expects a callback to be executed when the script is successfully loaded   * __error__ (_loadscripterror_) - Expects a callback to be executed if there is a loading error  
+
+
+
+
+
+###loadScriptSuccsess
+
+
+
+
+__returns all Depencies from a seed header in a list__  
+Defined in row: 1572  
+
+  
+
+
+
+
+
+
+###loadScriptError
+
+
+
+__Creats a seed object chain in Mold.js scope, if an object allready exists it will not be overwritten. For not existing object an empty namespace will created.__  
+Defined in row: 1577  
+
+  
+
+
+
+
+
+
+###addLoadingRule
+
+
+
+__adds a rule to control the loading process__  
+Defined in row: 1585  
+
+__Arguments:__  
+ * __name__ (_string_) - Expects the name of the rule   * __a__ (_function_) - function with a control statement  
+
+
+
+
+
+###checkLoadedConf
+
+
+
+__checks if a config ist loaded__  
+Defined in row: 1614  
+
+__Arguments:__  
+ * __conf__ (_object_) - the configuration  
+returns: 
+
+
+
+
+###load
+
+
+
+__Load the specified Seed__  
+Defined in row: 1635  
+
+__Arguments:__  
+ * __seed__ (_object_) - Expects a seed object  
+returns: 
+
+
+
+
+###addMethod
+
+
+
+__Add a method to Mold.js, methodes with equal names will overwriten__  
+Defined in row: 1716  
+
+__Arguments:__  
+ * __name__ (_string_) - Expects the method name   * __method__ (_function_) - Expects a function with the method code  
+
+
+
+
+
+###importSeeds
+
+
+
+__Import Seeds from array of objects to target seed__  
+Defined in row: 1728  
+
+__Arguments:__  
+ * __target__ (_function_) - the target seed   * __method__ (_array_) - an array of objects  
+
+
+
+
+
+###injectBefore
+
+
+
+__Injects code at the beginning of a Functionobject;__  
+Defined in row: 1748  
+
+__Arguments:__  
+ * __func__ (_function_) - Expects a function object   * __code__ (_string_) - Expects code to be injected  
+
+
+
+
+
+###extend
+
+
+
+__Inherited methods from a superclass to a class__  
+Defined in row: 1778  
+
+__Arguments:__  
+ * __superClass__ (_class_) - Expected the superclass   * __subClass__ (_class_) - Expeted a Class  
+returns: 
+
+
+
+
+###mixin
+
+
+
+__Adds Methods from one Object to another__  
+Defined in row: 1815  
+
+__Arguments:__  
+ * __target__ (_object_) - Expects the target object   * __origin__ (_object_) - Expects the origin object   * __selected__ (_array_) - Expects an array with the property- and methodenames that will be copied, the parameter is optional, if it is not given, all methodes an parametes will be copied  
+returns: 
+
+
+
+
+###copy
+
+
+
+__copys an array or an object__  
+Defined in row: 1842  
+
+__Arguments:__  
+ * __target__ (_mixed_) - the array or object to copy  
+returns: 
+
+
+
+
+###getId
+
+
+
+__returns a uinque ID__  
+Defined in row: 1868  
+
+  
+
+returns: 
+
+
+
+
+###callWithDynamicArguments
+
+
+
+__Wraps a constructor and call it with dynamic arguments;__  
+Defined in row: 1881  
+
+__Arguments:__  
+ * __constructor__ (_function_) - Expects the target constructor   * __arguments__ (_array_) - Expects an array with the arguments  
+returns: 
+
+
+
+
+###wrap
+
+
+
+__Wraps a Class with a second constructor, so you can execute methods in the scope of the targetclass__  
+Defined in row: 1895  
+
+__Arguments:__  
+ * __targetClass__ (_class_) - Expects the class will be wraped   * __wrappingMethode__ (_function_) - Expects the method that will be executed, as parameter the scope of the instance will transfered  
+returns: 
+
 
 
 
  
   
-###Properties
--------------
+##Properties
 
 
-#####isNodeJS
+
+####isNodeJS
 	Contains true if Mold.js runs on the Server under Nods.js, otherwith it contains false  
-Defined in row: 939  
+Defined in row: 952  
+returns: 
 
-
-#####startime
+####startime
 	inculdes the time, when Mold is constructed, you can use it to measure Molds loadingtime  
-Defined in row: 958  
+Defined in row: 971  
 
 
  
 
-###Objects
-------------
+##Objects
+		
 
 
-#####cue
-Defined in row: 1005  
+####cue
+Defined in row: 1018  
 Parameter: 
 
 returns: 

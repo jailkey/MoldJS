@@ -13,7 +13,7 @@ __dna__: cli
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.DNA.CLI](../../Mold/DNA/CLI.md) 
@@ -21,21 +21,12 @@ __dna__: cli
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

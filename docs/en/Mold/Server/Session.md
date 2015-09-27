@@ -13,7 +13,7 @@ __dna__: static
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.Cookie](../../Mold/Lib/Cookie.md) 
@@ -21,21 +21,12 @@ __dna__: static
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

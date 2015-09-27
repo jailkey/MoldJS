@@ -13,28 +13,19 @@ __dna__: component
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [->Mold.DNA.Component](../../../../->Mold/DNA/Component.md) 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

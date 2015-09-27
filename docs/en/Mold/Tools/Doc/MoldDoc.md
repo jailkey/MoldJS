@@ -15,7 +15,7 @@ __test__: [Mold.Test.Tools.Doc.MoldDoc](../../../Mold/Test/Tools/Doc/MoldDoc.md)
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [Mold.Lib.File](../../../Mold/Lib/File.md) 
@@ -24,21 +24,12 @@ __test__: [Mold.Test.Tools.Doc.MoldDoc](../../../Mold/Test/Tools/Doc/MoldDoc.md)
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

@@ -15,27 +15,18 @@ __test__: [Mold.Test.Lib.Promise](../../Mold/Test/Lib/Promise.md)
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

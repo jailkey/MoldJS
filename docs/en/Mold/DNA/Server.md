@@ -13,7 +13,7 @@ __dna__: dna
 
 
 
-###Dependencies
+##Dependencies
 --------------
 
 * [->Mold.Server.Server](../../->Mold/Server/Server.md) 
@@ -21,21 +21,12 @@ __dna__: dna
 
 
 
-   
-###Methods
---------------
  
 
  
-  
-###Properties
--------------
 
 
  
-
-###Objects
-------------
 
 
 

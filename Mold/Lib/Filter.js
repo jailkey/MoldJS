@@ -54,6 +54,7 @@ Seed({
 					});
 				}
 
+
 				if(conf.desc){
 					data.reverse();
 				}
@@ -61,10 +62,36 @@ Seed({
 			return data;
 		});
 
+		_add("sortlen", function(data, conf){
+			if(Mold.isArray(data)){
+				if(conf.value){
+					data.sort(function (a, b) {
+						a = a[conf.value].length;
+						b = b[conf.value].length;
+
+						if (a > b) {
+							return 1;
+						}
+						if (a < b) {
+							return -1;
+						}
+						return 0;
+					});
+				}
+
+
+				if(conf.desc){
+					data.reverse();
+				}
+			}
+			return data;
+		})
+
 		_add("exists", function(data, conf){
 			if(Mold.isArray(data) && !data.length){
 				return false;
 			}
+
 
 			if(Mold.isObject(data)){
 				var test = 0;
@@ -79,8 +106,11 @@ Seed({
 			if(data == undefined && data == null && data == false){
 				return false;
 			}
-
-			return true;
+			if(typeof data === "string"){
+				console.log("dDATA", data)
+			}else{
+				return true;
+			}
 		})
 
 		_add("case", function(data, conf){

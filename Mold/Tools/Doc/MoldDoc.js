@@ -4,7 +4,8 @@ Seed({
 		include : [
 			{ File : "Mold.Lib.File" },
 			{ Promise : "Mold.Lib.Promise" },
-			{ PathLib : "Mold.Lib.Path" }
+			{ PathLib : "Mold.Lib.Path" },
+			"Mold.Lib.Encode"
 		],
 		test : "Mold.Test.Tools.Doc.MoldDoc"
 	},
@@ -107,7 +108,7 @@ Seed({
 				lineCounter++;
 				line = dataParts.shift();
 			}
-			//console.log("output", output)
+		
 			return output;
 		}
 
@@ -136,14 +137,15 @@ Seed({
 			var parts = example.split("#");
 			var filename = Mold.trim(parts[0]);
 			var ancor = "#" + Mold.trim(parts[1]);
-
+			console.log("GET EXAMPLE", out)
 			if (PathLib.is(filename)) {
 				var file = fs.readFileSync(filename).toString();
 				var out = file.substring(file.indexOf("//"+ancor) + ancor.length + 2, file.indexOf("///"+ancor))
 				out = out.replace(/\r\n/g, "\n");
+
 				return {
 					path : filename,
-					code : _removeTabs(out)
+					code : Mold.Lib.Encode.encodeHTMLEntities(_removeTabs(out))
 				};
 			}else{
 				return {
@@ -161,22 +163,23 @@ Seed({
 		}
 
 		var _getParameter = function(comment, number){
+			comment = comment.replace(/  /g, " ");
 			var parts = comment.split(" ");
-			return parts[number];
+			return Mold.trim(parts[number]);
 		}
 
 		var _getFrom = function(comment, number){
-			var parts = comment.split(" ");
-			var output = "";
-			for(; number < parts.length; number++){
-				output += parts[number] + " ";
+			var sustr = comment.substring(comment.indexOf(" "), comment.length);
+			for(var i = 0; i < number; i++){
+				sustr = sustr.substring(sustr.indexOf(" "), sustr.length);
 			}
 
-			output = Mold.trim(output);
+			output = sustr;
 			if(Mold.startsWith(output, "-")){
-				output = Mold.trim(output.substring(1, output.length));
+				output = output.substring(1, output.length);
 			}
-			return Mold.trim(output);
+		
+			return sustr;
 		}
 
 		var _dissolveIncludes = function(includes, targetName){
@@ -232,7 +235,7 @@ Seed({
 		var _parseComment = function(comment){
 			var output = {
 				parameter : [],
-				events : [],
+				trigger : [],
 				private : false,
 				public : false,
 				property : false,
@@ -323,9 +326,9 @@ Seed({
 						case "fires":
 						case "trigger":
 						case "event":
-							output['events'].push({
-								name : Mold.trim(trim_getParameter(selected, 1)),
-								description : Mold.trim(_getFrom(selected, 2))
+							output['trigger'].push({
+								name : Mold.trim(_getParameter(selected, 1)),
+								description : _getFrom(selected, 2)
 							})
 							break;
 						case "callback":
@@ -363,10 +366,7 @@ Seed({
 				}
 
 			}
-			if(!output.partType){
-				output.partType = "module";
-				output.module = true;
-			}
+		
 			return output;
 		}
 

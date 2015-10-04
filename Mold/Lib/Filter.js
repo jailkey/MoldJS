@@ -87,9 +87,19 @@ Seed({
 			return data;
 		})
 
-		_add("exists", function(data, conf){
-			if(Mold.isArray(data) && !data.length){
-				return false;
+		_add("exists", function(data, conf, caller){
+			if(Mold.isArray(data)){
+				if(data.length){
+
+					if(caller && caller.name){
+						var output = {};
+						output[caller.name] = data;
+					}
+
+					return true;
+				}else{
+					return false;
+				}
 			}
 
 
@@ -107,7 +117,7 @@ Seed({
 				return false;
 			}
 			if(typeof data === "string"){
-				console.log("dDATA", data)
+				return data;
 			}else{
 				return true;
 			}

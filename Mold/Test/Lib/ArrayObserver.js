@@ -9,7 +9,7 @@ Seed({
 			test = false;;
 
 		describe("Test Mold.Lib.ArrayObserver", function(){
-
+			//#observer
 			it("create test array", function(){
 				testArray = [
 					"one",
@@ -38,7 +38,7 @@ Seed({
 
 				testArray.push("six");
 			});
-
+			///#observer
 			it("observe splice", function(done){
 				test = function(data){
 

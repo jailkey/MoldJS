@@ -349,6 +349,31 @@ Seed({
 			},
 
 		/**
+		 * @method prepandTo 
+		 * @description prepand the template to an element and render the template
+		 * @async
+		 * @param {element} element the element where the template has to be appended
+		 * @event renderd triggers the renderd event when the template is rendert
+		 * @example Mold/Test/Lib/Template.js#appendTo
+		 * @return {promise} returns a promise
+		 */
+			prepandTo : function(element){
+				return new Promise(function(resolve, reject){
+					_templateTree.then(function(tree){
+		
+						if(element.firstChild){
+							element.insertBefore(tree.render(), element.firstChild);
+						}else{
+							element.appendChild(tree.render());
+						}
+
+						resolve(tree);
+						_that.trigger("renderd", { tree : _tree });
+					})
+				})
+			},
+
+		/**
 		 * @method getString 
 		 * @description set data to the template and renders the template
 		 * @async

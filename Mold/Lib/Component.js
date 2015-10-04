@@ -1,3 +1,11 @@
+/**
+ * @module  Mold.Lib.Component
+ * @description creates a component by the given configutation
+ * @event files.loaded fired when all files are loaded
+ * @event files.error fired if there are problems to load the files
+ * @event files.loading fired while files are loading
+ */
+
 Seed({
 		name : "Mold.Lib.Component",
 		dna : "class",
@@ -32,11 +40,23 @@ Seed({
 		var _timer = false;
 
 		this.publics = {
+
+		/**
+		 * @method directive
+		 * @description adds the component directive
+		 * @param  {obejct} directive
+		 */
 			directive : function(directive){
 				directive.seed = _seed;
 				Mold.Lib.Directive.add(directive, document);
 
 			},
+
+		/**
+		 * @method files
+		 * @description adds component files
+		 * @param  {array} files a list of files
+		 */
 			files : function(file){
 				if(file && file.length > 0){
 					_loader.append(file);

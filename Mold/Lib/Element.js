@@ -353,11 +353,18 @@ Seed (
 	/**
 	 * @method attr
 	 * @description get or set an attribute value of an element
-	 * @param  {string} attr  - name of the attribute
+	 * @param  {string} attr  - name of the attribute / if attr is an object, the method will be executed for each property
 	 * @param  {string} value - if value is given the attribute will set if not the attribute value will returned
 	 * @return {mixed}  if mehtod is in set mode the element will returned else the artribute value will returned
 	 */
 		element.attr = function(attr, value){
+
+			if(Mold.isObject(attr)){
+				for(var prop in attr){
+					element.attr(prop, attr[prop])
+				}
+				return element;
+			}
 
 			if(Mold.is(value)){
 				new Mold.Lib.Event(document).trigger("attribute.modified", {
@@ -503,6 +510,22 @@ Seed (
 		}
 
 	/**
+	 * @method prepand
+	 * @description prepand an element as child element
+	 * @param  {node} childElement - the element that has to be appened
+	 * @return {node} returns the element
+	 */
+		element.prepend = function(childElement){
+			if(element.firstChild){
+				element.insertBefore(childElement, element.firstChild);
+			}else{
+				element.appendChild(childElement);
+			}
+			element.trigger("append", { child : childElement });
+			return element;
+		}
+
+	/**
 	 * @method after
 	 * @description inserts a node after the element
 	 * @param  {node} sibiling - the node that has to be inserted
@@ -577,7 +600,12 @@ Seed (
 						}
 						break;
 
+					case "textarea":
+						element.textContent = value;
+						break;
+
 					default:
+						console.log("set value", value)
 						element.textContent = value;
 						break;
 				}
@@ -634,11 +662,12 @@ Seed (
 	 * @param  {boolean} xml if true the return value is a valid xml
 	 * @return {mixed}  if in get mode the inner html will be returned else the element
 	 */
-		element.html = function(value, xml, disableSanitize){
-			if(!disableSanitize){
+		element.html = function(value, xml, sanitize){
+			if(sanitize){
 				var sanitizer = new Mold.Lib.Sanitize();
 				value = sanitizer.html(disableSanitize);
 			}
+			
 			if(Mold.is(value) && value !== false){
 				element.innerHTML = value;
 			}else{
@@ -672,11 +701,35 @@ Seed (
 		}
 
 	/**
+	 * @method wrap 
+	 * @description wrapps the current element into anoter
+	 * @param  {element} wrapper the wrapping element
+	 */
+		element.wrap = function(wrapped){
+			wrapped.wrapIn(element);
+			return element;
+		};
+
+	/**
+	 * @method wrap 
+	 * @description wrapps the current element into anoter
+	 * @param  {element} wrapper the wrapping element
+	 */
+		element.wrapIn = function(wrapper){
+			var parentNode = element.parentNode;
+			parentNode.insertBefore(wrapper, element);
+			wrapper.appendChild(element);
+
+			return element;
+		};
+
+	/**
 	 * @method remove
 	 * @description remove the element from dom
 	 */
 		element.remove = function(){
 			element.parentNode.removeChild(element);
+			return element;
 		}
 
 	/**

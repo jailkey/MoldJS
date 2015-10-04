@@ -1,3 +1,7 @@
+/**
+ * @module 
+ * @description static object, provides async methods
+ */
 Seed({
 		name : "Mold.Lib.Async",
 		dna : "static",
@@ -10,8 +14,8 @@ Seed({
  		return {
  		/**
  		 * @method waterfall 
- 		 * @description execute all given paramters in sequence
- 		 * @param  {array / function} input 
+ 		 * @description execute all given functions one after the nother
+ 		 * @param {array} input function or array of functions to execute
  		 * @return {promise} returns a promise   
  		 */
  			waterfall : function(input){

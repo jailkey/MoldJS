@@ -1,3 +1,19 @@
+/**
+ * @module Mold.Lib.ArrayObserver
+ * @description class creates an observer used for ansynchronously observing changes to an array
+ * @param {array} data the array to observe
+ * @event change fires when the array has changed, the event data has following properties:  
+	
+	- type : splice or update,  
+	- object : the changed object after the,  
+	- name : name of the property wich changed,  
+	- oldValue : the value before changed only available for update, 
+	- index : the start index, only available for split,  
+	- removed : an array of the removed elements, only available for split,
+	- addedCount : the number of added elements, only available for split,
+	
+ * @example Mold/Test/Lib/ArrayObserver.js#observer
+ */
 Seed({
 		name : "Mold.Lib.ArrayObserver",
 		dna : "class",
@@ -127,6 +143,12 @@ Seed({
 
 
 		this.publics = {
+
+			/**
+			 * @method observe
+			 * @description start observing the array 
+			 * @param  {function} callback a callback wich will be executed when the array changed
+			 */
 			observe : function(callback){
 
 				that.on('change', function(e){
@@ -134,6 +156,13 @@ Seed({
 				});
 				_observe();
 			},
+
+			/**
+			 * @method unobserve 
+			 * @description end observing the array
+			 * @param {function} callback the callback that h
+			 * @return {[type]}            [description]
+			 */
 			unobserve : function(callback){
 	
 				that.off('change')

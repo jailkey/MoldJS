@@ -1,4 +1,9 @@
 "use strict";
+/**
+ * @method Mold.Lib.Promise
+ * @description creates a new promise
+ * @param {function} setup a function
+ */
 Seed({
 		name : "Mold.Lib.Promise",
 		dna : "class",
@@ -127,9 +132,21 @@ Seed({
 		this.publics = {
 			changeState : _changeState,
 			async : _async,
+		/**
+		 * @method state 
+		 * @description returns the current state possible values are reject, fulfilled, reject
+		 * @return {string} returns a string with current state
+		 */
 			state : function(){
 				return _state;
 			},
+
+		/**
+		 * @method all 
+		 * @description returns a promise wich will be resolved when all promises in the given list are resolved  
+		 * @param  {[type]} promises [description]
+		 * @return {[type]}          [description]
+		 */
 			all : function(promises){
 				var fullfillCount = 0;
 				var promise = new Mold.Lib.Promise(function(fullfill, resolve){

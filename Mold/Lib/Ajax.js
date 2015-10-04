@@ -1,5 +1,6 @@
 ﻿/**
- * @description ajax class provids methods to communicate via xhr
+ * @modul Mold.Lib.Ajax
+ * @description ajax class provides methods to communicate via xhr
  * @param {object} ajaxConf configuration object
  * @event ajax.error fires on error
  * @event ajax.not.initialized fires on xhr state initialized
@@ -12,6 +13,7 @@
  * @event ajax.put.success
  * @event ajax.delete.success
  */
+
 Seed({
 		name : "Mold.Lib.Ajax",
 		dna : "class",
@@ -32,6 +34,7 @@ Seed({
 		Mold.mixin(this, events);
 
 		this.publics = {
+
 		/**
 		 * method get 
 		 * @description creates a get request

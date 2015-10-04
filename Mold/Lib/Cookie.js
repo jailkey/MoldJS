@@ -1,3 +1,8 @@
+/**
+ * @module Mold.Lib.Cookie
+ * @description parse a cookiestring and provides mmethod for easy access to it
+ * @param  {Object} cookieString a cookie string
+ */
 Seed({
 		name : "Mold.Lib.Cookie",
 		dna : "class",
@@ -50,6 +55,13 @@ Seed({
 				});
 				return output;
 			},
+
+		/**
+		 * @method get 
+		 * @description returns cookie value by the given attribute if no attribute is given it returns an object with key value pairs
+		 * @param  {string} attribute the name of the desired attribute
+		 * @return {mixed} returns a string with the attribute value or a object with alll attributes
+		 */
 			get : function(attribute){
 				if(!attribute){
 					return _cookies;
@@ -58,6 +70,13 @@ Seed({
 				}
 				return _cookies;
 			},
+
+		/**
+		 * @method set 
+		 * @description set an attribute value
+		 * @param {string} attribute the name of the attribute
+		 * @param {string} value the attribute value
+		 */
 			set : function(attribute, value){
 				_cookies[attribute] = value;
 			}

@@ -1,5 +1,7 @@
-
-
+/**
+ * @module Mold.Lib.ClI
+ * @description static object provides methods to create CLI commands
+ */
 Seed({
 		name : "Mold.Lib.CLI",
 		dna : "static",

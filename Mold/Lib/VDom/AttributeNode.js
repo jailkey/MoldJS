@@ -66,6 +66,10 @@ Seed({
 				return output;
 			}
 
+			this.renderString = function(){
+				return this.render();
+			}
+
 
 			
 		}

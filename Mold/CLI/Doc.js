@@ -38,7 +38,7 @@ Seed({
 			var mkdirp = require("mkdirp");
 			var pathes = require('path');
 			var project = new Mold.Tools.ProjectHandler();
-			var exportPath = Mold.LOCAL_REPOSITORY + "docs/en/";
+			var exportPath = parameter.path || Mold.LOCAL_REPOSITORY + "docs/en/";
 			var reporter = new Mold.Tools.Doc.MarkDownReporter();
 			var projectHandler = new Mold.Tools.ProjectHandler()
 			var overviewData = [];
@@ -48,14 +48,13 @@ Seed({
 
 			var repo = new Mold.Tools.RepoHandler(Mold.LOCAL_REPOSITORY);
 
-			console.log("LOAD LOCAL DOC")
+			//console.log("LOAD LOCAL DOC")
 
 			var _docFile = function(path){
 				
 				if(fs.existsSync(path)){
 					var doc = new Mold.Tools.Doc.MoldDoc(path);
 					doc.get().then(function(data){
-						
 						var target = exportPath + data.name.replace(/\./g, "/") + reporter.getFileExtension();
 						var targetPath = target.split("/").splice(0, target.split("/").length - 1).join("/") + "/";
 						overviewData.push({
@@ -69,8 +68,6 @@ Seed({
 						reporter
 							.report(data)
 							.then(function(fileData){
-						
-							
 								mkdirp(targetPath, function(){
 								 	fs.writeFile(pathes.normalize(target), fileData, function(err) {
 								 		console.log("\u001b[32m" + target + " successfully created!" +  "\u001b[39m");
@@ -79,7 +76,7 @@ Seed({
 								});
 							})
 					}).fail(function(e){
-						console.log("e", e)
+						//console.log("e", e)
 					})
 				}
 			}
@@ -87,14 +84,12 @@ Seed({
 			//Test Local Repo
 			var documentedRepo = function(){
 			
-				
 				repo.eachSeed(function(path){
 					_docFile(path)
 
 				});
 
 				promise.then(function(){
-					console.log("START INDEX")
 					reporter
 						.overview({ overview : overviewData })
 						.then(function(fileData){
@@ -105,19 +100,29 @@ Seed({
 							})
 
 						})
-				})
-				
-
+				});
 			}
 
-			if(parameter.only){
-				_docFile(Mold.LOCAL_REPOSITORY + parameter.only.replace(/\./g, "/") + ".js");
-			}else{
-				//test standard local
-				documentedRepo();
-				_docFile(Mold.LOCAL_REPOSITORY + "Mold.js")
+			var _doDoc = function(){
+				if(parameter.only){
+					_docFile(Mold.LOCAL_REPOSITORY + parameter.only.replace(/\./g, "/") + ".js");
+				}else{
+					//test standard local
+					documentedRepo();
+					_docFile(Mold.LOCAL_REPOSITORY + "Mold.js")
+				}
 			}
 			
+			if(parameter.reporter){
+				Mold.load({ name : parameter.reporter }).bind(function(){
+					var  reporterSeed = Mold.getSeed(parameter.reporter);
+					reporter = new reporterSeed();
+					_doDoc();
+				})
+			}else{
+				_doDoc();
+			}
+
 		}
 	}
 )

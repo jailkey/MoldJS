@@ -12,7 +12,6 @@ Seed({
 		".Color",
 		".Component",
 		".Controller",
-		".Convert",
 		".Cookie",
 		".CssParser",
 		".Directive",

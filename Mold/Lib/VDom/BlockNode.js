@@ -330,7 +330,7 @@ Seed({
 					var filter = Mold.Lib.Filter.get(filterName);
 					if(filter){
 						var copy = Mold.copy(data)
-						copy = filter(copy, this.filter[filterName]);
+						copy = filter(copy, this.filter[filterName], this);
 						if(copy === true){
 							copy = {};
 							copy[this.name] = true
@@ -603,23 +603,24 @@ Seed({
 						var y = 0, subLen = selected.length;
 						this.pointer[i] = [];
 						for(; y < subLen; y++){
-							if(selected[y].parentElement === this.parentElement && selected[y].type !== 2){
-								var item = selected[y];
-								item.render(); 
-							}else{
-								selected[y].parentElement = this.parentElement;
-
-								var item = selected[y].render();
-								item.stopDirective = false;
-
+							selected[y].parentElement = this.parentElement;
+							
+							var item = selected[y].render();
+							item.stopDirective = false;
+							
+							//insert to dom if item has no parent
+							if(!item.parentNode){
 								if(lastElement){
 									lastElement.parentNode.insertBefore(item, lastElement.nextSibling);
 								}else{
 
 									this.parentElement.insertBefore(item, this.referenceNode);
 								}
-								this.pointer[i][y] = item;
+							}else{
+								console.log("do not insert")
 							}
+							this.pointer[i][y] = item;
+					
 							lastElement = item;
 						}
 					}

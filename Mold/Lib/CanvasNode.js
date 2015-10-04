@@ -4,7 +4,7 @@ Seed({
 		include : [
 			"Mold.Lib.Event",
 			"Mold.Lib.Info",
-			"Mold.Lib.Convert",
+			"Mold.Lib.Color",
 			"Mold.Lib.Ease",
 			"Mold.Lib.Loader"
 		]
@@ -326,7 +326,7 @@ Seed({
 					break;
 				case "backgroundColor":
 					if(Mold.Lib.Info.isHexValue(value)){
-						nodeStyle.backgroundColor = Mold.Lib.Convert.Color.hexToRGB(value);
+						nodeStyle.backgroundColor = Mold.Lib.Color.hexToRGB(value);
 					}else{
 						nodeStyle.backgroundColor = value;
 					}

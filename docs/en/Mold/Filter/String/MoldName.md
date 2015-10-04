@@ -9,7 +9,7 @@ __dna__: filter
 	
 
 
-__extends__: true  
+
 
 
 
@@ -17,6 +17,13 @@ __extends__: true
 --------------
 
 * [Mold.DNA.Filter](../../../Mold/DNA/Filter.md) 
+
+
+##Events
+--------------
+
+
+
 
 
 

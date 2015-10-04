@@ -32,6 +32,13 @@ __build a vdom from a content-template string__
 * [Mold.Lib.VDom.VDoc](../../../Mold/Lib/VDom/VDoc.md) 
 
 
+##Events
+--------------
+
+
+
+
+
 ##Example
 --------------
 **

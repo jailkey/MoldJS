@@ -20,6 +20,13 @@ __This callback is displayed as part of the Requester class.__
 
 
 
+##Events
+--------------
+
+
+
+
+
 
    
 ##Methods
@@ -34,7 +41,8 @@ __returns all Depencies from a seed header in a list__
 Defined in row: 491  
 
 __Arguments:__  
- * __header__ (_object_) - a seed header with an include property  
+ 
+* __header__ (_object_) - a seed header with an include property  
 returns: 
 
 
@@ -77,7 +85,8 @@ __Mold__
 Defined in row: 542  
 
 __Arguments:__  
- * __phrase__ (_string_) - string with leading and ending whitespaces  
+ 
+* __phrase__ (_string_) - string with leading and ending whitespaces  
 returns: 
 
 
@@ -91,7 +100,10 @@ __iterates through an List (Object, Array)__
 Defined in row: 577  
 
 __Arguments:__  
- * __collection__ (_object_) - the list   * __iterator__ (_function_) - a callback function   * __context__ (_object_) - optional context Object  
+ 
+* __collection__ (_object_) - the list   
+* __iterator__ (_function_) - a callback function   
+* __context__ (_object_) - optional context Object  
 returns: 
 
 
@@ -105,7 +117,9 @@ __iterates through an array and remove the selected item until the array is empt
 Defined in row: 623  
 
 __Arguments:__  
- * __collection__ (_array_) - the array   * __callback__ (_function_) - method will called on each entry, given paramter is the entry value  
+ 
+* __collection__ (_array_) - the array   
+* __callback__ (_function_) - method will called on each entry, given paramter is the entry value  
 
 
 
@@ -119,7 +133,10 @@ __find a specified value in an array__
 Defined in row: 646  
 
 __Arguments:__  
- * __collection__ (_object_) - the list   * __iterator__ (_function_) - a callback function   * __context__ (_object_) - context Object  
+ 
+* __collection__ (_object_) - the list   
+* __iterator__ (_function_) - a callback function   
+* __context__ (_object_) - context Object  
 returns: 
 
 
@@ -133,7 +150,10 @@ __iterates through an array until the specified callback returns false__
 Defined in row: 667  
 
 __Arguments:__  
- * __collection__ (_object_) - the list   * __iterator__ (_function_) - a callback function   * __context__ (_object_) - context Object  
+ 
+* __collection__ (_object_) - the list   
+* __iterator__ (_function_) - a callback function   
+* __context__ (_object_) - context Object  
 returns: 
 
 
@@ -147,7 +167,9 @@ __compares all values in an array__
 Defined in row: 706  
 
 __Arguments:__  
- * __collection__ (_array_) - an array to compare   * __iterator__ (_function_) - callback that wich is executet on every entry  
+ 
+* __collection__ (_array_) - an array to compare   
+* __iterator__ (_function_) - callback that wich is executet on every entry  
 returns: 
 
 
@@ -161,7 +183,8 @@ __returns an Array with the key of an object__
 Defined in row: 781  
 
 __Arguments:__  
- * __collection__ (_object_) - Expects an object  
+ 
+* __collection__ (_object_) - Expects an object  
 returns: 
 
 
@@ -175,7 +198,9 @@ __checks if a list contains a value__
 Defined in row: 806  
 
 __Arguments:__  
- * __list__ (_array/object/sting_) -    * __needel__ (_stirng_) -   
+ 
+* __list__ (_array/object/sting_) -    
+* __needel__ (_stirng_) -   
 returns: 
 
 
@@ -189,7 +214,8 @@ __test if a variable is defined__
 Defined in row: 825  
 
 __Arguments:__  
- * __value__ (_mixed_) -   
+ 
+* __value__ (_mixed_) -   
 returns: 
 
 
@@ -203,7 +229,8 @@ __checks if the give value is an array__
 Defined in row: 879  
 
 __Arguments:__  
- * __collection__ (_object_) - the value  
+ 
+* __collection__ (_object_) - the value  
 returns: 
 
 
@@ -217,7 +244,8 @@ __checks if the give value is an object__
 Defined in row: 897  
 
 __Arguments:__  
- * __collection__ (_object_) - the value  
+ 
+* __collection__ (_object_) - the value  
 returns: 
 
 
@@ -231,7 +259,8 @@ __checks if the give value is a NodeListe__
 Defined in row: 912  
 
 __Arguments:__  
- * __collection__ (_object_) - the value  
+ 
+* __collection__ (_object_) - the value  
 returns: 
 
 
@@ -245,7 +274,8 @@ __Fires if the dom is ready__
 Defined in row: 960  
 
 __Arguments:__  
- * __callback__ (_readycallback_) - Expected a callback, fires if the dom and Mold.js is ready  
+ 
+* __callback__ (_readycallback_) - Expected a callback, fires if the dom and Mold.js is ready  
 
 
 
@@ -259,7 +289,8 @@ __Add a DNA pattern to Mold.js__
 Defined in row: 984  
 
 __Arguments:__  
- * __dna__ (_object_) - Expected an object of type DNA  
+ 
+* __dna__ (_object_) - Expected an object of type DNA  
 
 
 
@@ -273,7 +304,8 @@ __Returns a DNA pattern from the specified name__
 Defined in row: 997  
 
 __Arguments:__  
- * __Expected__ (_dnaname_) - the name of the pattern  
+ 
+* __Expected__ (_dnaname_) - the name of the pattern  
 returns: 
 
 
@@ -287,7 +319,10 @@ __Adds a value to an specified cue__
 Defined in row: 1027  
 
 __Arguments:__  
- * __type__ (_string_) - Expects the name of the cue   * __name__ (_string_) - Expects the name of the entry   * __value__ (_mixing_) - Expects the value  
+ 
+* __type__ (_string_) - Expects the name of the cue   
+* __name__ (_string_) - Expects the name of the entry   
+* __value__ (_mixing_) - Expects the value  
 
 
 
@@ -301,7 +336,9 @@ __Removes an entry from the specified cue__
 Defined in row: 1039  
 
 __Arguments:__  
- * __type__ (_string_) - Expects the name of the cue   * __name__ (_string_) - Expects the name of the entry  
+ 
+* __type__ (_string_) - Expects the name of the cue   
+* __name__ (_string_) - Expects the name of the entry  
 
 
 
@@ -315,7 +352,9 @@ __Returns a specified cue value__
 Defined in row: 1050  
 
 __Arguments:__  
- * __type__ (_string_) - Expects the name of the cue   * __name__ (_string_) - Expects the name of the entry  
+ 
+* __type__ (_string_) - Expects the name of the cue   
+* __name__ (_string_) - Expects the name of the entry  
 returns: 
 
 
@@ -329,7 +368,8 @@ __Returns a specified cue object__
 Defined in row: 1060  
 
 __Arguments:__  
- * __type__ (_string_) - Expects the name of the cue  
+ 
+* __type__ (_string_) - Expects the name of the cue  
 returns: 
 
 
@@ -343,7 +383,8 @@ __Deletes a specified cue__
 Defined in row: 1070  
 
 __Arguments:__  
- * __name__ (_string_) - Expects the name of the entry, to be deleted  
+ 
+* __name__ (_string_) - Expects the name of the entry, to be deleted  
 
 
 
@@ -357,7 +398,9 @@ __Logs an entry__
 Defined in row: 1082  
 
 __Arguments:__  
- * __type__ (_string_) - Expects the entry type of the logmessage. Predefined values are "Error", "Info" and "Debug", but you can define your own, if necessary.   * __message__ (_string|object_) - Expects the message that will be logged, when the type is "Error" the parameter expects an object with the property "code". This property contains the errorcode.  
+ 
+* __type__ (_string_) - Expects the entry type of the logmessage. Predefined values are "Error", "Info" and "Debug", but you can define your own, if necessary.   
+* __message__ (_string|object_) - Expects the message that will be logged, when the type is "Error" the parameter expects an object with the property "code". This property contains the errorcode.  
 
 
 
@@ -371,7 +414,8 @@ __Fires if a Message wil be logged__
 Defined in row: 1102  
 
 __Arguments:__  
- * __callback__ (_onlogcallback_) - Expects a callback to be fired if a message will be logged  
+ 
+* __callback__ (_onlogcallback_) - Expects a callback to be fired if a message will be logged  
 
 
 
@@ -399,7 +443,8 @@ __Tells Mold.js which properties of a Seed are "loading properties". These prope
 Defined in row: 1163  
 
 __Arguments:__  
- * __propertyName__ (_string_) - The name of the property to be added.  
+ 
+* __propertyName__ (_string_) - The name of the property to be added.  
 
 
 
@@ -427,7 +472,8 @@ __Returns a seed specified by name__
 Defined in row: 1184  
 
 __Arguments:__  
- * __name__ (_string_) - Expects the name of the seed (seed chain)  
+ 
+* __name__ (_string_) - Expects the name of the seed (seed chain)  
 returns: 
 
 
@@ -441,7 +487,8 @@ __Returns the seed chain from the seed object without the root object__
 Defined in row: 1202  
 
 __Arguments:__  
- * __seed__ (_object_) - Expects a seed object  
+ 
+* __seed__ (_object_) - Expects a seed object  
 returns: 
 
 
@@ -455,7 +502,8 @@ __Returns the name of the root object of a Seed__
 Defined in row: 1211  
 
 __Arguments:__  
- * __seed__ (_object_) - Expects a seed object  
+ 
+* __seed__ (_object_) - Expects a seed object  
 returns: 
 
 
@@ -469,7 +517,8 @@ __Creats a seed object chain in Mold.js scope. If an object allready exists it w
 Defined in row: 1220  
 
 __Arguments:__  
- * __targets__ (_string_) - Expects an String with the seed chain  
+ 
+* __targets__ (_string_) - Expects an String with the seed chain  
 returns: 
 
 
@@ -497,7 +546,8 @@ __Adds a Seed to Mold.js__
 Defined in row: 1278  
 
 __Arguments:__  
- * __seed__ (_object_) - Expects a seed object  
+ 
+* __seed__ (_object_) - Expects a seed object  
 
 
 
@@ -511,7 +561,10 @@ __Loads a specified Script__
 Defined in row: 1499  
 
 __Arguments:__  
- * __path__ (_string_) - Expects the scriptpath   * __success__ (_loadscriptsuccsess_) - Expects a callback to be executed when the script is successfully loaded   * __error__ (_loadscripterror_) - Expects a callback to be executed if there is a loading error  
+ 
+* __path__ (_string_) - Expects the scriptpath   
+* __success__ (_loadscriptsuccsess_) - Expects a callback to be executed when the script is successfully loaded   
+* __error__ (_loadscripterror_) - Expects a callback to be executed if there is a loading error  
 
 
 
@@ -554,7 +607,9 @@ __adds a rule to control the loading process__
 Defined in row: 1585  
 
 __Arguments:__  
- * __name__ (_string_) - Expects the name of the rule   * __a__ (_function_) - function with a control statement  
+ 
+* __name__ (_string_) - Expects the name of the rule   
+* __a__ (_function_) - function with a control statement  
 
 
 
@@ -568,7 +623,8 @@ __checks if a config ist loaded__
 Defined in row: 1614  
 
 __Arguments:__  
- * __conf__ (_object_) - the configuration  
+ 
+* __conf__ (_object_) - the configuration  
 returns: 
 
 
@@ -582,7 +638,8 @@ __Load the specified Seed__
 Defined in row: 1635  
 
 __Arguments:__  
- * __seed__ (_object_) - Expects a seed object  
+ 
+* __seed__ (_object_) - Expects a seed object  
 returns: 
 
 
@@ -596,7 +653,9 @@ __Add a method to Mold.js, methodes with equal names will overwriten__
 Defined in row: 1716  
 
 __Arguments:__  
- * __name__ (_string_) - Expects the method name   * __method__ (_function_) - Expects a function with the method code  
+ 
+* __name__ (_string_) - Expects the method name   
+* __method__ (_function_) - Expects a function with the method code  
 
 
 
@@ -610,7 +669,9 @@ __Import Seeds from array of objects to target seed__
 Defined in row: 1728  
 
 __Arguments:__  
- * __target__ (_function_) - the target seed   * __method__ (_array_) - an array of objects  
+ 
+* __target__ (_function_) - the target seed   
+* __method__ (_array_) - an array of objects  
 
 
 
@@ -624,7 +685,9 @@ __Injects code at the beginning of a Functionobject;__
 Defined in row: 1748  
 
 __Arguments:__  
- * __func__ (_function_) - Expects a function object   * __code__ (_string_) - Expects code to be injected  
+ 
+* __func__ (_function_) - Expects a function object   
+* __code__ (_string_) - Expects code to be injected  
 
 
 
@@ -638,7 +701,9 @@ __Inherited methods from a superclass to a class__
 Defined in row: 1778  
 
 __Arguments:__  
- * __superClass__ (_class_) - Expected the superclass   * __subClass__ (_class_) - Expeted a Class  
+ 
+* __superClass__ (_class_) - Expected the superclass   
+* __subClass__ (_class_) - Expeted a Class  
 returns: 
 
 
@@ -652,7 +717,10 @@ __Adds Methods from one Object to another__
 Defined in row: 1815  
 
 __Arguments:__  
- * __target__ (_object_) - Expects the target object   * __origin__ (_object_) - Expects the origin object   * __selected__ (_array_) - Expects an array with the property- and methodenames that will be copied, the parameter is optional, if it is not given, all methodes an parametes will be copied  
+ 
+* __target__ (_object_) - Expects the target object   
+* __origin__ (_object_) - Expects the origin object   
+* __selected__ (_array_) - Expects an array with the property- and methodenames that will be copied, the parameter is optional, if it is not given, all methodes an parametes will be copied  
 returns: 
 
 
@@ -666,7 +734,8 @@ __copys an array or an object__
 Defined in row: 1842  
 
 __Arguments:__  
- * __target__ (_mixed_) - the array or object to copy  
+ 
+* __target__ (_mixed_) - the array or object to copy  
 returns: 
 
 
@@ -694,7 +763,9 @@ __Wraps a constructor and call it with dynamic arguments;__
 Defined in row: 1881  
 
 __Arguments:__  
- * __constructor__ (_function_) - Expects the target constructor   * __arguments__ (_array_) - Expects an array with the arguments  
+ 
+* __constructor__ (_function_) - Expects the target constructor   
+* __arguments__ (_array_) - Expects an array with the arguments  
 returns: 
 
 
@@ -708,7 +779,9 @@ __Wraps a Class with a second constructor, so you can execute methods in the sco
 Defined in row: 1895  
 
 __Arguments:__  
- * __targetClass__ (_class_) - Expects the class will be wraped   * __wrappingMethode__ (_function_) - Expects the method that will be executed, as parameter the scope of the instance will transfered  
+ 
+* __targetClass__ (_class_) - Expects the class will be wraped   
+* __wrappingMethode__ (_function_) - Expects the method that will be executed, as parameter the scope of the instance will transfered  
 returns: 
 
 

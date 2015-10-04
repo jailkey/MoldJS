@@ -2,7 +2,7 @@
 #Mold.DNA.Filter
 ---------------------------------------
 
-__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/DNA/View Kopie.js  
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/DNA/Filter.js  
 __dna__: dna  
 __author__: Jan Kaufmann  
 __version__: 0.0.1  
@@ -17,6 +17,13 @@ __version__: 0.0.1
 --------------
 
 * [Mold.Lib.Filter](../../Mold/Lib/Filter.md) 
+
+
+##Events
+--------------
+
+
+
 
 
 

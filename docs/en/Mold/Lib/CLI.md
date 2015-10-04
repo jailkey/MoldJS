@@ -1,5 +1,5 @@
 
-#Mold.Lib.CLI
+#Mold.Lib.ClI
 ---------------------------------------
 
 __file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Lib/CLI.js  
@@ -23,6 +23,13 @@ __colors and symboles you could use to format your cli output__
 * [Mold.Lib.Promise](../../Mold/Lib/Promise.md) 
 
 
+##Events
+--------------
+
+
+
+
+
 
    
 ##Methods
@@ -34,10 +41,11 @@ __colors and symboles you could use to format your cli output__
 
 
 __shows an errormessage__  
-Defined in row: 53  
+Defined in row: 55  
 
 __Arguments:__  
- * __error__ (_string_) - a string with a message  
+ 
+* __error__ (_string_) - a string with a message  
 returns: 
 
 
@@ -48,10 +56,11 @@ returns:
 
 
 __show message__  
-Defined in row: 64  
+Defined in row: 66  
 
 __Arguments:__  
- * __message__ (_string_) - [description]  
+ 
+* __message__ (_string_) - [description]  
 returns: 
 
 
@@ -62,10 +71,11 @@ returns:
 
 
 __show ok message__  
-Defined in row: 74  
+Defined in row: 76  
 
 __Arguments:__  
- * __message__ (_string_) - [description]  
+ 
+* __message__ (_string_) - [description]  
 returns: 
 
 
@@ -76,10 +86,11 @@ returns:
 
 
 __read standard in__  
-Defined in row: 84  
+Defined in row: 86  
 
 __Arguments:__  
- * __callback__ (_function_) - will be executed if the user press Enter  
+ 
+* __callback__ (_function_) - will be executed if the user press Enter  
 returns: 
 
 
@@ -90,10 +101,11 @@ returns:
 
 
 __*	[{		 *    	label : "some question?:",		 *     	input : {		 *      	name : 'path',		 *       	type : 'filesystem',		 *        	validate : 'required',		 *         	messages : {		 *          	error : "Is not valid!",		 *           	success : function(data){		 *           		if(data === 1){		 *           			return "yuhu one!"		 *           		}		 *           	}		 *          }		 *      }		 *   }]__  
-Defined in row: 122  
+Defined in row: 124  
 
 __Arguments:__  
- * __fields__ (_array_) - an array with the field definition  
+ 
+* __fields__ (_array_) - an array with the field definition  
 returns: 
 
 
@@ -104,7 +116,7 @@ returns:
 
 
 __exits the cli__  
-Defined in row: 130  
+Defined in row: 132  
 
   
 
@@ -118,10 +130,12 @@ returns:
 
 
 __adds a custome completer__  
-Defined in row: 202  
+Defined in row: 204  
 
 __Arguments:__  
- * ____ (_string_) - name of the completer   * __callback__ (_function_) - completer function  
+ 
+* ____ (_string_) - name of the completer   
+* __callback__ (_function_) - completer function  
 
 
 
@@ -132,10 +146,12 @@ __Arguments:__
 
 
 __excute the specified command__  
-Defined in row: 356  
+Defined in row: 358  
 
 __Arguments:__  
- * __command__ (_string_) - the command   * __parameter__ (_object_) - command parameter  
+ 
+* __command__ (_string_) - the command   
+* __parameter__ (_object_) - command parameter  
 
 
 
@@ -146,10 +162,11 @@ __Arguments:__
 
 
 __adds a new CLI Command to Mold__  
-Defined in row: 390  
+Defined in row: 392  
 
 __Arguments:__  
- * __[command]__ (_object_) - an object with the command  
+ 
+* __[command]__ (_object_) - an object with the command  
 
 
 

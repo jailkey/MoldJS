@@ -21,6 +21,13 @@ __binds model data to an element__
 * [->Mold.DNA.Component](../../../../->Mold/DNA/Component.md) 
 
 
+##Events
+--------------
+
+
+
+
+
 ##Example
 --------------
 **

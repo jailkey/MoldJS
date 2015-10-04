@@ -25,6 +25,13 @@ __test__: [Mold.Test.Lib.Model](../../Mold/Test/Lib/Model.md)
 * [Mold.Lib.Promise](../../Mold/Lib/Promise.md) 
 
 
+##Events
+--------------
+
+
+
+
+
 
    
 ##Methods
@@ -39,7 +46,9 @@ __validate model propertys__
 Defined in row: 39  
 
 __Arguments:__  
- * __value__ (_string|number_) - value to validate   * __validation__ (_string_) - name of the validation method  
+ 
+* __value__ (_string|number_) - value to validate   
+* __validation__ (_string_) - name of the validation method  
 returns: 
 
 
@@ -53,7 +62,8 @@ __returns the model data by a given path__
 Defined in row: 172  
 
 __Arguments:__  
- * __an__ (_string_) - object path  
+ 
+* __an__ (_string_) - object path  
 returns: 
 
 
@@ -67,7 +77,9 @@ __set the model data by a given path__
 Defined in row: 194  
 
 __Arguments:__  
- * __path__ (_string_) - the object path   * __data__ (_mixed_) - the data  
+ 
+* __path__ (_string_) - the object path   
+* __data__ (_mixed_) - the data  
 
 
 
@@ -78,10 +90,11 @@ __Arguments:__
 
 
 __enables the model validation__  
-Defined in row: 216  
+Defined in row: 218  
 
 __Arguments:__  
- * __state__ (_boolean_) - a boolean value with true enables the validation / false disable it  
+ 
+* __state__ (_boolean_) - a boolean value with true enables the validation / false disable it  
 
 
 
@@ -92,7 +105,7 @@ __Arguments:__
 
 
 __returns the model properties:__  
-Defined in row: 224  
+Defined in row: 226  
 
   
 
@@ -106,7 +119,7 @@ returns:
 
 
 __saves the model data to the specified adapter__  
-Defined in row: 233  
+Defined in row: 235  
 
   
 
@@ -120,10 +133,11 @@ returns:
 
 
 __loads data by the specified resourceID__  
-Defined in row: 258  
+Defined in row: 260  
 
 __Arguments:__  
- * __id__ (_number|string_) - the resource id  
+ 
+* __id__ (_number|string_) - the resource id  
 returns: 
 
 
@@ -134,7 +148,7 @@ returns:
 
 
 __removes model from the resource__  
-Defined in row: 273  
+Defined in row: 275  
 
   
 
@@ -148,10 +162,11 @@ returns:
 
 
 __connects a adapter to the model__  
-Defined in row: 283  
+Defined in row: 285  
 
 __Arguments:__  
- * __adapter__ (_object_) -   
+ 
+* __adapter__ (_object_) -   
 
 
 
@@ -162,7 +177,7 @@ __Arguments:__
 
 
 __returns a JSON string with the current model data__  
-Defined in row: 301  
+Defined in row: 303  
 
   
 
@@ -181,7 +196,7 @@ returns:
 
 
 ####data
-Defined in row: 210  
+Defined in row: 212  
 Parameter: 
 
 returns: 

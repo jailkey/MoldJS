@@ -22,6 +22,13 @@ __dna__: class
 * [Mold.Lib.TextFinder](../../Mold/Lib/TextFinder.md) 
 
 
+##Events
+--------------
+
+
+
+
+
 
    
 ##Methods
@@ -50,7 +57,9 @@ __retruns the next childNode with the given nodeType__
 Defined in row: 38  
 
 __Arguments:__  
- * __node__ (_object_) - target node   * __nodeType__ (_number_) - requested node type  
+ 
+* __node__ (_object_) - target node   
+* __nodeType__ (_number_) - requested node type  
 returns: 
 
 
@@ -105,7 +114,8 @@ __set a selection from a range object__
 Defined in row: 84  
 
 __Arguments:__  
- * __range__ (_object_) - expects a range object  
+ 
+* __range__ (_object_) - expects a range object  
 returns: 
 
 
@@ -135,7 +145,8 @@ __get / set a text selection__
 Defined in row: 317  
 
 __Arguments:__  
- * __range__ (_mixed_) - range ident object or range ident string, if not set method returns the current selection  
+ 
+* __range__ (_mixed_) - range ident object or range ident string, if not set method returns the current selection  
 returns: 
 
 
@@ -165,13 +176,34 @@ template.tree.then(function(tree){
 
 
 
-__set data to the template and renders the template__  
+__prepand the template to an element and render the template__  
 Defined in row: 346  
 
 __Arguments:__  
- * __range__ (_mixed_) - object or string  
+ 
+* __range__ (_mixed_) - object or string  
 returns: 
 
+
+__Example:__  
+*Mold/Test/Lib/Template.js*
+
+```
+
+template.tree.then(function(tree){
+	if(!Mold.isNodeJS){
+		
+		template.appendTo(document.body)
+		
+	}else{
+		var doc = new Doc();
+		template.appendTo(doc.get())
+	}
+	go();
+})
+
+
+```  
 
 
 

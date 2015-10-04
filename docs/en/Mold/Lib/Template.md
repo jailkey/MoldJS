@@ -28,6 +28,13 @@ __creates a template__
 * [Mold.Lib.Event](../../Mold/Lib/Event.md) 
 
 
+##Events
+--------------
+
+
+
+
+
 ##Example
 --------------
 *examples/simple_todo/Mold/Main.js*
@@ -88,7 +95,8 @@ __connects a model to the template__
 Defined in row: 298  
 
 __Arguments:__  
- * __model__ (_mold.lib.model_) -   
+ 
+* __model__ (_mold.lib.model_) -   
 
 
 
@@ -143,7 +151,8 @@ __set the template data__
 Defined in row: 316  
 
 __Arguments:__  
- * __data__ (_object_) - expects the object data  
+ 
+* __data__ (_object_) - expects the object data  
 returns: 
 
 
@@ -173,7 +182,43 @@ __appends the template to an element and render the template__
 Defined in row: 340  
 
 __Arguments:__  
- * __element__ (_element_) - the element where the template has to be appended  
+ 
+* __element__ (_element_) - the element where the template has to be appended  
+returns: 
+
+
+__Example:__  
+*Mold/Test/Lib/Template.js*
+
+```
+
+template.tree.then(function(tree){
+	if(!Mold.isNodeJS){
+		
+		template.appendTo(document.body)
+		
+	}else{
+		var doc = new Doc();
+		template.appendTo(doc.get())
+	}
+	go();
+})
+
+
+```  
+
+
+
+###prepandTo
+
+
+
+__prepand the template to an element and render the template__  
+Defined in row: 359  
+
+__Arguments:__  
+ 
+* __element__ (_element_) - the element where the template has to be appended  
 returns: 
 
 
@@ -204,10 +249,11 @@ template.tree.then(function(tree){
 
 
 __set data to the template and renders the template__  
-Defined in row: 357  
+Defined in row: 382  
 
 __Arguments:__  
- * __data__ (_object_) - the data has to set  
+ 
+* __data__ (_object_) - the data has to set  
 returns: 
 
 

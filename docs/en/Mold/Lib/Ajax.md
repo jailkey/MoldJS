@@ -23,6 +23,15 @@ __creates a get request__
 * [Mold.Lib.Header](../../Mold/Lib/Header.md) 
 
 
+##Events
+--------------
+
+
+
+* ____   
+
+
+
 
    
 ##Methods
@@ -34,14 +43,12 @@ __creates a get request__
 
 
 __creates a post request__  
-Defined in row: 62  
+Defined in row: 65  
 
 __Arguments:__  
  
-*	__url__ (_string_) - a string with the request url  
-*	__data__ (_object_) - an object with request data  
-
-
+* __url__ (_string_) - a string with the request url   
+* __data__ (_object_) - an object with request data  
 returns: 
 
 
@@ -52,10 +59,12 @@ returns:
 
 
 __creates a put request__  
-Defined in row: 84  
+Defined in row: 87  
 
 __Arguments:__  
- * __url__ (_string_) - a string with the request url   * ____ (_object_) - data an object with request data  
+ 
+* __url__ (_string_) - a string with the request url   
+* ____ (_object_) - data an object with request data  
 returns: 
 
 
@@ -66,10 +75,11 @@ returns:
 
 
 __creates a delete request__  
-Defined in row: 105  
+Defined in row: 108  
 
 __Arguments:__  
- * __url__ (_string]_) - a string with the request url  
+ 
+* __url__ (_string]_) - a string with the request url  
 returns: 
 
 
@@ -80,10 +90,13 @@ returns:
 
 
 __creates a ajax request__  
-Defined in row: 128  
+Defined in row: 131  
 
 __Arguments:__  
- * __url__ (_string]_) - a string with the request url   * __data__ (_object_) - an object with request data   * __config__ (_object_) - an configuration object  
+ 
+* __url__ (_string]_) - a string with the request url   
+* __data__ (_object_) - an object with request data   
+* __config__ (_object_) - an configuration object  
 returns: 
 
 

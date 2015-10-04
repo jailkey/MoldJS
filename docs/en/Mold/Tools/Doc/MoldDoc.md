@@ -21,6 +21,14 @@ __test__: [Mold.Test.Tools.Doc.MoldDoc](../../../Mold/Test/Tools/Doc/MoldDoc.md)
 * [Mold.Lib.File](../../../Mold/Lib/File.md) 
 * [Mold.Lib.Promise](../../../Mold/Lib/Promise.md) 
 * [Mold.Lib.Path](../../../Mold/Lib/Path.md) 
+* [Mold.Lib.Encode](../../../Mold/Lib/Encode.md) 
+
+
+##Events
+--------------
+
+
+
 
 
 

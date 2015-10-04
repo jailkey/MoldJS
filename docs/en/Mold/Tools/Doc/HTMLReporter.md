@@ -1,8 +1,8 @@
 
-#Mold.Tools.SeedHandler
+#Mold.Tools.Doc.HTMLReporter
 ---------------------------------------
 
-__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/SeedHandler.js  
+__file__: /Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold/Tools/Doc/HTMLReporter.js  
 __dna__: class  
 
 
@@ -12,16 +12,11 @@ __dna__: class
 
 
 
-__creates a seed in the current dire__
-
 
 ##Dependencies
 --------------
 
-* [Mold.Tools.SeedParser](../../Mold/Tools/SeedParser.md) 
-* [Mold.Lib.Promise](../../Mold/Lib/Promise.md) 
-* [Mold.Lib.Event](../../Mold/Lib/Event.md) 
-* [Mold.Lib.MultiLineString](../../Mold/Lib/MultiLineString.md) 
+* [Mold.Lib.Template](../../../Mold/Lib/Template.md) 
 
 
 ##Events
@@ -37,17 +32,16 @@ __creates a seed in the current dire__
 	
  
 
-###info
+###report
 
 
 
-__returns infos about the given seed__  
-Defined in row: 202  
+__returns a markdown document genereated by the given data__  
+Defined in row: 152  
 
 __Arguments:__  
  
-* __path__ (_string_) - path to the seed / seed code   
-* __fromCode__ (_boolean_) - if true, path will parsed as code string  
+* __data__ (_object_) -   
 returns: 
 
 
@@ -79,22 +73,6 @@ it("render block", function(){
 
 
 ```  
-
-
-
-###infos
-
-
-
-__returns infos about a seed and it dependencies__  
-Defined in row: 223  
-
-__Arguments:__  
- 
-* __path__ (_string_) - the path to the seed.   
-* __seed__ (_string_) - name of the seed  
-returns: 
-
 
 
 

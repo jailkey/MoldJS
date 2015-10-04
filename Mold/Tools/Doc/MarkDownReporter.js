@@ -35,6 +35,15 @@ Seed({
 			{{#include}}
 			* [{{name}}]({{path}}.md) {{/include}}
 			
+			{{#trigger|exists}}
+			##Events
+			--------------
+			{{/trigger}}
+
+			{{#trigger}}
+			* __{{name}}__ {{description}}  
+			{{/trigger}}
+
 			{{#example}}
 			##Example
 			--------------
@@ -59,7 +68,8 @@ Seed({
 			Defined in row: {{line}}  
 			
 			{{#parameter|exists}}__Arguments:__{{/parameter}}  
-			{{#parameter}} * __{{paraname}}__ (_{{type}}_) - {{description}}  {{/parameter}}
+			{{#parameter}} 
+			* __{{paraname}}__ (_{{type}}_) - {{description}}  {{/parameter}}
 			{{#return}}returns: {{return}}{{/return}}
 			
 			{{#example}}
@@ -109,6 +119,7 @@ Seed({
 		|*/}, { parseAsString : true});
 		
 		this.publics = {
+			
 		/**
 		 * @method report 
 		 * @description returns a markdown document genereated by the given data

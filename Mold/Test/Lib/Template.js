@@ -603,7 +603,7 @@ Seed({
 				})
 			})
 
-			xit("tests two way model binding with object", function(){
+			it("tests two way model binding with object", function(){
 				var template = false, model = false;
 
 				it("create new template add a model with a object ", function(done){
@@ -658,7 +658,7 @@ Seed({
 			})
 
 
-			it("tests diffrent form bindings", function(){
+			xit("tests diffrent form bindings", function(){
 				var template = false, model = false;
 
 				//#binding

@@ -2112,10 +2112,9 @@ Mold.addLoadingRule("vendor_script", function(seed){
  		Mold.startsWith(seed.name, "/vendor")
  		|| Mold.startsWith(seed.name, "vendor")
  	 ){
- 		var path = seed.name,
- 			seedName = seed.name;
+ 		var seedName = seed.name;
 		
-		return { path : '', file : seed.name, isExternal : false, isVendor : true, seedName: seedName, isScript : true }
+		return { path : Mold.LOCAL_REPOSITORY , file : seed.name, isExternal : false, isVendor : true, seedName: seedName, isScript : true }
  	}else{
  		return false;
  	}

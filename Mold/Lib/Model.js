@@ -199,7 +199,9 @@ Seed({
  				if(Mold.isArray(result)){
  					result.splice(+prop, 1, data);
  				}else{
- 					result[prop] = data
+ 					if(result[prop] !== data){
+ 						result[prop] = data
+ 					}
  				}
  			},
 

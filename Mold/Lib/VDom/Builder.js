@@ -162,10 +162,7 @@ Seed({
 
 							var binding = (Mold.startsWith(selected.nodeValue, BINDED_VALUE)) ? true : false;
 							var name = selected.nodeValue.replace(BINDED_VALUE, "").replace(VALUE, "").replace(END, "");
-					
-					
 							var parts = _getFilter(name);
-							console.log("name", name, parts)
 							var valueNode = new ValueNode({
 								name : parts.name,
 								filter : parts.filter,

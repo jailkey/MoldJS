@@ -147,6 +147,23 @@ Seed({
 			}
 		});
 
+		_add("tabs", function(data, conf){
+			var tabs = 2;
+			for(var tab in conf){};
+			tabs = tab;
+			var parts = data.split("\n");
+			var output = "";
+			for(var i = 0; i < parts.length; i++){
+
+				for(var y = 0; y < tabs; y++){
+					output += "\t";
+				}
+				output += parts[i] + "\n";
+			}
+
+			return output;
+		});
+
 		return {
 			add : _add,
 			get : _get

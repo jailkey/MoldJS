@@ -64,8 +64,8 @@ Seed({
 				<h2>Example</h2>
 				
 				<i>{{path}}</i>
-				<code>
-				{{code}}
+				<code has="line-numbers striped-lines options">
+				{{code|tabs:1}}
 				</code>
 				
 				{{/example}}
@@ -102,8 +102,8 @@ Seed({
 						<div class="example">
 							<h4>Example:</h4>  
 							<div class="path">{{path}}</div>
-							<code>
-							{{code}}
+							<code has="line-numbers striped-lines options">
+							{{code|tabs:1}}
 							</code>
 						</div> 
 					{{/example}}

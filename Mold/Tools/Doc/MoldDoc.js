@@ -1,3 +1,5 @@
+"use strict";
+
 Seed({
 		name : "Mold.Tools.Doc.MoldDoc",
 		dna : "class",
@@ -137,12 +139,11 @@ Seed({
 			var parts = example.split("#");
 			var filename = Mold.trim(parts[0]);
 			var ancor = "#" + Mold.trim(parts[1]);
-			console.log("GET EXAMPLE", out)
+			
 			if (PathLib.is(filename)) {
 				var file = fs.readFileSync(filename).toString();
 				var out = file.substring(file.indexOf("//"+ancor) + ancor.length + 2, file.indexOf("///"+ancor))
 				out = out.replace(/\r\n/g, "\n");
-
 				return {
 					path : filename,
 					code : Mold.Lib.Encode.encodeHTMLEntities(_removeTabs(out))
@@ -269,22 +270,28 @@ Seed({
 							output['partType'] = "method";
 							output['name'] = _getParameter(selected, 1).replace("\n", "");
 							break;
+
 						case "object":
 							output['object'] = true;
 							output['partType'] = "object";
 							output['name'] = _getParameter(selected, 1).replace("\n", "");
 							break;
+
 						case "property":
 							output['property'] = true;
 							output['partType'] = "property";
 							output['name'] = _getParameter(selected, 1).replace("\n", "");
 							break;
+
 						case "modul":
 						case "module":
 							output['module'] = true;
 							output['partType'] = "module";
 							output['name'] = _getParameter(selected, 1).replace("\n", "");
 							break;
+
+						case "arg":
+						case "argument":
 						case "param":
 						case "parameter":
 							output['parameter'].push({
@@ -293,36 +300,45 @@ Seed({
 								description : _getFrom(selected, 3)
 							});
 							break;
+
 						case "return":
 						case "returns":
 							output['return'] = {
 								type : _convertType(_getParameter(selected, 1).replace("\n", "")),
 								description : _getFrom(selected, 2)
 							};
-							break
+							break;
+
 						case "type":
 						case "typ":
 							output['type'] = _getParameter(selected, 1).replace("\n", "");
 							break;
+
 						case "desc":
 						case "description":
 							output['description'] = Mold.trim(_getFrom(selected, 1));
 							break;
+
 						case "namespace":
 							output['description'] = Mold.trim(_getParameter(selected, 1));
 							break;
+
 						case "public":
 							output['public'] = true;
 							break;
+
 						case "private":
 							output['private'] = true;
 							break;
+
 						case "example":
 							output['example'] =_getExample( Mold.trim(_getFrom(selected, 1)));
 							break;
+
 						case "test":
 							output['test'] = Mold.trim(_getFrom(selected, 1));
 							break;
+
 						case "fires":
 						case "trigger":
 						case "event":
@@ -331,9 +347,11 @@ Seed({
 								description : _getFrom(selected, 2)
 							})
 							break;
+
 						case "callback":
 							output['callback'] = Mold.trim(_getFrom(selected, 1));
 							break;
+
 						case "author":
 							output['author'] = Mold.trim(_getFrom(selected, 1));
 							break;
@@ -358,6 +376,9 @@ Seed({
 						case "deprecated":
 							output['deprecated'] = true;
 							break;
+						case "throws":
+						case "exeption":
+
 						default:
 							console.log("not found", action, selected)
 

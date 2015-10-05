@@ -48,8 +48,6 @@ Seed({
 
 			var repo = new Mold.Tools.RepoHandler(Mold.LOCAL_REPOSITORY);
 
-			//console.log("LOAD LOCAL DOC")
-
 			var _docFile = function(path){
 				
 				if(fs.existsSync(path)){

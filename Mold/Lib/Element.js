@@ -701,21 +701,21 @@ Seed (
 		}
 
 	/**
-	 * @method wrap 
-	 * @description wrapps the current element into anoter
-	 * @param  {element} wrapper the wrapping element
+	 * @method cover 
+	 * @description wrapps another element into the current
+	 * @param  {element} wrapped the the element to wrap
 	 */
-		element.wrap = function(wrapped){
-			wrapped.wrapIn(element);
+		element.cover = function(wrapped){
+			wrapped.coverIn(element);
 			return element;
 		};
 
 	/**
-	 * @method wrap 
+	 * @method coverIn 
 	 * @description wrapps the current element into anoter
 	 * @param  {element} wrapper the wrapping element
 	 */
-		element.wrapIn = function(wrapper){
+		element.coverIn = function(wrapper){
 			var parentNode = element.parentNode;
 			parentNode.insertBefore(wrapper, element);
 			wrapper.appendChild(element);

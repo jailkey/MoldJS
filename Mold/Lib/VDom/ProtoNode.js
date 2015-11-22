@@ -178,16 +178,7 @@ Seed({
 						//}
 					}
 				}else{
-					/*
-					if(this.children[name].type === BLOCK_NODE){
-						//if type is a blocknode add parent data
-						if(data){
-							this.children[name].setData(data[name]);
-						}else{
-							this.children[name].setData(false);
-						}
-					}else{
-						*/
+
 						var selected = this.children[name];
 						if(selected.hasParentValue && data[selected.parentName]){
 							selected.setData(data[selected.parentName]);
@@ -196,7 +187,7 @@ Seed({
 						}else{
 							this.children[name].setData(false);
 						}
-					//}
+					
 					
 				}
 			}

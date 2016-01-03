@@ -93,14 +93,36 @@
 				throw new Error("seedConf must be an object!");
 			}
 
-			return this.mixin({
+			var seedPrototype = {
 				_id : this.getId(),
-				_oldState = null,
-				state : this.states.INITIALISING,
+				_oldState : null,
+				_currentState : null,
+				_changedState : false,
 				stateHasChanged : function(){
-					if(this._oldState)
+					var output = this._changedState;
+					this._changedState = false;
+					return output;
 				}
-			}, seedConf);
+			}
+
+			Object.defineProperty(
+				seedPrototype,
+				'state', {
+					get : function(){
+						return this._currentState;
+					},
+					set : function(state){
+						this._currentState = state;
+						if(this._currentState !== this._oldState){
+							this._oldState = this._currentState
+						}
+					}
+				}
+			)
+			
+			seedPrototype.state = this.states.INITIALISING;
+
+			return this.mixin(seedPrototype, seedConf);
 		},
 		
 		/**
@@ -117,8 +139,12 @@
 				throw new SeedError('Seed state property is not defined! [' + seed.name + ']');
 			}
 
-			if(!seed.dna){
-				throw new SeedError('Seed dna is not defined! [' + seed.name + ']');
+			if(!seed.type){
+				throw new SeedError('Seed type is not defined! [' + seed.name + ']');
+			}
+
+			if(!this.seedTypeIndex[seed.type]){
+				throw new SeedError('SeedType \'' + seed.type + '\' does not exist! [' + seed.name + ']');
 			}
 
 			if(!this.isValidState(seed.state)){
@@ -171,9 +197,9 @@
 
 		executeSeed : function(seed){
 			seed.state = this.states.EXECUTING;
-
-
-
+			var seedType = this.getSeedType(seed.type);
+			this.addCodeToNamespace(seed.name, seedType.create(seed));
+			seed.state = this.states.READY;
 		},
 
 		checkDependencies : function(seed){
@@ -196,14 +222,16 @@
 			var i = 0, len = this.seeds.length;
 			for(; i < len; i++){
 				var seed = this.seeds[i];
-				var flows = null;
-				for(var state in this.stateFlows){
-					if(flows = this.stateFlows[state]){
-						for(var y = 0; y < flows.length; y++){
-							flows[y].call(this, seed);
+				//if(seed.stateHasChanged()){
+					var flows = null;
+					for(var state in this.stateFlows){
+						if(flows = this.stateFlows[state]){
+							for(var y = 0; y < flows.length; y++){
+								flows[y].call(this, seed);
+							}
 						}
 					}
-				}
+				//}
 				
 			}
 		},
@@ -246,6 +274,8 @@
 			if(typeof type.create !== 'function'){
 				throw new SeedTypeError('SeedType \'create\' is not a function! [' + type.name + ']');
 			}
+
+
 		},
 
 		/**
@@ -444,7 +474,7 @@
 		this.addSeedType({
 			name : 'static',
 			create : function(seed){
-				return seed();
+				return seed.code();
 			}
 		});
 
@@ -457,7 +487,12 @@
 
 
 		this.addStateFlow(this.states.PENDING, function(seed){
-			if(seed.dependencies && this.checkDependencies(seed)){
+			if(seed.dependencies){
+				if(this.checkDependencies(seed)){
+					this.executeSeed(seed);
+				}
+			}else{
+				console.log("EXECUTE SEED")
 				this.executeSeed(seed);
 			}
 		})

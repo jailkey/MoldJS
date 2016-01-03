@@ -5,7 +5,7 @@ describe("Mold Core Lib", function () {
 		it("Test the factory result", function(){
 			var seed = Mold.seedFactory({
 				name : "Mold.Test",
-				dna : "module",
+				type : "module",
 				code : function(){
 
 				}
@@ -16,15 +16,19 @@ describe("Mold Core Lib", function () {
 	})	
 
 	describe("Mold.validateSeed", function(){
-		var seed = Mold.seedFactory({dna : "module"})
+		var seed = Mold.seedFactory({type : "module"})
 
 		it("validate the seed without a name", function(){
 			expect(function() { Mold.validateSeed(seed); }).toThrow(new Mold.errors.SeedError('Seed name property is not defined!'))
 		});
 
-
 		it("set a name and validate without code", function(){
 			seed.name = "Mold.Test";
+			expect(function() { Mold.validateSeed(seed); }).toThrow(new Mold.errors.SeedError('SeedType \'module\' does not exist! [Mold.Test]'))
+		})
+
+		it("set a name and validate without code", function(){
+			seed.type = "static";
 			expect(function() { Mold.validateSeed(seed); }).toThrow(new Mold.errors.SeedError('Seed code property is not defined! [Mold.Test]'))
 		})
 
@@ -45,7 +49,7 @@ describe("Mold Core Lib", function () {
 	describe("Mold.addSeed and removeSeed", function(){
 		var seed = Mold.seedFactory({
 			name : "Mold.Test",
-			dna : "module",
+			type : "static",
 			code : function(){
 
 			}
@@ -56,7 +60,7 @@ describe("Mold Core Lib", function () {
 			expect(Mold.seedIndex["Mold.Test"]).not.toBe(seed);
 			expect(seed.state).toBe(Mold.states.INITIALISING);
 			Mold.addSeed(seed);
-			expect(seed.state).toBe(Mold.states.PENDING);
+			expect(seed.state).toBe(Mold.states.READY);
 			expect(Mold.seeds.length).toBe(1);
 			expect(Mold.seedIndex["Mold.Test"]).toBe(seed);
 		})
@@ -143,6 +147,27 @@ describe("Mold Core Lib", function () {
 		
 	})
 
+// TEST SEED AND NAMESPACING TOGETHER
+	describe("seed and namespacing together", function(){
+		var seed;
+		it("create a new seed", function(){
+			seed = Mold.seedFactory({
+				name : 'Mold.Test.Irgendwas',
+				type : 'static',
+				code : function(){
+					return {
+						doSomething : function(){
+							return true;
+						}
+					}
+				}
+			})
+			Mold.addSeed(seed);
+			expect(seed.state).toBe(Mold.states.READY);
+		});
+
+		it("")
+	})
 
 //TEST METHODS
 	describe("Mold.isArray", function(){

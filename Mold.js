@@ -1,6 +1,6 @@
 "use strict";
-(function(){
-	var global = this;
+
+(function(global){
 
 /** ERROR TYPES */
 	var SeedError = function SeedError (message) {
@@ -56,6 +56,8 @@
 			this.stateFlows[this.states[state]] = [];
 		}
 
+		this.isNodeJS = (global.global) ? true : false;
+
 		this.init();
 	}
 
@@ -102,24 +104,19 @@
 					var output = this._changedState;
 					this._changedState = false;
 					return output;
-				}
-			}
-
-			Object.defineProperty(
-				seedPrototype,
-				'state', {
-					get : function(){
-						return this._currentState;
-					},
-					set : function(state){
-						this._currentState = state;
-						if(this._currentState !== this._oldState){
-							this._oldState = this._currentState
-						}
+				},
+				get state(){
+					return this._currentState;
+				},
+				set state(state){
+					this._currentState = state;
+					if(this._currentState !== this._oldState){
+						this._oldState = this._currentState
 					}
 				}
-			)
-			
+
+			}
+
 			seedPrototype.state = this.states.INITIALISING;
 
 			return this.mixin(seedPrototype, seedConf);
@@ -170,6 +167,10 @@
 		 */
 		addSeed : function(seed){
 			this.validateSeed(seed);
+			var type = this.getSeedType(seed.type);
+			if(type.preCreating){
+				type.preCreating(seed);
+			}
 			if(this.seedIndex[seed.name] && !seed.overwrite){
 				return;
 			}
@@ -383,8 +384,16 @@
 	
 
 /**  OBJECT HANDLING  **/
+		
+		 extend : function(superClass, subClass){
+		 	subClass.prototype = Object.create(superClass);
+		 	subClass.prototype.constructor = subClass;
+		 	return subClass;
+		 },
+
+
 	 	/**
-		* @methode mixin
+		* @method mixin
 		* @desc Adds methods adn properties from one object to another
 		* @param {object} target - Expects the target object
 		* @param {object} origin - Expects the origin object
@@ -408,6 +417,132 @@
 				}
 			}
 			return target;
+		},
+
+		/**
+		 * @method clone 
+		 * @description clones an given object
+		 * @param  {object} target - the object that should be cloned
+		 * @return {object} returns the cloned object
+		 */
+		clone : function(target) {
+		    if(!target || typeof(target) != 'object'){
+		        return target;
+		    }
+		    var newObj = target.constructor();
+		    Mold.each(target, function(element, key, obj){
+				newObj[key] = Mold.clone(obj[key]);
+		    });
+		    return newObj;
+		},
+
+		/**
+		* @methode wrap
+		* @desc Wraps a Class with a second constructor, so you can execute methods in the scope of the targetclass
+		* @param (function) targetClass - Expects the class will be wraped
+		* @param (function) wrappingMethode - Expects the method that will be executed, as parameter the scope of the instance will transfered
+		* @return (function) wrapperClass - Returns a new Class that wrapped the target class
+		**/
+		wrap : function(targetClass, wrappingMethode){
+			var wrapperClass = function() {
+				var constructor = targetClass.apply(this, arguments);
+				wrappingMethode(this);
+				return constructor;
+			}
+			wrapperClass.prototype = targetClass.prototype;
+			return wrapperClass;
+		},
+
+		/**
+		 * @method watch 
+		 * @description watches a property of an object or html element
+		 * @param  {object}   obj - the ojbect to watch
+		 * @param  {string}   property - the property to watch
+		 * @param  {function} callback - the callback wich will be called if the property has changed
+		 * @param  {boolean}  [handleAsObject] - if it is set to true the object will handelt like a object even if it is a html element
+		 */
+		watch : function(obj, property, callback, handleAsObject){
+
+			if(Object.prototype.watch && !Mold.isNode(obj)){
+				obj.watch(property, callback);
+			}else{
+
+				var oldval = obj[property];
+				var newval = oldval;
+				
+				/*use mutation observer for HTML elements*/
+				
+				if(Mold.isNode(obj) && !handleAsObject){
+				
+					if(!!window.MutationObserver){
+						var observer = new MutationObserver(function(mutations) {
+							Mold.each(mutations, function(mutation) {
+								
+								if(
+									mutation.target === obj
+									&& mutation.type === 'attributes'
+									&& mutation.attributeName === property
+								){
+									callback.call(obj, property,  mutation.oldValue, obj.getAttribute(property));
+								}
+						  	});    
+						});
+					
+						observer.observe(obj, { 
+							attributes: true,
+							childList: true,
+							characterData: true ,
+							attributeOldValue: true,
+						});
+					}else{
+						obj.addEventListener('DOMAttrModified', function(e){
+							if(e.attrName === property){
+								callback.call(obj, property, e.prevValue, e.newValue);
+							}
+						})
+					}
+				}else{
+					var getter = function () {
+						return newval;
+					}
+					var setter = function (val) {
+						oldval = newval;
+						return newval = callback.call(obj, property, oldval, val);
+					}
+					if (delete obj[property]) { 
+						Object.defineProperty(obj, property, {
+							  get: getter, 
+							  set: setter,
+							  enumerable: true,
+							  configurable: true
+						});
+					}
+				}
+			}
+		},
+
+		/**
+		 * @method unwatch 
+		 * @description unwatches a object property 
+ 		 * @param  {object}   obj - the object to unwatch
+		 * @param  {string}   property - the property to unwatch
+		 * @param  {function} callback - the callback that has to be removed
+		 */
+		unwatch : function(obj, property, callback){
+			if(Object.prototype.unwatch) {
+				obj.unwatch(property);
+			}else{
+				Object.defineProperty(obj, "unwatch", {
+					enumerable: false,
+					configurable: true,
+					writable: false,
+					value: function (prop) {
+						var val = obj[property];
+						delete obj[property];
+						obj[property] = val;
+					}
+				});
+			}
 		},
 
 
@@ -462,13 +597,40 @@
 				return true;
 			}
 			return false;
-		}
+		},
+
+		/**
+		 * @method isNode 
+		 * @description checks if an object is in a html element node
+		 * @param  {object}  element - the node to check
+		 * @return {boolean} returns true if the element is a element node otherwise it returns false
+		 */
+		isNode : function(element){
+			
+			if(_isNodeJS) { return false; }
+			if(!element) { return false; }
+			
+			if(element === window){ return true }
+
+			return(
+				(typeof element === "object") 
+				? element instanceof Node 
+				: (
+					element 
+					&& typeof element === "object" 
+					&& typeof element.nodeType === "number"
+					&& typeof element.nodeName === "string"
+				)
+			)
+				
+		},
 
 	}
 
 
 /** INIT DEFAULT CONFIGURATION */
 	Mold.prototype.init = function(){
+		var that = this;
 
 		//default seed typs
 		this.addSeedType({
@@ -485,6 +647,53 @@
 			}
 		});
 
+		//for compatibility with 0.0.*, don't use this
+		this.addSeedType({
+			name : 'class',
+			preCreating : function(seed){
+				return seed;
+			},
+			create : function(seed){
+				if(seed.extend){
+					seed = Mold.extend(seed.extend, seed)
+				}
+			
+				return Mold.wrap(seed.code, function(that){
+					if(that.publics){
+						for(var property in that.publics){
+							that[property] = that.publics[property];
+						}
+					}
+					delete that.publics;
+					
+					if(that.trigger && typeof that.trigger === "function"){
+						that.trigger("after.init");
+					}
+					
+					return constructor;
+				});
+			}
+		});
+
+		this.addSeedType({
+			name : 'module',
+			create : function(seed){
+				var module = {
+					_exports : null,
+					get exports() {
+						return this._exports;
+					},
+					set exports(exported){
+						this._exports = exported;
+					}
+				}
+
+				seed.code.call(seed, module);
+
+				return module.exports;
+			}
+		});
+
 
 		this.addStateFlow(this.states.PENDING, function(seed){
 			if(seed.dependencies){
@@ -492,17 +701,153 @@
 					this.executeSeed(seed);
 				}
 			}else{
-				console.log("EXECUTE SEED")
 				this.executeSeed(seed);
+			}
+		});
+
+//ADD BUILD IN MODULES
+
+		/**
+		 * @module Mold.Core.File
+		 * @description creates a class calls File wich allows to ready a file on the full stack (node/browser) with the same API
+		 * @return {class} returns a File class 
+		 */
+		this.addSeed({
+			name : "Mold.Core.File",
+			type : "module",
+			state : that.states.INITIALISING,
+			code : function(module){
+
+				/**
+				 * @class File
+				 * @description a file class
+				 * @param {string} filename - expects the full filepath
+				 */
+				var File = function(filename){
+
+					var _rejected = [];
+					var _resolved = [];
+					var _data = null;
+					var _error = null;
+					var undefined;
+
+					var _resolve = function(data){
+						var resolve;
+						while(resolve = _resolved.shift()){
+							resolve(data);
+						}
+					}
+
+					var _reject = function(err){
+						var reject;
+						while(reject = _rejected.shift()){
+							reject(err);
+						}
+					}
+
+					var _test = function(){
+						if(_data){
+							_resolve(_data);
+						}
+						if(_error){
+							_reject(_error);
+						}
+					}
+
+					var _ajaxLoader = function(){
+						var xhr;
+
+						if(XMLHttpRequest !== undefined){
+						 	xhr = new XMLHttpRequest();
+						}else{
+							var versions = [
+								"MSXML2.XmlHttp.5.0", 
+								"MSXML2.XmlHttp.4.0",
+								"MSXML2.XmlHttp.3.0", 
+								"MSXML2.XmlHttp.2.0",
+								"Microsoft.XmlHttp"
+							];
+							for(var i = 0; i < versions.length; i++) {
+								try {
+									xhr = new ActiveXObject(versions[i]);
+									break;
+								}
+								catch(e){}
+							}
+						}
+
+						xhr.onreadystatechange = function(){
+							if(xhr.readyState < 4) {
+								return;
+							}
+
+							switch(xhr.status){
+								case 404:
+									_error = "File not found! [" + filename + "]"; 
+									break;
+							}
+
+							if(xhr.readyState === 4 && xhr.status === 200) {
+								_data = xhr.response;
+							}
+
+							_test();  
+						}
+
+						xhr.open('GET', filename, true);
+        				xhr.send()	
+					}
+
+					var _nodeLoader = function(){
+						var fs = require('fs');
+						if(!fs.existsSync(filename)){
+							_error = "File not found! [" + filename + "]";
+							_test();
+							return;
+						}
+
+						fs.readFile(filename, 'utf8', function (err, data) {
+							if(err){
+								_error = err;
+							}
+							if(data){
+								_data = data;
+							}
+							_test();
+							console.log("DATA", data)
+						})
+					}
+
+					this.load = function(){
+						if(that.isNodeJS){
+							_nodeLoader();
+						}else{
+							_ajaxLoader();
+						}
+						return {
+							then : function(onresolve){
+								_resolved.push(onresolve);
+								_test();
+							},
+							fail : function(onfail){
+								_rejected.push(onfail);
+								_test();
+							}
+						}
+					}
+				}
+
+				module.exports = File;
 			}
 		})
 	}
 
+	global._Mold = Mold;
 
 	var Mold = new Mold();
 
 
 	global.Mold = Mold;
+	console.log("LOAD Mold")
+})((typeof global !== 'undefined') ? global : this);
 
-}).call(this);
-console.log(Mold)

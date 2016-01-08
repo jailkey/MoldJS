@@ -16,7 +16,7 @@ describe("Mold Core Lib", function () {
 	})	
 
 	describe("Mold.validateSeed", function(){
-		var seed = Mold.seedFactory({type : "module"})
+		var seed = Mold.seedFactory({type : "testirgendwaskomisches"})
 
 		it("validate the seed without a name", function(){
 			expect(function() { Mold.validateSeed(seed); }).toThrow(new Mold.errors.SeedError('Seed name property is not defined!'))
@@ -24,7 +24,7 @@ describe("Mold Core Lib", function () {
 
 		it("set a name and validate without code", function(){
 			seed.name = "Mold.Test";
-			expect(function() { Mold.validateSeed(seed); }).toThrow(new Mold.errors.SeedError('SeedType \'module\' does not exist! [Mold.Test]'))
+			expect(function() { Mold.validateSeed(seed); }).toThrow(new Mold.errors.SeedError('SeedType \'testirgendwaskomisches\' does not exist! [Mold.Test]'))
 		})
 
 		it("set a name and validate without code", function(){
@@ -56,18 +56,18 @@ describe("Mold Core Lib", function () {
 		});
 		
 		it("adds a seed", function(){
-			expect(Mold.seeds.length).toBe(0);
+			expect(Mold.seeds.length).toBe(1);
 			expect(Mold.seedIndex["Mold.Test"]).not.toBe(seed);
 			expect(seed.state).toBe(Mold.states.INITIALISING);
 			Mold.addSeed(seed);
 			expect(seed.state).toBe(Mold.states.READY);
-			expect(Mold.seeds.length).toBe(1);
+			expect(Mold.seeds.length).toBe(2);
 			expect(Mold.seedIndex["Mold.Test"]).toBe(seed);
 		})
 
 		it("it removes the seed", function(){
 			Mold.removeSeed(seed);
-			expect(Mold.seeds.length).toBe(0);
+			expect(Mold.seeds.length).toBe(1);
 			expect(Mold.seedIndex["Mold.Test"]).not.toBe(seed);
 		})
 	});
@@ -95,7 +95,7 @@ describe("Mold Core Lib", function () {
 		it("creates a new Namespace", function(){
 		
 			Mold.createNamespace('Herbert');
-			expect(window.Herbert).toBeDefined();
+			expect(Herbert).toBeDefined();
 		})
 
 		it("creates a new namespace in a given object", function(){
@@ -166,7 +166,7 @@ describe("Mold Core Lib", function () {
 			expect(seed.state).toBe(Mold.states.READY);
 		});
 
-		it("")
+
 	})
 
 //TEST METHODS
@@ -213,16 +213,38 @@ describe("Mold Core Lib", function () {
 			var testString = "Irgendwas";
 			expect(Mold.isNodeList(testString)).toEqual(false);
 		});
-		it("Test if nodelist is a nodelist", function(){
-			var fragment = document.createDocumentFragment(),
-    			element = document.createElement('div');
-
-    		fragment.appendChild(element);
-			expect(Mold.isNodeList(fragment.childNodes)).toEqual(true);
-		});
 
 		
+		
 	});
+
+//TEST INTEGRATED CORE MODULES
+	describe("Mold.Core.File", function(){
+		var file = null;
+		it("Test if module exists", function(){
+			expect(Mold.Core.File).toBeDefined();
+		})
+
+		it("create file object", function(done){
+			var file = new Mold.Core.File('test.txt');
+			expect(file.load).toBeDefined();
+
+			file.load().then(function(data){
+				expect(data).toBe('test irgendwas text ganz viel')
+				done();
+			})
+		})
+
+		it("create  and load no existing file", function(done){
+			var file = new Mold.Core.File('tessdsdt.txt');
+			expect(file.load).toBeDefined();
+
+			file.load().fail(function(err){
+				expect(err).toBe('File not found! [tessdsdt.txt]')
+				done();
+			})
+		})
+	})
 
 
 });

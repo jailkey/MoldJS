@@ -1,21 +1,23 @@
 describe("Mold Core Lib", function () {
 
 //SEEDHANLDING
-	describe("Mold.seedFactory", function(){
-		it("Test the factory result", function(){
-			var seed = Mold.seedFactory({
+	describe("Mold.Core.SeedFactory", function(){
+		it("create a new seed and check methods an properties", function(){
+			var seed = Mold.Core.SeedFactory({
 				name : "Mold.Test",
 				type : "module",
 				code : function(){
 
 				}
 			})
-			expect(seed.state).toEqual(Mold.states.INITIALISING);
-			expect(seed.name).toEqual("Mold.Test")
+			expect(seed.state).toEqual(Mold.Core.SeedStates.INITIALISING);
+			expect(seed.name).toEqual("Mold.Test");
+			expect(seed.hasDependency).toBeDefined();
+			expect(seed.hasDependencies).toBeDefined();
 		});
 	})	
 
-	describe("Mold.validateSeed", function(){
+	xdescribe("Mold.validateSeed", function(){
 		var seed = Mold.seedFactory({type : "testirgendwaskomisches"})
 
 		it("validate the seed without a name", function(){
@@ -46,130 +48,128 @@ describe("Mold Core Lib", function () {
 
 	})
 
-	describe("Mold.addSeed and removeSeed", function(){
-		var seed = Mold.seedFactory({
+	describe("Mold.Core.SeedManager", function(){
+		var seed = Mold.Core.SeedFactory({
 			name : "Mold.Test",
-			type : "static",
-			code : function(){
-
-			}
-		});
-		
-		it("adds a seed", function(){
-			expect(Mold.seeds.length).toBe(1);
-			expect(Mold.seedIndex["Mold.Test"]).not.toBe(seed);
-			expect(seed.state).toBe(Mold.states.INITIALISING);
-			Mold.addSeed(seed);
-			expect(seed.state).toBe(Mold.states.READY);
-			expect(Mold.seeds.length).toBe(2);
-			expect(Mold.seedIndex["Mold.Test"]).toBe(seed);
+			type : "module",
+			code : function(){}
 		})
+		
+		it("adds a seed with .add", function(){
+			var oldLength = Mold.Core.SeedManager.count;
+			expect(Mold.Core.SeedManager.count).toBe(oldLength);
+			expect(Mold.Core.SeedManager.get("Mold.Test")).not.toBe(seed);
+			expect(seed.state).toBe(Mold.Core.SeedStates.INITIALISING);
+			Mold.Core.SeedManager.add(seed);
+			expect(Mold.Core.SeedManager.count).toBe(oldLength + 1);
+		});
+
+
+		it("get a seed with .get", function(){
+			expect(Mold.Core.SeedManager.get("Mold.Test")).toBe(seed);
+		});
 
 		it("it removes the seed", function(){
-			Mold.removeSeed(seed);
-			expect(Mold.seeds.length).toBe(1);
-			expect(Mold.seedIndex["Mold.Test"]).not.toBe(seed);
+			var oldLength = Mold.Core.SeedManager.count;
+			Mold.Core.SeedManager.remove(seed);
+			expect(Mold.Core.SeedManager.count).toBe(oldLength - 1);
+			expect(Mold.Core.SeedManager.get("Mold.Test")).not.toBe(seed);
 		})
 	});
 
-//NAMESPACE HANLDING
-	describe("validated Namespace names with Mold.validateNamespaceName", function(){
-		it("test name with spaces", function(){
-			expect(Mold.validateNamespaceName('A asdasd')).toBe(false)
+//Mold.Core.NamespaceManger
+	describe("Test Mold.Core.NamespaceManger", function(){
+		describe('validates a name with .validate()', function(){
+			it("test a name with spaces", function(){
+				expect(Mold.Core.NamespaceManager.validate('A asdasd')).toBe(false)
+			});
+
+			it("test name with number", function(){
+				expect(Mold.Core.NamespaceManager.validate('A3asd')).toBe(false)
+			});
+
+			it("test name with a short begining", function(){
+				expect(Mold.Core.NamespaceManager.validate('test')).toBe(false)
+			});
+
+			it("test correct name", function(){
+				expect(Mold.Core.NamespaceManager.validate('Test')).toBe(true)
+			});
 		});
 
-		it("test name with number", function(){
-			expect(Mold.validateNamespaceName('A3asd')).toBe(false)
-		});
+		describe("creates a namepace with .create", function(){
+			it("creates a new Namespace", function(){
+			
+				Mold.Core.NamespaceManager.create('Herbert');
+				expect(Herbert).toBeDefined();
+			})
 
-		it("test name with a short begining", function(){
-			expect(Mold.validateNamespaceName('test')).toBe(false)
-		});
+			it("creates a new namespace in a given object", function(){
+				var test = {};
+				Mold.Core.NamespaceManager.create('Herbert', test);
+				expect(test.Herbert).toBeDefined();
+			})
 
-		it("test correct name", function(){
-			expect(Mold.validateNamespaceName('Test')).toBe(true)
-		});
+			it("try to create a new namespace a unvalid name", function(){
+				var test = {};
+				expect(function() { Mold.Core.NamespaceManager.create('aerbe8rt', test) }).toThrow(new Error("'aerbe8rt' is not a valid Namespace name!"));
+			})
+		})
+
+
+		describe("adds code to namespace with .addCode", function(){
+			it("creates a namepace chain inside of Mold and put an object to it", function(){
+				Mold.Core.NamespaceManager.addCode("Mold.Test.HansPeter", { test : 1 });
+				expect(Mold.Test.HansPeter.test).toBe(1);
+			});
+
+			it("creates a namepace chain in the global scope", function(){
+				Mold.Core.NamespaceManager.addCode("App.Test.HansPeter", { test : 1 });
+				expect(App.Test.HansPeter.test).toBe(1);
+			});
+		})
 	});
 
-	describe("Mold.createNamespace", function(){
-		it("creates a new Namespace", function(){
-		
-			Mold.createNamespace('Herbert');
-			expect(Herbert).toBeDefined();
-		})
+	
 
-		it("creates a new namespace in a given object", function(){
-			var test = {};
-			Mold.createNamespace('Herbert', test);
-			expect(test.Herbert).toBeDefined();
-		})
-
-		it("try to create a new namespace a unvalid name", function(){
-			var test = {};
-			expect(function() { Mold.createNamespace('aerbe8rt', test) }).toThrow(new Error("'aerbe8rt' is not a valid Namespace name!"));
-		})
-	})
-
-	describe("Mold.addCodeToNamespace", function(){
-		it("creates a namepace chain inside of Mold and put an object to it", function(){
-			Mold.addCodeToNamespace("Mold.Test.HansPeter", { test : 1 });
-			expect(Mold.Test.HansPeter.test).toBe(1);
-		});
-
-		it("creates a namepace chain in the global scope", function(){
-			Mold.addCodeToNamespace("App.Test.HansPeter", { test : 1 });
-			expect(App.Test.HansPeter.test).toBe(1);
-		});
-	})
 
 //SEED TYPE HANDLING
-	describe("add and get seed typs", function(){
-		var typeLen = Object.keys(Mold.seedTypeIndex).length;
-		it("add a seed type with Mold.addSeedType", function(){
-			expect(Object.keys(Mold.seedTypeIndex).length).toBe(typeLen);
-
-			Mold.addSeedType({
+	describe("Test Mold.Core.SeedTypeManager", function(){
+		var typeLen;
+		it("test the amount of SeedTypes with .count", function(){
+			typeLen = Mold.Core.SeedTypeManager.count;
+			expect(Mold.Core.SeedTypeManager.count).toBe(typeLen);
+			expect(function(){ Mold.Core.SeedTypeManager.count = 5; }).toThrow( new Error("the property 'len' is not writeable! [Mold.Core.SeedTypeManger]"));
+		});
+		it("add seed type with .add", function(){
+			
+			Mold.Core.SeedTypeManager.add({
 				name : 'testtype',
 				create : function(){}
 			})
 
-			expect(Object.keys(Mold.seedTypeIndex).length).toBe(typeLen + 1);
+			expect(Mold.Core.SeedTypeManager.count).toBe(typeLen + 1);
 		});
 
-		it("remove seed type with Mold.removeSeedType", function(){
-			Mold.removeSeedType('testtype')
-			expect(Object.keys(Mold.seedTypeIndex).length).toBe(typeLen);
+		it("remove seed type with .remove", function(){
+			Mold.Core.SeedTypeManager.remove('testtype')
+			expect(Mold.Core.SeedTypeManager.count).toBe(typeLen);
 		});
 
-		it("get seed type with Mold.getSeedType", function(){
-			expect(Mold.getSeedType('static').name).toBe('static');
+		it("get seed type with .get", function(){
+			expect(Mold.Core.SeedTypeManager.get('static').name).toBe('static');
 		})
 		
 	})
 
-// TEST SEED AND NAMESPACING TOGETHER
-	describe("seed and namespacing together", function(){
-		var seed;
-		it("create a new seed", function(){
-			seed = Mold.seedFactory({
-				name : 'Mold.Test.Irgendwas',
-				type : 'static',
-				code : function(){
-					return {
-						doSomething : function(){
-							return true;
-						}
-					}
-				}
-			})
-			Mold.addSeed(seed);
-			expect(seed.state).toBe(Mold.states.READY);
-		});
 
 
-	})
+//TEST MOLD METHODS
+	describe("Mold.load", function(){
+		Mold.load("Mold.Test")
+	})		
 
-//TEST METHODS
+
 	describe("Mold.isArray", function(){
 		it("Test if array is an array", function(){
 			var testArray = ["one", "two", "three"];

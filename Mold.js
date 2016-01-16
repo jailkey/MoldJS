@@ -27,6 +27,8 @@
 
 	SeedTypeError.prototype = new Error;
 
+	var _isNodeJS =  (global.global) ? true : false;
+
 /** MOLD CONTRUCTOR */
 	var Mold = function Mold(){
 		
@@ -43,7 +45,7 @@
 
 		this.EXIT = '---exit---';
 
-		this.isNodeJS = (global.global) ? true : false;
+		this.isNodeJS = _isNodeJS;
 
 		this.init();
 	}
@@ -840,6 +842,142 @@
 		}
 	}();
 
+	/**
+	 * @module Mold.Core.Config 
+	 * @description provides methods to load, set and get configuration file and params
+	 * @static
+	 */
+	Mold.prototype.Core.Config = function(){
+
+		var _configValue = {
+			'config-path' : '',
+			'config-name' : 'mold.json'
+		}
+
+		var _isReady = false;
+		var _readyCallbacks = [];
+
+		var _executeIsReady = function(data){
+			_isReady = true;
+			while(_readyCallbacks.length){
+				var callback = _readyCallbacks.pop();
+				callback(data);
+			}
+		}
+		
+		return {
+			/**
+			 * @method set 
+			 * @description set a configuration parameter
+			 * @param {sting} name - the parameter name
+			 * @param {mixed} value - the parameter value
+			 */
+			set : function(name, value){
+				_configValue[name] = value;
+				return this;
+			},
+
+			/**
+			 * @method get 
+			 * @description returns a configuration parameter
+			 * @param  {string} name - the parameters name
+			 * @return {mixed} returns the parameter value
+			 */
+			get : function(name){
+				return _configValue[name] || null;
+			},
+
+			/**
+			 * @method init 
+			 * @description initialize the config, loads a configuration file
+			 * @return {promise} returns a (psydo-) promise 
+			 */
+			init : function(){
+				var that = this;
+
+				_configValue['config-path'] = Mold.prototype.Core.Initializer.getParam('config-path') || _configValue['config-path'];
+				_configValue['config-name'] = Mold.prototype.Core.Initializer.getParam('config-name') || _configValue['config-name'];
+
+				var configFile = new Mold.prototype.Core.File(_configValue['config-path'] + _configValue['config-name']);
+				var promise = configFile.load();
+				
+				promise
+					.then(function(data){
+						data = JSON.parse(data);
+						for(var prop in data){
+							that.set(prop, data[prop]);
+						}
+						_executeIsReady(data);
+					})
+					.fail(function(err){
+						throw new Error("Configuration file not found: '" + _configValue['config-path'] + _configValue['config-name'] + "'");
+					})
+				
+				return promise;
+			},
+
+			isReady : function(callback){
+				if(_isReady){
+					callback();
+				}else{
+					_readyCallbacks.push(callback);
+				}
+			}
+
+		}
+	}();
+
+	Mold.prototype.Core.Initializer = function(){
+		var _params = ['config-name', 'config-path'];
+		var _availableParams = {};
+
+		var _getBrowserParam = function(name){
+			var param = document.currentScript.getAttribute(name);
+			return param || null;
+		}
+
+		var _getNodeParam = function(name){
+			var argFound = false, value = null;
+			for(var i = 0; i < process.argv.length; i++){
+				if(argFound){
+					value = process.argv[i];
+					break;
+				}
+				if(process.argv[i] === name){
+					argFound = true;
+				}
+			}
+			return value;
+		}
+
+		return {
+			init : function(){
+				_availableParams = this.getInitParams();
+			},
+			getParam : function(name){
+				return _availableParams[name] || null;
+			},
+			getInitParams : function(){
+				var output = {};
+				_params.forEach(function(entry){
+					var result = null;
+
+					if(_isNodeJS){
+						result = _getNodeParam(entry);
+					}else{
+						result = _getBrowserParam(entry);
+					}
+
+					if(result){
+						output[entry] = result;
+					}
+				});
+
+				return output;
+			}
+		}
+	}();
+
 
 	/**
 	 * @module Mold.Core.File
@@ -956,10 +1094,12 @@
 				then : function(onresolve){
 					_resolved.push(onresolve);
 					_test();
+					return this;
 				},
 				fail : function(onfail){
 					_rejected.push(onfail);
 					_test();
+					return this;
 				}
 			}
 		}
@@ -985,7 +1125,7 @@
 			}
 		});
 
-		//for compatibility with 0.0.*, don't use this
+		//for compatibility with 0.0.1*, don't use this
 		this.Core.SeedTypeManager.add({
 			name : 'class',
 			preCreating : function(seed){
@@ -1035,8 +1175,10 @@
 		//configurate seed flow
 		this.Core.SeedFlow
 			.on(this.Core.SeedStates.LOADING, function(seed, done){
-				console.log("do LOADING");
-				done()
+				that.Core.Config.isReady(function(){
+					console.log("do LOADING");
+					done()	
+				})
 			})
 			.onAfter(this.Core.SeedStates.LOADING, function(seed, done){
 				console.log("AFTER LOADING", done.toString())
@@ -1088,6 +1230,11 @@
 				done()
 			})
 
+
+		console.log("INITIALISING")
+
+		this.Core.Initializer.init();
+		this.Core.Config.init() ;
 	}
 
 	global._Mold = Mold;
@@ -1097,5 +1244,6 @@
 
 	global.Mold = Mold;
 	console.log("LOAD Mold")
+
 })((typeof global !== 'undefined') ? global : this);
 

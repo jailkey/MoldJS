@@ -162,6 +162,22 @@ describe("Mold Core Lib", function () {
 		
 	})
 
+	describe("Mold.Core.Config", function(){
+		it("Test default config settings", function(){
+			expect(Mold.Core.Config.get('config-name')).toBe('mold.json');
+		})
+
+		it("set and get a config value", function(){
+			Mold.Core.Config.set('onlyAtestValue', '---val---');
+			expect(Mold.Core.Config.get('onlyAtestValue')).toBe('---val---');
+		})
+
+		it("test config settings from mold.json", function(){
+			expect(Mold.Core.Config.get('name')).toBe('DefaultMoldRepo');
+		})
+
+	});
+
 
 
 //TEST MOLD METHODS

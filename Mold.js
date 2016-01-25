@@ -47,6 +47,8 @@
 
 		this.isNodeJS = _isNodeJS;
 
+		this.ready = this._reCreateReadyPromise();
+
 		this.init();
 	}
 
@@ -59,7 +61,7 @@
 		**/
 		ident : 0,
 		getId : function (){
-			 Mold.ident++;
+			Mold.ident++;
 			return Mold.ident;
 		},
 
@@ -67,12 +69,26 @@
 
 
 		load : function(name){
+			var seed;
+			if((seed = this.Core.SeedManager.get(name))){
+				var output = new this.Core.Promise(false, { throwError : true, name : "Mold.load" });
+				return output.resolve(seed);
+			}
+
 			var seed = this.Core.SeedFactory({
 				name : name,
 				state : this.Core.SeedStates.LOADING
 			});
 
 			this.Core.SeedFlow.exec(seed);
+			return seed.isReady;
+		},
+
+		_reCreateReadyPromise : function (){
+			this.ready = new this.Core.Promise(false, { throwError : true, name : "_reCreateReadyPromise" }).all([
+				this.Core.Config.isReady,
+				this.Core.SeedManager.isReady
+			])
 		},
 
 /** FUNCTIONAL METHODS **/
@@ -433,6 +449,203 @@
 	//Build-in core modules
 	Mold.prototype.Core = {};
 
+
+/**
+	 * @module Mold.Core.Promise 
+	 * @description implements a Promise A+
+	 * @param {function} 
+	 */
+	Mold.prototype.Core.Promise = function Promise(setup, conf){
+
+		var _state = "pending",
+			_value = false,
+			_callbacks = [],
+			undefined;
+
+		var PromiseError = function(message){
+			return {
+				name : "PromiseError",
+				message : message
+			}
+		}
+
+		var _changeState = function(state, value){
+			
+			if ( _state === state ) {
+				throw Error("can't transition to same state: " + state);
+			}
+
+			if ( 
+				_state === "fulfilled" 
+				|| _state === "rejeced" 
+			) {
+				throw Error("can't transition from current state: " + state);
+			}
+
+			if (
+				state === "fulfilled" 
+				&& arguments.length < 2 
+			) {
+				throw Error("transition to fulfilled must have a non null value");
+			}
+
+			if ( 
+				state === "rejeced"
+				&& value === null 
+			) {
+				throw Error("transition to rejected must have a non null reason");
+			}
+
+			_state = state;
+			_value = value;
+			_resolve();
+			return _state;
+		};
+
+		var _resolve = function(){
+
+			if ( _state === "pending" ) {
+				return false;
+			}
+
+			Mold.eachShift(_callbacks, function(callbackObject){
+				var nextCall = (_state === "fulfilled") ? callbackObject.onFulFilled : callbackObject.onRejected;
+				if(typeof nextCall !== "function" ){
+
+					callbackObject.promise.changeState(_state, _value );
+				}else{
+
+					try {
+						var value = nextCall.call(null, _value);
+						if (value && typeof value.then === 'function' ){
+							value.then(function(value){
+								callbackObject.promise.changeState("fulfilled", value);
+							}, function(error){
+								callbackObject.promise.changeState("rejected", error);
+							});
+
+						}else{
+							callbackObject.promise.changeState("fulfilled", value);
+						}
+					}catch(error){
+						if(conf.throwError){
+							throw new Error(error + ((conf.name) ? " " + conf.name : "" ) + " \n " + nextCall.toString());
+						}
+						callbackObject.promise.changeState("rejected", error);
+						
+						throw error.stack;
+					}
+				}
+			});
+		
+		};
+
+		var _then = function(onFulFilled, onRejected){
+
+			var promise = new Promise(),
+				that = this;
+
+			_async(function(){
+				_callbacks.push({
+					onFulFilled : onFulFilled,
+					onRejected : onRejected,
+					promise : promise
+				});
+				_resolve();
+			});
+
+			return promise;
+		}
+
+
+		var _fulfill = function(value){
+			_changeState("fulfilled", value );
+		}
+
+		var _reject = function(reason){
+			_changeState( "reject", reason );
+		}
+
+		if(setup && typeof setup === "function"){
+			setup.call(null, _fulfill, _reject);
+		}
+
+		var _async = function(callback) {
+			setTimeout(callback, 5);
+		};
+
+		return {
+			changeState : _changeState,
+			async : _async,
+		/**
+		 * @method state 
+		 * @description returns the current state possible values are reject, fulfilled, reject
+		 * @return {string} returns a string with current state
+		 */
+			state : function(){
+				return _state;
+			},
+
+		/**
+		 * @method all 
+		 * @description returns a promise wich will be resolved when all promises in the given list are resolved  
+		 * @param  {[type]} promises [description]
+		 * @return {[type]}          [description]
+		 */
+			all : function(promises){
+				var fullfillCount = 0;
+				console.log("ALL PROMISES", promises)
+				var promise = new Promise(function(fullfill, resolve){
+					var fullfillAll = function(){
+						
+						fullfillCount++;
+						console.log("full fill all", fullfillCount, promises.length)
+						if(fullfillCount === promises.length){
+							
+							fullfill();
+						}
+					}
+					for(var i = 0; i < promises.length; i++){
+						promises[i].then(
+							fullfillAll,
+							resolve
+						);
+					}
+				});
+				return promise;
+			},
+			fail : function(onfail){
+				return _then(undefined, onfail);
+			},
+			success : function(onsuccess){
+				return _then(onsuccess, undefined);
+			},
+			catch : function(onfail){
+				return _then(undefined, onfail);
+			},
+			then : function(onFulFilled, onRejected){
+				return _then(onFulFilled, onRejected);
+			},
+			reject : function(reason) {
+				_reject(reason);
+			},
+			fulfill : function(value){
+				_fulfill(value);
+			},
+			resolve : function(value){
+				if(value && typeof value.then === "function"){
+					var promise = new Promise(function(resolve, reject){
+						value.then(resolve, reject);
+					})
+					return promise
+				}
+				_fulfill(value);
+				return this;
+			}
+		}
+	};
+
+
 	/**
 	 * @module Mold.Core.SeedFactory
 	 * @description creates a seed object from a configuration
@@ -443,7 +656,7 @@
 	 * @return {object} seedObject - returns a seed object with the config properties plus the following methods and properties
 	 *                             - 'state' the current state of the seed
 	 */
-	Mold.prototype.Core.SeedFactory = function(conf){
+	Mold.prototype.Core.SeedFactory = function SeedFactory(conf){
 
 		if(!conf){
 			throw new Error("seedConf must be defined!");
@@ -468,10 +681,53 @@
 				this[prop] = properties[prop];
 			}
 
-			this.state = properties.state || Mold.Core.SeedStates.INITIALISING;
+			this._state = properties.state || Mold.Core.SeedStates.INITIALISING;
+			this.path = null;
+			this.fileData = null;
+			this._sid = Mold.getId();
+			this._isCreatedPromise = new Mold.Core.Promise(false, { throwError : true, name : "_isCreatedPromise" });
+			this.isReady = new Mold.Core.Promise(false, { throwError : true, name : "isReady" });
+			this.dependenciesLoaded = new Mold.Core.Promise(false, { throwError : true, name : "dependenciesLoaded" });
+			
+			this._dependenciesAreLoaded = false;
+			var that = this;
+			
+			this.dependenciesLoaded.then(function(){
+				that._dependenciesAreLoaded = true;
+			});
+
+			this.dependencies = [];
+			this.injections = {};
 		}
 
 		Seed.prototype = {
+			get sid(){
+				return this._sid;
+			},
+
+			set sid(sid){
+				throw new Error("The property 'sid' is not writeable! [Mold.Core.SeedManager]");
+			},
+
+			/**
+			 * @method state 
+			 * @description get for the state property
+			 * @return {number} returns the current state
+			 */
+			get state(){
+				return this._state;
+			},
+
+			set state(state){
+				this._state = state;
+				if(state === Mold.Core.SeedStates.READY){
+					this.isReady.resolve(this);
+					console.log("CHECK READY", this.name)
+					Mold.Core.SeedManager.checkReady();
+				}
+			},
+
+
 			/**
 			 * @method  hasDependency 
 			 * @description checks if a specific dependency exists
@@ -510,14 +766,123 @@
 				}
 				this.dependencies.push(dependency);
 			},
+
+			addInjection : function(injection){
+				for(var inject in injection){
+					if(!this.injections[inject]){
+						this.injections[inject] = injection[inject];
+					}
+				}
+			},
+
+			/**
+			 * @property isLoaded 
+			 * @description true if the seed is loaded
+			 * @return {boolean} 
+			 */
+			get isLoaded(){
+				return (this.state > Mold.Core.SeedStates.LOADING) ? true : false;
+			},
+
+			/**
+			 * @method load 
+			 * @description loads the seed if it is not loaded
+			 * @return {promise}
+			 */
+			load : function(){
+				if(!this.isLoaded){
+					this.path = Mold.Core.Pathes.getPathFromName(this.name);
+					var file = new Mold.Core.File(this.path);
+					var promise = file.load();
+					var that = this;
+
+					promise
+						.then(function(data){
+							that.fileData = data;
+						})
+						.fail(function(){
+							throw new SeedError("Can not load seed: '" + that.path + "'! [" + that.name + "]");
+						})
+
+					return promise;
+				}
+			},
+
+			getDependecies : function(){
+				Mold.Core.DependencyManager.find(this);
+				return this.dependenciesLoaded;
+			},
+
+			checkDependencies : function(){
+				if(Mold.Core.DependencyManager.checkDependencies(this) && !this._dependenciesAreLoaded){
+					this.dependenciesLoaded.resolve(this.dependencies);
+				}
+				return this;
+			},
+
+			catched : function(info, code){
+				
+				if(this.code){
+					throw new SeedError("The seed code is allready created! [" + this.name + "]");
+				}
+				
+				this.code = code;
+
+				for(var prop in info){
+					if(prop !== "name"){
+						this[prop] = info[prop];
+					}
+				}
+				this._isCreatedPromise.resolve(this);
+			},
+
+			create : function(){
+				if(!this.fileData){
+					throw new SeedError("Can not created script without file data! [" + this.name + "]");
+				}
+				var fileData = "(function() { var Seed = function(info, code) { Mold.Core.SeedManager.catchSeed(info, code, " + this.sid + ")}\n" + this.fileData + "})()";
+				if(_isNodeJS){
+					var func = new Function(fileData);
+					func();
+				}else{
+					this.scriptFile = document.createElement('script');
+					this.scriptFile.src = 'data:text/javascript,' + encodeURIComponent(fileData)
+					document.body.appendChild(this.scriptFile);
+				}
+				return this._isCreatedPromise;
+			},
+
+			/**
+			 * [execute description]
+			 * @return {[type]} [description]
+			 */
 			execute : function(){
 
+				var typeHandler = Mold.Core.SeedTypeManager.get(this.type);
+				if(!typeHandler){
+					throw new SeedError("SeedType '" + this.type + "' not found! [" + this.name + "]")
+				}
+				if(!this.code){
+					throw new SeedError("Code property is not defined! [" + this.name + "]")
+				}
+
+				if(Object.keys(this.injections).length){
+					var closure = "return (function() { \n";
+					for(var inject in this.injections){
+						closure += "	var " + inject + " = " + this.injections[inject] + "; \n" ;
+					}
+					closure += " return " + this.code.toString() + ";})();"
+					this.code = new Function(closure);
+				}
+
+				Mold.Core.NamespaceManager.addCode(this.name, typeHandler.create(this));
 			}
 		}
 
 		return new Seed(conf);
 	
 	}
+
 
 	/**
 	 * @module SeedManager 
@@ -526,6 +891,8 @@
 	Mold.prototype.Core.SeedManager = function(){
 		var _seeds = [];
 		var _seedIndex = {};
+		var _readyPromise = new Mold.prototype.Core.Promise(false, { throwError : true });
+		var _isReady = false;
 
 		var _deleteSeedByName = function(name){
 			for(var i = 0; i < _seeds.length; i++){
@@ -548,7 +915,39 @@
 			},
 
 			set count(value){
-				throw new Error("the property 'len' is not writeable! [Mold.Core.SeedManager]");
+				throw new Error("The property 'count' is not writeable! [Mold.Core.SeedManager]");
+			},
+
+			getBySid : function(sid){
+				return Mold.find(_seeds, function(seed){
+					return (seed.sid === sid) ? true : false;
+				});
+			},
+
+			catchSeed : function(seedInfo, seedCode, ident){
+				var seed;
+				if(seedInfo.name){
+					seed = this.get(seedInfo.name);
+					//if no seed found with this name create a new one
+					if(!seed){
+						seed = Mold.Core.SeedFactory({
+							name : seedInfo.name,
+							state : Mold.Core.SeedStates.PENDING,
+
+						});
+						this.add(seed);
+						seed.catched(seedInfo, seedCode);
+						Mold.Core.SeedFlow.exec(seed)
+						return this;
+					}
+				}else{
+					//if no name is defined get seed by ident
+					seed = this.getBySid(ident);
+				}
+				if(seed){
+					seed.catched(seedInfo, seedCode);
+				}
+				return this;
 			},
 
 			/**
@@ -579,6 +978,12 @@
 				return _seedIndex[name] || null;
 			},
 
+			each : function(callback){
+				for(var name in _seedIndex){
+					callback(_seedIndex[name], name)
+				}
+			},
+
 			/**
 			 * @method remove 
 			 * @description removes a seed 
@@ -588,7 +993,36 @@
 				var name = (typeof seed === 'object') ? seed.name : seed;
 				delete _seedIndex[name];
 				_deleteSeedByName(name);
-			}
+			},
+
+			/**
+			 * @method checkReady 
+			 * @description checks if all seeds has the state ready
+			 * @return {boolean} returns true if all seeds are ready otherwise it returns false
+			 */
+			checkReady : function(){
+				var i = 0, len = _seeds.length;
+				for(; i < len; i++){
+					if(_seeds[i].state !== Mold.Core.SeedStates.READY){
+						return false;
+					}
+				}
+
+				//resolve promise and create a new one
+				_readyPromise.resolve(_seeds);
+				_readyPromise = new Mold.Core.Promise(false, { throwError : true });
+				this.isReady = _readyPromise;
+				Mold._reCreateReadyPromise();
+				
+				return true;
+			},
+
+			/**
+			 * @properts isReady 
+			 * description returns a promise which will resolved if all seeds are ready
+			 * @return {Boolean} [description]
+			 */
+			isReady : _readyPromise
 		}
 	}();
 
@@ -696,7 +1130,7 @@
 			},
 
 			/**
-			 * @property {number} len 
+			 * @property {number} count 
 			 * @description returns the amount of stored seed types
 			 */
 			get count(){
@@ -748,11 +1182,72 @@
 		var _dependenyPropertys = {};
 
 		return {
-			check : function(seed){
 
+			/**
+			 * @method find 
+			 * @description find all dependecy properties inside the seed and add them as dependencx
+			 * @param  {[type]} seed the seed
+			 */
+			find : function(seed){
+				for(var prop in _dependenyPropertys){
+					if(seed[prop]){
+						if(Array.isArray(seed[prop])){
+							for(var i = 0; i < seed[prop].length; i++){
+								if(Mold.isObject(seed[prop][i])){
+									for(var injection in seed[prop][i]){
+										seed.addInjection(seed[prop][i]);
+										seed.addDependency(seed[prop][i][injection]);
+									}
+								}else{
+									seed.addDependency(seed[prop][i]);
+								}
+							}
+						}
+					}
+				}
+				return this;
 			},
+
+			/**
+			 * @method checkDependencies 
+			 * @description checks if all dependencies are loaded
+			 * @param  {Seed} seed - the seed to check
+			 * @return {boolean} returns true if all dependecies are loaded, otherwise false
+			 */
+			checkDependencies : function(seed){
+				var output = true;
+				for(var i = 0; i < seed.dependencies.length; i++){
+					var depSeed = Mold.Core.SeedManager.get(seed.dependencies[i]);
+					if(depSeed){
+						if(depSeed.state !== Mold.Core.SeedStates.READY){
+							output = false;
+						}
+					}else{
+						Mold.load(seed.dependencies[i]);
+						output = false;
+					}
+				}
+				return output;
+			},
+
+
+			checkAll : function(){
+				Mold.Core.SeedManager.each(function(seed){
+					seed.checkDependencies()
+				})
+				return this;
+			},
+
+			/**
+			 * @method addDependencyProperty 
+			 * @description adds a dependency property
+			 * @param {string} name - name of the property
+			 */
 			addDependencyProperty : function(name){
-				_dependenyPropertys = true;
+				if(!_dependenyPropertys[name]){
+					_dependenyPropertys[name] = true;
+				}
+				return this;
 			},
 		}
 	}();
@@ -765,12 +1260,15 @@
 	Mold.prototype.Core.SeedStates = {
 		LOADING : 1,
 		PREPARSING : 2,
-		INITIALISING : 3,
-		TRANSPILING : 4,
-		PENDING : 5,
-		EXECUTING : 6,
-		READY : 7, 
-		ERROR : 8, 
+		PARSING : 3,
+		INSPECTING : 4,
+		VALIDATING : 5,
+		TRANSPILING : 6,
+		INITIALISING : 7,
+		PENDING : 8,
+		EXECUTING : 9,
+		READY : 10, 
+		ERROR : 11, 
 	}
 
 
@@ -854,7 +1352,7 @@
 			'config-name' : 'mold.json'
 		}
 
-		var _isReady = false;
+		var _isReady = new Mold.prototype.Core.Promise(false, { throwError : true });
 		var _readyCallbacks = [];
 
 		var _executeIsReady = function(data){
@@ -879,12 +1377,16 @@
 
 			/**
 			 * @method get 
-			 * @description returns a configuration parameter
+			 * @description returns a configuration property
 			 * @param  {string} name - the parameters name
 			 * @return {mixed} returns the parameter value
 			 */
 			get : function(name){
 				return _configValue[name] || null;
+			},
+
+			getAll : function(){
+				return _configValue;
 			},
 
 			/**
@@ -907,7 +1409,7 @@
 						for(var prop in data){
 							that.set(prop, data[prop]);
 						}
-						_executeIsReady(data);
+						_isReady.resolve(data);
 					})
 					.fail(function(err){
 						throw new Error("Configuration file not found: '" + _configValue['config-path'] + _configValue['config-name'] + "'");
@@ -916,13 +1418,7 @@
 				return promise;
 			},
 
-			isReady : function(callback){
-				if(_isReady){
-					callback();
-				}else{
-					_readyCallbacks.push(callback);
-				}
-			}
+			isReady : _isReady
 
 		}
 	}();
@@ -974,6 +1470,128 @@
 				});
 
 				return output;
+			}
+		}
+	}();
+
+	/**
+	 * @module Mold.Core.Pathes 
+	 * @description provides methods to transform an generate pathes
+	 */
+	Mold.prototype.Core.Pathes = function(){
+		var _pathHandler = {};
+
+		return {
+
+			/**
+			 * @method on 
+			 * @description registers a path parsing function for a specific path type
+			 * @param  {string} type - the path type    
+			 * @param  {Function} callback - the function that should be executed on this type of pathes 
+			 */
+			on : function(type, callback){
+				_pathHandler[type] = callback;
+				return this;
+			},
+
+			/**
+			 * @method getPathFromName 
+			 * @description translite a seed loading string into a path
+			 * @param  {string} name - the string to convert
+			 * @return {string} returns a seed path
+			 */
+			getPathFromName : function(name){
+				var type = 'mold';
+				if(~name.indexOf(":")){
+					var parts = name.split(":");
+					type = parts[0];
+					name = parts[1];
+				}
+				
+				if(!_pathHandler[type]){
+					throw new Error("Path type '" + type + "' is not supported!");
+				}
+
+				return _pathHandler[type](name);
+			}
+		}
+	}();
+
+	/**
+	 * @modul Mold.Core.Preprocessor 
+	 * @description provides methods for adding / removing and executing preprozessor scripts
+	 */
+	Mold.prototype.Core.Preprocessor = function(){
+		var _preprocessors = {};
+
+		var _getParams = function(args){
+			var output = {};
+			args = args.replace(/(\S*?)([\s]*?)(=)([\s]*)(\S*)/gm, function(){
+				return arguments[1] + arguments[3] + arguments[5];
+			})
+			var parts = args.split(" ");
+			for(var i = 0; i < parts.length; i++){
+				if(parts[i] === ""){
+					continue;
+				}
+				if(~parts[i].indexOf("=")){
+					var paramParts = parts[i].split("=");
+					output[paramParts[0]] = paramParts[1];
+				}else{
+					output[parts[i]] = true;
+				}
+			}
+			return output;
+		}
+
+		var _processCommand = function(command, action, seed){
+			var regString = "\\/\\/!" + command + "([\\s\\S]*?)$";
+			var regExp = new RegExp(regString, "gm");
+			var undefined;
+			seed.fileData = seed.fileData.replace(regExp, function(all, params){
+				var parameter = _getParams(params);
+				var result = action(parameter, seed);
+				if(result === undefined){
+					return all;
+				}else{
+					
+					return result
+				}
+			})
+		}
+
+		return {
+			/**
+			 * @method add 
+			 * @description adds a new preprocessor
+			 * @param {string} name - pre processor name
+			 * @param {function} code - pre processor script
+			 */
+			add : function(name, code){
+				_preprocessors[name] = code;
+				return this;
+			},
+
+			/**
+			 * @method remove 
+			 * @description removes a preprocessor by name
+			 * @param {string} name - name of the preprocessor
+			 */
+			remove : function(name){
+				delete _preprocessors[name];
+				return this;
+			},
+			
+			/**
+			 * @method exec 
+			 * @description execute all preprocessors on a seed
+			 * @param  {[type]} seed - the seed that should be preprocessed
+			 */
+			exec : function(seed){
+				for(var command in _preprocessors){
+					_processCommand(command, _preprocessors[command], seed);
+				}
+				return this;
 			}
 		}
 	}();
@@ -1075,7 +1693,6 @@
 					_data = data;
 				}
 				_test();
-				console.log("DATA", data)
 			})
 		}
 
@@ -1085,7 +1702,7 @@
 		 * @return {object} returns a thenabel object with
 		 */
 		this.load = function(){
-			if(Mold.isNodeJS){
+			if(_isNodeJS){
 				_nodeLoader();
 			}else{
 				_ajaxLoader();
@@ -1104,6 +1721,7 @@
 			}
 		}
 	}
+
 
 
 /** INIT DEFAULT CONFIGURATION */
@@ -1125,6 +1743,9 @@
 			}
 		});
 
+		/**
+		 * @deprecated
+		 */
 		//for compatibility with 0.0.1*, don't use this
 		this.Core.SeedTypeManager.add({
 			name : 'class',
@@ -1171,34 +1792,65 @@
 				return module.exports;
 			}
 		});
+
+		//add dependecy properties
+		this.Core.DependencyManager
+			.addDependencyProperty('include');
+
+		//configurate default path handling
+		this.Core.Pathes.on('mold', function(name){
+			var parts = name.split('.');
+			console.log(that.Core.Config.getAll())
+			var repoPath = that.Core.Config.get("repositories")[parts[0]];
+			if(!repoPath){
+				throw new Error("No path for repository '" + parts[0] + "' found!")
+			}
+			var path = repoPath + "/";
+			parts.shift();
+			path += parts.join('/');
+
+			return path + '.js';
+		});
+
+		//add some default preprocessors
+		this.Core.Preprocessor
+			.add('seedInfo', function(parameter, seed){
+				for(var prop in parameter){
+					seed[prop] = parameter[prop];
+				}
+				return;
+			});
 		
 		//configurate seed flow
 		this.Core.SeedFlow
 			.on(this.Core.SeedStates.LOADING, function(seed, done){
-				that.Core.Config.isReady(function(){
+				that.Core.Config.isReady.then(function(){
 					console.log("do LOADING");
-					done()	
+					seed.load().then(function(){
+						Mold.Core.SeedManager.add(seed);
+						done()
+					});
 				})
 			})
 			.onAfter(this.Core.SeedStates.LOADING, function(seed, done){
 				console.log("AFTER LOADING", done.toString())
-				seed.state = that.Core.SeedStates.PREPARSING
+				seed.state = that.Core.SeedStates.PREPARSING;
+
 				done();
 			})
 			.on(this.Core.SeedStates.PREPARSING, function(seed, done){
+				that.Core.Preprocessor.exec(seed);
 				console.log("do PREPARSING");
 				done()
 			})
 			.onAfter(this.Core.SeedStates.PREPARSING, function(seed, done){
-				seed.state = that.Core.SeedStates.INITIALISING
-				done();
-			})
-			.on(this.Core.SeedStates.INITIALISING, function(seed, done){
-				console.log("do INITIALISING");
-				done()
-			})
-			.onAfter(this.Core.SeedStates.INITIALISING, function(seed, done){
-				seed.state = that.Core.SeedStates.TRANSPILING;
+				//if seed is already transpiled skip transpiling step
+				if(seed.transpiled){
+					seed.state = that.Core.SeedStates.INITIALISING;
+				}else{
+					seed.state = that.Core.SeedStates.TRANSPILING;
+				}
+				console.log("seed", seed)
 				done();
 			})
 			.on(this.Core.SeedStates.TRANSPILING, function(seed, done){
@@ -1206,23 +1858,48 @@
 				done()
 			})
 			.onAfter(this.Core.SeedStates.TRANSPILING, function(seed, done){
-				seed.state = that.Core.SeedStates.PENDING;
+				seed.state = that.Core.SeedStates.INITIALISING;
 				done();
 			})
-			.on(this.Core.SeedStates.PENDING, function(seed, done){
-				console.log("do PENDING");
+			.on(this.Core.SeedStates.INITIALISING, function(seed, done){
+				console.log("do INITIALISING");
+				seed.create().then(function(){
+					console.log("IS CREATED")
+					done()	
+				})
+				
+			})
+			.onAfter(this.Core.SeedStates.INITIALISING, function(seed, done){
+				seed.state = that.Core.SeedStates.PENDING;
 				done()
+				
+			})
+			.on(this.Core.SeedStates.PENDING, function(seed, done){
+				console.log("do PENDING", seed.name);
+				seed.getDependecies();
+				seed.checkDependencies();
+				seed.dependenciesLoaded.then(function(){
+					done();
+				});
+			
 			})
 			.onAfter(this.Core.SeedStates.PENDING, function(seed, done){
 				seed.state = that.Core.SeedStates.EXECUTING;
 				done();
 			})
 			.on(this.Core.SeedStates.EXECUTING, function(seed, done){
-				console.log("do EXECUTING");
+				seed.execute();
+				console.log("EXECUTE ", seed.name)
 				done()
 			})
 			.onAfter(this.Core.SeedStates.EXECUTING, function(seed, done){
 				seed.state = that.Core.SeedStates.READY;
+				
+				
+				done();
+			})
+			.on(that.Core.SeedStates.READY, function(seed, done){
+				that.Core.DependencyManager.checkAll();
 				done();
 			})
 			.on(this.Core.SeedStates.ERROR, function(seed, done){
@@ -1230,8 +1907,6 @@
 				done()
 			})
 
-
-		console.log("INITIALISING")
 
 		this.Core.Initializer.init();
 		this.Core.Config.init() ;

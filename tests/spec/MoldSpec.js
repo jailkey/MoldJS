@@ -1,3 +1,5 @@
+jasmine.getEnv().defaultTimeoutInterval = 20000;
+
 describe("Mold Core Lib", function () {
 
 //SEEDHANLDING
@@ -172,19 +174,64 @@ describe("Mold Core Lib", function () {
 			expect(Mold.Core.Config.get('onlyAtestValue')).toBe('---val---');
 		})
 
-		it("test config settings from mold.json", function(){
-			expect(Mold.Core.Config.get('name')).toBe('DefaultMoldRepo');
+		it("test config settings from mold.json", function(done){
+			
+			Mold.Core.Config.isReady.then(function(){
+				expect(Mold.Core.Config.get('name')).toBe('DefaultMoldRepo');
+				done();
+			});
+
 		})
 
 	});
 
 
+	describe("Mold.Core.Pathes", function(){
+
+		it("checks name path with .getPathFromName", function(){
+
+			expect(Mold.Core.Pathes.getPathFromName("App.Test")).toBe('App/Test.js');
+			expect(Mold.Core.Pathes.getPathFromName("Mold.Test")).toBe('../Mold/Test.js');
+		
+		})
+	})
+
+	describe("Mold.Core.SeedFlow", function(){
+		it("check loading flow", function(done){
+			Mold.Core.SeedFlow.on(Mold.Core.SeedStates.LOADING, function(seed, next){
+				expect(seed.fileData).not.toBe(null);
+				next();
+				done();
+			})
+			Mold.load("App.Test");
+		})
+
+	})
+
+	describe("Mold.Core.SeedManger", function(){
+
+		it("checks if seed manger is ready", function(next){
+
+			Mold.Core.SeedManager.isReady.then(function(data){
+				expect(data.length).toBe(3)
+				next();
+			})
+		
+		});
+	});
+
+	describe("Mold.Core.DependenciesManager", function(){
+	
+	})
+
+	describe("test build in seed types", function(){
+		
+	})
+
+
+
 
 //TEST MOLD METHODS
-	describe("Mold.load", function(){
-		Mold.load("Mold.Test")
-	})		
-
 
 	describe("Mold.isArray", function(){
 		it("Test if array is an array", function(){

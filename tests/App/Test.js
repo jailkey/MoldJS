@@ -1,13 +1,11 @@
+//!seedInfo transpiled
 Seed({
-		name : "Mold.TestAll",
-		dna : "class",
+		type : "class",
 		include : [
-			"Mold.Dependency",
-			"->Mold.Lib.Event"
+			"App.Dependency"
 		]
 	},
-	function(){
-		
+	function(){	
 		console.log("Show this message if dependecy is loaded!")
 
 		this.publics = {
@@ -15,5 +13,18 @@ Seed({
 				return true;
 			}
 		}
+	}
+)
+
+
+Seed({
+		name : "App.WasAnderes",
+		type : "static",
+	},
+	function(){
+		console.log("ANDERS ------------------")
+
+		//module.exports = this;
+		return {};
 	}
 )

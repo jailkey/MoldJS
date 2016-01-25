@@ -1,6 +1,5 @@
 Seed({
-		name : "Mold.Dependency",
-		dna : "class"	
+		type : "class"	
 	},
 	function(){
 

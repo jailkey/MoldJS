@@ -867,12 +867,12 @@
 				}
 
 				if(Object.keys(this.injections).length){
-					var closure = "return (function() { \n";
+					var closure = "";
 					for(var inject in this.injections){
 						closure += "	var " + inject + " = " + this.injections[inject] + "; \n" ;
 					}
-					closure += " return " + this.code.toString() + ";})();"
-					this.code = new Function(closure);
+					closure += " return " + this.code.toString();
+					this.code = new Function(closure)();
 				}
 
 				Mold.Core.NamespaceManager.addCode(this.name, typeHandler.create(this));
@@ -1730,16 +1730,16 @@
 		
 		//default seed typs
 		this.Core.SeedTypeManager.add({
-			name : 'static',
+			name : 'action',
 			create : function(seed){
 				return seed.code();
 			}
 		});
 
 		this.Core.SeedTypeManager.add({
-			name : 'data',
+			name : 'static',
 			create : function(seed){
-				return seed;
+				return seed.code;
 			}
 		});
 
@@ -1889,13 +1889,10 @@
 			})
 			.on(this.Core.SeedStates.EXECUTING, function(seed, done){
 				seed.execute();
-				console.log("EXECUTE ", seed.name)
 				done()
 			})
 			.onAfter(this.Core.SeedStates.EXECUTING, function(seed, done){
 				seed.state = that.Core.SeedStates.READY;
-				
-				
 				done();
 			})
 			.on(that.Core.SeedStates.READY, function(seed, done){

@@ -1,18 +1,18 @@
 //!seedInfo transpiled
 Seed({
-		type : "class",
+		type : "static",
 		include : [
-			"App.Dependency"
+			{ "Injection" : "App.Dependency"}
 		]
 	},
 	function(){	
 		console.log("Show this message if dependecy is loaded!")
+		var test = new Injection();
 
-		this.publics = {
-			testMethod : function(){
-				return true;
-			}
+		this.testMethod = function(){
+			return test.test();
 		}
+		
 	}
 )
 

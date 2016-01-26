@@ -198,7 +198,7 @@ describe("Mold Core Lib", function () {
 
 	describe("Mold.Core.SeedFlow", function(){
 		it("check loading flow", function(done){
-			Mold.Core.SeedFlow.on(Mold.Core.SeedStates.LOADING, function(seed, next){
+			Mold.Core.SeedFlow.on(Mold.Core.SeedStates.LOADED, function(seed, next){
 				expect(seed.fileData).not.toBe(null);
 				next();
 				done();
@@ -213,7 +213,7 @@ describe("Mold Core Lib", function () {
 		it("checks if seed manger is ready", function(next){
 
 			Mold.Core.SeedManager.isReady.then(function(data){
-				expect(data.length).toBe(3)
+				expect(data.length).toBeDefined();
 				next();
 			})
 		

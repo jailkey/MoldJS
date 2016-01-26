@@ -1,3 +1,4 @@
+//!seedInfo transpiled
 Seed({
 		type : "class"	
 	},

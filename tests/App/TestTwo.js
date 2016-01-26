@@ -1,6 +1,6 @@
+//!seedInfo transpiled
 Seed({
-		name : "Mold.TestTwo",
-		dna : "class"	
+		type : "class"	
 	},
 	function(){
 		console.log("ready 2")

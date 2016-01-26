@@ -77,7 +77,7 @@
 
 			var seed = this.Core.SeedFactory({
 				name : name,
-				state : this.Core.SeedStates.LOADING
+				state : this.Core.SeedStates.NEW
 			});
 
 			this.Core.SeedFlow.exec(seed);
@@ -692,9 +692,6 @@
 			this._dependenciesAreLoaded = false;
 			var that = this;
 			
-			this.dependenciesLoaded.then(function(){
-				that._dependenciesAreLoaded = true;
-			});
 
 			this.dependencies = [];
 			this.injections = {};
@@ -816,6 +813,7 @@
 			checkDependencies : function(){
 				if(Mold.Core.DependencyManager.checkDependencies(this) && !this._dependenciesAreLoaded){
 					this.dependenciesLoaded.resolve(this.dependencies);
+					this._dependenciesAreLoaded = true;
 				}
 				return this;
 			},
@@ -965,6 +963,7 @@
 				}
 				_seeds.push(seed);
 				_seedIndex[seed.name] = seed;
+				return this;
 			},
 
 			/**
@@ -1181,6 +1180,19 @@
 	Mold.prototype.Core.DependencyManager = function(){
 		var _dependenyPropertys = {};
 
+		var _getRelativeDependencies = function(dep, seedName){
+			var depParts = dep.split(".");
+
+			if(depParts[0] === ""){
+				var nameParts = seedName.split(".");
+				depParts.shift();
+				nameParts.pop();
+				return nameParts.concat(depParts);
+			}
+
+			return dep;
+		}
+
 		return {
 
 			/**
@@ -1193,13 +1205,15 @@
 					if(seed[prop]){
 						if(Array.isArray(seed[prop])){
 							for(var i = 0; i < seed[prop].length; i++){
+
 								if(Mold.isObject(seed[prop][i])){
 									for(var injection in seed[prop][i]){
+										seed[prop][i][injection] = _getRelativeDependencies(seed[prop][i][injection], seed.name)
 										seed.addInjection(seed[prop][i]);
 										seed.addDependency(seed[prop][i][injection]);
 									}
 								}else{
-									seed.addDependency(seed[prop][i]);
+									seed.addDependency(_getRelativeDependencies(seed[prop][i]), seed.name);
 								}
 							}
 						}
@@ -1258,17 +1272,19 @@
 	 * @type {enum}
 	 */
 	Mold.prototype.Core.SeedStates = {
-		LOADING : 1,
-		PREPARSING : 2,
-		PARSING : 3,
-		INSPECTING : 4,
-		VALIDATING : 5,
-		TRANSPILING : 6,
-		INITIALISING : 7,
-		PENDING : 8,
-		EXECUTING : 9,
-		READY : 10, 
-		ERROR : 11, 
+		NEW : 1,
+		LOADING : 2,
+		LOADED : 2,
+		PREPARSING : 3,
+		PARSING : 4,
+		INSPECTING : 5,
+		VALIDATING : 6,
+		TRANSPILING : 7,
+		INITIALISING : 8,
+		PENDING : 9,
+		EXECUTING : 10,
+		READY : 11, 
+		ERROR : 12, 
 	}
 
 
@@ -1800,10 +1816,9 @@
 		//configurate default path handling
 		this.Core.Pathes.on('mold', function(name){
 			var parts = name.split('.');
-			console.log(that.Core.Config.getAll())
 			var repoPath = that.Core.Config.get("repositories")[parts[0]];
 			if(!repoPath){
-				throw new Error("No path for repository '" + parts[0] + "' found!")
+				throw new Error("No path for repository '" + parts[0] + "' found! [" + name + "]")
 			}
 			var path = repoPath + "/";
 			parts.shift();
@@ -1823,19 +1838,22 @@
 		
 		//configurate seed flow
 		this.Core.SeedFlow
-			.on(this.Core.SeedStates.LOADING, function(seed, done){
+			.on(this.Core.SeedStates.NEW, function(seed, done){
+				Mold.Core.SeedManager.add(seed);
 				that.Core.Config.isReady.then(function(){
-					console.log("do LOADING");
+					seed.state = that.Core.SeedStates.LOADING;
 					seed.load().then(function(){
-						Mold.Core.SeedManager.add(seed);
+						seed.state = that.Core.SeedStates.LOADED;
 						done()
 					});
 				})
 			})
-			.onAfter(this.Core.SeedStates.LOADING, function(seed, done){
-				console.log("AFTER LOADING", done.toString())
+			.on(this.Core.SeedStates.LOADED, function(seed, done){
+				done();
+			})
+			.onAfter(this.Core.SeedStates.LOADED, function(seed, done){
+				console.log("AFTER LOADING");
 				seed.state = that.Core.SeedStates.PREPARSING;
-
 				done();
 			})
 			.on(this.Core.SeedStates.PREPARSING, function(seed, done){
@@ -1902,16 +1920,25 @@
 			.on(this.Core.SeedStates.ERROR, function(seed, done){
 				throw new Error("ERROR: " + ((seed.error) ? seed.error : "") + "[" + seed.name + "]");
 				done()
-			})
-
+			});
+		
 
 		this.Core.Initializer.init();
-		this.Core.Config.init() ;
+		this.Core.Config.init();
 	}
 
 	global._Mold = Mold;
 
 	var Mold = new Mold();
+
+	//register core seeds 
+	Mold.Core.SeedManager.add(
+		Mold.Core.SeedFactory({
+			name : "Mold.Core.SeedManager",
+			state : "READY",
+			code : Mold.Core.SeedManager
+		})
+	)
 
 
 	global.Mold = Mold;

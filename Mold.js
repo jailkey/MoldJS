@@ -529,7 +529,7 @@
 						}
 					}catch(error){
 						if(conf.throwError){
-							throw new Error(error + ((conf.name) ? " " + conf.name : "" ) + " \n " + nextCall.toString());
+							throw error;
 						}
 						callbackObject.promise.changeState("rejected", error);
 						
@@ -594,7 +594,6 @@
 		 */
 			all : function(promises){
 				var fullfillCount = 0;
-				console.log("ALL PROMISES", promises)
 				var promise = new Promise(function(fullfill, resolve){
 					var fullfillAll = function(){
 						
@@ -685,9 +684,9 @@
 			this.path = null;
 			this.fileData = null;
 			this._sid = Mold.getId();
-			this._isCreatedPromise = new Mold.Core.Promise(false, { throwError : true, name : "_isCreatedPromise" });
-			this.isReady = new Mold.Core.Promise(false, { throwError : true, name : "isReady" });
-			this.dependenciesLoaded = new Mold.Core.Promise(false, { throwError : true, name : "dependenciesLoaded" });
+			this._isCreatedPromise = new Mold.Core.Promise(false, { throwError : true });
+			this.isReady = new Mold.Core.Promise(false, { throwError : true });
+			this.dependenciesLoaded = new Mold.Core.Promise(false, { throwError : true });
 			
 			this._dependenciesAreLoaded = false;
 			var that = this;
@@ -719,7 +718,6 @@
 				this._state = state;
 				if(state === Mold.Core.SeedStates.READY){
 					this.isReady.resolve(this);
-					console.log("CHECK READY", this.name)
 					Mold.Core.SeedManager.checkReady();
 				}
 			},
@@ -812,6 +810,7 @@
 
 			checkDependencies : function(){
 				if(Mold.Core.DependencyManager.checkDependencies(this) && !this._dependenciesAreLoaded){
+					console.log("DEPENDENCYS LOASDED", Mold.Core.DependencyManager.checkDependencies(this), this.name)
 					this.dependenciesLoaded.resolve(this.dependencies);
 					this._dependenciesAreLoaded = true;
 				}
@@ -865,7 +864,7 @@
 				}
 
 				if(Object.keys(this.injections).length){
-					var closure = "";
+					var closure = "//" + this.name;
 					for(var inject in this.injections){
 						closure += "	var " + inject + " = " + this.injections[inject] + "; \n" ;
 					}
@@ -1230,6 +1229,7 @@
 			 */
 			checkDependencies : function(seed){
 				var output = true;
+
 				for(var i = 0; i < seed.dependencies.length; i++){
 					var depSeed = Mold.Core.SeedManager.get(seed.dependencies[i]);
 					if(depSeed){
@@ -1241,6 +1241,7 @@
 						output = false;
 					}
 				}
+				console.log("SEED", seed.name, seed.dependencies, output)
 				return output;
 			},
 
@@ -1852,13 +1853,13 @@
 				done();
 			})
 			.onAfter(this.Core.SeedStates.LOADED, function(seed, done){
-				console.log("AFTER LOADING");
+				//console.log("AFTER LOADING");
 				seed.state = that.Core.SeedStates.PREPARSING;
 				done();
 			})
 			.on(this.Core.SeedStates.PREPARSING, function(seed, done){
 				that.Core.Preprocessor.exec(seed);
-				console.log("do PREPARSING");
+				//console.log("do PREPARSING");
 				done()
 			})
 			.onAfter(this.Core.SeedStates.PREPARSING, function(seed, done){
@@ -1872,7 +1873,7 @@
 				done();
 			})
 			.on(this.Core.SeedStates.TRANSPILING, function(seed, done){
-				console.log("do TRANSPILING");
+			//	console.log("do TRANSPILING");
 				done()
 			})
 			.onAfter(this.Core.SeedStates.TRANSPILING, function(seed, done){
@@ -1880,9 +1881,9 @@
 				done();
 			})
 			.on(this.Core.SeedStates.INITIALISING, function(seed, done){
-				console.log("do INITIALISING");
+				//console.log("do INITIALISING");
 				seed.create().then(function(){
-					console.log("IS CREATED")
+				//	console.log("IS CREATED")
 					done()	
 				})
 				
@@ -1893,7 +1894,7 @@
 				
 			})
 			.on(this.Core.SeedStates.PENDING, function(seed, done){
-				console.log("do PENDING", seed.name);
+				//console.log("do PENDING", seed.name);
 				seed.getDependecies();
 				seed.checkDependencies();
 				seed.dependenciesLoaded.then(function(){
@@ -1906,6 +1907,7 @@
 				done();
 			})
 			.on(this.Core.SeedStates.EXECUTING, function(seed, done){
+				console.log("EXECUTING", seed.name, seed.state)
 				seed.execute();
 				done()
 			})
@@ -1914,6 +1916,7 @@
 				done();
 			})
 			.on(that.Core.SeedStates.READY, function(seed, done){
+				console.log("SEED READY", seed.name)
 				that.Core.DependencyManager.checkAll();
 				done();
 			})
@@ -1932,14 +1935,56 @@
 	var Mold = new Mold();
 
 	//register core seeds 
-	Mold.Core.SeedManager.add(
-		Mold.Core.SeedFactory({
-			name : "Mold.Core.SeedManager",
-			state : "READY",
-			code : Mold.Core.SeedManager
-		})
-	)
-
+	Mold.Core.SeedManager
+		.add(
+			Mold.Core.SeedFactory({
+				name : "Mold.Core.SeedManager",
+				state : "READY",
+				code : Mold.Core.SeedManager
+			})
+		)
+		.add(
+			Mold.Core.SeedFactory({
+				name : "Mold.Core.SeedFactory",
+				state : "READY",
+				code : Mold.Core.SeedFactory
+			})
+		)
+		.add(
+			Mold.Core.SeedFactory({
+				name : "Mold.Core.Promise",
+				state : "READY",
+				code : Mold.Core.Promise
+			})
+		)
+		.add(
+			Mold.Core.SeedFactory({
+				name : "Mold.Core.File",
+				state : "READY",
+				code : Mold.Core.File
+			})
+		)
+		.add(
+			Mold.Core.SeedFactory({
+				name : "Mold.Core.Pathes",
+				state : "READY",
+				code : Mold.Core.Pathes
+			})
+		)
+		.add(
+			Mold.Core.SeedFactory({
+				name : "Mold.Core.Initializer",
+				state : "READY",
+				code : Mold.Core.Initializer
+			})
+		)
+		.add(
+			Mold.Core.SeedFactory({
+				name : "Mold.Core.Config",
+				state : "READY",
+				code : Mold.Core.Config
+			})
+		)
 
 	global.Mold = Mold;
 	console.log("LOAD Mold")

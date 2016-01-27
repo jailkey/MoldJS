@@ -1,6 +1,6 @@
 Seed ({ 
 		name : "Mold.Lib.Elements",
-		dna : "class",
+		type : "class",
 		include : [
 			"Mold.Lib.Element"
 		]

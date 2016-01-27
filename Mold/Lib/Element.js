@@ -11,11 +11,11 @@
 Seed (
 	{ 
 		name : "Mold.Lib.Element",
-		dna : "class",
+		type : "class",
 		author : "Jan Kaufmann",
 		include : [
 			"Mold.Lib.Event",
-			"Mold.Lib.Promise",
+			"Mold.Core.Promise",
 			"Mold.Lib.Info",
 			"Mold.Lib.Observer",
 			"Mold.Lib.Sanitize"
@@ -1059,7 +1059,7 @@ Seed (
 
 				createKeyFrames();
 
-				var promise = new Mold.Lib.Promise(function(resolve, reject){
+				var promise = new Mold.Core.Promise(function(resolve, reject){
 					var resolveAnimation = function(e){
 						element.off("animationend", resolveAnimation);
 						resolve();
@@ -1127,7 +1127,7 @@ Seed (
 					startDate = new Date().getTime();
 			
 
-				var promise = new Mold.Lib.Promise(function(resolve, reject){
+				var promise = new Mold.Core.Promise(function(resolve, reject){
 					
 					var timeout = window.setTimeout(function(){
 						element.off('transitionend', resolveTransition)

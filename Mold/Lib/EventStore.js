@@ -1,7 +1,7 @@
 Seed (
 	{ 
 		name : "Mold.Lib.EventStore",
-		dna : "static",
+		type : "static",
 		author : "Jan Kaufmann",
 		description : "",
 		version : 0.1

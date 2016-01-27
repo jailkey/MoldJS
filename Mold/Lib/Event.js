@@ -2,7 +2,7 @@
 Seed (
 	{ 
 		name : "Mold.Lib.Event",
-		dna : "class",
+		type : "class",
 		author : "Jan Kaufmann",
 		description : "",
 		test : "Mold.Test.Lib.Event",

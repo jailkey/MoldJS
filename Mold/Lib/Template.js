@@ -7,14 +7,14 @@
 
 Seed({
 		name : "Mold.Lib.Template",
-		dna : "class",
+		type : "class",
 		test : "Mold.Test.Lib.Template",
 		include : [
 			{ Builder : "Mold.Lib.VDom.Builder" },
 			{ Ajax : "Mold.Lib.Ajax" },
 			{ MultiLineString :  "Mold.Lib.MultiLineString" },
 			{ Path : "Mold.Lib.Path" },
-			{ Promise : "Mold.Lib.Promise" },
+			{ Promise : "Mold.Core.Promise" },
 			{ Event : "Mold.Lib.Event" }
 			
 		],

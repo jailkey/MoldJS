@@ -13,15 +13,15 @@ Seed({
 			"Mold.Lib.Dom",
 			"Mold.Tools.Dev.CodeInclude",
 			".ProtoNode",
-			[
-				{ DomNode : ".DomNode" },
-				{ BlockNode : ".BlockNode" },
-				{ ValueNode : ".ValueNode" },
-				{ TextNode : ".TextNode" },
-				{ AttributeNode : ".AttributeNode" },
-				{ RootNode : ".RootNode" },
-				{ Doc : ".VDoc"}
-			]
+			
+			{ DomNode : ".DomNode" },
+			{ BlockNode : ".BlockNode" },
+			{ ValueNode : ".ValueNode" },
+			{ TextNode : ".TextNode" },
+			{ AttributeNode : ".AttributeNode" },
+			{ RootNode : ".RootNode" },
+			{ Doc : ".VDoc"}
+			
 		]
 	},
 	function(content, config){

@@ -211,7 +211,7 @@ describe("Mold Core Lib", function () {
 	describe("Mold.Core.SeedManger", function(){
 
 		it("checks if seed manger is ready", function(next){
-
+			console.log("STATE", Mold.Core.SeedManager.get('App.Test'))
 			Mold.Core.SeedManager.isReady.then(function(data){
 				expect(data.length).toBeDefined();
 				next();

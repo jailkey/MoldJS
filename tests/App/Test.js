@@ -1,10 +1,10 @@
-//!seedInfo transpiled
+//!info transpiled
 Seed({
 		type : "static",
 		include : [
 			{ "Injection" : "App.Dependency" },
 			{ "SecondDep" : "App.TestTwo" },
-			"Mold.Lib.Template"
+			//"Mold.Lib.Template"
 		]
 	},
 	function(){	

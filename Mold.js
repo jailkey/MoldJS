@@ -594,14 +594,13 @@
 		 */
 			all : function(promises){
 				var fullfillCount = 0;
+				var result = [];
 				var promise = new Promise(function(fullfill, resolve){
-					var fullfillAll = function(){
-						
+					var fullfillAll = function(data){
+						result.push(data);
 						fullfillCount++;
-						console.log("full fill all", fullfillCount, promises.length)
 						if(fullfillCount === promises.length){
-							
-							fullfill();
+							fullfill(result);
 						}
 					}
 					for(var i = 0; i < promises.length; i++){
@@ -674,26 +673,27 @@
 			if(!properties.name){
 				throw new SeedError('A seed needs a name!')
 			}
-
-			//append propetises
-			for(var prop in properties){
-				this[prop] = properties[prop];
-			}
-
-			this._state = properties.state || Mold.Core.SeedStates.INITIALISING;
+			
 			this.path = null;
 			this.fileData = null;
 			this._sid = Mold.getId();
 			this._isCreatedPromise = new Mold.Core.Promise(false, { throwError : true });
 			this.isReady = new Mold.Core.Promise(false, { throwError : true });
+			this._isReady = false;
 			this.dependenciesLoaded = new Mold.Core.Promise(false, { throwError : true });
 			
 			this._dependenciesAreLoaded = false;
 			var that = this;
 			
-
 			this.dependencies = [];
 			this.injections = {};
+			this._state = properties.state || Mold.Core.SeedStates.INITIALISING;
+
+			//append propetises
+			for(var prop in properties){
+				this[prop] = properties[prop];
+			}
+			
 		}
 
 		Seed.prototype = {
@@ -716,9 +716,10 @@
 
 			set state(state){
 				this._state = state;
-				if(state === Mold.Core.SeedStates.READY){
+				if(state === Mold.Core.SeedStates.READY && !this._isReady){
 					this.isReady.resolve(this);
 					Mold.Core.SeedManager.checkReady();
+					this._isReady = true;
 				}
 			},
 
@@ -809,12 +810,12 @@
 			},
 
 			checkDependencies : function(){
-				if(Mold.Core.DependencyManager.checkDependencies(this) && !this._dependenciesAreLoaded){
-					console.log("DEPENDENCYS LOASDED", Mold.Core.DependencyManager.checkDependencies(this), this.name)
-					this.dependenciesLoaded.resolve(this.dependencies);
-					this._dependenciesAreLoaded = true;
-				}
-				return this;
+				var that = this;
+				Mold.Core.DependencyManager.checkDependencies(this).then(function(){
+					that.dependenciesLoaded.resolve(that.dependencies);
+					that._dependenciesAreLoaded = true;
+				})
+				return this.dependenciesLoaded;
 			},
 
 			catched : function(info, code){
@@ -850,7 +851,8 @@
 			},
 
 			/**
-			 * [execute description]
+			 * @method execute 
+			 * @description executes the seed, injects dependencies if defined and add it to the name space
 			 * @return {[type]} [description]
 			 */
 			execute : function(){
@@ -1179,14 +1181,16 @@
 	Mold.prototype.Core.DependencyManager = function(){
 		var _dependenyPropertys = {};
 
-		var _getRelativeDependencies = function(dep, seedName){
+		var _getRelativeDependencies = function(dep, seed){
 			var depParts = dep.split(".");
-
+			var seedName = seed.name;
+			
 			if(depParts[0] === ""){
+				
 				var nameParts = seedName.split(".");
 				depParts.shift();
 				nameParts.pop();
-				return nameParts.concat(depParts);
+				return nameParts.concat(depParts).join('.');
 			}
 
 			return dep;
@@ -1206,13 +1210,14 @@
 							for(var i = 0; i < seed[prop].length; i++){
 
 								if(Mold.isObject(seed[prop][i])){
+
 									for(var injection in seed[prop][i]){
-										seed[prop][i][injection] = _getRelativeDependencies(seed[prop][i][injection], seed.name)
+										seed[prop][i][injection] = _getRelativeDependencies(seed[prop][i][injection], seed)
 										seed.addInjection(seed[prop][i]);
 										seed.addDependency(seed[prop][i][injection]);
 									}
 								}else{
-									seed.addDependency(_getRelativeDependencies(seed[prop][i]), seed.name);
+									seed.addDependency(_getRelativeDependencies(seed[prop][i], seed));
 								}
 							}
 						}
@@ -1228,29 +1233,25 @@
 			 * @return {boolean} returns true if all dependecies are loaded, otherwise false
 			 */
 			checkDependencies : function(seed){
-				var output = true;
+			
+				var seedsLoades = [];
 
 				for(var i = 0; i < seed.dependencies.length; i++){
 					var depSeed = Mold.Core.SeedManager.get(seed.dependencies[i]);
 					if(depSeed){
-						if(depSeed.state !== Mold.Core.SeedStates.READY){
-							output = false;
-						}
+						seedsLoades.push(depSeed);
 					}else{
-						Mold.load(seed.dependencies[i]);
-						output = false;
+						seedsLoades.push(Mold.load(seed.dependencies[i]));
 					}
 				}
-				console.log("SEED", seed.name, seed.dependencies, output)
-				return output;
-			},
-
-
-			checkAll : function(){
-				Mold.Core.SeedManager.each(function(seed){
-					seed.checkDependencies()
-				})
-				return this;
+	
+				var promise = new Mold.Core.Promise();
+				if(seedsLoades.length){
+					promise = promise.all(seedsLoades);
+				}else{
+					promise.resolve();
+				}
+				return promise;
 			},
 
 			/**
@@ -1298,6 +1299,7 @@
 
 		var _stateFlows = {};
 		var _afterFlow = {};
+		var _executedSeedFlows = {};
 
 		return {
 			/**
@@ -1334,6 +1336,9 @@
 			 */
 			exec : function(seed, index){
 				var index = index || 0;
+				if(_executedSeedFlows[seed.name] && _executedSeedFlows[seed.name][seed.state] >= index){
+					return;
+				}
 				if(!_stateFlows[seed.state] || !_stateFlows[seed.state][index]){
 					if(_afterFlow[seed.state]){
 						index = null;
@@ -1350,6 +1355,8 @@
 					this.exec(seed, next);
 				}.bind(this);
 
+				_executedSeedFlows[seed.name] = _executedSeedFlows[seed.name] || {};
+				_executedSeedFlows[seed.name][seed.state] = index;
 				flow(seed, done);
 
 				return this;
@@ -1539,7 +1546,7 @@
 	 * @description provides methods for adding / removing and executing preprozessor scripts
 	 */
 	Mold.prototype.Core.Preprocessor = function(){
-		var _preprocessors = {};
+		var _preprocessors = [];
 
 		var _getParams = function(args){
 			var output = {};
@@ -1561,17 +1568,40 @@
 			return output;
 		}
 
-		var _processCommand = function(command, action, seed){
+		var _getCommandActions = function(command, seed){
+			var actions = []
+			var regString = "\\/\\/!" + command + "([\\s\\S]*?)$";
+			var regExp = new RegExp(regString, "gm");
+			seed.fileData.replace(regExp, function(all, params){
+				actions.push({ parameter  : _getParams(params) });
+				return all;
+			});
+			return actions;
+		}
+
+		var _applyCommand = function(command, actions, seed){
+			var count = -1;
+			var regString = "\\/\\/!" + command + "([\\s\\S]*?)$";
+			var regExp = new RegExp(regString, "gm");
+			seed.fileData = seed.fileData.replace(regExp, function(all){
+				count++;
+				if(actions[count].result){
+					return actions[count].result;
+				}
+				return all;
+			});
+		}
+
+		var _processCommand = function(command, action, seed, done){
 			var regString = "\\/\\/!" + command + "([\\s\\S]*?)$";
 			var regExp = new RegExp(regString, "gm");
 			var undefined;
 			seed.fileData = seed.fileData.replace(regExp, function(all, params){
 				var parameter = _getParams(params);
-				var result = action(parameter, seed);
+				var result = action(parameter, seed, done);
 				if(result === undefined){
 					return all;
 				}else{
-					
 					return result
 				}
 			})
@@ -1585,7 +1615,11 @@
 			 * @param {function} code - pre processor script
 			 */
 			add : function(name, code){
-				_preprocessors[name] = code;
+				console.log("ADDD PREPOZ", name, code)
+				_preprocessors.push({
+					name : name,
+					code : code
+				});
 				return this;
 			},
 
@@ -1595,7 +1629,13 @@
 			 * @param {string} name - name of the preprocessor
 			 */
 			remove : function(name){
-				delete _preprocessors[name];
+				console.log("remove preproz")
+				for(var i = 0; i < _preprocessors.length; i++){
+					if(_preprocessors[i].name === name){
+						_preprocessors.splice(i, 1);
+						break;
+					}
+				}
 				return this;
 			},
 			
@@ -1605,10 +1645,39 @@
 			 * @param  {[type]} seed - the seed that should be preprocessed
 			 */
 			exec : function(seed){
-				for(var command in _preprocessors){
-					_processCommand(command, _preprocessors[command], seed);
-				}
-				return this;
+				return new Mold.Core.Promise(function(resolve){
+					var i = 0;
+					var next = function(){
+						var process = _preprocessors[i] || null;
+						if(process){
+							var actions = _getCommandActions(process.name, seed);
+							var y = 0;
+							var nextAction = function(){
+								var action = actions[y] || null;
+								if(!action){
+									_applyCommand(process.name, actions, seed)
+									i++;
+									next();
+									return;
+								}
+
+								var done = function(result){
+									action.result = result;
+									y++
+									nextAction();
+								}
+
+								process.code(action.parameter, seed, done) 
+
+							}.bind(this)
+							nextAction();
+						}else{
+							resolve(seed);
+						}
+
+					}.bind(this);
+					next();
+				});
 			}
 		}
 	}();
@@ -1830,11 +1899,20 @@
 
 		//add some default preprocessors
 		this.Core.Preprocessor
-			.add('seedInfo', function(parameter, seed){
+			.add('info', function(parameter, seed, done){
 				for(var prop in parameter){
 					seed[prop] = parameter[prop];
 				}
-				return;
+				done();
+			})
+			.add('include', function(parameter, seed, done){
+				if(parameter.seed){
+					Mold.load(parameter.seed).then(function(loaded){
+						done(loaded.code);
+					})
+				}else{
+					done();
+				}
 			});
 		
 		//configurate seed flow
@@ -1858,9 +1936,10 @@
 				done();
 			})
 			.on(this.Core.SeedStates.PREPARSING, function(seed, done){
-				that.Core.Preprocessor.exec(seed);
-				//console.log("do PREPARSING");
-				done()
+				console.log("do PREPARSING");
+				that.Core.Preprocessor.exec(seed).then(done);
+				
+				//done()
 			})
 			.onAfter(this.Core.SeedStates.PREPARSING, function(seed, done){
 				//if seed is already transpiled skip transpiling step
@@ -1869,11 +1948,10 @@
 				}else{
 					seed.state = that.Core.SeedStates.TRANSPILING;
 				}
-				console.log("seed", seed)
 				done();
 			})
 			.on(this.Core.SeedStates.TRANSPILING, function(seed, done){
-			//	console.log("do TRANSPILING");
+				console.log("do TRANSPILING", seed.name);
 				done()
 			})
 			.onAfter(this.Core.SeedStates.TRANSPILING, function(seed, done){
@@ -1896,8 +1974,7 @@
 			.on(this.Core.SeedStates.PENDING, function(seed, done){
 				//console.log("do PENDING", seed.name);
 				seed.getDependecies();
-				seed.checkDependencies();
-				seed.dependenciesLoaded.then(function(){
+				seed.checkDependencies().then(function(){
 					done();
 				});
 			
@@ -1907,7 +1984,7 @@
 				done();
 			})
 			.on(this.Core.SeedStates.EXECUTING, function(seed, done){
-				console.log("EXECUTING", seed.name, seed.state)
+				//console.log("EXECUTING", seed.name, seed.state)
 				seed.execute();
 				done()
 			})
@@ -1917,7 +1994,7 @@
 			})
 			.on(that.Core.SeedStates.READY, function(seed, done){
 				console.log("SEED READY", seed.name)
-				that.Core.DependencyManager.checkAll();
+				//that.Core.DependencyManager.checkAll();
 				done();
 			})
 			.on(this.Core.SeedStates.ERROR, function(seed, done){
@@ -1939,49 +2016,49 @@
 		.add(
 			Mold.Core.SeedFactory({
 				name : "Mold.Core.SeedManager",
-				state : "READY",
+				state : Mold.Core.SeedStates.READY,
 				code : Mold.Core.SeedManager
 			})
 		)
 		.add(
 			Mold.Core.SeedFactory({
 				name : "Mold.Core.SeedFactory",
-				state : "READY",
+				state : Mold.Core.SeedStates.READY,
 				code : Mold.Core.SeedFactory
 			})
 		)
 		.add(
 			Mold.Core.SeedFactory({
 				name : "Mold.Core.Promise",
-				state : "READY",
+				state : Mold.Core.SeedStates.READY,
 				code : Mold.Core.Promise
 			})
 		)
 		.add(
 			Mold.Core.SeedFactory({
 				name : "Mold.Core.File",
-				state : "READY",
+				state : Mold.Core.SeedStates.READY,
 				code : Mold.Core.File
 			})
 		)
 		.add(
 			Mold.Core.SeedFactory({
 				name : "Mold.Core.Pathes",
-				state : "READY",
+				state : Mold.Core.SeedStates.READY,
 				code : Mold.Core.Pathes
 			})
 		)
 		.add(
 			Mold.Core.SeedFactory({
 				name : "Mold.Core.Initializer",
-				state : "READY",
+				state : Mold.Core.SeedStates.READY,
 				code : Mold.Core.Initializer
 			})
 		)
 		.add(
 			Mold.Core.SeedFactory({
 				name : "Mold.Core.Config",
-				state : "READY",
+				state : Mold.Core.SeedStates.READY,
 				code : Mold.Core.Config
 			})
 		)

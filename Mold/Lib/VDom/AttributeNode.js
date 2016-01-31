@@ -1,6 +1,5 @@
 Seed({
-		name : "Mold.Lib.VDom.AttributeNode",
-		dna : "static",
+		type : "static",
 		include : [
 			{ StringParser : "Mold.Lib.VDom.StringParser" }
 		]
@@ -8,7 +7,7 @@ Seed({
 	function(){
 
 		return function AttributeNode(config){
-			//°include Mold.Lib.VDom.ProtoNode
+			//!include Mold.Lib.VDom.ProtoNode
 			
 			this.type = ATTRIBUTE_NODE;
 			this.domPointer = false;

@@ -1,12 +1,29 @@
 {
-	"name" : "DefaultMoldRepo",
+	"name" : "Mold",
 	"version" : "0.2.0",
 	"repositories" : {
 		"Mold" : "../Mold",
 		"App" : "App"
 	},
+	"main" : "Mold",
+	"dependencies" : [
+		{ 
+			"name" : "Mold.Core.*"
+		},
+		{
+			"name" : "Mold.Core.Hexler",
+			"path" : "http://..../src/",
+			"routes" : {
+				"Mold.Test.Hexler" : "Mold.Core.Hexler"
+			}
+		}
+	],
+	"docs" : {
+		"md" : [],
+		"html" : []
+	},
 	"seedRouting" : {
-
+		"Mold.*" : "Global.Mold.*"
 	},
 	"npm" : {
 		"directory" : "../node_modules/"

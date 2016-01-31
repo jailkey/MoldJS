@@ -4,7 +4,7 @@ Seed({
 		include : [
 			{ "Injection" : "App.Dependency" },
 			{ "SecondDep" : "App.TestTwo" },
-			//"Mold.Lib.Template"
+			"Mold.Lib.Template"
 		]
 	},
 	function(){	

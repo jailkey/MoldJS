@@ -1,6 +1,6 @@
 Seed({
 		name : "Mold.Lib.VDom.NodeBuilder",
-		dna : "static",
+		type : "static",
 		include : [
 			{ BlockNode : "Mold.Lib.VDom.BlockNode" },
 			{ ValueNode : "Mold.Lib.VDom.ValueNode" },

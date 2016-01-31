@@ -1,6 +1,5 @@
 Seed({
-		name : "Mold.Lib.VDom.DomNode",
-		dna : "static",
+		type : "static",
 		include : [
 			"Mold.Lib.VDom.ProtoNode"
 		]
@@ -8,7 +7,7 @@ Seed({
 	function(){
 
 		return function DomNode(config){
-			//°include Mold.Lib.VDom.ProtoNode
+			//!include seed=Mold.Lib.VDom.ProtoNode
 			
 			this.type = DOM_NODE;
 			this.attributes = config.attributes || {};

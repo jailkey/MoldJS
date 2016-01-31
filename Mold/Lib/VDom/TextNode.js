@@ -1,6 +1,5 @@
 Seed({
-		name : "Mold.Lib.VDom.TextNode",
-		dna : "static",
+		type : "static",
 		include : [
 			"Mold.Lib.VDom.ProtoNode"
 		]
@@ -8,7 +7,7 @@ Seed({
 	function(){
 
 		return function TextNode(config){
-			//°include Mold.Lib.VDom.ProtoNode
+			//!include seed=Mold.Lib.VDom.ProtoNode
 			
 			this.type = TEXT_NODE;
 			this.domPointer = false;

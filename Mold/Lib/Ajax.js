@@ -15,7 +15,6 @@
  */
 
 Seed({
-		name : "Mold.Lib.Ajax",
 		type : "class",
 		author : "Jan Kaufmann",
 		include : [

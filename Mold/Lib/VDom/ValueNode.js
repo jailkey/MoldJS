@@ -1,6 +1,6 @@
 Seed({
 		name : "Mold.Lib.VDom.ValueNode",
-		dna : "static",
+		type : "static",
 		include : [
 			"Mold.Lib.VDom.ProtoNode"
 		]
@@ -8,7 +8,7 @@ Seed({
 	function(){
 
 		return function ValueNode(config){
-			//°include Mold.Lib.VDom.ProtoNode
+			//!include seed=Mold.Lib.VDom.ProtoNode
 			
 			this.type = VALUE_NODE;
 			this.domPointer = false;

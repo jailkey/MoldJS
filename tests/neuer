@@ -1,0 +1,13 @@
+process.argv [ 'node',
+  '/Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold.js',
+  'add',
+  '-p',
+  'http://www.iregnasd/',
+  'befehl' ]
+process.argv [ 'node',
+  '/Applications/XAMPP/xamppfiles/htdocs/Mold Git Checkout/MoldJS/Mold.js',
+  'add',
+  '-p',
+  'http://www.iregnasd/',
+  'befehl' ]
+LOAD Mold

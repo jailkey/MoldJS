@@ -1,6 +1,5 @@
 Seed({
-		name : "Mold.Lib.VDom.StringNode",
-		dna : "static",
+		type : "static",
 		include : [
 			"Mold.Lib.VDom.ProtoNode"
 		]
@@ -8,7 +7,7 @@ Seed({
 	function(){
 
 		return function StringNode(config){
-			//°include Mold.Lib.VDom.ProtoNode
+			//!include seed=Mold.Lib.VDom.ProtoNode
 			
 			this.type = STRING_NODE;
 

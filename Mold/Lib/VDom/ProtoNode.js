@@ -1,6 +1,5 @@
 Seed({
-		name : "Mold.Lib.VDom.ProtoNode",
-		dna : "data",
+		type : "data",
 		include : [
 			"Mold.Lib.VDom.VDoc",
 			"Mold.Lib.Filter",

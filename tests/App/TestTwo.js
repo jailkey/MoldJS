@@ -1,4 +1,5 @@
 //!info transpiled
+//!info test: Mold.Irgendwas.Test
 Seed({
 		type : "class"	
 	},

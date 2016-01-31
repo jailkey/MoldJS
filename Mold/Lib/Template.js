@@ -6,7 +6,6 @@
  */
 
 Seed({
-		name : "Mold.Lib.Template",
 		type : "class",
 		test : "Mold.Test.Lib.Template",
 		include : [

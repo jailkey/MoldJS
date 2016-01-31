@@ -16,39 +16,19 @@ describe("Mold Core Lib", function () {
 			expect(seed.name).toEqual("Mold.Test");
 			expect(seed.hasDependency).toBeDefined();
 			expect(seed.hasDependencies).toBeDefined();
+			expect(seed.addDependency).toBeDefined();
+			expect(seed.addInjection).toBeDefined();
+			expect(seed.load).toBeDefined();
+			expect(seed.getDependecies).toBeDefined();
+			expect(seed.checkDependencies).toBeDefined();
+			expect(seed.catched).toBeDefined();
+			expect(seed.create).toBeDefined();
+			expect(seed.execute).toBeDefined();
 		});
-	})	
-
-	xdescribe("Mold.validateSeed", function(){
-		var seed = Mold.seedFactory({type : "testirgendwaskomisches"})
-
-		it("validate the seed without a name", function(){
-			expect(function() { Mold.validateSeed(seed); }).toThrow(new Mold.errors.SeedError('Seed name property is not defined!'))
-		});
-
-		it("set a name and validate without code", function(){
-			seed.name = "Mold.Test";
-			expect(function() { Mold.validateSeed(seed); }).toThrow(new Mold.errors.SeedError('SeedType \'testirgendwaskomisches\' does not exist! [Mold.Test]'))
-		})
-
-		it("set a name and validate without code", function(){
-			seed.type = "static";
-			expect(function() { Mold.validateSeed(seed); }).toThrow(new Mold.errors.SeedError('Seed code property is not defined! [Mold.Test]'))
-		})
-
-
-		it("set a codestring and validate with wrong state", function(){
-			seed.code = "Mold.Test";
-			seed.state = Mold.states.EXECUTING;
-			expect(function() { Mold.validateSeed(seed); }).toThrow(new Mold.errors.SeedError('Seed code property must be a function! [Mold.Test]'));
-		})
-
-		it("set code to a function and validate", function(){
-			seed.code = function(){};
-			expect(Mold.validateSeed(seed)).toBe(true);
-		})
-
 	})
+
+
+
 
 	describe("Mold.Core.SeedManager", function(){
 		var seed = Mold.Core.SeedFactory({
@@ -71,6 +51,20 @@ describe("Mold Core Lib", function () {
 			expect(Mold.Core.SeedManager.get("Mold.Test")).toBe(seed);
 		});
 
+		it("get a seed with .getBySid", function(){
+			var sid = seed.sid;
+			expect(Mold.Core.SeedManager.getBySid(sid)).toBe(seed);
+		})
+
+
+		it("get a seed with .getBySid", function(){
+			var count = 0;
+			Mold.Core.SeedManager.each(function(){
+				count++;
+			})
+			expect(Mold.Core.SeedManager.count).toBe(count);
+		})
+
 		it("it removes the seed", function(){
 			var oldLength = Mold.Core.SeedManager.count;
 			Mold.Core.SeedManager.remove(seed);
@@ -78,6 +72,8 @@ describe("Mold Core Lib", function () {
 			expect(Mold.Core.SeedManager.get("Mold.Test")).not.toBe(seed);
 		})
 	});
+
+
 
 //Mold.Core.NamespaceManger
 	describe("Test Mold.Core.NamespaceManger", function(){
@@ -100,6 +96,11 @@ describe("Mold Core Lib", function () {
 		});
 
 		describe("creates a namepace with .create", function(){
+
+			it("test if a namspace exists with .exists", function(){
+				expect(Mold.Core.NamespaceManager.exists('Herbert')).toBe(false);
+			})
+
 			it("creates a new Namespace", function(){
 			
 				Mold.Core.NamespaceManager.create('Herbert');
@@ -117,6 +118,7 @@ describe("Mold Core Lib", function () {
 				expect(function() { Mold.Core.NamespaceManager.create('aerbe8rt', test) }).toThrow(new Error("'aerbe8rt' is not a valid Namespace name!"));
 			})
 		})
+
 
 
 		describe("adds code to namespace with .addCode", function(){
@@ -138,11 +140,28 @@ describe("Mold Core Lib", function () {
 //SEED TYPE HANDLING
 	describe("Test Mold.Core.SeedTypeManager", function(){
 		var typeLen;
+
+		it("test wrong seed types with .validate", function(){
+			expect(function(){
+				Mold.Core.SeedTypeManager.validate({
+					create : "test"
+				})
+			}).toThrow(new Mold.Errors.SeedTypeError('SeedType \'name\' is not defined!'))
+
+			expect(function(){
+				Mold.Core.SeedTypeManager.validate({
+					name : "test"
+				})
+			}).toThrow(new Mold.Errors.SeedTypeError('SeedType \'create\' is not defined! [test]'))
+			
+		})
+
 		it("test the amount of SeedTypes with .count", function(){
 			typeLen = Mold.Core.SeedTypeManager.count;
 			expect(Mold.Core.SeedTypeManager.count).toBe(typeLen);
-			expect(function(){ Mold.Core.SeedTypeManager.count = 5; }).toThrow( new Error("the property 'len' is not writeable! [Mold.Core.SeedTypeManger]"));
+			expect(function(){ Mold.Core.SeedTypeManager.count = 5; }).toThrow(new Error("the property 'len' is not writeable! [Mold.Core.SeedTypeManger]"));
 		});
+
 		it("add seed type with .add", function(){
 			
 			Mold.Core.SeedTypeManager.add({
@@ -164,6 +183,10 @@ describe("Mold Core Lib", function () {
 		
 	})
 
+	describe("Mold.Core.DependencyManager", function(){
+
+	})
+
 	describe("Mold.Core.Config", function(){
 		it("Test default config settings", function(){
 			expect(Mold.Core.Config.get('config-name')).toBe('mold.json');
@@ -177,23 +200,36 @@ describe("Mold Core Lib", function () {
 		it("test config settings from mold.json", function(done){
 			
 			Mold.Core.Config.isReady.then(function(){
-				expect(Mold.Core.Config.get('name')).toBe('DefaultMoldRepo');
+				expect(Mold.Core.Config.get('name')).toBe('Mold');
 				done();
 			});
 
 		})
-
 	});
 
 
 	describe("Mold.Core.Pathes", function(){
 
 		it("checks name path with .getPathFromName", function(){
-
 			expect(Mold.Core.Pathes.getPathFromName("App.Test")).toBe('App/Test.js');
 			expect(Mold.Core.Pathes.getPathFromName("Mold.Test")).toBe('../Mold/Test.js');
-		
 		})
+
+		it("checks the current Mold.js path .getMoldPath", function(){
+			console.log("Mold.Core.Pathes.getMoldPath()", Mold.Core.Pathes.getMoldPath());
+			expect(Mold.Core.Pathes.getMoldPath()).toBe('../');
+		})
+
+		it("checks get current path", function(){
+			expect(Mold.Core.Pathes.getCurrentPath()).toBe("");
+		})
+
+		if(Mold.isNodeJS){
+			it("check path with .exist (only on nodejs)", function(){
+				expect(Mold.Core.Pathes.exists('App/Test.js', 'file')).toBe(true);
+			})
+		}
+		
 	})
 
 	describe("Mold.Core.SeedFlow", function(){
@@ -211,7 +247,6 @@ describe("Mold Core Lib", function () {
 	describe("Mold.Core.SeedManger", function(){
 
 		it("checks if seed manger is ready", function(next){
-			console.log("STATE", Mold.Core.SeedManager.get('App.Test'))
 			Mold.Core.SeedManager.isReady.then(function(data){
 				expect(data.length).toBeDefined();
 				next();
@@ -229,22 +264,25 @@ describe("Mold Core Lib", function () {
 	})
 
 
+	describe("Check methods after seed is loaded", function(){
+		//Mold.Core.SeedManager.checkReady()
+		//seed.hasDependencies
+	})
 
 
-//TEST MOLD METHODS
-
-	describe("Mold.isArray", function(){
+//TEST MOLD BUILD IN POLYFILLS
+	describe("Array.isArray", function(){
 		it("Test if array is an array", function(){
 			var testArray = ["one", "two", "three"];
-			expect(Mold.isArray(testArray)).toEqual(true);
+			expect(Array.isArray(testArray)).toEqual(true);
 		});
 		it("Test if object is an array", function(){
 			var testObject = { "one" : "value", "two" : "moreValue" }
-			expect(Mold.isArray(testObject)).toEqual(false);
+			expect(Array.isArray(testObject)).toEqual(false);
 		})
 		it("Test if string is an array", function(){
 			var testString = "Irgendwas";
-			expect(Mold.isArray(testString)).toEqual(false);
+			expect(Array.isArray(testString)).toEqual(false);
 		})
 	});
 

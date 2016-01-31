@@ -1,8 +1,7 @@
 Seed({
-		name : "Mold.Lib.VDom.VDoc",
-		dna : "static",
+		type : "static",
 		include : [
-			"->Mold.Lib.Dom"
+			"Mold.Lib.Dom"
 		]
 	},
 	function(){

@@ -6,14 +6,10 @@
 
 "user strict";
 Seed({
-		name : "Mold.Lib.VDom.Builder",
-		dna : "class",
+		type : "class",
 		test : "Mold.Test.Lib.VDom.Builder",
 		include : [
 			"Mold.Lib.Dom",
-			"Mold.Tools.Dev.CodeInclude",
-			".ProtoNode",
-			
 			{ DomNode : ".DomNode" },
 			{ BlockNode : ".BlockNode" },
 			{ ValueNode : ".ValueNode" },

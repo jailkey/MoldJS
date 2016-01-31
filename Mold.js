@@ -28,6 +28,14 @@
 	SeedTypeError.prototype = new Error;
 
 	var _isNodeJS =  (global.global) ? true : false;
+	if(!_isNodeJS){
+		var _currentScript = document.currentScript || (function() {
+			var scripts = document.getElementsByTagName('script');
+			return scripts[scripts.length - 1];
+		})();
+	}
+
+
 
 /** MOLD CONTRUCTOR */
 	var Mold = function Mold(){
@@ -37,7 +45,7 @@
 		this.seedIndex = {};
 		this.seedTypeIndex = {};
 
-		this.errors = {
+		this.Errors = {
 			SeedError : SeedError,
 			DNAError : DNAError,
 			SeedTypeError : SeedTypeError
@@ -52,6 +60,7 @@
 		this.init();
 	}
 
+	var __Mold = Mold.prototype;
 	
 	Mold.prototype = {
 		/**
@@ -61,8 +70,8 @@
 		**/
 		ident : 0,
 		getId : function (){
-			Mold.ident++;
-			return Mold.ident;
+			this.ident++;
+			return this.ident;
 		},
 
 /** SEED HANDLING */
@@ -71,8 +80,7 @@
 		load : function(name){
 			var seed;
 			if((seed = this.Core.SeedManager.get(name))){
-				var output = new this.Core.Promise(false, { throwError : true, name : "Mold.load" });
-				return output.resolve(seed);
+				return seed.isReady;
 			}
 
 			var seed = this.Core.SeedFactory({
@@ -85,123 +93,11 @@
 		},
 
 		_reCreateReadyPromise : function (){
-			this.ready = new this.Core.Promise(false, { throwError : true, name : "_reCreateReadyPromise" }).all([
+			this.ready = new this.Core.Promise(false, { throwError : true }).all([
 				this.Core.Config.isReady,
 				this.Core.SeedManager.isReady
 			])
 		},
-
-/** FUNCTIONAL METHODS **/
-		
-		/**
-		* @namespace Mold
-		* @method each
-		* @desc iterates through an List (Object, Array)
-		* @public
-		* @return (Boolean) 
-		* @param (Object) collection - the list
-		* @param (function) iterator - a callback function
-		* @param (object) context - optional context Object
-		**/
-		each : function(collection, iterator, context, debug){
-			var i = 0;
-			if(collection == null || collection === false) { 
-				return false; 
-			}
-
-			if(Array.prototype.forEach && collection.forEach){
-				collection.forEach(iterator, context);
-			}else if(Mold.isArray(collection)){
-				var len = collection.length;
-				for (; i < len; i++) {
-				 	if(iterator.call(context, collection[i], i, collection) === Mold.EXIT) {
-				 		return true;
-				 	};
-				}
-
-			}else {
-				var keys = Mold.keys(collection), len = keys.length;
-				for(; i < len; i++){
-					if(!(Mold.isNodeList(collection) && keys[i] === "length")){
-						
-						if(
-							Mold.is(collection[keys[i]]) 
-							&& iterator.call(context, collection[keys[i]], keys[i], collection) === Mold.EXIT
-						){
-							return true;
-						}
-					}
-				}
-			}
-			return true;
-		},
-
-		/**
-		 * @namespace Mold
-		 * @method eachShift
-		 * @description iterates through an array and remove the selected item until the array is empty
-		 * @param {array} collection the array
-		 * @param  {function} callback  method will called on each entry, given paramter is the entry value           
-		 */
-		eachShift : function(collection, callback){
-			if(!Mold.isArray(collection)){
-				return false;
-			}
-			if(typeof callback !== "function"){
-				throw new Error("eachShift needs a callback ")
-			}
-			while(collection.length){
-				var selected = collection.shift();
-				callback.call(this, selected);
-			}
-		},
-
-		/**
-		* @methode find
-		* @desc find a specified value in an array
-		* @public
-		* @return (mixed) 
-		* @param (Object) collection - the list
-		* @param (function) iterator - a callback function
-		* @param (object) context - context Object
-		**/
-		find : function(collection, iterator, context){
-			var result = false;
-			Mold.some(collection, function(value, index, list) {
-				if (iterator.call(context, value, index, list)) {
-					result = value;
-					return true;
-				}
-			});
-			return result;
-		},
-
-		/**
-		* @methode some
-		* @desc iterates through an array until the specified callback returns false
-		* @public
-		* @param (Object) collection - the list
-		* @param (function) iterator - a callback function
-		* @param (object) context - context Object
-		* @return (boolean) returns true if the callback function returns true for each element, otherwise it returns false; 
-		**/
-		some : function(collection, iterator, context){
-			var result = false;
-			if (collection == null) {
-				return result;
-			}
-			if (Array.prototype.some && collection.some){
-				return collection.some(iterator, context);
-			}
-			Mold.each(collection, function(value, index, list) {
-				if (result || (result = iterator.call(context, value, index, list))) { 
-					return Mold.EXIT;
-				}
-			});
-
-			return result;
-		},
-
 
 /**  OBJECT HANDLING  **/
 		
@@ -250,7 +146,7 @@
 		        return target;
 		    }
 		    var newObj = target.constructor();
-		    Mold.each(target, function(element, key, obj){
+		    __Mold.each(target, function(element, key, obj){
 				newObj[key] = Mold.clone(obj[key]);
 		    });
 		    return newObj;
@@ -291,11 +187,11 @@
 				var newval = oldval;
 				
 				/*use mutation observer for HTML elements*/
-				if(Mold.isNode(obj) && !handleAsObject){
+				if(__Mold.isNode(obj) && !handleAsObject){
 				
 					if(!!window.MutationObserver){
 						var observer = new MutationObserver(function(mutations) {
-							Mold.each(mutations, function(mutation) {
+							__Mold.each(mutations, function(mutation) {
 								
 								if(
 									mutation.target === obj
@@ -367,23 +263,6 @@
 
 /** TEST METHODS **/
 
-		/**
-		* @namespace Mold
-		* @methode isArray
-		* @desc checks if the give value is an array
-		* @public
-		* @return (Boolean) 
-		* @param (Object) collection - the value
-		**/
-		isArray : function(collection){
-			if(Array.isArray){
-				return Array.isArray(collection);
-			}
-			if(Object.prototype.toString.call(collection) === "[object Array]"){
-				return true;
-			}
-			return false;
-		},
 
 		/**
 		* @namespace Mold
@@ -446,6 +325,8 @@
 
 	}
 
+	__Mold = Mold.prototype;
+
 	//Build-in core modules
 	Mold.prototype.Core = {};
 
@@ -455,12 +336,13 @@
 	 * @description implements a Promise A+
 	 * @param {function} 
 	 */
-	Mold.prototype.Core.Promise = function Promise(setup, conf){
+	Mold.prototype.Core.Promise = function Promise(setup, config){
 
 		var _state = "pending",
 			_value = false,
 			_callbacks = [],
-			undefined;
+			undefined,
+			config = config || {};
 
 		var PromiseError = function(message){
 			return {
@@ -507,12 +389,12 @@
 			if ( _state === "pending" ) {
 				return false;
 			}
-
-			Mold.eachShift(_callbacks, function(callbackObject){
+		
+			_callbacks.eachShift(function(callbackObject){
 				var nextCall = (_state === "fulfilled") ? callbackObject.onFulFilled : callbackObject.onRejected;
 				if(typeof nextCall !== "function" ){
 
-					callbackObject.promise.changeState(_state, _value );
+					callbackObject.promise.changeState(_state, _value);
 				}else{
 
 					try {
@@ -528,12 +410,12 @@
 							callbackObject.promise.changeState("fulfilled", value);
 						}
 					}catch(error){
-						if(conf.throwError){
+						callbackObject.promise.changeState("rejected", error);
+
+						if(config.throwError){
+							console.log("THROW", error)
 							throw error;
 						}
-						callbackObject.promise.changeState("rejected", error);
-						
-						throw error.stack;
 					}
 				}
 			});
@@ -542,7 +424,7 @@
 
 		var _then = function(onFulFilled, onRejected){
 
-			var promise = new Promise(),
+			var promise = new Promise(false, config),
 				that = this;
 
 			_async(function(){
@@ -604,37 +486,74 @@
 						}
 					}
 					for(var i = 0; i < promises.length; i++){
+						if(!promises[i].then){
+							console.log("IST KEIN PROMISE", promises[i])
+						}
 						promises[i].then(
 							fullfillAll,
 							resolve
 						);
 					}
-				});
+				}, config);
+
 				return promise;
 			},
+
+			/**
+			 * @method fail 
+			 * @description the given onfail callback will be called when the promise will be rejected
+			 * @param  {function} onfail the onfail callback
+			 */
 			fail : function(onfail){
 				return _then(undefined, onfail);
 			},
-			success : function(onsuccess){
-				return _then(onsuccess, undefined);
-			},
-			catch : function(onfail){
-				return _then(undefined, onfail);
-			},
+
+			/**
+			 * @method then 
+			 * @description executes the given callbacks when the promise will be resolved / rejected
+			 * @param  {[type]} onFulFilled  - will be executed if the will resolved
+			 * @param  {[type]} onRejected  - will be executed if the will rejected
+			 */
 			then : function(onFulFilled, onRejected){
 				return _then(onFulFilled, onRejected);
 			},
+
+			/**
+			 * @method success 
+			 * @description the give callback will called if the promise will be resolved
+			 * @param  {[type]} onsuccess - the onsuccess callback
+			 */
+			success : function(onsuccess){
+				return _then(onsuccess, undefined);
+			},
+
+			/**
+			 * @method catch
+			 * @alias for fail
+			 */
+			catch : function(onfail){
+				return _then(undefined, onfail);
+			},
+
+			/**
+			 * @method reject 
+			 * @description rejects the current promise
+			 * @param  {mixed} reason - a error message
+			 */
 			reject : function(reason) {
 				_reject(reason);
 			},
-			fulfill : function(value){
-				_fulfill(value);
-			},
+
+			/**
+			 * @method resolve 
+			 * @description] resolves the given promise
+			 * @param  {mixed} value - a value
+			 */
 			resolve : function(value){
 				if(value && typeof value.then === "function"){
 					var promise = new Promise(function(resolve, reject){
 						value.then(resolve, reject);
-					})
+					}, config)
 					return promise
 				}
 				_fulfill(value);
@@ -673,21 +592,21 @@
 			if(!properties.name){
 				throw new SeedError('A seed needs a name!')
 			}
-			
+
 			this.path = null;
 			this.fileData = null;
-			this._sid = Mold.getId();
-			this._isCreatedPromise = new Mold.Core.Promise(false, { throwError : true });
-			this.isReady = new Mold.Core.Promise(false, { throwError : true });
+			this._sid = __Mold.getId();
+			this._isCreatedPromise = new __Mold.Core.Promise(false, { throwError : true });
+			this.isReady = new __Mold.Core.Promise(false, { throwError : true });
 			this._isReady = false;
-			this.dependenciesLoaded = new Mold.Core.Promise(false, { throwError : true });
+			this.dependenciesLoaded = new __Mold.Core.Promise(false, { throwError : true });
 			
 			this._dependenciesAreLoaded = false;
 			var that = this;
 			
 			this.dependencies = [];
 			this.injections = {};
-			this._state = properties.state || Mold.Core.SeedStates.INITIALISING;
+			this._state = properties.state || __Mold.Core.SeedStates.INITIALISING;
 
 			//append propetises
 			for(var prop in properties){
@@ -716,9 +635,9 @@
 
 			set state(state){
 				this._state = state;
-				if(state === Mold.Core.SeedStates.READY && !this._isReady){
+				if(state === __Mold.Core.SeedStates.READY && !this._isReady){
 					this.isReady.resolve(this);
-					Mold.Core.SeedManager.checkReady();
+					__Mold.Core.SeedManager.checkReady();
 					this._isReady = true;
 				}
 			},
@@ -731,7 +650,7 @@
 			 * @return {boolean} returns true if the seed has the given dependency otherwise it return false
 			 */
 			hasDependency : function(name){
-				return Mold.find(this.dependencies, function(value){
+				return this.dependencies.find(function(value){
 					return (value.name === name) ? true : false;
 				});
 			},
@@ -777,7 +696,7 @@
 			 * @return {boolean} 
 			 */
 			get isLoaded(){
-				return (this.state > Mold.Core.SeedStates.LOADING) ? true : false;
+				return (this.state > __Mold.Core.SeedStates.LOADING) ? true : false;
 			},
 
 			/**
@@ -787,8 +706,8 @@
 			 */
 			load : function(){
 				if(!this.isLoaded){
-					this.path = Mold.Core.Pathes.getPathFromName(this.name);
-					var file = new Mold.Core.File(this.path);
+					this.path = __Mold.Core.Pathes.getPathFromName(this.name);
+					var file = new __Mold.Core.File(this.path);
 					var promise = file.load();
 					var that = this;
 
@@ -805,13 +724,13 @@
 			},
 
 			getDependecies : function(){
-				Mold.Core.DependencyManager.find(this);
+				__Mold.Core.DependencyManager.find(this);
 				return this.dependenciesLoaded;
 			},
 
 			checkDependencies : function(){
 				var that = this;
-				Mold.Core.DependencyManager.checkDependencies(this).then(function(){
+				__Mold.Core.DependencyManager.checkDependencies(this).then(function(){
 					that.dependenciesLoaded.resolve(that.dependencies);
 					that._dependenciesAreLoaded = true;
 				})
@@ -856,9 +775,9 @@
 			 * @return {[type]} [description]
 			 */
 			execute : function(){
-
-				var typeHandler = Mold.Core.SeedTypeManager.get(this.type);
+				var typeHandler = __Mold.Core.SeedTypeManager.get(this.type);
 				if(!typeHandler){
+					console.log("seedType not found", this.name, this.type)
 					throw new SeedError("SeedType '" + this.type + "' not found! [" + this.name + "]")
 				}
 				if(!this.code){
@@ -874,7 +793,7 @@
 					this.code = new Function(closure)();
 				}
 
-				Mold.Core.NamespaceManager.addCode(this.name, typeHandler.create(this));
+				__Mold.Core.NamespaceManager.addCode(this.name, typeHandler.create(this));
 			}
 		}
 
@@ -890,7 +809,7 @@
 	Mold.prototype.Core.SeedManager = function(){
 		var _seeds = [];
 		var _seedIndex = {};
-		var _readyPromise = new Mold.prototype.Core.Promise(false, { throwError : true });
+		var _readyPromise = new __Mold.Core.Promise(false, { throwError : true });
 		var _isReady = false;
 
 		var _deleteSeedByName = function(name){
@@ -917,26 +836,39 @@
 				throw new Error("The property 'count' is not writeable! [Mold.Core.SeedManager]");
 			},
 
+			/**
+			 * @method getBySid 
+			 * @description returns a seed be the given seed id, if no seed is found it returns undefined
+			 * @param  {number} sid - the seed id
+			 * @return {mixed} returns a seed or undefined
+			 */
 			getBySid : function(sid){
-				return Mold.find(_seeds, function(seed){
+				return _seeds.find(function(seed){
 					return (seed.sid === sid) ? true : false;
 				});
 			},
 
+			/**
+			 * @method catchSeed 
+			 * @description catches a seed and ad the catched information to the registerd seed
+			 * @param  {object} seedInfo - an object with seed informations
+			 * @param  {function} seedCode - the code of the seed
+			 * @param  {number} [ident] -  the seed id
+			 */
 			catchSeed : function(seedInfo, seedCode, ident){
 				var seed;
 				if(seedInfo.name){
 					seed = this.get(seedInfo.name);
 					//if no seed found with this name create a new one
 					if(!seed){
-						seed = Mold.Core.SeedFactory({
+						seed = __Mold.Core.SeedFactory({
 							name : seedInfo.name,
-							state : Mold.Core.SeedStates.PENDING,
+							state : __Mold.Core.SeedStates.PENDING,
 
 						});
 						this.add(seed);
 						seed.catched(seedInfo, seedCode);
-						Mold.Core.SeedFlow.exec(seed)
+						__Mold.Core.SeedFlow.exec(seed)
 						return this;
 					}
 				}else{
@@ -978,10 +910,17 @@
 				return _seedIndex[name] || null;
 			},
 
+			/**
+			 * @method each 
+			 * @description iterates through the all added seeds and executes a callback per seed with the as argument
+			 * @param  {dunction} callback - a function with the seed as argument
+			 */
 			each : function(callback){
 				for(var name in _seedIndex){
 					callback(_seedIndex[name], name)
 				}
+
+				return this;
 			},
 
 			/**
@@ -993,6 +932,7 @@
 				var name = (typeof seed === 'object') ? seed.name : seed;
 				delete _seedIndex[name];
 				_deleteSeedByName(name);
+				return this;
 			},
 
 			/**
@@ -1003,16 +943,16 @@
 			checkReady : function(){
 				var i = 0, len = _seeds.length;
 				for(; i < len; i++){
-					if(_seeds[i].state !== Mold.Core.SeedStates.READY){
+					if(_seeds[i].state !== __Mold.Core.SeedStates.READY){
 						return false;
 					}
 				}
 
 				//resolve promise and create a new one
 				_readyPromise.resolve(_seeds);
-				_readyPromise = new Mold.Core.Promise(false, { throwError : true });
+				_readyPromise = new __Mold.Core.Promise(false, { throwError : true });
 				this.isReady = _readyPromise;
-				Mold._reCreateReadyPromise();
+				__Mold._reCreateReadyPromise();
 				
 				return true;
 			},
@@ -1149,6 +1089,7 @@
 			add : function(type){
 				this.validate(type);
 				_seedTypeIndex[type.name] = type;
+				return this;
 			},
 
 			/**
@@ -1209,7 +1150,7 @@
 						if(Array.isArray(seed[prop])){
 							for(var i = 0; i < seed[prop].length; i++){
 
-								if(Mold.isObject(seed[prop][i])){
+								if(__Mold.isObject(seed[prop][i])){
 
 									for(var injection in seed[prop][i]){
 										seed[prop][i][injection] = _getRelativeDependencies(seed[prop][i][injection], seed)
@@ -1237,17 +1178,19 @@
 				var seedsLoades = [];
 
 				for(var i = 0; i < seed.dependencies.length; i++){
-					var depSeed = Mold.Core.SeedManager.get(seed.dependencies[i]);
+					var depSeed = __Mold.Core.SeedManager.get(seed.dependencies[i]);
 					if(depSeed){
-						seedsLoades.push(depSeed);
+						seedsLoades.push(depSeed.isReady);
 					}else{
-						seedsLoades.push(Mold.load(seed.dependencies[i]));
+						var promise =  __Mold.load(seed.dependencies[i]);
+
+						seedsLoades.push(promise);
 					}
 				}
 	
-				var promise = new Mold.Core.Promise();
+				var promise = new __Mold.Core.Promise(false, { throwError : true });
 				if(seedsLoades.length){
-					promise = promise.all(seedsLoades);
+					promise = promise.all(seedsLoades, { throwError : true });
 				}else{
 					promise.resolve();
 				}
@@ -1365,140 +1308,6 @@
 	}();
 
 	/**
-	 * @module Mold.Core.Config 
-	 * @description provides methods to load, set and get configuration file and params
-	 * @static
-	 */
-	Mold.prototype.Core.Config = function(){
-
-		var _configValue = {
-			'config-path' : '',
-			'config-name' : 'mold.json'
-		}
-
-		var _isReady = new Mold.prototype.Core.Promise(false, { throwError : true });
-		var _readyCallbacks = [];
-
-		var _executeIsReady = function(data){
-			_isReady = true;
-			while(_readyCallbacks.length){
-				var callback = _readyCallbacks.pop();
-				callback(data);
-			}
-		}
-		
-		return {
-			/**
-			 * @method set 
-			 * @description set a configuration parameter
-			 * @param {sting} name - the parameter name
-			 * @param {mixed} value - the parameter value
-			 */
-			set : function(name, value){
-				_configValue[name] = value;
-				return this;
-			},
-
-			/**
-			 * @method get 
-			 * @description returns a configuration property
-			 * @param  {string} name - the parameters name
-			 * @return {mixed} returns the parameter value
-			 */
-			get : function(name){
-				return _configValue[name] || null;
-			},
-
-			getAll : function(){
-				return _configValue;
-			},
-
-			/**
-			 * @method init 
-			 * @description initialize the config, loads a configuration file
-			 * @return {promise} returns a (psydo-) promise 
-			 */
-			init : function(){
-				var that = this;
-
-				_configValue['config-path'] = Mold.prototype.Core.Initializer.getParam('config-path') || _configValue['config-path'];
-				_configValue['config-name'] = Mold.prototype.Core.Initializer.getParam('config-name') || _configValue['config-name'];
-
-				var configFile = new Mold.prototype.Core.File(_configValue['config-path'] + _configValue['config-name']);
-				var promise = configFile.load();
-				
-				promise
-					.then(function(data){
-						data = JSON.parse(data);
-						for(var prop in data){
-							that.set(prop, data[prop]);
-						}
-						_isReady.resolve(data);
-					})
-					.fail(function(err){
-						throw new Error("Configuration file not found: '" + _configValue['config-path'] + _configValue['config-name'] + "'");
-					})
-				
-				return promise;
-			},
-
-			isReady : _isReady
-
-		}
-	}();
-
-	Mold.prototype.Core.Initializer = function(){
-		var _params = ['config-name', 'config-path'];
-		var _availableParams = {};
-
-		var _getBrowserParam = function(name){
-			var param = document.currentScript.getAttribute(name);
-			return param || null;
-		}
-
-		var _getNodeParam = function(name){
-			var argFound = false, value = null;
-			for(var i = 0; i < process.argv.length; i++){
-				if(argFound){
-					value = process.argv[i];
-					break;
-				}
-				if(process.argv[i] === name){
-					argFound = true;
-				}
-			}
-			return value;
-		}
-
-		return {
-			init : function(){
-				_availableParams = this.getInitParams();
-			},
-			getParam : function(name){
-				return _availableParams[name] || null;
-			},
-			getInitParams : function(){
-				var output = {};
-				_params.forEach(function(entry){
-					var result = null;
-
-					if(_isNodeJS){
-						result = _getNodeParam(entry);
-					}else{
-						result = _getBrowserParam(entry);
-					}
-
-					if(result){
-						output[entry] = result;
-					}
-				});
-
-				return output;
-			}
-		}
-	}();
-
-	/**
 	 * @module Mold.Core.Pathes 
 	 * @description provides methods to transform an generate pathes
 	 */
@@ -1537,6 +1346,340 @@
 				}
 
 				return _pathHandler[type](name);
+			},
+
+			/**
+			 * @method getMoldPath 
+			 * @description returns the path current Mols.js path
+			 * @return {string} returns a string
+			 */
+			getMoldPath : function(){
+				if(_isNodeJS){
+					var path = require("path");
+					return path.relative(process.cwd(), __dirname) + "/"
+				}else{
+					var path = _currentScript.getAttribute('src');
+					if(~path.indexOf("/")){
+						path = path.substring(0, path.lastIndexOf("/") + 1);
+					}else{
+						path = "";
+					}
+					return path;
+				}
+			},
+
+			/**
+			 * @method getCurrentPath 
+			 * @description returns the current relative path
+			 * @return {string} returns the current relative path
+			 */
+			getCurrentPath : function(){
+				return "";
+			},
+
+			/**
+			 * @method exists 
+			 * @description checks if a path exists
+			 * @platform node
+			 * @param  {string} path - the path to check
+			 * @param  {string} type - the path type to check, possible values are 'file' and 'dir'
+			 * @return {boolean} returns true if the path exists otherwise false 
+			 */
+			exists : function(path, type){
+				if(_isNodeJS){
+					var fs = require('fs');
+					try{
+						var stats = fs.lstatSync(path);
+						switch(type){
+							case 'file' :
+								return stats.isFile();
+							case 'dir' :
+								return stats.isDirectory();
+						}
+
+						return false;
+					}catch(e){
+						return false;
+					}
+					return false;
+				}
+				return true;
+			}
+		}
+	}();
+
+	/**
+	 * @module Mold.Core.Config 
+	 * @description provides methods to load, set and get configuration file and params
+	 * @static
+	 */
+	Mold.prototype.Core.Config = function(){
+		
+		var _configValue = {
+			local : {
+				'config-path' : __Mold.Core.Pathes.getCurrentPath(),
+				'config-name' : 'mold.json'
+			},
+			global : {
+				'config-path' : __Mold.Core.Pathes.getMoldPath(),
+				'config-name' : 'mold.json',
+			}
+		}
+
+		var _defaultType = 'local';
+
+		var _isReady = new __Mold.Core.Promise(false, { throwError : true });
+		var _readyCallbacks = [];
+
+		var _executeIsReady = function(data){
+			_isReady = true;
+			while(_readyCallbacks.length){
+				var callback = _readyCallbacks.pop();
+				callback(data);
+			}
+		}
+		
+		return {
+			switchConfig : function(type){
+				_defaultType = type;
+			},
+
+			/**
+			 * @method set 
+			 * @description set a configuration parameter
+			 * @param {sting} name - the parameter name
+			 * @param {mixed} value - the parameter value
+			 */
+			set : function(name, value, type){
+				type = type || _defaultType;
+				_configValue[type] = _configValue[type] || {};
+				_configValue[type][name] = value;
+				return this;
+			},
+
+			/**
+			 * @method get 
+			 * @description returns a configuration property
+			 * @param  {string} name - the parameters name
+			 * @return {mixed} returns the parameter value
+			 */
+			get : function(name, type){
+				var undefined;
+				type = type || _defaultType;
+				if(!_configValue[type]){
+					throw new Error("Config type '" + type + "' is not defined!")
+				}
+				return (_configValue[type][name] === undefined) ? null : _configValue[type][name];
+			},
+
+			/**
+			 * @method getAll 
+			 * @description returns the hole configuration file
+			 * @param  {string} [type] - optional the type of configuration possible values are 'local' and 'global' 
+			 * @return {[type]}      [description]
+			 */
+			getAll : function(type){
+				if(type){
+					return _configValue[type];
+				}
+				return _configValue;
+			},
+
+			/**
+			 * @method loadConfig 
+			 * @description loads a configuration file 
+			 * @param  {string} path - path to the configuration file
+			 * @param  {string} type - type of the configuration (local/global)
+			 * @return {promise} returns a promise which will be resolved when the configuration file ist loaded
+			 */
+			loadConfig : function(path, type){
+				type = type || _defaultType;
+				
+				var that = this;
+				var configFile = new __Mold.Core.File(path);
+				var promise = configFile.load();
+
+				promise
+					.then(function(data){
+						data = JSON.parse(data);
+						for(var prop in data){
+							that.set(prop, data[prop], type);
+						}
+					})
+					.fail(function(err){
+						throw new Error("Configuration file not found: '" + path + "'!");
+					})
+
+			
+				return promise;
+			},
+
+			/**
+			 * @method init 
+			 * @description initialize the config, loads a configuration file
+			 * @return {promise} returns a (psydo-) promise 
+			 */
+			init : function(){
+				var that = this;
+
+				var configPath = __Mold.Core.Initializer.getParam('config-path') || this.get('config-path', _defaultType);
+				var configName = __Mold.Core.Initializer.getParam('config-name') || this.get('config-name', _defaultType);
+				var promise = this.loadConfig(configPath + configName);
+				
+				//use two config files (if exists) only on node
+				if(_isNodeJS){
+					//if a local file exists load also the local once
+					var localConfigPath = this.get('config-path', 'global');
+					var localConfigName = this.get('config-name', 'global');
+					var fs = require('fs');
+					try {
+						var stats = fs.lstatSync(localConfigPath + localConfigName);
+						if(stats.isFile()){
+							return new __Mold.Core.Promise(function(resolve, reject){
+								promise.then(function(data){
+									var localPromise = that.loadConfig(configPath + configName, 'global');
+
+									localPromise.then(function(localData){
+										_isReady.resolve([localData, data]);
+										resolve([localData, data]);
+									});
+								});
+							}, { throwError : true });
+						}
+					}catch(e){}
+					
+				}
+
+				promise.then(function(data){
+					_isReady.resolve(data);
+				});
+
+				return promise;
+			},
+
+			isReady : _isReady
+
+		}
+	}();
+
+	/**
+	 * @namespace PolyFillManger 
+	 * @description handles polyfills, use this to avoid problems with overwriting
+	 */
+	Mold.prototype.Core.PolyFillManger = function(){
+		var _polyFills = {};
+
+		return {
+			/**
+			 * @method add 
+			 * @description adds a polyfill
+			 * @param {string} name - name of the pollyfill
+			 * @param {code} code - poly fillcode
+			 */
+			add : function(polyfill){
+				if(!polyfill.name){
+					throw new Error("Polyfill 'name' is not defined");
+				}
+				if(!polyfill.code){
+					throw new Error("Polyfill 'code' is not defined");
+				}
+				if(_polyFills[polyfill.name]){
+					throw new Error("Polyfill '" + name + "' already exists!");
+				}
+				_polyFills[polyfill.name] = polyfill;
+				if(!polyfill.object || !polyfill.method){
+					_polyFills[polyfill.name].code();
+				}else{
+					if(!polyfill.object.prototype[polyfill.method]){
+						_polyFills[polyfill.name].code();
+					}
+				}
+				return this;
+			}
+		}
+	}()
+
+	Mold.prototype.Core.Initializer = function(){
+		var _params = ['config-name', 'config-path', 'global-config-name', 'global-config-path'];
+		var _availableParams = {};
+		var _cliArguments = [];
+
+		var _getBrowserParam = function(name){
+			var param = document.currentScript.getAttribute(name);
+			return param || null;
+		}
+
+		var _getNodeParam = function(name){
+			var argFound = false, value = null;
+			for(var i = 0; i < process.argv.length; i++){
+				if(argFound){
+					value = process.argv[i];
+					break;
+				}
+				if(process.argv[i] === name){
+					argFound = true;
+				}
+			}
+			return value;
+		}
+
+		var _intiCliCommands = function(){
+			var command = { name : null, parameter : {} }, getValue = false;
+			for(var i = 0; i < process.argv.length; i++){
+				var part = process.argv[i];
+
+				if(part.startsWith('--')){
+					command.paramenter[part.substring(2, part.length)] = true;
+					getValue = false;
+				}else if(part.startsWith('-')){
+					command.paramenter[part.substring(1, part.length)] = "";
+					getValue = true;
+				}else if(getValue){
+					command.paramenter[command.paramenter.length - 1] += getValue;
+				}else if('+'){
+					_cliArguments.push(command);
+					command = { name : null, parameter : {} };
+					getValue = false;
+				}else{
+					command.name = part;
+					getValue = false;
+				}
+			}
+		}
+
+		return {
+			isCLI : function(){
+
+			},
+			init : function(){
+				_availableParams = this.getInitParams();
+				if(_isNodeJS){
+					_intiCliCommands();
+				}
+			},
+			getParam : function(name){
+				return _availableParams[name] || null;
+			},
+			getCLIArguments : function(){
+				return _cliArguments;
+			},
+			getInitParams : function(){
+				var output = {};
+				_params.forEach(function(entry){
+					var result = null;
+
+					if(_isNodeJS){
+						result = _getNodeParam(entry);
+					}else{
+						result = _getBrowserParam(entry);
+					}
+
+					if(result){
+						output[entry] = result;
+					}
+				});
+
+				return output;
 			}
 		}
 	}();
@@ -1615,7 +1758,6 @@
 			 * @param {function} code - pre processor script
 			 */
 			add : function(name, code){
-				console.log("ADDD PREPOZ", name, code)
 				_preprocessors.push({
 					name : name,
 					code : code
@@ -1629,7 +1771,6 @@
 			 * @param {string} name - name of the preprocessor
 			 */
 			remove : function(name){
-				console.log("remove preproz")
 				for(var i = 0; i < _preprocessors.length; i++){
 					if(_preprocessors[i].name === name){
 						_preprocessors.splice(i, 1);
@@ -1645,7 +1786,7 @@
 			 * @param  {[type]} seed - the seed that should be preprocessed
 			 */
 			exec : function(seed){
-				return new Mold.Core.Promise(function(resolve){
+				return new __Mold.Core.Promise(function(resolve){
 					var i = 0;
 					var next = function(){
 						var process = _preprocessors[i] || null;
@@ -1677,7 +1818,7 @@
 
 					}.bind(this);
 					next();
-				});
+				}, { throwError : true });
 			}
 		}
 	}();
@@ -1765,21 +1906,26 @@
 
 		var _nodeLoader = function(){
 			var fs = require('fs');
-			if(!fs.existsSync(filename)){
+
+			try {
+				var stats = fs.lstatSync(filename);
+				if(stats.isFile()) {
+					fs.readFile(filename, 'utf8', function (err, data) {
+						if(err){
+							_error = err;
+						}
+
+						if(data){
+							_data = data;
+						}
+						_test();
+					})
+				}
+			}catch(e){
 				_error = "File not found! [" + filename + "]";
 				_test();
-				return;
 			}
-
-			fs.readFile(filename, 'utf8', function (err, data) {
-				if(err){
-					_error = err;
-				}
-				if(data){
-					_data = data;
-				}
-				_test();
-			})
+		
 		}
 
 		/**
@@ -1813,52 +1959,144 @@
 /** INIT DEFAULT CONFIGURATION */
 	Mold.prototype.init = function(){
 		var that = this;
+		__Mold = this;
+
+		//add polyfills
+		this.Core.PolyFillManger
+			.add({
+				name : 'String.startsWith',
+				code : function(){
+					String.prototype.startsWith = function(searchString, position) {
+						position = position || 0;
+						return this.indexOf(searchString, position) === position;
+					};
+				},
+				object : String,
+				method : 'startsWith'
+			})
+
+			.add({
+				name : 'String.endsWith',
+				code : function(){
+					String.prototype.endsWith = function(searchString, position) {
+						var subjectString = this.toString();
+						if(typeof position !== 'number' || !isFinite(position) || Math.floor(position) !== position || position > subjectString.length) {
+							position = subjectString.length;
+						}	
+						position -= searchString.length;
+						var lastIndex = subjectString.indexOf(searchString, position);
+						return lastIndex !== -1 && lastIndex === position;
+					};
+				},
+				object : String,
+				method : 'endsWith'
+			})
+			
+			.add({
+				name : 'Array.find',
+				code : function(){
+					Array.prototype.find = function(predicate) {
+						if (this == null) {
+							throw new TypeError('Array.prototype.find called on null or undefined');
+						}
+						if (typeof predicate !== 'function') {
+							throw new TypeError('predicate must be a function');
+						}
+						var list = Object(this);
+						var length = list.length >>> 0;
+						var thisArg = arguments[1];
+						var value;
+						for (var i = 0; i < length; i++) {
+							value = list[i];
+							if (predicate.call(thisArg, value, i, list)) {
+								return value;
+							}
+						}
+						return undefined;
+					};
+				},
+				object : Array,
+				method : 'find'
+
+			})
+
+			/**
+			 * @polyfill eachShift
+			 * @description iterates through an array and remove the selected item until the array is empty
+			 * @param {array} collection the array
+			 * @param  {function} callback  method will called on each entry, given paramter is the entry value           
+			 */
+			.add({
+				name : 'Array.eachShift', 
+				code : function(){
+					Array.prototype.eachShift = function(predicate){
+						if (this == null) {
+							throw new TypeError('Array.prototype.eachShift called on null or undefined');
+						}
+						if (typeof predicate !== 'function') {
+							throw new TypeError('predicate must be a function');
+						}
+						while(this.length){
+							var selected = this.shift();
+							predicate.call(this, selected);
+						}
+						return this;
+					}
+				},
+				object : Array,
+				method : 'eachShift'
+			})
 		
 		//default seed typs
-		this.Core.SeedTypeManager.add({
-			name : 'action',
-			create : function(seed){
-				return seed.code();
-			}
-		});
-
-		this.Core.SeedTypeManager.add({
-			name : 'static',
-			create : function(seed){
-				return seed.code;
-			}
-		});
-
-		/**
-		 * @deprecated
-		 */
-		//for compatibility with 0.0.1*, don't use this
-		this.Core.SeedTypeManager.add({
-			name : 'class',
-			preCreating : function(seed){
-				return seed;
-			},
-			create : function(seed){
-				if(seed.extend){
-					seed = Mold.extend(seed.extend, seed)
+		this.Core.SeedTypeManager
+			.add({
+				name : 'action',
+				create : function(seed){
+					return seed.code();
 				}
-			
-				return Mold.wrap(seed.code, function(that){
-					if(that.publics){
-						for(var property in that.publics){
-							that[property] = that.publics[property];
+			})
+			.add({
+				name : 'static',
+				create : function(seed){
+					return seed.code;
+				}
+			})
+			.add({
+				name : 'data',
+				create : function(seed){
+					return seed.code;
+				}
+			})
+			.add({
+				/**
+				 * @deprecated
+				 */
+				//for compatibility with 0.0.1*, don't use this
+				name : 'class',
+				preCreating : function(seed){
+					return seed;
+				},
+				create : function(seed){
+					if(seed.extend){
+						seed = Mold.extend(seed.extend, seed)
+					}
+				
+					return Mold.wrap(seed.code, function(that){
+						if(that.publics){
+							for(var property in that.publics){
+								that[property] = that.publics[property];
+							}
 						}
-					}
-					delete that.publics;
-					
-					if(that.trigger && typeof that.trigger === "function"){
-						that.trigger("after.init");
-					}
-					
-					return constructor;
-				});
-			}
-		});
+						delete that.publics;
+						
+						if(that.trigger && typeof that.trigger === "function"){
+							that.trigger("after.init");
+						}
+						
+						return constructor;
+					});
+				}
+			});
 
 		this.Core.SeedTypeManager.add({
 			name : 'module',
@@ -1885,16 +2123,28 @@
 
 		//configurate default path handling
 		this.Core.Pathes.on('mold', function(name){
-			var parts = name.split('.');
-			var repoPath = that.Core.Config.get("repositories")[parts[0]];
-			if(!repoPath){
-				throw new Error("No path for repository '" + parts[0] + "' found! [" + name + "]")
+			var createPath = function(confType){
+				var parts = name.split('.');
+				var conf = that.Core.Config.get("repositories", confType)
+				if(!conf && confType === "global"){
+					throw new Error("No repositiories in " + confType + " config' found! [" + name + "]")
+				}
+				var repoPath = that.Core.Config.get("repositories", confType)[parts[0]];
+				if(!repoPath && confType === "global"){
+					throw new Error("No path for repository '" + parts[0] + "' found! [" + name + "]")
+				}
+				var path = repoPath + "/";
+				parts.shift();
+				path += parts.join('/') + '.js';
+	
+				if(!that.Core.Pathes.exists(path) && confType !== 'global'){
+					return createPath('global');
+				}
+				return path;
 			}
-			var path = repoPath + "/";
-			parts.shift();
-			path += parts.join('/');
 
-			return path + '.js';
+			return createPath('local');
+			
 		});
 
 		//add some default preprocessors
@@ -1908,7 +2158,10 @@
 			.add('include', function(parameter, seed, done){
 				if(parameter.seed){
 					Mold.load(parameter.seed).then(function(loaded){
-						done(loaded.code);
+						var codeString = loaded.code.toString();
+						codeString = codeString.substring(codeString.indexOf("{") + 1, codeString.lastIndexOf("}"));
+						//console.log(codeString)
+						done(codeString);
 					})
 				}else{
 					done();
@@ -1936,10 +2189,8 @@
 				done();
 			})
 			.on(this.Core.SeedStates.PREPARSING, function(seed, done){
-				console.log("do PREPARSING");
+				//console.log("do PREPARSING");
 				that.Core.Preprocessor.exec(seed).then(done);
-				
-				//done()
 			})
 			.onAfter(this.Core.SeedStates.PREPARSING, function(seed, done){
 				//if seed is already transpiled skip transpiling step
@@ -1951,7 +2202,7 @@
 				done();
 			})
 			.on(this.Core.SeedStates.TRANSPILING, function(seed, done){
-				console.log("do TRANSPILING", seed.name);
+				//console.log("do TRANSPILING", seed.name);
 				done()
 			})
 			.onAfter(this.Core.SeedStates.TRANSPILING, function(seed, done){
@@ -1993,8 +2244,8 @@
 				done();
 			})
 			.on(that.Core.SeedStates.READY, function(seed, done){
-				console.log("SEED READY", seed.name)
-				//that.Core.DependencyManager.checkAll();
+				//console.log("SEED READY", seed.name)
+
 				done();
 			})
 			.on(this.Core.SeedStates.ERROR, function(seed, done){
@@ -2005,66 +2256,65 @@
 
 		this.Core.Initializer.init();
 		this.Core.Config.init();
+		//register core seeds 
+		this.Core.SeedManager
+			.add(
+				this.Core.SeedFactory({
+					name : "Mold.Core.SeedManager",
+					state : this.Core.SeedStates.READY,
+					code : this.Core.SeedManager
+				})
+			)
+			.add(
+				this.Core.SeedFactory({
+					name : "Mold.Core.SeedFactory",
+					state : this.Core.SeedStates.READY,
+					code : this.Core.SeedFactory
+				})
+			)
+			.add(
+				this.Core.SeedFactory({
+					name : "Mold.Core.Promise",
+					state : this.Core.SeedStates.READY,
+					code : this.Core.Promise
+				})
+			)
+			.add(
+				this.Core.SeedFactory({
+					name : "Mold.Core.File",
+					state : this.Core.SeedStates.READY,
+					code : this.Core.File
+				})
+			)
+			.add(
+				this.Core.SeedFactory({
+					name : "Mold.Core.Pathes",
+					state : this.Core.SeedStates.READY,
+					code : this.Core.Pathes
+				})
+			)
+			.add(
+				this.Core.SeedFactory({
+					name : "Mold.Core.Initializer",
+					state : this.Core.SeedStates.READY,
+					code : this.Core.Initializer
+				})
+			)
+			.add(
+				this.Core.SeedFactory({
+					name : "Mold.Core.Config",
+					state : this.Core.SeedStates.READY,
+					code : this.Core.Config
+				})
+			)
 	}
 
 	global._Mold = Mold;
 
 	var Mold = new Mold();
 
-	//register core seeds 
-	Mold.Core.SeedManager
-		.add(
-			Mold.Core.SeedFactory({
-				name : "Mold.Core.SeedManager",
-				state : Mold.Core.SeedStates.READY,
-				code : Mold.Core.SeedManager
-			})
-		)
-		.add(
-			Mold.Core.SeedFactory({
-				name : "Mold.Core.SeedFactory",
-				state : Mold.Core.SeedStates.READY,
-				code : Mold.Core.SeedFactory
-			})
-		)
-		.add(
-			Mold.Core.SeedFactory({
-				name : "Mold.Core.Promise",
-				state : Mold.Core.SeedStates.READY,
-				code : Mold.Core.Promise
-			})
-		)
-		.add(
-			Mold.Core.SeedFactory({
-				name : "Mold.Core.File",
-				state : Mold.Core.SeedStates.READY,
-				code : Mold.Core.File
-			})
-		)
-		.add(
-			Mold.Core.SeedFactory({
-				name : "Mold.Core.Pathes",
-				state : Mold.Core.SeedStates.READY,
-				code : Mold.Core.Pathes
-			})
-		)
-		.add(
-			Mold.Core.SeedFactory({
-				name : "Mold.Core.Initializer",
-				state : Mold.Core.SeedStates.READY,
-				code : Mold.Core.Initializer
-			})
-		)
-		.add(
-			Mold.Core.SeedFactory({
-				name : "Mold.Core.Config",
-				state : Mold.Core.SeedStates.READY,
-				code : Mold.Core.Config
-			})
-		)
 
 	global.Mold = Mold;
 	console.log("LOAD Mold")
 
 })((typeof global !== 'undefined') ? global : this);
-

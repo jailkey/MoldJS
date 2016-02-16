@@ -3,8 +3,7 @@ Seed({
 		type : "static",
 		include : [
 			{ "Injection" : "App.Dependency" },
-			{ "SecondDep" : "App.TestTwo" },
-			"Mold.Lib.Template"
+			{ "SecondDep" : "App.TestTwo" }
 		]
 	},
 	function(){	

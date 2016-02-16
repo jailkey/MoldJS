@@ -28,5 +28,8 @@
   "dependencies": {
     "hexler": ">=0.0.2"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "btoa": "^1.1.2"
+  }
 }

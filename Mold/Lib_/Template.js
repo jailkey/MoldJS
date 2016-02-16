@@ -29,9 +29,7 @@ Seed({
 		]
 	},
 	function(markup, config){
-		
 		config = config || {};
-
 		var ajax = new Ajax();
 		var _tree = false;
 		var _that = this;
@@ -40,6 +38,7 @@ Seed({
 
 		Mold.mixin(this, new Event(this));
 
+		
 		//load the 
 		var _template = new Promise(function(resolve, reject){
 			var data = markup;

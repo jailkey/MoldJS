@@ -5,18 +5,9 @@
 		"Mold" : "Mold",
 		"App" : "tests/App"
 	},
-	"main" : "Mold",
+	"main" : "App.Main",
 	"dependencies" : [
-		{ 
-			"name" : "Mold.Core.*"
-		},
-		{
-			"name" : "Mold.Core.Hexler",
-			"path" : "http://..../src/",
-			"routes" : {
-				"Mold.Test.Hexler" : "Mold.Core.Hexler"
-			}
-		}
+		{}
 	],
 	"docs" : {
 		"md" : [],

@@ -262,7 +262,8 @@ Seed (
 				if(!config.disableSaveTrigger){
 					Mold.Lib.EventStore.saveTrigger(_element, event, data);
 				}
-				return (Mold.is(output)) ? output : _element;
+				var undefined;
+				return (output !== undefined) ? output : _element;
 
 			}
 

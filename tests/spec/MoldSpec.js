@@ -4,7 +4,7 @@ describe("Mold Core Lib", function () {
 
 //SEEDHANLDING
 	describe("Mold.Core.SeedFactory", function(){
-		it("create a new seed and check methods an properties", function(){
+		it("create a new seed and check methods and properties", function(){
 			var seed = Mold.Core.SeedFactory({
 				name : "Mold.Test",
 				type : "module",
@@ -19,8 +19,8 @@ describe("Mold Core Lib", function () {
 			expect(seed.addDependency).toBeDefined();
 			expect(seed.addInjection).toBeDefined();
 			expect(seed.load).toBeDefined();
-			expect(seed.getDependecies).toBeDefined();
-			expect(seed.checkDependencies).toBeDefined();
+			//expect(seed.getDependecies).toBeDefined();
+			//expect(seed.checkDependencies).toBeDefined();
 			expect(seed.catched).toBeDefined();
 			expect(seed.create).toBeDefined();
 			expect(seed.execute).toBeDefined();
@@ -115,7 +115,7 @@ describe("Mold Core Lib", function () {
 
 			it("try to create a new namespace a unvalid name", function(){
 				var test = {};
-				expect(function() { Mold.Core.NamespaceManager.create('aerbe8rt', test) }).toThrow(new Error("'aerbe8rt' is not a valid Namespace name!"));
+				expect(function() { Mold.Core.NamespaceManager.create('aerbe8rt', test) }).toThrow(new Error("'aerbe8rt' is not a valid Namespace name! [instance:origin]"));
 			})
 		})
 
@@ -141,25 +141,25 @@ describe("Mold Core Lib", function () {
 	describe("Test Mold.Core.SeedTypeManager", function(){
 		var typeLen;
 
-		it("test wrong seed types with .validate", function(){
+		xit("test wrong seed types with .validate", function(){
 			expect(function(){
 				Mold.Core.SeedTypeManager.validate({
 					create : "test"
 				})
-			}).toThrow(new Mold.Errors.SeedTypeError('SeedType \'name\' is not defined!'))
+			}).toThrow(new Error('SeedType \'name\' is not defined!'))
 
 			expect(function(){
 				Mold.Core.SeedTypeManager.validate({
 					name : "test"
 				})
-			}).toThrow(new Mold.Errors.SeedTypeError('SeedType \'create\' is not defined! [test]'))
+			}).toThrow(new Error('SeedType \'create\' is not defined! [test]'))
 			
 		})
 
 		it("test the amount of SeedTypes with .count", function(){
 			typeLen = Mold.Core.SeedTypeManager.count;
 			expect(Mold.Core.SeedTypeManager.count).toBe(typeLen);
-			expect(function(){ Mold.Core.SeedTypeManager.count = 5; }).toThrow(new Error("the property 'len' is not writeable! [Mold.Core.SeedTypeManger]"));
+			expect(function(){ Mold.Core.SeedTypeManager.count = 5; }).toThrow(new Error("the property 'len' is not writeable! [Mold.Core.SeedTypeManger] [instance:origin]"));
 		});
 
 		it("add seed type with .add", function(){
@@ -229,6 +229,15 @@ describe("Mold Core Lib", function () {
 				expect(Mold.Core.Pathes.exists('App/Test.js', 'file')).toBe(true);
 			})
 		}
+
+		it("checks if a path is a mold seed path", function(){
+			console.log(Mold.Core.Pathes.isMoldPath("Mold.Test"))
+			expect(Mold.Core.Pathes.isMoldPath("Mold.Test")).toBe(true);
+			expect(Mold.Core.Pathes.isMoldPath("mold.Test")).toBe(false);
+			expect(Mold.Core.Pathes.isMoldPath("http://.Test")).toBe(false);
+			expect(Mold.Core.Pathes.isMoldPath("irgendwas")).toBe(false);
+			expect(Mold.Core.Pathes.isMoldPath("App")).toBe(true);
+		})
 		
 	})
 
@@ -270,7 +279,31 @@ describe("Mold Core Lib", function () {
 	})
 
 
-//TEST MOLD BUILD IN POLYFILLS
+
+
+//TEST MOLD BUILD IN AND POLYFILLS
+	describe("Mold.merge", function(){
+		it("Test merging objects", function(){
+			var objOne = {
+				hans : {
+					test : 'value1',
+					anothertest : 'notoverwritten'
+				}
+			}
+
+			var objTwo = {
+				hans : {
+					test : 'value2'
+				},
+				wasanderes : true
+			}
+
+			var result = Mold.merge(objOne, objTwo);
+			expect(result.hans.test).toBe('value2');
+			expect(result.hans.anothertest).toBe('notoverwritten');
+			expect(result.wasanderes).toBe(true);
+		})
+	})
 	describe("Array.isArray", function(){
 		it("Test if array is an array", function(){
 			var testArray = ["one", "two", "three"];
@@ -341,7 +374,8 @@ describe("Mold Core Lib", function () {
 			expect(file.load).toBeDefined();
 
 			file.load().fail(function(err){
-				expect(err).toBe('File not found! [tessdsdt.txt]')
+				console.log(err)
+				expect(err.message).toBe('File not found! [tessdsdt.txt] [instance:origin]')
 				done();
 			})
 		})

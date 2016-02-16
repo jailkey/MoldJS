@@ -9,7 +9,20 @@
 	    this.stack = (new Error()).stack;
 	}
 
-	SeedError.prototype = new Error;
+	SeedError.prototype = Object.create(Error.prototype);
+	SeedError.prototype.constructor = SeedError;
+
+
+	var CommandError = function CommandError (message, command) {
+	    this.name = 'CommandError';
+	    this.message = message;
+	    this.stack = message + "\n" + (new Error()).stack;
+	    this.command = command;
+	}
+
+	CommandError.prototype = Object.create(Error.prototype);
+	CommandError.prototype.constructor = CommandError;
+
 
 	var DNAError = function DNAError (message) {
 	    this.name = 'DNAError';
@@ -35,11 +48,16 @@
 		})();
 	}
 
+	//load required node modules
+	if(_isNodeJS){
+		var fs = require('fs');
+		var vm = require('vm');
+	}
+
 
 
 /** MOLD CONTRUCTOR */
 	var Mold = function Mold(){
-		
 		//create storages
 		this.seeds = [];
 		this.seedIndex = {};
@@ -48,7 +66,8 @@
 		this.Errors = {
 			SeedError : SeedError,
 			DNAError : DNAError,
-			SeedTypeError : SeedTypeError
+			SeedTypeError : SeedTypeError,
+			CommandError : CommandError
 		}
 
 		this.EXIT = '---exit---';
@@ -56,6 +75,15 @@
 		this.isNodeJS = _isNodeJS;
 
 		this.ready = this._reCreateReadyPromise();
+		if(_isNodeJS){
+			this.globalProperties = {
+				require : require,
+				__dirname : __dirname,
+				setTimeout : setTimeout,
+				process : process,
+				Buffer : Buffer
+			}
+		}
 
 		this.init();
 	}
@@ -74,15 +102,23 @@
 			return this.ident;
 		},
 
+		copyGlobalProperties : function(global){
+			for(var prop in this.globalProperties){
+				global[prop] = this.globalProperties[prop];
+			}
+		},
+
+		getInstanceDescription : function(){
+			return " [instance:" + ((global && global.vmInstance) ? 'vm' : 'origin') + ((global && global.vmInstance) ? ":" + global.vmInstance : '') + "]";
+		},
+
 /** SEED HANDLING */
-
-
 		load : function(name){
 			var seed;
 			if((seed = this.Core.SeedManager.get(name))){
 				return seed.isReady;
 			}
-
+			console.log("LOAD", name , this.getInstanceDescription())
 			var seed = this.Core.SeedFactory({
 				name : name,
 				state : this.Core.SeedStates.NEW
@@ -117,6 +153,7 @@
 		* @return {object} - returns the target object with the new methodes an properties
 		**/
 		mixin : function(target, origin, selected, config){
+
 			for(var property in origin){
 				if(selected && selected.length > 0){
 					if(selected.indexOf(property) > -1){
@@ -135,6 +172,44 @@
 			return target;
 		},
 
+		merge : function(target, origin, conf){
+			if(Array.isArray(origin)){
+				if(conf && conf.concatArrays){
+					if(Array.isArray(target)){
+						target = target.concat(origin);
+					}else{
+						target = origin;
+					}
+				}else{
+					for(var i = 0; i < origin.length; i++){
+						if(target[i]){
+							if(this.isObject(target[i]) || Array.isArray(target[i])){
+								target[i] = this.merge(target[i], origin[i], conf);
+							}else{
+								target[i] = origin[i];
+							}
+						}else{
+							target[i] = origin[i];
+						}
+					}
+				}
+			}else if(this.isObject(origin)){
+				for(var prop in origin){
+					if(target[prop]){
+						if(this.isObject(target[prop]) || Array.isArray(target[prop])){
+							target[prop] = this.merge(target[prop], origin[prop], conf);
+						}else{
+							target[prop] = origin[prop];
+						}
+					}else{
+						target[prop] = origin[prop];
+					}
+					
+				}
+			}
+			return target;
+		},
+
 		/**
 		 * @method clone 
 		 * @description clones an given object
@@ -146,9 +221,10 @@
 		        return target;
 		    }
 		    var newObj = target.constructor();
-		    __Mold.each(target, function(element, key, obj){
-				newObj[key] = Mold.clone(obj[key]);
-		    });
+			for(var prop in target){
+				newObj[prop] = this.clone(target[prop]);
+			}
+	
 		    return newObj;
 		},
 
@@ -411,9 +487,7 @@
 						}
 					}catch(error){
 						callbackObject.promise.changeState("rejected", error);
-
 						if(config.throwError){
-							console.log("THROW", error)
 							throw error;
 						}
 					}
@@ -484,6 +558,9 @@
 						if(fullfillCount === promises.length){
 							fullfill(result);
 						}
+					}
+					if(!promises.length){
+						fullfill([]);
 					}
 					for(var i = 0; i < promises.length; i++){
 						if(!promises[i].then){
@@ -563,6 +640,188 @@
 	};
 
 
+	Mold.prototype.Core.Base64 = function(){
+		return {
+			btoa : function(str){
+				if(_isNodeJS){
+				//	console.log(str);
+					/*
+					if (Buffer.byteLength(str) !== str.length){
+						throw new Error('bad string!');
+					}*/
+
+					return Buffer(str).toString('base64');
+				}else{
+					return btoa(str);
+				}
+			}
+		}
+	}()
+
+
+	Mold.prototype.Core.VLQ = function VLQ(){
+		
+		var VLQ_BASE_SHIFT = 5;
+		var VLQ_BASE = 1 << VLQ_BASE_SHIFT;
+		var VLQ_BASE_MASK = VLQ_BASE - 1;
+		var VLQ_CONTINUATION_BIT = VLQ_BASE;
+
+
+		var _base64 = function(number){
+			var intToCharMap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.split('');
+
+			if (0 <= number && number < intToCharMap.length) {
+			  return intToCharMap[number];
+			}
+			throw new TypeError("Must be between 0 and 63: " + number);
+		}
+
+		var _toVLQSigned = function(aValue) {
+			return aValue < 0
+			  ? ((-aValue) << 1) + 1
+			  : (aValue << 1) + 0;
+		}
+
+
+		var _fromVLQSigned = function(aValue) {
+			var isNegative = (aValue & 1) === 1;
+			var shifted = aValue >> 1;
+			return isNegative ? -shifted: shifted;
+		}
+		/*
+		var _base64Encode = function(value){
+			
+			return __Mold.Core.Base64.btoa(encodeURIComponent(value).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+				return String.fromCharCode('0x' + p1);
+			}));
+		}*/
+
+		return {
+			encode : function base64VLQ_encode(aValue) {
+				var encoded = "";
+				var digit;
+
+				var vlq = _toVLQSigned(aValue);
+
+				do {
+					digit = vlq & VLQ_BASE_MASK;
+					vlq >>>= VLQ_BASE_SHIFT;
+					if (vlq > 0) {
+						digit |= VLQ_CONTINUATION_BIT;
+					}
+					encoded += _base64(digit);
+				} while (vlq > 0);
+				//return aValue;
+				return encoded;
+			},
+			
+			decode : function base64VLQ_decode(aStr, aIndex, aOutParam) {
+				var strLen = aStr.length;
+				var result = 0;
+				var shift = 0;
+				var continuation, digit;
+
+				do {
+					if (aIndex >= strLen) {
+						throw new Error("Expected more digits in base 64 VLQ value.");
+					}
+
+					digit = base64.decode(aStr.charCodeAt(aIndex++));
+					if (digit === -1) {
+						throw new Error("Invalid base64 digit: " + aStr.charAt(aIndex - 1));
+					}
+
+					continuation = !!(digit & VLQ_CONTINUATION_BIT);
+					digit &= VLQ_BASE_MASK;
+					result = result + (digit << shift);
+					shift += VLQ_BASE_SHIFT;
+				} while (continuation);
+
+				aOutParam.value = fromVLQSigned(result);
+				aOutParam.rest = aIndex;
+			}
+		}
+	}
+
+
+	/**
+	 * @class SourceMap 
+	 * @description creates a new source map
+	 * @param {} file 
+	 * @param {[type]} content
+	 */
+	
+	Mold.prototype.Core.SourceMap = function(file, content){
+		this.names = [];
+		this.mappings = [];
+		this.rawMappings = [];
+		this.lastGeneratedLine = 1;
+		this.lastOriginalColumn = 0;
+		this.lastGeneratedColumn = 0;
+		this.lastOriginalLine = 0;
+		this.vlq = new __Mold.Core.VLQ();
+		this.files = [];
+		this.files.push(file);
+		this.mapFile = file + ".map";
+		this.sourcesContent = [];
+		this.sourcesContent.push(content);
+
+
+		this.addMapping = function(generatedLine, generatedColumn, originalLine, originalColumn, originalFile, name, code){
+			var output = "";
+			if(this.lastGeneratedLine !== generatedLine){
+
+				while(this.lastGeneratedLine < generatedLine){
+					output += ";"
+					this.lastGeneratedLine++;
+				}
+			}
+			output += this.vlq.encode(generatedColumn - this.lastGeneratedColumn);
+			this.lastGeneratedColumn = generatedColumn;
+			
+			output += this.vlq.encode(0);
+			output += this.vlq.encode(originalLine - 1 - this.lastOriginalLine);		
+			this.lastOriginalLine = originalLine - 1;
+
+			output += this.vlq.encode(originalColumn );
+			this.lastOriginalColumn = originalColumn;
+			if(name){
+				this.names.push(name);
+
+				output += this.vlq.encode(this.names.length - 1);
+			}
+
+			this.mappings.push(output);
+		}
+		
+		this.createMapping = function(){
+			var output = "";
+			var len = this.mappings.length;
+			for(var i = 0; i < len; i++){
+				output += this.mappings[i];
+				//console.log("I", i, len, this.mappings[i + 1], this.mappings[i + 1].indexOf(';') )
+				if((i + 1) < this.mappings.length && this.mappings[i + 1].indexOf(';') < 0){
+					output += ",";
+				}
+			}
+			return output;
+		}
+
+		this.create = function(){
+
+			return {
+				version : 3,
+				file : this.mapFile,
+				sourceRoot : "",
+				sources: this.files,
+				names: this.names,
+				mappings: this.createMapping(),
+				sourcesContent : this.sourcesContent
+			}
+		}	
+	}
+
+
 	/**
 	 * @module Mold.Core.SeedFactory
 	 * @description creates a seed object from a configuration
@@ -576,11 +835,11 @@
 	Mold.prototype.Core.SeedFactory = function SeedFactory(conf){
 
 		if(!conf){
-			throw new Error("seedConf must be defined!");
+			throw new Error("seedConf must be defined!" + __Mold.getInstanceDescription());
 		}
 
 		if(typeof conf !== 'object'){
-			throw new Error("seedConf must be an object!");
+			throw new Error("seedConf must be an object!" + __Mold.getInstanceDescription());
 		}
 
 		/**
@@ -590,11 +849,13 @@
 		 */
 		var Seed = function Seed(properties){
 			if(!properties.name){
-				throw new SeedError('A seed needs a name!')
+				throw new Error('A seed needs a name!' + __Mold.getInstanceDescription())
 			}
+			this.fileMap = [];
 
 			this.path = null;
 			this.fileData = null;
+
 			this._sid = __Mold.getId();
 			this._isCreatedPromise = new __Mold.Core.Promise(false, { throwError : true });
 			this.isReady = new __Mold.Core.Promise(false, { throwError : true });
@@ -607,6 +868,7 @@
 			this.dependencies = [];
 			this.injections = {};
 			this._state = properties.state || __Mold.Core.SeedStates.INITIALISING;
+			this._addedLines = 0;
 
 			//append propetises
 			for(var prop in properties){
@@ -621,7 +883,7 @@
 			},
 
 			set sid(sid){
-				throw new Error("The property 'sid' is not writeable! [Mold.Core.SeedManager]");
+				throw new Error("The property 'sid' is not writeable! [Mold.Core.SeedManager]" + __Mold.getInstanceDescription());
 			},
 
 			/**
@@ -707,6 +969,7 @@
 			load : function(){
 				if(!this.isLoaded){
 					this.path = __Mold.Core.Pathes.getPathFromName(this.name);
+
 					var file = new __Mold.Core.File(this.path);
 					var promise = file.load();
 					var that = this;
@@ -714,20 +977,80 @@
 					promise
 						.then(function(data){
 							that.fileData = data;
+							that.mapFileData();
 						})
 						.fail(function(){
-							throw new SeedError("Can not load seed: '" + that.path + "'! [" + that.name + "]");
+							throw new Error("Can not load seed: '" + that.path + "'! [" + that.name + "]" + __Mold.getInstanceDescription());
 						})
 
 					return promise;
 				}
 			},
 
-			getDependecies : function(){
-				__Mold.Core.DependencyManager.find(this);
-				return this.dependenciesLoaded;
+			/**
+			 * @method mapFileData 
+			 * @description creates a filemap from the raw file
+			 */
+			mapFileData : function(){
+				if(this.fileData){
+					var line = 0, len = this.fileData.length, i = 0;
+					var stopCollection = false, collected = "", charNumber = 0, current = "";
+					var that = this;
+
+					var addEntry = function(name, line, charNumber){
+						that.fileMap.push({
+							name : name,
+							line : line,
+							charNumber : charNumber - name.length
+						});
+					}
+
+					for(; i < len; i++){
+						current = this.fileData[i];
+
+						switch(current){
+							case "\n":
+								line++;
+								addEntry(collected, line, charNumber);
+								collected = "";
+								charNumber = 1;
+								break;
+							case " ":
+							case "\t":
+								addEntry(collected, line, charNumber);
+								collected = "";
+								break;
+							default:
+								collected += current;
+								stopCollection = false;
+						}
+						charNumber++;
+					}
+				}
 			},
 
+			/**
+			 * @method buildSourceMap 
+			 * @description builds a source map from a filemap, used for pre-transpiled seeds debugging
+			 * @return {string} returns the source map
+			 */
+			buildSourceMap : function(){
+				var map = new __Mold.Core.SourceMap(this.path, this.fileData);
+				var that = this;
+				this.fileMap.forEach(function(entry){
+					map.addMapping(entry.line + that._addedLines, entry.charNumber, entry.line, entry.charNumber, 0, entry.name, '');
+				});
+
+				return "\n//# sourceMappingURL=data:application/json;base64," + __Mold.Core.Base64.btoa(JSON.stringify(map.create())) + "";
+			},
+
+			
+
+			/**
+			 * @method checkDependencies 
+			 * @description checks the seed dependencies
+			 * @return {promise} returns a promise wich will be resolved if all dependencies are loaded
+			 */
 			checkDependencies : function(){
 				var that = this;
 				__Mold.Core.DependencyManager.checkDependencies(this).then(function(){
@@ -737,10 +1060,17 @@
 				return this.dependenciesLoaded;
 			},
 
+			/**
+			 * @method catched 
+			 * @description adds catched information to the seed
+			 * @param  {object} info - an object with the seed meta informations
+			 * @param  {function} code - the seed code
+			 * @return {promise} returns the isCreated promise
+			 */
 			catched : function(info, code){
 				
 				if(this.code){
-					throw new SeedError("The seed code is allready created! [" + this.name + "]");
+					throw new Error("The seed code is already created! [" + this.name + "] " + __Mold.getInstanceDescription());
 				}
 				
 				this.code = code;
@@ -753,14 +1083,37 @@
 				this._isCreatedPromise.resolve(this);
 			},
 
+			/**
+			 * @method create 
+			 * @description executes a pre-transpiled seed to catche it's informations
+			 * @return {promise} returns a promise which will be resolved if the seed is created
+			 */
 			create : function(){
 				if(!this.fileData){
-					throw new SeedError("Can not created script without file data! [" + this.name + "]");
+					throw new Error("Can not created script without file data! [" + this.name + "]");
 				}
-				var fileData = "(function() { var Seed = function(info, code) { Mold.Core.SeedManager.catchSeed(info, code, " + this.sid + ")}\n" + this.fileData + "})()";
+				
+				var fileData = "//" + this.name + " \n";
+				fileData += "(function() { var Seed = function(info, code) {  Mold.Core.SeedManager.catchSeed(info, code, " + this.sid + ")}\n" + this.fileData + "})()";
+				this._addedLines = this._addedLines + 2; 
+				fileData += this.buildSourceMap();
 				if(_isNodeJS){
-					var func = new Function(fileData);
-					func();
+					try{
+						var scriptBox = {
+							Mold : __Mold,
+							console : console
+						}
+
+						__Mold.copyGlobalProperties(scriptBox);
+						var context = new vm.createContext(scriptBox);
+
+						var script = new vm.Script(fileData);
+  						script.runInContext(context, { filename: this.path });
+
+					}catch(e){
+						throw e;
+					}
+					
 				}else{
 					this.scriptFile = document.createElement('script');
 					this.scriptFile.src = 'data:text/javascript,' + encodeURIComponent(fileData)
@@ -777,20 +1130,43 @@
 			execute : function(){
 				var typeHandler = __Mold.Core.SeedTypeManager.get(this.type);
 				if(!typeHandler){
-					console.log("seedType not found", this.name, this.type)
-					throw new SeedError("SeedType '" + this.type + "' not found! [" + this.name + "]")
+					throw new Error("SeedType '" + this.type + "' not found! [" + this.name + "]" + __Mold.getInstanceDescription());
 				}
 				if(!this.code){
-					throw new SeedError("Code property is not defined! [" + this.name + "]")
+					throw new Error("Code property is not defined! [" + this.name + "]" + __Mold.getInstanceDescription());
 				}
 
 				if(Object.keys(this.injections).length){
-					var closure = "//" + this.name;
+					var closure = "//" + this.name + "\n";
+					this._addedLines++;
 					for(var inject in this.injections){
 						closure += "	var " + inject + " = " + this.injections[inject] + "; \n" ;
+						this._addedLines++;
 					}
-					closure += " return " + this.code.toString();
-					this.code = new Function(closure)();
+					closure += " return " + this.code.toString() + "\n";
+					closure += this.buildSourceMap();
+					//console.log("file", )
+					if(_isNodeJS){
+						try{
+							var sandbox = {
+								output : function(){},
+								Mold : __Mold,
+								console : console
+							}
+
+							__Mold.copyGlobalProperties(sandbox);
+
+							var context = new vm.createContext(sandbox);
+
+							var script = new vm.Script("var output = function() { " + closure + "\n}()", { filename: this.path, lineOffset : this.fileData.split("\n").length - closure.split("\n").length + 1});
+							var test = script.runInContext(sandbox);
+							this.code = sandbox.output;
+						}catch(e){
+							throw e;
+						}
+					}else{
+						this.code = new Function(closure)();
+					}
 				}
 
 				__Mold.Core.NamespaceManager.addCode(this.name, typeHandler.create(this));
@@ -833,7 +1209,7 @@
 			},
 
 			set count(value){
-				throw new Error("The property 'count' is not writeable! [Mold.Core.SeedManager]");
+				throw new Error("The property 'count' is not writeable! [Mold.Core.SeedManager]" + __Mold.getInstanceDescription());
 			},
 
 			/**
@@ -999,7 +1375,7 @@
 			 */
 			create : function(name, root){
 				if(!this.validate(name)){
-					throw new Error("'" + name + "' is not a valid Namespace name!");
+					throw new Error("'" + name + "' is not a valid Namespace name!" + __Mold.getInstanceDescription());
 				}
 				root = root || global;
 				root[name] = {};
@@ -1055,15 +1431,15 @@
 			 */
 			validate: function(type){
 				if(!type.name){
-					throw new SeedTypeError('SeedType \'name\' is not defined!');
+					throw new SeedTypeError('SeedType \'name\' is not defined!' + __Mold.getInstanceDescription());
 				}
 
 				if(!type.create){
-					throw new SeedTypeError('SeedType \'create\' is not defined! [' + type.name + ']');
+					throw new SeedTypeError('SeedType \'create\' is not defined! [' + type.name + ']' + __Mold.getInstanceDescription());
 				}
 
 				if(typeof type.create !== 'function'){
-					throw new SeedTypeError('SeedType \'create\' is not a function! [' + type.name + ']');
+					throw new SeedTypeError('SeedType \'create\' is not a function! [' + type.name + ']' + __Mold.getInstanceDescription());
 				}
 
 
@@ -1078,7 +1454,7 @@
 			},
 
 			set count(value){
-				throw new Error("the property 'len' is not writeable! [Mold.Core.SeedTypeManger]");
+				throw new Error("the property 'len' is not writeable! [Mold.Core.SeedTypeManger]" + __Mold.getInstanceDescription());
 			},
 
 			/**
@@ -1342,10 +1718,37 @@
 				}
 				
 				if(!_pathHandler[type]){
-					throw new Error("Path type '" + type + "' is not supported!");
+					throw new Error("Path type '" + type + "' is not supported!" + __Mold.getInstanceDescription());
 				}
 
 				return _pathHandler[type](name);
+			},
+
+			/**
+			 * @method isMoldPath 
+			 * @description checks if a path is a Mold seed-path or not
+			 * @param  {type}  path - the path
+			 * @return {boolean} returns true if it is a Mold seed-path or not
+			 */
+			isMoldPath : function(path){
+				if(!path || ~path.indexOf("..") || ~path.indexOf("/") || ~path.indexOf("\\")){
+					return false;
+				}
+				var parts = path.split('.');
+				for(var i = 0; i < parts.length; i++){
+					if(!__Mold.Core.NamespaceManager.validate(parts[i])){
+						return false;
+					}
+				}
+
+				return true;
+			},
+
+			isHttpPath : function(path){
+				if(path.startsWith('http:') || path.startsWith('https:')){
+					return true;
+				}
+				return false;
 			},
 
 			/**
@@ -1355,8 +1758,9 @@
 			 */
 			getMoldPath : function(){
 				if(_isNodeJS){
-					var path = require("path");
-					return path.relative(process.cwd(), __dirname) + "/"
+					var pathMod = require("path");
+					var currentPath = pathMod.relative(process.cwd(), __dirname);
+					return (currentPath) ?  currentPath + "/" : "";
 				}else{
 					var path = _currentScript.getAttribute('src');
 					if(~path.indexOf("/")){
@@ -1387,7 +1791,10 @@
 			 */
 			exists : function(path, type){
 				if(_isNodeJS){
-					var fs = require('fs');
+					if(!type){
+						throw new Error("No path type given!");
+					}
+
 					try{
 						var stats = fs.lstatSync(path);
 						switch(type){
@@ -1467,7 +1874,7 @@
 				var undefined;
 				type = type || _defaultType;
 				if(!_configValue[type]){
-					throw new Error("Config type '" + type + "' is not defined!")
+					throw new Error("Config type '" + type + "' is not defined!" + __Mold.getInstanceDescription())
 				}
 				return (_configValue[type][name] === undefined) ? null : _configValue[type][name];
 			},
@@ -1485,6 +1892,10 @@
 				return _configValue;
 			},
 
+			overwrite : function(config){
+				_configValue = config;
+			},
+
 			/**
 			 * @method loadConfig 
 			 * @description loads a configuration file 
@@ -1493,12 +1904,13 @@
 			 * @return {promise} returns a promise which will be resolved when the configuration file ist loaded
 			 */
 			loadConfig : function(path, type){
+				console.log("LOAD CONFIG PATH", path)
 				type = type || _defaultType;
 				
 				var that = this;
 				var configFile = new __Mold.Core.File(path);
 				var promise = configFile.load();
-
+				
 				promise
 					.then(function(data){
 						data = JSON.parse(data);
@@ -1521,37 +1933,43 @@
 			 */
 			init : function(){
 				var that = this;
-
+				console.log("INIT")
 				var configPath = __Mold.Core.Initializer.getParam('config-path') || this.get('config-path', _defaultType);
 				var configName = __Mold.Core.Initializer.getParam('config-name') || this.get('config-name', _defaultType);
-				var promise = this.loadConfig(configPath + configName);
-				
+				this.set('config-path', configPath);
+				this.set('config-name', configName)
+
+				var localPath = configPath + configName;
+				var promise = this.loadConfig(localPath);
+			
 				//use two config files (if exists) only on node
 				if(_isNodeJS){
-					//if a local file exists load also the local once
-					var localConfigPath = this.get('config-path', 'global');
-					var localConfigName = this.get('config-name', 'global');
-					var fs = require('fs');
-					try {
-						var stats = fs.lstatSync(localConfigPath + localConfigName);
-						if(stats.isFile()){
-							return new __Mold.Core.Promise(function(resolve, reject){
-								promise.then(function(data){
-									var localPromise = that.loadConfig(configPath + configName, 'global');
+					//if a global file exists load also the global once
+					var globalConfigPath = this.get('config-path', 'global');
+					var globalConfigName = this.get('config-name', 'global');
+			
+					if(__Mold.Core.Pathes.exists(globalConfigPath + globalConfigName, 'file')){
 
-									localPromise.then(function(localData){
-										_isReady.resolve([localData, data]);
-										resolve([localData, data]);
-									});
-								});
-							}, { throwError : true });
-						}
-					}catch(e){}
+						return new __Mold.Core.Promise(function(resolve, reject){
+							promise.then(function(data){
+								var localPromise = that.loadConfig(globalConfigPath + globalConfigName, 'global');
+							
+								localPromise.then(function(localData){
+
+									_isReady.resolve([localData, data]);
+									resolve([localData, data]);
+								}).catch(reject);
+							});
+						}, { throwError : true });
+					}
 					
 				}
-
+				
 				promise.then(function(data){
+					
 					_isReady.resolve(data);
+				}).catch(function(e){
+					console.log("FEHLER", e)
 				});
 
 				return promise;
@@ -1602,7 +2020,7 @@
 	Mold.prototype.Core.Initializer = function(){
 		var _params = ['config-name', 'config-path', 'global-config-name', 'global-config-path'];
 		var _availableParams = {};
-		var _cliArguments = [];
+		var _cliCommands= [];
 
 		var _getBrowserParam = function(name){
 			var param = document.currentScript.getAttribute(name);
@@ -1611,6 +2029,7 @@
 
 		var _getNodeParam = function(name){
 			var argFound = false, value = null;
+
 			for(var i = 0; i < process.argv.length; i++){
 				if(argFound){
 					value = process.argv[i];
@@ -1623,46 +2042,95 @@
 			return value;
 		}
 
+		var _isConfigParam = function(name){
+			return _params.find(function(paramName){
+				return (paramName === name) ? true : false; 
+			})
+		}
+
 		var _intiCliCommands = function(){
 			var command = { name : null, parameter : {} }, getValue = false;
-			for(var i = 0; i < process.argv.length; i++){
+			
+			var currentParameter = null;
+			for(var i = 2; i < process.argv.length; i++){
 				var part = process.argv[i];
-
+				if(_isConfigParam(part)){
+					i++;
+					continue;
+				}
 				if(part.startsWith('--')){
-					command.paramenter[part.substring(2, part.length)] = true;
+					command.parameter[part] = true;
 					getValue = false;
 				}else if(part.startsWith('-')){
-					command.paramenter[part.substring(1, part.length)] = "";
+					command.parameter[part] = "";
+					currentParameter = part;
 					getValue = true;
 				}else if(getValue){
-					command.paramenter[command.paramenter.length - 1] += getValue;
-				}else if('+'){
-					_cliArguments.push(command);
+					command.parameter[currentParameter] += part;
+					getValue = false;
+				}else if(part === '+'){
+					if(command.name){
+						_cliCommands.push(command);
+					}
+					currentParameter = null;
 					command = { name : null, parameter : {} };
 					getValue = false;
 				}else{
+					currentParameter = null;
 					command.name = part;
 					getValue = false;
 				}
 			}
+			if(command.name) {
+				_cliCommands.push(command)
+			}
 		}
 
 		return {
+			/**
+			 * @method isCLI 
+			 * @description checks if mold is called with CLI commands 
+			 * @return {boolean} returns true if mold is called with CLI commands, otherwise it returns false
+			 */
 			isCLI : function(){
-
+				return (_cliCommands.length) ? true : false;
 			},
+
+			/**
+			 * @method init 
+			 * @description get alls parameters are set to mold at the beginning
+			 */
 			init : function(){
 				_availableParams = this.getInitParams();
 				if(_isNodeJS){
 					_intiCliCommands();
 				}
 			},
+
+			/**
+			 * @method getParam 
+			 * @description returns the specified parameter by name
+			 * @param  {string} name - the name of the parameter
+			 * @return {mixed} returns the parameter if found, otherwise it returns false
+			 */
 			getParam : function(name){
 				return _availableParams[name] || null;
 			},
-			getCLIArguments : function(){
-				return _cliArguments;
+
+			/**
+			 * @method getCLICommands 
+			 * @description returns all CLI command wich are found
+			 * @return {array} returns an array with all founded cli commands
+			 */
+			getCLICommands : function(){
+				return _cliCommands;
 			},
+
+			/**
+			 * @method getInitParams 
+			 * @description gets all initializing parameter and returns them
+			 * @return {object} returns all initializing parameter
+			 */
 			getInitParams : function(){
 				var output = {};
 				_params.forEach(function(entry){
@@ -1831,100 +2299,79 @@
 	 */
 	Mold.prototype.Core.File = function(filename){
 
-		var _rejected = [];
-		var _resolved = [];
-		var _data = null;
-		var _error = null;
-		var undefined;
-
-		var _resolve = function(data){
-			var resolve;
-			while(resolve = _resolved.shift()){
-				resolve(data);
-			}
-		}
-
-		var _reject = function(err){
-			var reject;
-			while(reject = _rejected.shift()){
-				reject(err);
-			}
-		}
-
-		var _test = function(){
-			if(_data){
-				_resolve(_data);
-			}
-			if(_error){
-				_reject(_error);
-			}
-		}
-
 		var _ajaxLoader = function(){
-			var xhr;
 
-			if(XMLHttpRequest !== undefined){
-			 	xhr = new XMLHttpRequest();
-			}else{
-				var versions = [
-					"MSXML2.XmlHttp.5.0", 
-					"MSXML2.XmlHttp.4.0",
-					"MSXML2.XmlHttp.3.0", 
-					"MSXML2.XmlHttp.2.0",
-					"Microsoft.XmlHttp"
-				];
-				for(var i = 0; i < versions.length; i++) {
-					try {
-						xhr = new ActiveXObject(versions[i]);
-						break;
+			return new __Mold.Core.Promise(function(resolve, reject){
+				var xhr;
+
+				if(XMLHttpRequest !== undefined){
+				 	xhr = new XMLHttpRequest();
+				}else{
+					var versions = [
+						"MSXML2.XmlHttp.5.0", 
+						"MSXML2.XmlHttp.4.0",
+						"MSXML2.XmlHttp.3.0", 
+						"MSXML2.XmlHttp.2.0",
+						"Microsoft.XmlHttp"
+					];
+					for(var i = 0; i < versions.length; i++) {
+						try {
+							xhr = new ActiveXObject(versions[i]);
+							break;
+						}
+						catch(e){}
 					}
-					catch(e){}
-				}
-			}
-
-			xhr.onreadystatechange = function(){
-				if(xhr.readyState < 4) {
-					return;
 				}
 
-				switch(xhr.status){
-					case 404:
-						_error = "File not found! [" + filename + "]"; 
-						break;
+				xhr.onreadystatechange = function(){
+					if(xhr.readyState < 4) {
+						return;
+					}
+
+					switch(xhr.status){
+						case 200:
+							break;
+						case 404:
+							reject(new Error("File not found! [" + filename + "]" + __Mold.getInstanceDescription())); 
+							break;
+						default:
+							reject(new Error("Request error " + xhr.status + " [" + filename + "]" + __Mold.getInstanceDescription())); 
+					}
+
+					if(xhr.readyState === 4 && xhr.status === 200) {
+						resolve(xhr.response)
+					}
+
+					
 				}
 
-				if(xhr.readyState === 4 && xhr.status === 200) {
-					_data = xhr.response;
-				}
-
-				_test();  
-			}
-
-			xhr.open('GET', filename, true);
-			xhr.send()	
+				xhr.open('GET', filename, true);
+				xhr.send();
+			});
 		}
 
 		var _nodeLoader = function(){
-			var fs = require('fs');
+			return new __Mold.Core.Promise(function(resolve, reject){
+				try {
+					var stats = fs.lstatSync(filename);
+					if(stats.isFile()) {
+						fs.readFile(filename, 'utf8', function (err, data) {
+							if(err){
+								reject(err)
+							}
 
-			try {
-				var stats = fs.lstatSync(filename);
-				if(stats.isFile()) {
-					fs.readFile(filename, 'utf8', function (err, data) {
-						if(err){
-							_error = err;
-						}
-
-						if(data){
-							_data = data;
-						}
-						_test();
-					})
+							if(data){
+								resolve(data);
+							}
+							
+						})
+					}else{
+						reject(new Error("Path is not a file! [" + filename + "]" + __Mold.getInstanceDescription()));
+					}
+				}catch(e){
+					reject(new Error("File not found! [" + filename + "]" + __Mold.getInstanceDescription()));
 				}
-			}catch(e){
-				_error = "File not found! [" + filename + "]";
-				_test();
-			}
+			});
 		
 		}
 
@@ -1934,22 +2381,11 @@
 		 * @return {object} returns a thenabel object with
 		 */
 		this.load = function(){
+
 			if(_isNodeJS){
-				_nodeLoader();
+				return _nodeLoader();
 			}else{
-				_ajaxLoader();
-			}
-			return {
-				then : function(onresolve){
-					_resolved.push(onresolve);
-					_test();
-					return this;
-				},
-				fail : function(onfail){
-					_rejected.push(onfail);
-					_test();
-					return this;
-				}
+				return _ajaxLoader();
 			}
 		}
 	}
@@ -1991,7 +2427,7 @@
 				object : String,
 				method : 'endsWith'
 			})
-			
+
 			.add({
 				name : 'Array.find',
 				code : function(){
@@ -2017,7 +2453,34 @@
 				},
 				object : Array,
 				method : 'find'
+			})
 
+			.add({
+				name : "Array.includes",
+				code : function(){
+					if (!Array.prototype.includes) {
+
+						Array.prototype.includes = function(search, index) {
+							var current = Object(this);
+							var index = index || 0;
+							var len = current.length || 0;
+							if (len === 0) {
+								return false;
+							}
+							if(index >= len){
+								return false;
+							}
+							for(;index < len; index++){
+								if(search === current[index]){
+									return true;
+								}
+							}
+							return false;
+						}
+					}
+				},
+				object : Array,
+				method : 'includes'
 			})
 
 			/**
@@ -2058,7 +2521,7 @@
 			.add({
 				name : 'static',
 				create : function(seed){
-					return seed.code;
+					return seed.code();
 				}
 			})
 			.add({
@@ -2081,16 +2544,16 @@
 						seed = Mold.extend(seed.extend, seed)
 					}
 				
-					return Mold.wrap(seed.code, function(that){
-						if(that.publics){
-							for(var property in that.publics){
-								that[property] = that.publics[property];
+					return that.wrap(seed.code, function(seedCode){
+						if(seedCode.publics){
+							for(var property in seedCode.publics){
+								seedCode[property] = seedCode.publics[property];
 							}
 						}
-						delete that.publics;
+						delete seedCode.publics;
 						
-						if(that.trigger && typeof that.trigger === "function"){
-							that.trigger("after.init");
+						if(seedCode.trigger && typeof seedCode.trigger === "function"){
+							seedCode.trigger("after.init");
 						}
 						
 						return constructor;
@@ -2123,21 +2586,39 @@
 
 		//configurate default path handling
 		this.Core.Pathes.on('mold', function(name){
+
 			var createPath = function(confType){
 				var parts = name.split('.');
-				var conf = that.Core.Config.get("repositories", confType)
+				var conf = that.Core.Config.get("repositories", confType);
+				var packagePath = that.Core.Config.get('config-path', confType);
+
 				if(!conf && confType === "global"){
-					throw new Error("No repositiories in " + confType + " config' found! [" + name + "]")
+					throw new Error("No repositiories in " + confType + " config found! [" + name + "]")
 				}
-				var repoPath = that.Core.Config.get("repositories", confType)[parts[0]];
+				var repos = that.Core.Config.get("repositories", confType);
+				var selectedRepo = null, repoPath = null;
+				for(var repo in repos){
+					if(name.startsWith(repo)){
+						selectedRepo = repo;
+						repoPath = repos[repo];
+					}
+				}
+				
 				if(!repoPath && confType === "global"){
-					throw new Error("No path for repository '" + parts[0] + "' found! [" + name + "]")
+					throw new Error("No path for repository found! [" + name + "]")
 				}
-				var path = repoPath + "/";
-				parts.shift();
+		
+				var path =  packagePath + repoPath + "/";
+				var repoPartLength = selectedRepo.split('.').length;
+
+				for(var i = 0; i < repoPartLength; i++){
+					parts.shift();
+				}
+
 				path += parts.join('/') + '.js';
-	
-				if(!that.Core.Pathes.exists(path) && confType !== 'global'){
+				path = path.replace("//", "/");
+
+				if(!that.Core.Pathes.exists(path, 'file') && confType !== 'global'){
 					return createPath('global');
 				}
 				return path;
@@ -2157,7 +2638,7 @@
 			})
 			.add('include', function(parameter, seed, done){
 				if(parameter.seed){
-					Mold.load(parameter.seed).then(function(loaded){
+					that.load(parameter.seed).then(function(loaded){
 						var codeString = loaded.code.toString();
 						codeString = codeString.substring(codeString.indexOf("{") + 1, codeString.lastIndexOf("}"));
 						//console.log(codeString)
@@ -2171,12 +2652,14 @@
 		//configurate seed flow
 		this.Core.SeedFlow
 			.on(this.Core.SeedStates.NEW, function(seed, done){
-				Mold.Core.SeedManager.add(seed);
+				that.Core.SeedManager.add(seed);
 				that.Core.Config.isReady.then(function(){
 					seed.state = that.Core.SeedStates.LOADING;
 					seed.load().then(function(){
 						seed.state = that.Core.SeedStates.LOADED;
 						done()
+					}).catch(function(e){
+						console.error(e.stack)
 					});
 				})
 			})
@@ -2224,7 +2707,7 @@
 			})
 			.on(this.Core.SeedStates.PENDING, function(seed, done){
 				//console.log("do PENDING", seed.name);
-				seed.getDependecies();
+				__Mold.Core.DependencyManager.find(seed);
 				seed.checkDependencies().then(function(){
 					done();
 				});
@@ -2307,14 +2790,28 @@
 					code : this.Core.Config
 				})
 			)
+
+			//load core seeds
+			var coreSeeds = []
+
+			if(this.Core.Initializer.isCLI()){
+				coreSeeds.push(this.load("Mold.Core.CLI"))
+			}
+
+
+			//load main seed
+		
 	}
 
 	global._Mold = Mold;
 
-	var Mold = new Mold();
+	global.Mold = new Mold();
 
 
-	global.Mold = Mold;
-	console.log("LOAD Mold")
+	if(_isNodeJS){
+		//copy to global to avoid problems on lazy loading modules
+		global.Mold.copyGlobalProperties(global);
+
+	}
 
 })((typeof global !== 'undefined') ? global : this);

@@ -4,6 +4,7 @@ Seed({
 		platform : 'node',
 		include : [
 			{ Command : 'Mold.Core.Command' },
+			{ Helper : 'Mold.Core.CLIHelper' },
 			{ Promise : 'Mold.Core.Promise' }
 		]
 	},
@@ -25,7 +26,6 @@ Seed({
 
 				return new Promise(function(resolve, reject){
 					var name = args.parameter['-name'].value;
-					console.log("TEST", name)
 					if(!Mold.Core.Pathes.isMoldPath(name)){
 						throw new Error("Name is not a valid repository name! [" + name + "]")
 					}
@@ -39,18 +39,23 @@ Seed({
 					}
 
 					if(!isExisting){
-						//add to file
-						console.log("create repo")
-						existingRepositories[name] = name.replace('.', '/') + '/';
-						Mold.Core.Config.get('repositories', existingRepositories);
-
-						console.log("write new repo", existingRepositories)
-						
-						Command.execute('update-mold-json', { '-pr' : 'repositories', '-v' : existingRepositories})
+						var promise = new Promise() 
+						existingRepositories[name] = name.replace(/\./g, '/') + '/';
+						Mold.Core.Config.set('repositories', existingRepositories);
+						promise
+							.all([
+								Command.execute('create-path', { '-p' : existingRepositories[name] }),
+								Command.execute('update-mold-json', { '-pr' : 'repositories', '-v' : existingRepositories})
+							])
 							.then(function(){
-								console.log("changed")
+								Helper.ok('Repository successfully created! [' + name + '] \n');
+								resolve(args)
 							})
 							.catch(reject)
+						
+					}else{
+						Helper.ok('Repository exists! [' + name + '] \n');
+						resolve(args)
 					}
 					
 				}); 

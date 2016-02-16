@@ -50,7 +50,7 @@ Seed({
 							}
 							config[property] = value;
 							var fs = require('fs');
-							fs.writeFile(path, JSON.stringify(config, undefined, 4), function(err) {
+							fs.writeFile(path, JSON.stringify(config, undefined, '\t'), function(err) {
 								if(err) {
 									reject(err);
 									return;

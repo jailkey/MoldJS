@@ -20,6 +20,18 @@ Seed({
 				},
 				'-p' : {
 					'alias' : '-path'
+				},
+				'-mode' : {
+					'description' : 'the mode, default is 0755.'
+				},
+				'-m' : {
+					'alias' : '-mode'
+				},
+				'-content' : {
+					'description' : 'if the last part of the path is file, its content can be set with this parameter.'
+				},
+				'-c' : {
+					'alias' : '-content'
 				}
 			},
 			code : function(args){
@@ -27,7 +39,11 @@ Seed({
 
 				return new Promise(function(resolve, reject){
 					var pathParts = args.parameter['-path'].value.split('/');
-					
+					if(args.parameter['-content']){
+						var content = args.parameter['-content'].value;
+					}else{
+						var content = "";
+					}
 					if(args.parameter['-mode']){
 						var mode = args.parameter['-mode'];
 					}else{
@@ -43,7 +59,6 @@ Seed({
 						}else if(!~pathParts[i].indexOf(".")){
 							type = 'dir';
 						}
-						console.log("TRY", path, type)
 						if(!Mold.Core.Pathes.exists(path, type)){
 							try {
 								
@@ -51,7 +66,7 @@ Seed({
 									fs.mkdirSync(path, mode);
 									Helper.ok("directory created: '" + path + "'\n")
 								}else if(type === 'file'){
-									fs.writeFileSync(path, "");
+									fs.writeFileSync(path, content);
 									Helper.ok("file created: '" + path + "'\n")
 								}
 							}catch(e){

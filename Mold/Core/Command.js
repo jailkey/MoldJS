@@ -54,7 +54,6 @@ Seed({
 					if(cmd.parameter[param].alias){
 						var aliasName = cmd.parameter[param].alias;
 						var originalData = Mold.clone(parameter[param]);
-						console.log("originalData", originalData)
 						delete parameter[param];
 						var extended = cmd.parameter[aliasName];
 						for(var prop in extended){
@@ -123,7 +122,6 @@ Seed({
 					}
 					
 					new Promise().all(files).then(function(){
-						console.log("files loaded")
 						resolve(parameter);
 					}).catch(reject);
 				})

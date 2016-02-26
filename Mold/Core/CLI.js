@@ -16,6 +16,8 @@ Seed({
 	},
 	function(){
 
+		console.log("START CLI")
+
 		var _commands = {};
 		var _loadedCommandSeeds = {};
 		var fs = require('fs');
@@ -37,12 +39,13 @@ Seed({
 			return _commands[name];
 		}
 
-		var _loadCommands = function(repo, commandSpace){
+		var _loadCommands = function(repo, commandSpace, packagePath){
 			commandSpace = commandSpace || 'CMD';
-			
+		
 			return new Mold.Core.Promise(function(resolve, reject){
 				var name = repo.name + "." + commandSpace + ".";
-				var path = repo.path + "/" + commandSpace + "/";
+				var path = packagePath + repo.path + "/" + commandSpace + "/";
+				console.log("LOAD", path)
 				if(Mold.Core.Pathes.exists(path, 'dir')){
 					var dirValue = fs.readdirSync(path);
 				
@@ -50,6 +53,7 @@ Seed({
 					dirValue.forEach(function(entry){
 						var seedName = name + entry.replace(".js", "");
 						var seedPath = path + entry;
+						console.log("load", seedPath)
 						if(Mold.Core.Pathes.exists(seedPath, 'file') && !_loadedCommandSeeds[seedName]){
 							loadingSeeds.push(Mold.load(seedName))
 						}
@@ -68,11 +72,11 @@ Seed({
 
 		var _loadRepositorys = function(type){
 			var repos = Mold.Core.Config.get("repositories", type);
+			var packagePath = Mold.Core.Config.get("config-path", type);
 			var count = 0;
-			var length = Object.keys(repos).length;
 
 			var next = function(){
-				if(!Object.keys(repos)[count]){
+				if(!repos || !Object.keys(repos)[count]){
 					if(type === 'local'){
 						_loadRepositorys('global');
 					}else{
@@ -86,7 +90,7 @@ Seed({
 					path : repos[Object.keys(repos)[count]]
 				}
 				count++;
-				_loadCommands(repo, repos.commandSpace || null).then(function(){
+				_loadCommands(repo, repos.commandSpace || null, packagePath).then(function(){
 					next()
 				});
 			}

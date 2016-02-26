@@ -114,11 +114,13 @@
 
 /** SEED HANDLING */
 		load : function(name){
+
 			var seed;
 			if((seed = this.Core.SeedManager.get(name))){
 				return seed.isReady;
 			}
-			var seed = this.Core.SeedFactory({
+	
+			seed = this.Core.SeedFactory({
 				name : name,
 				state : this.Core.SeedStates.NEW
 			});
@@ -266,7 +268,7 @@
 				
 				/*use mutation observer for HTML elements*/
 				if(__Mold.isNode(obj) && !handleAsObject && obj !== window){
-					console.log(obj)
+		
 					if(!!window.MutationObserver){
 						var observer = new MutationObserver(function(mutations) {
 							__Mold.each(mutations, function(mutation) {
@@ -566,7 +568,7 @@
 					}
 					for(var i = 0; i < promises.length; i++){
 						if(!promises[i].then){
-							console.log("IST KEIN PROMISE", promises[i])
+							
 						}
 						promises[i].then(
 							fullfillAll,
@@ -646,12 +648,6 @@
 		return {
 			btoa : function(str){
 				if(_isNodeJS){
-				//	console.log(str);
-					/*
-					if (Buffer.byteLength(str) !== str.length){
-						throw new Error('bad string!');
-					}*/
-
 					return Buffer(str).toString('base64');
 				}else{
 					return btoa(str);
@@ -801,7 +797,6 @@
 			var len = this.mappings.length;
 			for(var i = 0; i < len; i++){
 				output += this.mappings[i];
-				//console.log("I", i, len, this.mappings[i + 1], this.mappings[i + 1].indexOf(';') )
 				if((i + 1) < this.mappings.length && this.mappings[i + 1].indexOf(';') < 0){
 					output += ",";
 				}
@@ -1147,7 +1142,7 @@
 					}
 					closure += " return " + this.code.toString() + "\n";
 					closure += this.buildSourceMap();
-					//console.log("file", )
+	
 					if(_isNodeJS){
 						try{
 							var sandbox = {
@@ -1914,7 +1909,6 @@
 				var that = this;
 				var configFile = new __Mold.Core.File(path);
 				var promise = configFile.load();
-				
 				promise
 					.then(function(data){
 						data = JSON.parse(data);
@@ -1922,8 +1916,8 @@
 							that.set(prop, data[prop], type);
 						}
 					})
-					.fail(function(err){
-						throw new Error("Configuration file not found: '" + path + "'!");
+					.catch(function(err){
+						new Error(type + " configuration file not found: '" + path + "'!");
 					})
 
 			
@@ -1943,6 +1937,7 @@
 				this.set('config-name', configName)
 
 				var localPath = configPath + configName;
+
 				var promise = this.loadConfig(localPath);
 			
 				//use two config files (if exists) only on node
@@ -1954,14 +1949,19 @@
 					if(__Mold.Core.Pathes.exists(globalConfigPath + globalConfigName, 'file')){
 
 						return new __Mold.Core.Promise(function(resolve, reject){
-							promise.then(function(data){
-								var localPromise = that.loadConfig(globalConfigPath + globalConfigName, 'global');
-							
-								localPromise.then(function(localData){
-
+							var loadGlobal = function(data){
+								var globalPromise = that.loadConfig(globalConfigPath + globalConfigName, 'global');
+								
+								globalPromise.then(function(localData){
 									_isReady.resolve([localData, data]);
 									resolve([localData, data]);
 								}).catch(reject);
+							}
+
+							promise.then(function(data){
+								loadGlobal(data);
+							}).catch(function(){
+								loadGlobal();
 							});
 						}, { throwError : true });
 					}
@@ -1972,7 +1972,7 @@
 					
 					_isReady.resolve(data);
 				}).catch(function(e){
-					console.log("FEHLER", e)
+					console.log(e.stack)
 				});
 
 				return promise;
@@ -2354,7 +2354,9 @@
 		}
 
 		var _nodeLoader = function(){
+
 			return new __Mold.Core.Promise(function(resolve, reject){
+				
 				try {
 					var stats = fs.lstatSync(filename);
 					if(stats.isFile()) {
@@ -2372,6 +2374,7 @@
 						reject(new Error("Path is not a file! [" + filename + "]" + __Mold.getInstanceDescription()));
 					}
 				}catch(e){
+
 					reject(new Error("File not found! [" + filename + "]" + __Mold.getInstanceDescription()));
 				}
 			});
@@ -2624,8 +2627,13 @@
 				if(!repoPath && confType === "global"){
 					throw new Error("No path for repository found! [" + name + "]")
 				}
-		
+
+				if(!selectedRepo && confType !== 'global'){
+					return createPath('global');
+				}
+
 				var path =  packagePath + repoPath + "/";
+
 				var repoPartLength = selectedRepo.split('.').length;
 
 				for(var i = 0; i < repoPartLength; i++){
@@ -2658,7 +2666,7 @@
 					that.load(parameter.seed).then(function(loaded){
 						var codeString = loaded.code.toString();
 						codeString = codeString.substring(codeString.indexOf("{") + 1, codeString.lastIndexOf("}"));
-						//console.log(codeString)
+			
 						done(codeString);
 					})
 				}else{
@@ -2755,7 +2763,9 @@
 		
 
 		this.Core.Initializer.init();
-		this.Core.Config.init();
+		this.Core.Config.init().catch(function(err){
+			console.log(err.stack)
+		});
 		//register core seeds 
 		this.Core.SeedManager
 			.add(
@@ -2810,7 +2820,6 @@
 
 			//load core seeds
 			var coreSeeds = []
-
 			if(this.Core.Initializer.isCLI()){
 				coreSeeds.push(this.load("Mold.Core.CLI"))
 			}

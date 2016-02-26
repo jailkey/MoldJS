@@ -114,7 +114,7 @@ Seed({
 					for(var param in parameter){
 						if(parameter[param].type === 'source' && !parameter[param].alias){
 							var path = parameter[param].value;
-					
+
 							if(parameter[param].extendpath && !path.endsWith(parameter[param].extendpath)){
 								path += parameter[param].extendpath;
 							}
@@ -140,6 +140,7 @@ Seed({
 												file : path,
 												data : fileData
 											});
+											
 											currentLoaded.resolve(parameter.source);
 										}catch(e){
 											e.message += " [" + path + "]";

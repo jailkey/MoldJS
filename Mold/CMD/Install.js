@@ -80,7 +80,6 @@ Seed({
 							
 
 							packagePromise.then(function(){
-								console.log("resolvePackage")
 								repoPromis
 									.all(repos)
 									.then(function(){
@@ -90,7 +89,7 @@ Seed({
 										for(var seedName in response.packageInfo.linkedSeeds){
 											var seedPath = response.packageInfo.linkedSeeds[seedName].path;
 											if(seedPath){
-												seeds.push(Command.copySeed({ '-name' : seedName, '-path' : seedPath }));
+												seeds.push(Command.copySeed({ '-name' : seedName, '-path' : seedPath }).catch(reject));
 											}
 										}
 

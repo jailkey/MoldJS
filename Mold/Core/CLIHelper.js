@@ -19,9 +19,13 @@ Seed({
 		 * @param  {string} error a string with a message
 		 */
 			error : function(error){
-				console.log(this.COLOR_RED + error + this.COLOR_RESET)
+				console.log(this.COLOR_RED + error + this.COLOR_RESET);
+				return this;
 			},
-			warn : this.error,
+			warn : function(warn){
+				this.write(this.COLOR_YELLOW + warn + this.COLOR_RESET);
+				return this;
+			},
 			fail : this.error,
 		/**
 		 * @method write 

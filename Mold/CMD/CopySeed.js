@@ -26,6 +26,12 @@ Seed({
 				'-name' : {
 					'description' : 'The (full) seed name including the repository.',
 					'required' : true
+				},
+				'--overwrite' : {
+					'description' : 'If set all seed will be overwriten.',
+				},
+				'--o' : {
+					'alias' : '--overwrite'
 				}
 			},
 			code : function(args){
@@ -34,12 +40,20 @@ Seed({
 				return new Promise(function(resolve, reject){
 					var name = args.parameter['-name'].value;
 					var path = args.parameter['-path'].value;
+
+					var overwrite = (args.parameter['--overwrite']) ?  args.parameter['--overwrite'].value : false;
+
+
 					if(!args.parameter.source || !args.parameter.source[0]){
 						reject(new Error("Can't get file! [" + path + "]"));
 						return;
 					}
 					var content = args.parameter.source[0];
-					Command.execute('create-path', { '-p' : Mold.Core.Pathes.getPathFromName(name), '-c' : content})
+					var conf = { '-p' : Mold.Core.Pathes.getPathFromName(name), '-c' : content};
+					if(overwrite){
+						conf['--of'] = true;
+					}
+					Command.createPath(conf)
 						.then(function(){
 							resolve(args);
 						}).catch(reject);

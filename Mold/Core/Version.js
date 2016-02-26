@@ -25,6 +25,9 @@ Seed({
 				if(parts.length !== 3){
 					throw new Error("Version needs parts! ['" + version + "']")
 				}
+				for(var i = 0; i < parts.length; i++){
+					
+				}
 			},
 			next : function(current){
 

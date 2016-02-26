@@ -194,6 +194,9 @@
 				}
 			}else if(this.isObject(origin)){
 				for(var prop in origin){
+					if(conf && conf.without && conf.without.indexOf(prop)){
+						continue;
+					}
 					if(target[prop]){
 						if(this.isObject(target[prop]) || Array.isArray(target[prop])){
 							target[prop] = this.merge(target[prop], origin[prop], conf);

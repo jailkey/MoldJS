@@ -36,7 +36,7 @@ Seed({
 				'--overwrite-file' : {
 					'description' : 'if set file will be overwriten!'
 				},
-				'--owf' : {
+				'--of' : {
 					'alias' : '--overwrite-file'
 				}
 			},

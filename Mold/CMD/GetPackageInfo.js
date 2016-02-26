@@ -66,6 +66,7 @@ Seed({
 							}
 
 							var collected = {
+								currentPackage : response.parameter.source[0].data,
 								linkedSeeds : {},
 								repositories : {},
 								linkedPackages : []
@@ -128,7 +129,7 @@ Seed({
 												Command.execute('get-package-info', { '-p' : currentPath + currentDep.path })
 													.then(function(foundInfo){
 														foundInfo.packageInfo.linkedSeeds = _addCurrentVersion(foundInfo.packageInfo.linkedSeeds, currentDep.currentVersion)
-														collected = Mold.merge(collected, foundInfo.packageInfo, { concatArrays : true})
+														collected = Mold.merge(collected, foundInfo.packageInfo, { concatArrays : true, without : [ 'currentPackage '] })
 														count++;
 														nextDep(count);
 													})

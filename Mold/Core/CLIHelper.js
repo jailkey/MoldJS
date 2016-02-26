@@ -6,20 +6,23 @@
 Seed({
 		type : "static",
 		platform : 'node',
+		include : [
+			{ Promise : "Mold.Core.Promise" }
+		]
 	},
 	function(){
-		
+
 		return {
 		/**
 		 * @method showError
 		 * @description shows an errormessage
 		 * @param  {string} error a string with a message
 		 */
-			showError : function(error){
+			error : function(error){
 				console.log(this.COLOR_RED + error + this.COLOR_RESET)
 			},
-			warn : this.showError,
-			fail : this.showError,
+			warn : this.error,
+			fail : this.error,
 		/**
 		 * @method write 
 		 * @description show message 
@@ -30,6 +33,11 @@ Seed({
 				process.stdout.write(message)
 				return this;
 			},
+
+			lb : function(){
+				process.stdout.write('\n')
+				return this;
+			},
 		/**
 		 * @method ok 
 		 * @description show ok message 
@@ -38,6 +46,11 @@ Seed({
 		 */
 			ok : function(message){
 				process.stdout.write(this.COLOR_GREEN + message + this.COLOR_RESET)
+				return this;
+			},
+
+			info : function(message){
+				process.stdout.write(this.COLOR_CYAN + message + this.COLOR_RESET)
 				return this;
 			},
 		/**
@@ -167,6 +180,76 @@ Seed({
 			addCompleter : function(name, callback){
 				this.completer[name] = callback;
 			},
+
+			scrollRight : function(str, time){
+				var that = this;
+				var time = time || 20;
+				return new Promise(function(resolve){
+					var next = function(count){
+						var count = count || 0;
+						var current = str[count];
+						that.write(current);
+						if(str.length > count + 1){
+							setTimeout(function(){ next(++count) }, time);
+						}else{
+							resolve();
+						}
+
+					}
+					next(0)
+				});
+			},
+
+			sprites :  function(){
+				var that = this;
+				var cQ = this.COLOR_RED + "◼" + this.COLOR_RESET;
+
+				return {
+
+					quat : [
+						cQ + " ▭ ▭ ▭ ▭ ▭ ▭ ▭ ▭",
+						"▭ " + cQ + " ▭ ▭ ▭ ▭ ▭ ▭ ▭",
+						"▭ ▭ " + cQ + " ▭ ▭ ▭ ▭ ▭ ▭",
+						"▭ ▭ ▭ " + cQ + " ▭ ▭ ▭ ▭ ▭",
+						"▭ ▭ ▭ ▭ " + cQ + " ▭ ▭ ▭ ▭",
+						"▭ ▭ ▭ ▭ ▭ " + cQ + " ▭ ▭ ▭",
+						"▭ ▭ ▭ ▭ ▭ ▭ " + cQ + " ▭ ▭",
+						"▭ ▭ ▭ ▭ ▭ ▭ ▭ " + cQ + " ▭",
+						"▭ ▭ ▭ ▭ ▭ ▭ ▭ ▭ " + cQ,
+					]
+				}
+				
+				
+			},
+
+			loadingBar : function(text, time){
+				var stop = false;
+				var time = time || 100;
+				var sprite = this.sprites().quat;
+
+				var next = function(count){
+					if(stop){
+						return;
+					}
+
+					count = (sprite.length === count) ? 0 : count;
+					process.stdout.cursorTo(0);
+					process.stdout.write(sprite[count] + "   " + text);
+					setTimeout(function(){ next(++count) }, time);
+				}
+
+				next(0);
+
+				return {
+					stop : function(){
+						//process.stdout.clearLine();
+						process.stdout.cursorTo(0);
+						process.stdout.write(sprite[0] + "   " + text);
+						process.stdout.write("\n");
+						stop = true;
+					}
+				}
+			},
 		/**
 		 * @description colors and symboles you could use to format your cli output
 		 * @type {String}
@@ -181,7 +264,9 @@ Seed({
 			COLOR_CYAN : "\u001b[36m",//"\033[0;36m",
 			COLOR_WHITE : "\033[0;37m",
 			SYMBOLE_TRUE : "\u001b[32m" + "✓" + "\u001b[39m",
-			SYMBOLE_FALSE : "✗"
+			SYMBOLE_FALSE : "✗",
+			SYMBOLE_ARROW_RIGHT : "▹",
+			SYMBOLE_STAR : "★"
 		}
 		
 	}

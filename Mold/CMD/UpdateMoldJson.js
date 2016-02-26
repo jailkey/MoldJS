@@ -33,6 +33,7 @@ Seed({
 			code : function(args){
 
 				return new Promise(function(resolve, reject){
+
 					var undefined;
 					var value = args.parameter['-value'].value;
 					var property = args.parameter['-property'].value;
@@ -40,7 +41,7 @@ Seed({
 					if(typeof value === "string"){
 						value = JSON.parse(value);
 					}
-		
+			
 					Command.execute('get-mold-json', { '-p' : '' })
 						.then(function(response){
 							var config = response.parameter.source[0].data;
@@ -56,7 +57,8 @@ Seed({
 									return;
 								}
 
-								Helper.ok(path + " successfully modified!\n")
+								Helper.ok(path + " successfully modified!").lb();
+								resolve();
 							}); 
 						})
 						.catch(reject);

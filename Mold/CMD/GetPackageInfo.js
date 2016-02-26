@@ -58,11 +58,10 @@ Seed({
 				}
 
 				return new Promise(function(resolve, reject){
-				
+					
 					Command.execute('get-mold-json', { '-p' : args.parameter['-path']})
 						.then(function(response){
-								
-							if(!response.parameter.source[0]){
+							if(!response.parameter.source || !response.parameter.source[0]){
 								throw new Error("Source is not defined")
 							}
 
@@ -88,6 +87,7 @@ Seed({
 								if(!args.parameter['--no-packages'] && !args.parameter['--no-dependencies']){
 									linkedDependencies = responsData.dependencies || [];
 								}
+								responsData.path = path;
 								collected.linkedPackages.push(responsData);
 								if(responsData.repositories){
 									for(var repoName in responsData.repositories){

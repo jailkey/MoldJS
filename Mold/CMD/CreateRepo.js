@@ -39,9 +39,10 @@ Seed({
 					}
 
 					if(!isExisting){
-						var promise = new Promise() 
+						var promise = new Promise();
 						existingRepositories[name] = name.replace(/\./g, '/') + '/';
 						Mold.Core.Config.set('repositories', existingRepositories);
+						
 						promise
 							.all([
 								Command.execute('create-path', { '-p' : existingRepositories[name] }),
@@ -54,7 +55,7 @@ Seed({
 							.catch(reject)
 						
 					}else{
-						Helper.ok('Repository exists! [' + name + '] \n');
+						Helper.info('Repository already exists! [' + name + '] \n');
 						resolve(args)
 					}
 					

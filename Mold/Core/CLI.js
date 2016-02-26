@@ -134,7 +134,6 @@ Seed({
 			return new Promise(function(resolve, reject){
 				if(currentCommand){
 				 	//Command.execute(currentCommand.name, currentCommand.parameter);
-				 	console.log("EXEC", currentCommand.name)
 				 	Command.execute(currentCommand.name, currentCommand.parameter, data)
 				 		.then(function(result){
 				 			count++;

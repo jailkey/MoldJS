@@ -15,6 +15,20 @@ Seed({
 
 		var _commands = {};
 		var _cache = {};
+		
+		var _getCamelCase = function(name){
+			var newName = "";
+			for(var i = 0; i < name.length; i++){
+				var current = name[i];
+				if(current === "-"){
+					i++;
+					current = name[i].toUpperCase();
+				}
+				newName += current;
+			}
+
+			return newName;
+		}
 
 		return {
 			get : function(name){
@@ -37,10 +51,19 @@ Seed({
 				this.validate(cmd);
 
 				if(_commands[cmd.name]){
-					throw new Mold.Errors.CommandError("Command '" + cmd.name + "' already exists!")
+					throw new Mold.Errors.CommandError("Command '" + cmd.name + "' already exists!");
 				}
 
 				_commands[cmd.name] = cmd;
+
+				//add command to the Command object
+				if(!this[_getCamelCase(cmd.name)]){
+					this[_getCamelCase(cmd.name)] = function(parameter){
+						return this.execute(cmd.name, parameter);
+					}.bind(this);
+				}else{
+					throw new Mold.Errors.CommandError("Command method '" + cmd.name + "' already exists!");
+				}
 
 				return this;
 			},
@@ -78,12 +101,6 @@ Seed({
 
 					if(info){
 						for(var prop in info){
-							/*
-							if(typeof parameter[param] !== 'object'){
-								parameter[param] = {
-									value : parameter[param]
-								}
-							}*/
 							parameter[param][prop] = info[prop];
 						}
 					}
@@ -93,43 +110,61 @@ Seed({
 			initFileParams : function(cmd, parameter, data){
 				var files = [];
 				return new Promise(function(resolve, reject){
+
 					for(var param in parameter){
 						if(parameter[param].type === 'source' && !parameter[param].alias){
 							var path = parameter[param].value;
-				
+					
 							if(parameter[param].extendpath && !path.endsWith(parameter[param].extendpath)){
 								path += parameter[param].extendpath;
 							}
 
 							var file = new File(path);
 							var loader = file.load();
-							files.push(loader);
+							var loaded = new Promise();
+							files.push(loaded);
 							loader.then(function(){
 									var format = parameter[param].format;
+									var currentLoaded = loaded;
 									return function(fileData){
-										if(format && format === "json"){
-											fileData = JSON.parse(fileData);
+										try {
+											if(format && format === "json"){
+												try {
+													fileData = JSON.parse(fileData);
+												}catch(e){
+													throw new Error(e.message + " file is not a valide JSON file! ")
+												}
+											}
+											parameter.source = parameter.source || [];
+											parameter.source.push({
+												file : path,
+												data : fileData
+											});
+											currentLoaded.resolve(parameter.source);
+										}catch(e){
+											e.message += " [" + path + "]";
+											currentLoaded.reject(e);
 										}
-										parameter.source = parameter.source || [];
-										parameter.source.push({
-											file : path,
-											data : fileData
-										});
 									}
 								}())
-								.catch(reject)
 						}
 					}
-					
-					new Promise().all(files).then(function(){
+					if(files.length){
+						new Promise().all(files).then(function(){
+							resolve(parameter);
+
+						}).catch(reject)
+					}else{
 						resolve(parameter);
-					}).catch(reject);
+					}
 				})
 			},
 			setValue : function(parameter){
 				for(param in parameter){
-					parameter[param] = {
-						value : parameter[param]
+					if(typeof parameter[param] !== "object" || !parameter[param].value){
+						parameter[param] = {
+							value : parameter[param]
+						}
 					}
 				}
 				return parameter;

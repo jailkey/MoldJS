@@ -32,6 +32,12 @@ Seed({
 				},
 				'-c' : {
 					'alias' : '-content'
+				},
+				'--overwrite-file' : {
+					'description' : 'if set file will be overwriten!'
+				},
+				'--owf' : {
+					'alias' : '--overwrite-file'
 				}
 			},
 			code : function(args){
@@ -39,11 +45,20 @@ Seed({
 
 				return new Promise(function(resolve, reject){
 					var pathParts = args.parameter['-path'].value.split('/');
+					var content = "";
+
 					if(args.parameter['-content']){
-						var content = args.parameter['-content'].value;
-					}else{
-						var content = "";
+						if(args.parameter['-content'].file){
+							content = args.parameter['-content'].data;
+						}else{
+							if(args.parameter['-content'].value.data){
+								content = args.parameter['-content'].value.data;
+							}else{
+								content = args.parameter['-content'].value;
+							}
+						}
 					}
+
 					if(args.parameter['-mode']){
 						var mode = args.parameter['-mode'];
 					}else{
@@ -53,27 +68,35 @@ Seed({
 					var currentPath = "";
 					for(var i = 0; i < pathParts.length; i++){
 						var path = currentPath + pathParts[i];
+
+						if(!path){
+							path += "/";
+						}
+
 						var type = 'file';
 						if(i + 1 < pathParts.length){
 							type = 'dir';
 						}else if(!~pathParts[i].indexOf(".")){
 							type = 'dir';
 						}
-						if(!Mold.Core.Pathes.exists(path, type)){
+
+						if(!Mold.Core.Pathes.exists(path, type) || (type === 'file' && args.parameter['--overwrite-file'])){
 							try {
-								
+							
 								if(type === 'dir'){
 									fs.mkdirSync(path, mode);
-									Helper.ok("directory created: '" + path + "'\n")
+									Helper.ok("Directory created: '" + path + "!'").lb()
 								}else if(type === 'file'){
 									fs.writeFileSync(path, content);
-									Helper.ok("file created: '" + path + "'\n")
+									Helper.ok("File created: '" + path + "!'").lb();
 								}
 							}catch(e){
 								reject(e);
+								return;
 							}
 							
 						}
+						
 						currentPath += pathParts[i] + "/";
 					}
 					resolve(args);

@@ -1,22 +1,36 @@
 {
-	"name" : "Mold",
-	"version" : "0.2.0",
-	"repositories" : {
-		"Mold" : "Mold",
-		"App" : "tests/App"
+	"name": "Mold",
+	"version": "0.2.0",
+	"repositories": {
+		"Mold": "Mold",
+		"App": "tests/App"
 	},
-	"main" : "App.Main",
-	"dependencies" : [
-		{}
+	"main": "App.Main",
+	"dependencies": [
+		{
+			"name": "Mold.Lib.Template",
+			"path": "../../Mold_Lib_Template/",
+			"version": "0.2.0"
+		},
+		{
+			"name": "Mold.Lib.Event",
+			"path": "../../Mold_Lib_Template/../Mold_Lib_Event/",
+			"version": "0.2.0"
+		},
+		{
+			"name": "Mold.Core.Hexler",
+			"path": "../../hexler/hexler/",
+			"version": "0.1.0"
+		}
 	],
-	"docs" : {
-		"md" : [],
-		"html" : []
+	"docs": {
+		"md": [],
+		"html": []
 	},
-	"seedRouting" : {
-		"Mold.*" : "Global.Mold.*"
+	"seedRouting": {
+		"Mold.*": "Global.Mold.*"
 	},
-	"npm" : {
-		"directory" : "../node_modules/"
+	"npm": {
+		"directory": "../node_modules/"
 	}
 }

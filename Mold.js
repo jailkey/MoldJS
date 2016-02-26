@@ -118,7 +118,6 @@
 			if((seed = this.Core.SeedManager.get(name))){
 				return seed.isReady;
 			}
-			console.log("LOAD", name , this.getInstanceDescription())
 			var seed = this.Core.SeedFactory({
 				name : name,
 				state : this.Core.SeedStates.NEW
@@ -255,7 +254,7 @@
 		 */
 		watch : function(obj, property, callback, handleAsObject){
 
-			if(Object.prototype.watch && !Mold.isNode(obj)){
+			if(Object.prototype.watch && !__Mold.isNode(obj)){
 				obj.watch(property, callback);
 			}else{
 
@@ -263,8 +262,8 @@
 				var newval = oldval;
 				
 				/*use mutation observer for HTML elements*/
-				if(__Mold.isNode(obj) && !handleAsObject){
-				
+				if(__Mold.isNode(obj) && !handleAsObject && obj !== window){
+					console.log(obj)
 					if(!!window.MutationObserver){
 						var observer = new MutationObserver(function(mutations) {
 							__Mold.each(mutations, function(mutation) {
@@ -551,16 +550,16 @@
 			all : function(promises){
 				var fullfillCount = 0;
 				var result = [];
-				var promise = new Promise(function(fullfill, resolve){
+				var promise = new Promise(function(resolve, reject){
 					var fullfillAll = function(data){
 						result.push(data);
 						fullfillCount++;
 						if(fullfillCount === promises.length){
-							fullfill(result);
+							resolve(result);
 						}
 					}
 					if(!promises.length){
-						fullfill([]);
+						resolve([]);
 					}
 					for(var i = 0; i < promises.length; i++){
 						if(!promises[i].then){
@@ -568,7 +567,7 @@
 						}
 						promises[i].then(
 							fullfillAll,
-							resolve
+							reject
 						);
 					}
 				}, config);
@@ -1710,6 +1709,9 @@
 			 * @return {string} returns a seed path
 			 */
 			getPathFromName : function(name){
+				if(typeof name !== "string"){
+					throw new TypeError("Name must be a string. [Mold.Core.Pathes] " + __Mold.getInstanceDescription());
+				}
 				var type = 'mold';
 				if(~name.indexOf(":")){
 					var parts = name.split(":");
@@ -1718,7 +1720,7 @@
 				}
 				
 				if(!_pathHandler[type]){
-					throw new Error("Path type '" + type + "' is not supported!" + __Mold.getInstanceDescription());
+					throw new Error("Path type '" + type + "' is not supported! [Mold.Core.Pathes]" + __Mold.getInstanceDescription());
 				}
 
 				return _pathHandler[type](name);
@@ -1904,7 +1906,6 @@
 			 * @return {promise} returns a promise which will be resolved when the configuration file ist loaded
 			 */
 			loadConfig : function(path, type){
-				console.log("LOAD CONFIG PATH", path)
 				type = type || _defaultType;
 				
 				var that = this;
@@ -1929,11 +1930,10 @@
 			/**
 			 * @method init 
 			 * @description initialize the config, loads a configuration file
-			 * @return {promise} returns a (psydo-) promise 
+			 * @return {promise} returns a promise 
 			 */
 			init : function(){
 				var that = this;
-				console.log("INIT")
 				var configPath = __Mold.Core.Initializer.getParam('config-path') || this.get('config-path', _defaultType);
 				var configName = __Mold.Core.Initializer.getParam('config-name') || this.get('config-name', _defaultType);
 				this.set('config-path', configPath);
@@ -2483,6 +2483,17 @@
 				method : 'includes'
 			})
 
+			.add({
+				name : 'Number.isInteger',
+				code  : function(){
+					Number.isInteger = Number.isInteger || function(value) {
+						return typeof value === "number" && isFinite(value) && Math.floor(value) === value;
+					}
+				},
+				object : Number,
+				method : 'isInteger'
+			})
+
 			/**
 			 * @polyfill eachShift
 			 * @description iterates through an array and remove the selected item until the array is empty
@@ -2492,19 +2503,22 @@
 			.add({
 				name : 'Array.eachShift', 
 				code : function(){
-					Array.prototype.eachShift = function(predicate){
-						if (this == null) {
-							throw new TypeError('Array.prototype.eachShift called on null or undefined');
-						}
-						if (typeof predicate !== 'function') {
-							throw new TypeError('predicate must be a function');
-						}
-						while(this.length){
-							var selected = this.shift();
-							predicate.call(this, selected);
-						}
-						return this;
-					}
+					Object.defineProperty(Array.prototype, 'eachShift', {
+						value : function(predicate){
+							if (this == null) {
+								throw new TypeError('Array.prototype.eachShift called on null or undefined');
+							}
+							if (typeof predicate !== 'function') {
+								throw new TypeError('predicate must be a function');
+							}
+							while(this.length){
+								var selected = this.shift();
+								predicate.call(this, selected);
+							}
+							return this;
+						},
+						enumerable : false
+					})
 				},
 				object : Array,
 				method : 'eachShift'

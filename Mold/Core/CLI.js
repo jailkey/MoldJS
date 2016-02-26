@@ -16,8 +16,6 @@ Seed({
 	},
 	function(){
 
-		console.log("START CLI")
-
 		var _commands = {};
 		var _loadedCommandSeeds = {};
 		var fs = require('fs');
@@ -45,7 +43,7 @@ Seed({
 			return new Mold.Core.Promise(function(resolve, reject){
 				var name = repo.name + "." + commandSpace + ".";
 				var path = packagePath + repo.path + "/" + commandSpace + "/";
-				console.log("LOAD", path)
+
 				if(Mold.Core.Pathes.exists(path, 'dir')){
 					var dirValue = fs.readdirSync(path);
 				
@@ -53,7 +51,6 @@ Seed({
 					dirValue.forEach(function(entry){
 						var seedName = name + entry.replace(".js", "");
 						var seedPath = path + entry;
-						console.log("load", seedPath)
 						if(Mold.Core.Pathes.exists(seedPath, 'file') && !_loadedCommandSeeds[seedName]){
 							loadingSeeds.push(Mold.load(seedName))
 						}

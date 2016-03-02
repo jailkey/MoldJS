@@ -27,9 +27,7 @@
 		"md": [],
 		"html": []
 	},
-	"seedRouting": {
-		"Mold.*": "Global.Mold.*"
-	},
+
 	"npm": {
 		"directory": "../node_modules/"
 	}

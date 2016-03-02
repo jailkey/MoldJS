@@ -19,7 +19,7 @@ Seed({
 		var _commands = {};
 		var _loadedCommandSeeds = {};
 		var fs = require('fs');
-		var _isLoaded = new Promise(false, { throwError : true});
+		var _isLoaded = new Promise();
 
 		if(!Mold.isNodeJS){
 			throw Error("You can use Mold.Core.CLI only with NodeJS!");
@@ -112,18 +112,30 @@ Seed({
 			if(cmd.description){
 				help += cmd.description + "\n";
 			}
-
-			help += "\n";
+			var commandHelpTable = [];
 
 			for(var name in cmd.parameter){
-				if(cmd.parameter[name].description){
-					help += CLIHelper.COLOR_CYAN + name + CLIHelper.COLOR_RESET + " \t " + cmd.parameter[name].description + "\n";
-				}else if(cmd.parameter[name].alias){
-					help += CLIHelper.COLOR_CYAN + name + CLIHelper.COLOR_RESET + "  \t alias for " + cmd.parameter[name].alias + "\n";
-				}
+				commandHelpTable.push([
+					name,
+					(cmd.parameter[name].description) ? cmd.parameter[name].description : (cmd.parameter[name].alias) ? "Alias for " + cmd.parameter[name].alias : ''
+				])
 			}
 
-			console.log(help + "\n")
+			console.log(help)
+
+			CLIHelper.table(commandHelpTable, {
+				columnFormat : [
+					function(value){
+						return "    "+ CLIHelper.COLOR_CYAN + value + "    " + CLIHelper.COLOR_RESET;
+					}
+				]
+			})
+			CLIHelper.lb();
+			
+		}
+
+		var _getCommandList = function(){
+
 		}
 
 
@@ -134,7 +146,7 @@ Seed({
 
 			return new Promise(function(resolve, reject){
 				if(currentCommand){
-				 	//Command.execute(currentCommand.name, currentCommand.parameter);
+				
 				 	Command.execute(currentCommand.name, currentCommand.parameter, data)
 				 		.then(function(result){
 				 			count++;
@@ -143,27 +155,28 @@ Seed({
 			 			.catch(reject);
 				}else{
 					resolve();
-					//reject(new Error("Command not found!"))
+			
 				}
 			});
 		}
 
 		_loadRepositorys('local');
-		_isLoaded.then(_execCommands).catch(function(e){
-			if(e instanceof Mold.Errors.CommandError){
-				console.log(e.message)
-				_getCommandHelp(Command.get(e.command))
-				return;
-			}else{
-				console.log(CLIHelper.COLOR_RED + e.stack + CLIHelper.COLOR_RESET);
-			}
-		})
+		
+			_isLoaded.then(_execCommands).catch(function(e){
+				if(e instanceof Mold.Errors.CommandError){
+					CLIHelper.warn(e.message).lb();
+					_getCommandHelp(Command.get(e.command))
+					return;
+				}else{
+					console.log(CLIHelper.COLOR_RED + e.stack + CLIHelper.COLOR_RESET);
+				}
+			})
+
+		
 
 		return {
 
-			exec : function(){
-
-			},
+			commandList : _getCommandList,
 
 			get : _get,
 

@@ -130,7 +130,8 @@
 		},
 
 		_reCreateReadyPromise : function (){
-			this.ready = new this.Core.Promise(false, { throwError : true }).all([
+			var id = this.getId();
+			this.ready = new this.Core.Promise(false, { throwError : true, name : "Mold.ready"}).all([
 				this.Core.Config.isReady,
 				this.Core.SeedManager.isReady
 			])
@@ -424,6 +425,8 @@
 			undefined,
 			config = config || {};
 
+		var _name = config.name || __Mold.getId();
+
 		var PromiseError = function(message){
 			return {
 				name : "PromiseError",
@@ -434,28 +437,28 @@
 		var _changeState = function(state, value){
 			
 			if ( _state === state ) {
-				throw Error("can't transition to same state: " + state);
+				throw Error("can't transition to same state: " + state + " [" + _name + "]");
 			}
 
 			if ( 
 				_state === "fulfilled" 
 				|| _state === "rejeced" 
 			) {
-				throw Error("can't transition from current state: " + state);
+				throw Error("can't transition from current (" + _state + ") state: " + state + " [" + _name + "]");
 			}
 
 			if (
 				state === "fulfilled" 
 				&& arguments.length < 2 
 			) {
-				throw Error("transition to fulfilled must have a non null value");
+				throw Error("transition to fulfilled must have a non null value."  + " [" + _name + "]");
 			}
 
 			if ( 
 				state === "rejeced"
 				&& value === null 
 			) {
-				throw Error("transition to rejected must have a non null reason");
+				throw Error("transition to rejected must have a non null reason." + " [" + _name + "]");
 			}
 
 			_state = state;
@@ -1314,19 +1317,26 @@
 			 * @return {boolean} returns true if all seeds are ready otherwise it returns false
 			 */
 			checkReady : function(){
+				
+				//renew promise if the last check was true;
+				if(this._lastReadyState){
+					_readyPromise = new __Mold.Core.Promise(false, { throwError : true });
+					this.isReady = _readyPromise;
+					__Mold._reCreateReadyPromise();
+				}
+
 				var i = 0, len = _seeds.length;
 				for(; i < len; i++){
 					if(_seeds[i].state !== __Mold.Core.SeedStates.READY){
+						this._lastReadyState = false;
 						return false;
 					}
 				}
 
 				//resolve promise and create a new one
 				_readyPromise.resolve(_seeds);
-				_readyPromise = new __Mold.Core.Promise(false, { throwError : true });
-				this.isReady = _readyPromise;
-				__Mold._reCreateReadyPromise();
 				
+				this._lastReadyState = true;
 				return true;
 			},
 
@@ -1837,15 +1847,7 @@
 
 		var _isReady = new __Mold.Core.Promise(false, { throwError : true });
 		var _readyCallbacks = [];
-
-		var _executeIsReady = function(data){
-			_isReady = true;
-			while(_readyCallbacks.length){
-				var callback = _readyCallbacks.pop();
-				callback(data);
-			}
-		}
-		
+	
 		return {
 			switchConfig : function(type){
 				_defaultType = type;
@@ -1909,19 +1911,21 @@
 				var that = this;
 				var configFile = new __Mold.Core.File(path);
 				var promise = configFile.load();
-				promise
-					.then(function(data){
-						data = JSON.parse(data);
-						for(var prop in data){
-							that.set(prop, data[prop], type);
-						}
-					})
-					.catch(function(err){
-						new Error(type + " configuration file not found: '" + path + "'!");
-					})
 
-			
-				return promise;
+				return new Promise(function(resolve, reject){
+					promise
+						.then(function(data){
+							data = JSON.parse(data);
+							for(var prop in data){
+								that.set(prop, data[prop], type);
+							}
+							resolve(data)
+						})
+						.catch(function(err){
+							reject(new Error("Error in configfile [" + path + "] " + err.stack))
+						})
+				})
+				
 			},
 
 			/**
@@ -1937,16 +1941,16 @@
 				this.set('config-name', configName)
 
 				var localPath = configPath + configName;
-
 				var promise = this.loadConfig(localPath);
-			
+				
 				//use two config files (if exists) only on node
 				if(_isNodeJS){
 					//if a global file exists load also the global once
 					var globalConfigPath = this.get('config-path', 'global');
 					var globalConfigName = this.get('config-name', 'global');
-			
-					if(__Mold.Core.Pathes.exists(globalConfigPath + globalConfigName, 'file')){
+					var globalPath = globalConfigPath + globalConfigName;
+
+					if(__Mold.Core.Pathes.exists(globalPath, 'file') && globalPath !== localPath){
 
 						return new __Mold.Core.Promise(function(resolve, reject){
 							var loadGlobal = function(data){
@@ -1969,7 +1973,6 @@
 				}
 				
 				promise.then(function(data){
-					
 					_isReady.resolve(data);
 				}).catch(function(e){
 					console.log(e.stack)
@@ -2627,7 +2630,7 @@
 				if(!repoPath && confType === "global"){
 					throw new Error("No path for repository found! [" + name + "]")
 				}
-
+				
 				if(!selectedRepo && confType !== 'global'){
 					return createPath('global');
 				}
@@ -2646,6 +2649,7 @@
 				if(!that.Core.Pathes.exists(path, 'file') && confType !== 'global'){
 					return createPath('global');
 				}
+
 				return path;
 			}
 
@@ -2818,11 +2822,18 @@
 				})
 			)
 
+			//this._reCreateReadyPromise();
+
 			//load core seeds
 			var coreSeeds = []
-			if(this.Core.Initializer.isCLI()){
-				coreSeeds.push(this.load("Mold.Core.CLI"))
-			}
+			
+			this.ready.then(function(){
+				if(that.Core.Initializer.isCLI()){
+					coreSeeds.push(that.load("Mold.Core.CLI"));
+				}
+				coreSeeds.push(that.load("Mold.Core.Hexler"))
+			});
+			
 
 
 			//load main seed

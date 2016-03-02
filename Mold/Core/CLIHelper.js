@@ -104,6 +104,39 @@ Seed({
 			createForm : function(fields){
 				return  new Mold.Tools.CLIForm(this, fields);
 			},
+
+		/**
+		 * @method  table 
+		 * @description shows data in a table
+		 * @param  {[type]} data - a two dimensional array, first dimension is the row second the column
+		 * @return {[type]}      [description]
+		 */
+			table : function(data, conf){
+				var that = this;
+				//calculate column width
+				var columns = [];
+				data.forEach(function(row){
+					row.forEach(function(column, index){
+						columnInfo = columns[index] || { width : 0 };
+						if(columnInfo.width < column.length){
+							columnInfo.width = column.length;
+						}
+						columns[index] = columnInfo;
+					});
+				});
+		
+				data.forEach(function(row){
+					row.forEach(function(column, index){
+						var value = column + " ".repeat(columns[index].width - column.length)
+						if(conf.columnFormat && conf.columnFormat[index] && typeof conf.columnFormat[index] == 'function'){
+							value = conf.columnFormat[index](value);
+						}
+						//console.log(value)
+						that.write(value);
+					});
+					that.lb();
+				});
+			},
 		/**
 		 * @method  exit
 		 * @description exits the cli

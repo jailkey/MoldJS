@@ -825,12 +825,15 @@
 	/**
 	 * @module Mold.Core.SeedFactory
 	 * @description creates a seed object from a configuration
-	 * @param  {object} seedConf - the cofiguration object can contain the following properties
-	 *                           - 'name' the name of the seed including the full object path, this property is mandatory
-	 *                           - 'type' the seed dna, the dna describes the way how the module will be executed
-	 *                           - 'code' the code of the seed, this property is mandatory
-	 * @return {object} seedObject - returns a seed object with the config properties plus the following methods and properties
-	 *                             - 'state' the current state of the seed
+	 * @param  {object} seedConf 
+	 *         - the cofiguration object can contain the following properties
+	 *         - 'name' the name of the seed including the full object path, this property is mandatory
+	 *         - 'type' the seed dna, the dna describes the way how the module will be executed
+	 *         - 'code' the code of the seed, this property is mandatory
+	 *         
+	 * @return {object} seedObject 
+	 *         - returns a seed object with the config properties plus the following methods and properties
+	 *         - 'state' the current state of the seed
 	 */
 	Mold.prototype.Core.SeedFactory = function SeedFactory(conf){
 
@@ -2821,8 +2824,6 @@
 					code : this.Core.Config
 				})
 			)
-
-			//this._reCreateReadyPromise();
 
 			//load core seeds
 			var coreSeeds = []

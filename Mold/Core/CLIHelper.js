@@ -13,13 +13,17 @@ Seed({
 	function(){
 
 		return {
+			getInstance : function(){
+				return Object.create(this);
+			},
+			silent : false,
 		/**
 		 * @method showError
 		 * @description shows an errormessage
 		 * @param  {string} error a string with a message
 		 */
 			error : function(error){
-				console.log(this.COLOR_RED + error + this.COLOR_RESET);
+				this.write(this.COLOR_RED + error + this.COLOR_RESET).lb();
 				return this;
 			},
 			warn : function(warn){
@@ -34,12 +38,16 @@ Seed({
 		 * @return {[type]}         [description]
 		 */
 			write : function(message){
-				process.stdout.write(message)
+				if(!this.silent){
+					process.stdout.write(message)
+				}
 				return this;
 			},
 
 			lb : function(){
-				process.stdout.write('\n')
+				if(!this.silent){
+					process.stdout.write('\n')
+				}
 				return this;
 			},
 		/**
@@ -49,12 +57,16 @@ Seed({
 		 * @return {[type]}         [description]
 		 */
 			ok : function(message){
-				process.stdout.write(this.COLOR_GREEN + message + this.COLOR_RESET)
+				if(!this.silent){
+					process.stdout.write(this.COLOR_GREEN + message + this.COLOR_RESET)
+				}
 				return this;
 			},
 
 			info : function(message){
-				process.stdout.write(this.COLOR_CYAN + message + this.COLOR_RESET)
+				if(!this.silent){
+					process.stdout.write(this.COLOR_CYAN + message + this.COLOR_RESET)
+				}
 				return this;
 			},
 		/**

@@ -1,4 +1,8 @@
 //!info transpiled
+/**
+ * @todo install npm packages
+ * @todo add dependencies to gitignor
+ */
 Seed({
 		type : "action",
 		platform : 'node',
@@ -35,6 +39,9 @@ Seed({
 				},
 				'--nd' : {
 					'alias' : '--no-dependencies'
+				},
+				'--without-git-ignore' : {
+					'description' : "if set no entrys will be added to the .gitignore"
 				}
 				/*
 				'--without-npm' : {
@@ -84,12 +91,20 @@ Seed({
 									.all(repos)
 									.then(function(){
 										var seeds = [];
-
+										var gitIgnor = [];
 										//copy seeds
 										for(var seedName in response.packageInfo.linkedSeeds){
 											var seedPath = response.packageInfo.linkedSeeds[seedName].path;
 											if(seedPath){
-												seeds.push(Command.copySeed({ '-name' : seedName, '-path' : seedPath }).catch(reject));
+												seeds.push(
+													Command.copySeed({ '-name' : seedName, '-path' : seedPath }).catch(reject)
+												);
+												gitIgnor.push(function(){
+													var name = seedName;
+													return function(){
+														return Command.gitIgnore({ '-path' :  '/' + Mold.Core.Pathes.getPathFromName(name, true), '--add' : true, '--silent' : true}).catch(reject);
+													}
+												}())
 											}
 										}
 
@@ -97,11 +112,20 @@ Seed({
 										seedPromise
 											.all(seeds)
 											.then(function(){
-												resolve(args)
+												if(args.parameter['--without-git-ignore']){
+													resolve(args);
+												}else{
+													var gitIgnorPromise = new Promise();
+													gitIgnorPromise
+														.waterfall(gitIgnor)
+														.then(function(){
+															Helper.info(".gitignor entrys added!").lb();
+															resolve(args)
+														})
+														.catch(reject)
+												}
 											})
 											.catch(reject)
-
-
 
 									})
 									.catch(reject)

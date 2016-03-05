@@ -15,6 +15,8 @@ Seed({
 
 		var _commands = {};
 		var _cache = {};
+
+		var _globaleParams = ['--silent', '--help'];
 		
 		var _getCamelCase = function(name){
 			var newName = "";
@@ -188,6 +190,7 @@ Seed({
 			 * @param {object} parameter - the parameter object
 			 */
 			setValue : function(cmd, parameter){
+				var undefined;
 				for(param in parameter){
 					
 					if(typeof parameter[param] !== "object" || !parameter[param].value){
@@ -196,7 +199,7 @@ Seed({
 						}
 					}
 
-					if((!parameter[param] || !parameter[param].value) && !param.startsWith('--')){
+					if((parameter[param] === undefined || parameter[param].value === undefined) && !param.startsWith('--')){
 						throw new Mold.Errors.CommandError("Parameter '" + param + "' must not be empty! ", cmd.name)
 					}
 				}
@@ -230,18 +233,41 @@ Seed({
 			},
 			getInvalidParameter : function(cmd, parameter){
 				for(var param in parameter){
-					if(!this.parameterExists(cmd, param)){
+					if(!this.parameterExists(cmd, param) && !~_globaleParams.indexOf(param)){
 						return param;
 					}
 				}
 				return null;
 			},
+
+			handleGlobaleParameter : function(cmd, parameter, conf){
+				var newParameter = {};
+				for(var param in parameter){
+					if(param === '--silent'){
+						conf.silent = true;
+					}
+					if(param === '--help'){
+						throw new Mold.Errors.CommandError("Help requested", cmd.name)
+					}
+					if(!~_globaleParams.indexOf(param)){
+						newParameter[param] = parameter[param];
+					}
+				}
+				return newParameter;
+			},
+
 			execute : function(name, parameter, data){
+				var conf = {
+					silent : false
+				}
+
 				if(!_commands[name]){
 					throw new Mold.Errors.CommandError("Command '" + name + "' not found!");
 				}
 
 				var cmd = this.get(name);
+				parameter = this.handleGlobaleParameter(cmd, parameter, conf);
+				
 				var invalid = this.getInvalidParameter(cmd, parameter);
 
 				if(invalid){
@@ -259,7 +285,7 @@ Seed({
 
 							that.checkRequired(cmd, parameter);
 							try {
-								cmd.code({ parameter : parameter, name : name }).then(function(result){
+								cmd.code({ parameter : parameter, name : name, conf : conf }).then(function(result){
 									resolve(result);
 								}).catch(reject)
 							}catch (e){

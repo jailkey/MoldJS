@@ -14,6 +14,9 @@
 
 
 	var CommandError = function CommandError (message, command) {
+		if(__Mold && __Mold.getInstanceDescription){
+			message += " "+ __Mold.getInstanceDescription();
+		}
 	    this.name = 'CommandError';
 	    this.message = message;
 	    this.stack = message + "\n" + (new Error()).stack;
@@ -579,6 +582,29 @@
 						);
 					}
 				}, config);
+
+				return promise;
+			},
+
+			waterfall : function(stack){
+				var promise = new Promise(function(resolve, reject){
+					var results = [];
+					var nextFromStack = function(counter){
+						
+						counter = counter || 0;
+						if(counter === stack.length){
+							resolve(results);
+							return;
+						}
+						stack[counter]()
+							.then(function(result){
+								results.push(result);
+								nextFromStack(++counter);
+							})
+							.catch(reject);
+					}
+					nextFromStack(0);
+				});
 
 				return promise;
 			},
@@ -1719,7 +1745,7 @@
 			 * @param  {string} name - the string to convert
 			 * @return {string} returns a seed path
 			 */
-			getPathFromName : function(name){
+			getPathFromName : function(name, ignorExistingCheck){
 				if(typeof name !== "string"){
 					throw new TypeError("Name must be a string. [Mold.Core.Pathes] " + __Mold.getInstanceDescription());
 				}
@@ -1734,7 +1760,7 @@
 					throw new Error("Path type '" + type + "' is not supported! [Mold.Core.Pathes]" + __Mold.getInstanceDescription());
 				}
 
-				return _pathHandler[type](name);
+				return _pathHandler[type](name, ignorExistingCheck);
 			},
 
 			/**
@@ -1880,6 +1906,9 @@
 				type = type || _defaultType;
 				if(!_configValue[type]){
 					throw new Error("Config type '" + type + "' is not defined!" + __Mold.getInstanceDescription())
+				}
+				if(!name){
+					return _configValue[type];
 				}
 				return (_configValue[type][name] === undefined) ? null : _configValue[type][name];
 			},
@@ -2307,6 +2336,7 @@
 	 * @return {class} returns a File class 
 	 */
 	Mold.prototype.Core.File = function(filename){
+		var _content = null;
 
 		var _ajaxLoader = function(){
 
@@ -2348,6 +2378,7 @@
 					}
 
 					if(xhr.readyState === 4 && xhr.status === 200) {
+						_content = xhr.response;
 						resolve(xhr.response)
 					}
 
@@ -2372,6 +2403,7 @@
 							}
 
 							if(data){
+								_content = data;
 								resolve(data);
 							}
 							
@@ -2400,6 +2432,42 @@
 				return _ajaxLoader();
 			}
 		}
+
+		/**
+		 * @property {string} content
+		 * @description the current file content
+		 */
+		Object.defineProperty(this, 'content', {
+			get: function() { 
+				return _content;
+			},
+			set: function(value) { 
+				_content = value; 
+			},
+			enumerable: true,
+			configurable: true
+		});
+
+		/**
+		 * @method save 
+		 * @platform node
+		 * @description saves the file with all content changes
+		 * @return {promise} returns a promise
+		 */
+		this.save = function(){
+			if(!_isNodeJS){
+				throw new Error("The 'save' method is only available on nodejs [Mold.Core.File]")
+			}
+			return new __Mold.Core.Promise(function(resolve, reject){
+				fs.writeFile(filename, _content, function(err) {
+					if(err) {
+						return reject(err);
+					}
+					resolve(_content);
+				}); 
+			});
+		}
+		
 	}
 
 
@@ -2611,7 +2679,7 @@
 			.addDependencyProperty('include');
 
 		//configurate default path handling
-		this.Core.Pathes.on('mold', function(name){
+		this.Core.Pathes.on('mold', function(name, ignorExistingCheck){
 
 			var createPath = function(confType){
 				var parts = name.split('.');
@@ -2619,7 +2687,7 @@
 				var packagePath = that.Core.Config.get('config-path', confType);
 
 				if(!conf && confType === "global"){
-					throw new Error("No repositiories in " + confType + " config found! [" + name + "]")
+					throw new Error("No repositiories in " + confType + " config found! [" + name + "] " + __Mold.getInstanceDescription())
 				}
 				var repos = that.Core.Config.get("repositories", confType);
 				var selectedRepo = null, repoPath = null;
@@ -2627,14 +2695,15 @@
 					if(name.startsWith(repo)){
 						selectedRepo = repo;
 						repoPath = repos[repo];
+						break;
 					}
 				}
 				
 				if(!repoPath && confType === "global"){
-					throw new Error("No path for repository found! [" + name + "]")
+					throw new Error("No path for repository found! [" + name + "] " + __Mold.getInstanceDescription())
 				}
-				
-				if(!selectedRepo && confType !== 'global'){
+
+				if(selectedRepo === null && confType !== 'global'){	
 					return createPath('global');
 				}
 
@@ -2649,7 +2718,8 @@
 				path += parts.join('/') + '.js';
 				path = path.replace("//", "/");
 
-				if(!that.Core.Pathes.exists(path, 'file') && confType !== 'global'){
+				if(!that.Core.Pathes.exists(path, 'file') && confType !== 'global' && !ignorExistingCheck){
+					console.log("PATH NOT FOUND", path)
 					return createPath('global');
 				}
 

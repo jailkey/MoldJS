@@ -48,11 +48,14 @@ Seed({
 						reject(new Error("Can't get file! [" + path + "]"));
 						return;
 					}
+					
 					var content = args.parameter.source[0];
-					var conf = { '-p' : Mold.Core.Pathes.getPathFromName(name), '-c' : content};
+					var conf = { '-p' : Mold.Core.Pathes.getPathFromName(name, true), '-c' : content};
+					
 					if(overwrite){
 						conf['--of'] = true;
 					}
+
 					Command.createPath(conf)
 						.then(function(){
 							resolve(args);

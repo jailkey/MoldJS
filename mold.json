@@ -5,7 +5,6 @@
 		"Mold": "Mold",
 		"App": "tests/App"
 	},
-	"main": "App.Main",
 	"dependencies": [
 		{
 			"name": "Mold.Lib.Template",
@@ -27,7 +26,13 @@
 		"md": [],
 		"html": []
 	},
-
+	"defaultSeeds" : [
+		"Mold"
+	],
+	"files" : [
+		"Mold.js",
+		".gitignore"
+	],
 	"npm": {
 		"directory": "../node_modules/"
 	}

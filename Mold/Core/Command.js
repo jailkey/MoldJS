@@ -31,9 +31,25 @@ Seed({
 		}
 
 		return {
+			/**
+			 * @method get 
+			 * @description returns a comman object by a given name
+			 * @param  {string} name - the command name, if not given all commands will be returned
+			 * @return {object} returns a command object or null
+			 */
 			get : function(name){
-				return _commands[name]
+				if(!name){
+					return _commands;
+				}
+				return _commands[name] || null;
 			},
+
+			/**
+			 * @method validate 
+			 * @description validates a command object
+			 * @param  {[type]} cmd - the command object
+			 * @return {[type]} returns true or throws an Error
+			 */
 			validate : function(cmd){
 				if(!cmd.name){
 					throw new Error("Command needs a name!");
@@ -47,11 +63,18 @@ Seed({
 
 				return true;
 			},
+
+			/**
+			 * @method register 
+			 * @description registers a command 
+			 * @param  {object} cmd - the command object
+			 * @return {this} returns this
+			 */
 			register : function(cmd){
 				this.validate(cmd);
 
 				if(_commands[cmd.name]){
-					throw new Mold.Errors.CommandError("Command '" + cmd.name + "' already exists!");
+					throw new Mold.Errors.CommandError("Command '" + cmd.name + "' already exists!", cmd.name);
 				}
 
 				_commands[cmd.name] = cmd;
@@ -62,14 +85,12 @@ Seed({
 						return this.execute(cmd.name, parameter);
 					}.bind(this);
 				}else{
-					throw new Mold.Errors.CommandError("Command method '" + cmd.name + "' already exists!");
+					throw new Mold.Errors.CommandError("Command method '" + cmd.name + "' already exists!", cmd.name);
 				}
 
 				return this;
 			},
-			getAliasOrigin : function(cmd, parameterName){
-				return cmd.parameter[parameterName] || null;
-			},
+
 
 			findAliasParameter : function(cmd, parameter){
 				var undefined;
@@ -160,23 +181,50 @@ Seed({
 					}
 				})
 			},
-			setValue : function(parameter){
+
+			/**
+			 * @method setValue 
+			 * @description creates value objectes for each parameter
+			 * @param {object} parameter - the parameter object
+			 */
+			setValue : function(cmd, parameter){
 				for(param in parameter){
+					
 					if(typeof parameter[param] !== "object" || !parameter[param].value){
 						parameter[param] = {
 							value : parameter[param]
 						}
 					}
+
+					if((!parameter[param] || !parameter[param].value) && !param.startsWith('--')){
+						throw new Mold.Errors.CommandError("Parameter '" + param + "' must not be empty! ", cmd.name)
+					}
 				}
 				return parameter;
 			},
+			
+			/**
+			 * @method checkRequired 
+			 * @description checks if a parameter is required
+			 * @param  {[type]} cmd       [description]
+			 * @param  {[type]} parameter [description]
+			 * @return {[type]}           [description]
+			 */
 			checkRequired : function(cmd, parameter){
 				for(var param in cmd.parameter){
 					if(cmd.parameter[param].required && !parameter[param]){
-						throw new Error("Command '" + cmd.name + "' requires parameter '" + param + "'!")
+						throw new Mold.Errors.CommandError("Command '" + cmd.name + "' requires parameter '" + param + "'!", cmd.name)
 					}
 				}
 			},
+
+			/**
+			 * @methdod parameterExists 
+			 * @description checks if a parameter exists
+			 * @param  {onject} cmd - command object
+			 * @param  {string} name - parameter name
+			 * @return {boolean} returns true if the parameter exists, otherwise false
+			 */
 			parameterExists : function(cmd, name){
 				return (cmd.parameter[name]) ? true : false;
 			},
@@ -190,7 +238,7 @@ Seed({
 			},
 			execute : function(name, parameter, data){
 				if(!_commands[name]){
-					throw new Error("Command '" + name + "' not found!");
+					throw new Mold.Errors.CommandError("Command '" + name + "' not found!");
 				}
 
 				var cmd = this.get(name);
@@ -200,7 +248,7 @@ Seed({
 					throw new Mold.Errors.CommandError("Parameter '" + invalid + "' is not a valid parameter!", name)
 				}
 				
-				parameter = this.setValue(parameter);
+				parameter = this.setValue(cmd, parameter);
 				parameter = this.findAliasParameter(cmd, parameter);
 				parameter = this.extendParameterInfo(cmd, parameter);
 

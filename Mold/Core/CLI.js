@@ -16,25 +16,12 @@ Seed({
 	},
 	function(){
 
-		var _commands = {};
 		var _loadedCommandSeeds = {};
 		var fs = require('fs');
 		var _isLoaded = new Promise();
 
 		if(!Mold.isNodeJS){
 			throw Error("You can use Mold.Core.CLI only with NodeJS!");
-		}	
-
-		var _commandExists = function(cmd){
-			return (_commands[cmd.name]) ? true : false;
-		}
-
-		var _isLoadedSeed = function(name){
-
-		}
-
-		var _get = function(name){
-			return _commands[name];
 		}
 
 		var _loadCommands = function(repo, commandSpace, packagePath){
@@ -107,7 +94,8 @@ Seed({
 
 
 		var _getCommandHelp = function(cmd){
-			var help = "\nMold command help '\033[1;35m" + cmd.name + "\033[0m'\n";
+			CLIHelper.lb();
+			var help = "Mold command help '\033[1;35m" + cmd.name + "\033[0m'\n";
 			
 			if(cmd.description){
 				help += cmd.description + "\n";
@@ -130,12 +118,31 @@ Seed({
 					}
 				]
 			})
+
 			CLIHelper.lb();
 			
 		}
 
 		var _getCommandList = function(){
+			CLIHelper.lb();
+			CLIHelper.write("Mold cli commands:").lb()
+			var commandList = [];
+			var commands = Command.get();
+			for(command in commands){
+				commandList.push([
+					commands[command].name,
+					commands[command].description || ''
+				])
+			}
 
+			CLIHelper.table(commandList, {
+				columnFormat : [
+					function(value){
+						return "    "+ CLIHelper.COLOR_CYAN + value + "    " + CLIHelper.COLOR_RESET;
+					}
+				]
+			})
+			CLIHelper.lb();
 		}
 
 
@@ -164,8 +171,13 @@ Seed({
 		
 			_isLoaded.then(_execCommands).catch(function(e){
 				if(e instanceof Mold.Errors.CommandError){
+					CLIHelper.lb();
 					CLIHelper.warn(e.message).lb();
-					_getCommandHelp(Command.get(e.command))
+					if(e.command){
+						_getCommandHelp(Command.get(e.command))
+					}else{
+						_getCommandList();
+					}
 					return;
 				}else{
 					console.log(CLIHelper.COLOR_RED + e.stack + CLIHelper.COLOR_RESET);
@@ -175,12 +187,7 @@ Seed({
 		
 
 		return {
-
 			commandList : _getCommandList,
-
-			get : _get,
-
-			
 		}
 	}
 )

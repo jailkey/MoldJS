@@ -15,7 +15,7 @@ Seed({
 
 		Command.register({
 			name : "create-dependency",
-			description : "Creates a new dependencies!",
+			description : "Creates a new dependency!",
 			parameter : {
 				'-name' : {
 					'description' : 'The dependency name!',

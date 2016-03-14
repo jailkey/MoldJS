@@ -24,6 +24,8 @@ Seed({
 			},
 			code : function(args){
 
+				Helper = Helper.getInstance(args.conf)
+
 				return new Promise(function(resolve, reject){
 					var name = args.parameter['-name'].value;
 					if(!Mold.Core.Pathes.isMoldPath(name)){

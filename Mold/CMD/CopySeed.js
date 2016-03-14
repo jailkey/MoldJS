@@ -36,6 +36,8 @@ Seed({
 			},
 			code : function(args){
 				var fs = require('fs');
+				Helper = Helper.getInstance(args.conf);
+			
 
 				return new Promise(function(resolve, reject){
 					var name = args.parameter['-name'].value;
@@ -48,12 +50,16 @@ Seed({
 						reject(new Error("Can't get file! [" + path + "]"));
 						return;
 					}
-					
+
 					var content = args.parameter.source[0];
 					var conf = { '-p' : Mold.Core.Pathes.getPathFromName(name, true), '-c' : content};
 					
 					if(overwrite){
 						conf['--of'] = true;
+					}
+
+					if(args.conf.silent){
+						conf['--silent'] = true;
 					}
 
 					Command.createPath(conf)

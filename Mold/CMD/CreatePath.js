@@ -42,6 +42,8 @@ Seed({
 			},
 			code : function(args){
 				var fs = require('fs');
+				Helper = Helper.getInstance();
+				Helper.silent = args.conf.silent;
 
 				return new Promise(function(resolve, reject){
 					var pathParts = args.parameter['-path'].value.split('/');

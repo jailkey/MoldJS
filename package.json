@@ -26,7 +26,14 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "btoa": "^1.1.2"
+    "btoa": "^1.1.2",
+    "gulp": "^3.9.1",
+    "http": "0.0.0",
+    "mmmagic": "^0.4.1",
+    "npm": "^2.1.12",
+    "request": "^2.69.0",
+    "semver": "^5.1.0",
+    "url": "^0.11.0"
   },
   "license": "MIT"
 }

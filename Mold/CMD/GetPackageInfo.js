@@ -5,7 +5,8 @@ Seed({
 		include : [
 			{ Command : 'Mold.Core.Command' },
 			{ Promise : 'Mold.Core.Promise' },
-			{ VM : 'Mold.Core.VM' }
+			{ VM : 'Mold.Core.VM' },
+			{ NPM : 'Mold.Core.NPM' }
 		]
 	},
 	function(){
@@ -30,6 +31,7 @@ Seed({
 
 			},
 			code : function(args){
+				var currentPath = args.parameter['-path'].value;
 
 				var _getAllDependencies = function(vm, seed, response, dep){
 					var dep = dep || {};
@@ -69,86 +71,137 @@ Seed({
 								currentPackage : response.parameter.source[0].data,
 								linkedSeeds : {},
 								repositories : {},
-								linkedPackages : []
+								linkedPackages : [],
+								linkedNpmPackages : [],
+								linkedNpmDependencies : {},
+								linkedSources : [],
 							}
 
 							var path =  args.parameter['-path'].value;
 							var currentPath = path;
+							var waterfall = [];
 							var getRepoVM = new VM({
 								configPath : path
 							});
-						
-							getRepoVM.Mold.Core.Config.isReady.then(function(){
-								var loadSeeds = [];
-								var linkedSeeds = response.parameter.source[0].data.seeds;
-								var responsData = response.parameter.source[0].data;
-								var linkedDependencies = [];
 
-								//console.log("args.parameter['--no-dependencies']", args.parameter['--no-dependencies'])
-								if(!args.parameter['--no-packages'] && !args.parameter['--no-dependencies']){
-									linkedDependencies = responsData.dependencies || [];
-								}
-								responsData.path = path;
-								collected.linkedPackages.push(responsData);
-								if(responsData.repositories){
-									for(var repoName in responsData.repositories){
-										collected.repositories[repoName] =  responsData.repositories[repoName];
-									}
-								}
-								if(linkedSeeds){
-									linkedSeeds.forEach(function(name){
-										loadSeeds.push(getRepoVM.Mold.load(name));
-									});
 
-									var promise = new Promise();
-									promise.all(loadSeeds).then(function(result){
-										if(!args.parameter['--no-dependencies']){
-											result.forEach(function(seed){
-												collected.linkedSeeds = _getAllDependencies(getRepoVM, seed, response);
+							if(response.parameter.source[0].data.sources){
+								response.parameter.source[0].data.sources.forEach(function(source){
+									//if it is a directory add only the path
+									if(source.endsWith('/')){
+										collected.linkedSources.push({
+											path : source,
+											type : 'dir'
+										})
+									}else{
+										//if it is a file get the data and add it
+										var filePath = currentPath + source;
+										if(Mold.Core.Pathes.exists(filePath, 'file')){
+											collected.linkedSources.push({
+												path : source,
+												filePath : filePath,
+												type : 'file'
 											})
-										}else{
-											result.forEach(function(seed){
-												collected.linkedSeeds[seed.name] = { 
-													path : seed.path,
-													packageName : responsData.name,
-													packageVersion : responsData.version
-												};
-											})
+											
 										}
+									}
+								})
+							}
 
-										if(linkedDependencies.length){
-											var nextDep = function(count){
-												count = count || 0;
-												if(count === linkedDependencies.length){
-													args.packageInfo = collected;
-													resolve(args);
-													return;
+							if(NPM.packageJsonExists(path)){
+								waterfall.push(function(){
+									return NPM.getPackageJson(path).then(function(data){
+										collected.linkedNpmPackages.push(data);
+										if(data.dependencies){
+											collected.linkedNpmDependencies = data.dependencies;
+										}
+									})
+								});
+							}
+
+							waterfall.push(function(){
+								return new Promise(function(resolveDep, rejectDep){
+									getRepoVM.Mold.Core.Config.isReady.then(function(){
+										var loadSeeds = [];
+										var linkedSeeds = response.parameter.source[0].data.seeds;
+										var responsData = response.parameter.source[0].data;
+										var linkedDependencies = [];
+
+										if(!args.parameter['--no-packages'] && !args.parameter['--no-dependencies']){
+											linkedDependencies = responsData.dependencies || [];
+										}
+										responsData.path = path;
+										collected.linkedPackages.push(responsData);
+										if(responsData.repositories){
+											for(var repoName in responsData.repositories){
+												collected.repositories[repoName] =  responsData.repositories[repoName];
+											}
+										}
+										if(linkedSeeds){
+											linkedSeeds.forEach(function(name){
+												loadSeeds.push(getRepoVM.Mold.load(name));
+											});
+
+											Promise.all(loadSeeds).then(function(result){
+												if(!args.parameter['--no-dependencies']){
+													result.forEach(function(seed){
+														collected.linkedSeeds = _getAllDependencies(getRepoVM, seed, response);
+													})
+												}else{
+													result.forEach(function(seed){
+														collected.linkedSeeds[seed.name] = { 
+															path : seed.path,
+															packageName : responsData.name,
+															packageVersion : responsData.version
+														};
+													})
 												}
 
-												var currentDep = linkedDependencies[count];
-												Command.execute('get-package-info', { '-p' : currentPath + currentDep.path })
-													.then(function(foundInfo){
-														foundInfo.packageInfo.linkedSeeds = _addCurrentVersion(foundInfo.packageInfo.linkedSeeds, currentDep.currentVersion)
-														collected = Mold.merge(collected, foundInfo.packageInfo, { concatArrays : true, without : [ 'currentPackage '] })
-														count++;
-														nextDep(count);
-													})
-													.catch(reject);
-											}
+												if(linkedDependencies.length){
+													var depWaterfall = [];
+													linkedDependencies.forEach(function(currentDep){
+														depWaterfall.push(function(){
+															return Command
+																		.execute('get-package-info', { '-p' : currentPath + currentDep.path })
+																		.then(function(foundInfo){
+																			foundInfo.packageInfo.linkedSeeds = _addCurrentVersion(foundInfo.packageInfo.linkedSeeds, currentDep.currentVersion)
+																			collected = Mold.merge(collected, foundInfo.packageInfo, { concatArrays : true, without : [ 'currentPackage'] });
+																		});
+														})
+													});
 
-											nextDep();
+													Promise
+														.waterfall(depWaterfall)
+														.then(function(){
+															args.packageInfo = collected;
+															resolveDep(args);
+														})
+														.catch(rejectDep)
+
+												}else{
+													args.packageInfo = collected;
+													resolveDep(args);
+												}
+
+											}).catch(rejectDep)
+
 										}else{
-											args.packageInfo = collected;
-											resolve(args);
+											rejectDep(new Error("No linked Seeds found in " + path.value + "!"))
 										}
-
-									}).catch(reject)
-
-								}else{
-									reject(new Error("No linked Seeds found in " + path.value + "!"))
-								}
+									
+									})
+									.catch(rejectDep);
+								})
 							
-							}).catch(reject);
+							});
+
+							Promise
+								.waterfall(waterfall)
+								.then(function(){
+									resolve(args);
+								})
+								.catch(reject)
+						
 						})
 						.catch(reject);
 				}); 

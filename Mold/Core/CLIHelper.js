@@ -11,12 +11,24 @@ Seed({
 		]
 	},
 	function(){
-
+		var _instances = [];
 		return {
-			getInstance : function(){
-				return Object.create(this);
+
+			getInstance : function(config){
+				config = config || {};
+				var instance = Object.create(this);
+				instance.silent = config.silent;
+				return instance;
 			},
 			silent : false,
+
+			stopAllInstances : function(){
+				_instances.forEach(function(instance){
+					if(instance.__loadingBar){
+						instance.__loadingBar.stop(" ");
+					}
+				})
+			},
 		/**
 		 * @method showError
 		 * @description shows an errormessage
@@ -270,11 +282,12 @@ Seed({
 				
 				
 			},
-
+			__loadingBar : null,
 			loadingBar : function(text, time){
 				var stop = false;
 				var time = time || 100;
 				var sprite = this.sprites().quat;
+				var _text = text;
 
 				var next = function(count){
 					if(stop){
@@ -283,21 +296,41 @@ Seed({
 
 					count = (sprite.length === count) ? 0 : count;
 					process.stdout.cursorTo(0);
-					process.stdout.write(sprite[count] + "   " + text);
+					process.stdout.write(sprite[count] + "   " + _text);
 					setTimeout(function(){ next(++count) }, time);
 				}
 
 				next(0);
 
-				return {
-					stop : function(){
-						//process.stdout.clearLine();
+				this.__loadingBar = {
+					stop : function(text){
 						process.stdout.cursorTo(0);
-						process.stdout.write(sprite[0] + "   " + text);
-						process.stdout.write("\n");
+						if(text){
+							var old = sprite[0] + "   " + _text;
+							if(text.length < old.length){
+								var spaceLength = old.length - text.length;
+								text += " ".repeat(spaceLength);
+							}
+							process.stdout.write(text);
+						}else{
+							process.stdout.write(sprite[0] + "   " + _text);
+						}
+						process.stdout.write("\n")
 						stop = true;
+					},
+					text : function(text){
+						var space = "";
+						if(_text.length > text.length){
+							var space = " ".repeat(_text.length);
+							process.stdout.cursorTo(0);
+							process.stdout.write(sprite[0] + "   " + space);
+							
+						}
+						_text = text;
 					}
 				}
+
+				return this.__loadingBar;
 			},
 		/**
 		 * @description colors and symboles you could use to format your cli output
@@ -312,6 +345,23 @@ Seed({
 			COLOR_PURPLE : "\033[0;35m",
 			COLOR_CYAN : "\u001b[36m",//"\033[0;36m",
 			COLOR_WHITE : "\033[0;37m",
+
+			BRIGHT_COLOR_BLACK : "\033[0;90m",
+
+			BGCOLOR_RESET : "\x1b[0m",
+			BGCOLOR_BLACK : "\x1b[40m",
+    		BGCOLOR_RED : "\x1b[41m",
+   			BGCOLOR_GREEN : "\x1b[42m",
+ 			BGCOLOR_YELLOW : "\x1b[43m",
+ 			BGCOLOR_BLUE : "\x1b[44m",
+    		BGCOLOR_MAGENTA : "\x1b[45m",
+    		BGCOLOR_CYAN : "\x1b[46m",
+   			BGCOLOR_WHITE : "\x1b[47m",
+
+
+   			BGCOLOR_DARK_GREY : "\x1b[100m",
+   			BGCOLOR_DARKER_GREY : "\x1b[48;5;234m",
+
 			SYMBOLE_TRUE : "\u001b[32m" + "✓" + "\u001b[39m",
 			SYMBOLE_FALSE : "✗",
 			SYMBOLE_ARROW_RIGHT : "▹",

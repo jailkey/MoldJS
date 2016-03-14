@@ -55,6 +55,9 @@
 	if(_isNodeJS){
 		var fs = require('fs');
 		var vm = require('vm');
+		var mmm = require('mmmagic');
+		var request = require('request');
+		var url = require('url');
 	}
 
 
@@ -178,6 +181,7 @@
 		},
 
 		merge : function(target, origin, conf){
+
 			if(Array.isArray(origin)){
 				if(conf && conf.concatArrays){
 					if(Array.isArray(target)){
@@ -200,10 +204,12 @@
 				}
 			}else if(this.isObject(origin)){
 				for(var prop in origin){
-					if(conf && conf.without && conf.without.indexOf(prop)){
+					if(conf && conf.without && !!~conf.without.indexOf(prop)){
 						continue;
 					}
+
 					if(target[prop]){
+
 						if(this.isObject(target[prop]) || Array.isArray(target[prop])){
 							target[prop] = this.merge(target[prop], origin[prop], conf);
 						}else{
@@ -406,13 +412,18 @@
 			)
 				
 		},
-
 	}
 
 	__Mold = Mold.prototype;
 
 	//Build-in core modules
 	Mold.prototype.Core = {};
+
+	Mold.prototype.Core.Reporter = function(){
+
+		
+
+	}()
 
 
 /**
@@ -672,6 +683,9 @@
 		}
 	};
 
+	//set static methods
+	Mold.prototype.Core.Promise.waterfall = Mold.prototype.Core.Promise().waterfall;
+	Mold.prototype.Core.Promise.all = Mold.prototype.Core.Promise().all;
 
 	Mold.prototype.Core.Base64 = function(){
 		return {
@@ -1184,11 +1198,10 @@
 							}
 
 							__Mold.copyGlobalProperties(sandbox);
-
 							var context = new vm.createContext(sandbox);
 
 							var script = new vm.Script("var output = function() { " + closure + "\n}()", { filename: this.path, lineOffset : this.fileData.split("\n").length - closure.split("\n").length + 1});
-							var test = script.runInContext(sandbox);
+							var test = script.runInContext(sandbox, { filename: this.path });
 							this.code = sandbox.output;
 						}catch(e){
 							throw e;
@@ -1790,9 +1803,16 @@
 				return false;
 			},
 
+			isHttpsPath : function(path){
+				if(path.startsWith('https:')){
+					return true;
+				}
+				return false;
+			},
+
 			/**
 			 * @method getMoldPath 
-			 * @description returns the path current Mols.js path
+			 * @description returns the current Mols.js path
 			 * @return {string} returns a string
 			 */
 			getMoldPath : function(){
@@ -1818,6 +1838,20 @@
 			 */
 			getCurrentPath : function(){
 				return "";
+			},
+
+			cleanPath : function(path){
+				var protocol = "";
+				if(path.startsWith('http://')){
+					protocol = "http://";
+				}
+				if(path.startsWith('https://')){
+					protocol = "https://";
+				}
+				path = path.replace(protocol, "");
+				path = path.replace(/\/\//g, "/");
+
+				return protocol + path;
 			},
 
 			/**
@@ -2019,10 +2053,10 @@
 	}();
 
 	/**
-	 * @namespace PolyFillManger 
+	 * @namespace PolyFillManager 
 	 * @description handles polyfills, use this to avoid problems with overwriting
 	 */
-	Mold.prototype.Core.PolyFillManger = function(){
+	Mold.prototype.Core.PolyFillManager = function(){
 		var _polyFills = {};
 
 		return {
@@ -2056,7 +2090,7 @@
 	}()
 
 	Mold.prototype.Core.Initializer = function(){
-		var _params = ['config-name', 'config-path', 'global-config-name', 'global-config-path'];
+		var _params = ['config-name', 'config-path', 'global-config-name', 'global-config-path', 'root-path'];
 		var _availableParams = {};
 		var _cliCommands= [];
 
@@ -2335,8 +2369,12 @@
 	 * @description creates a class calls File wich allows to ready a file on the full stack (node/browser) with the same API
 	 * @return {class} returns a File class 
 	 */
-	Mold.prototype.Core.File = function(filename){
+	Mold.prototype.Core.File = function(filename, format, encoding){
+
 		var _content = null;
+		var _encoding = encoding || 'utf8';
+		var _isHttp = __Mold.Core.Pathes.isHttpPath(filename);
+		var _isHttps = __Mold.Core.Pathes.isHttpsPath(filename);
 
 		var _ajaxLoader = function(){
 
@@ -2378,8 +2416,8 @@
 					}
 
 					if(xhr.readyState === 4 && xhr.status === 200) {
-						_content = xhr.response;
-						resolve(xhr.response)
+						_content = _convertData(xhr.response);
+						resolve(_content)
 					}
 
 					
@@ -2393,30 +2431,63 @@
 		var _nodeLoader = function(){
 
 			return new __Mold.Core.Promise(function(resolve, reject){
-				
-				try {
-					var stats = fs.lstatSync(filename);
-					if(stats.isFile()) {
-						fs.readFile(filename, 'utf8', function (err, data) {
-							if(err){
-								reject(err)
-							}
+				if(!_isHttp){
+					try {
+						var stats = fs.lstatSync(filename);
+						if(stats.isFile()) {
 
-							if(data){
-								_content = data;
-								resolve(data);
-							}
+							fs.readFile(filename, _encoding, function (err, data) {
+								
+								if(err){
+									reject(err)
+								}
+
+								if(data){
+									_content = _convertData(data);
+									resolve(_content);
+								}
+								
+							})
 							
-						})
-					}else{
-						reject(new Error("Path is not a file! [" + filename + "]" + __Mold.getInstanceDescription()));
-					}
-				}catch(e){
+						}else{
+							reject(new Error("Path is not a file! [" + filename + "]" + __Mold.getInstanceDescription()));
+						}
+					}catch(e){
 
-					reject(new Error("File not found! [" + filename + "]" + __Mold.getInstanceDescription()));
+						reject(new Error("File not found! [" + filename + "]" + __Mold.getInstanceDescription()));
+					}
+				}else{
+					request.get(filename , function (error, response, body) {
+						if(!response){
+							reject(new Error("Unkown response problem! [" + filename + "]" + __Mold.getInstanceDescription()));
+							return;
+						}
+
+						if(response.statusCode == 404){
+							reject(new Error("File not found! [" + filename + "]" + __Mold.getInstanceDescription()));
+							return;
+						}
+
+						if (!error && response.statusCode == 200) {
+							resolve(body);
+						}else{
+							reject(new Error("HTTP Error (" + response.statusCode  + ")! [" + filename + "]" + __Mold.getInstanceDescription()));
+						}
+					});
+						
 				}
 			});
 		
+		}
+
+		var _convertData = function(data){
+			if(format){
+				switch(format){
+					case "json":
+						return JSON.parse(data);
+				}
+			}
+			return data;
 		}
 
 		/**
@@ -2467,6 +2538,32 @@
 				}); 
 			});
 		}
+
+		/**
+		 * @method  copy 
+		 * @description copys the file to specific target
+		 * @param  {string} target the target
+		 * @return {promise} returns a promise
+		 */
+		this.copy = function(target){
+			if(!_isNodeJS){
+				throw new Error("The 'save' method is only available on nodejs [Mold.Core.File]")
+			}
+
+			return new __Mold.Core.Promise(function(resolve, reject){
+				var readStream = fs.createReadStream(filename);
+				readStream.on("error", reject);
+
+				var writeStream = fs.createWriteStream(target);
+				writeStream.on("error", reject);
+				writeStream.on("close", function(ready) {
+					filename = target;
+					resolve(filename);
+				});
+
+				readStream.pipe(writeStream);
+			})
+		}
 		
 	}
 
@@ -2478,7 +2575,7 @@
 		__Mold = this;
 
 		//add polyfills
-		this.Core.PolyFillManger
+		this.Core.PolyFillManager
 			.add({
 				name : 'String.startsWith',
 				code : function(){
@@ -2685,11 +2782,13 @@
 				var parts = name.split('.');
 				var conf = that.Core.Config.get("repositories", confType);
 				var packagePath = that.Core.Config.get('config-path', confType);
+				var rootPath = __Mold.Core.Initializer.getParam('root-path') || '';
 
 				if(!conf && confType === "global"){
 					throw new Error("No repositiories in " + confType + " config found! [" + name + "] " + __Mold.getInstanceDescription())
 				}
 				var repos = that.Core.Config.get("repositories", confType);
+				
 				var selectedRepo = null, repoPath = null;
 				for(var repo in repos){
 					if(name.startsWith(repo)){
@@ -2698,6 +2797,8 @@
 						break;
 					}
 				}
+
+
 				
 				if(!repoPath && confType === "global"){
 					throw new Error("No path for repository found! [" + name + "] " + __Mold.getInstanceDescription())
@@ -2716,13 +2817,17 @@
 				}
 
 				path += parts.join('/') + '.js';
-				path = path.replace("//", "/");
+				path = __Mold.Core.Pathes.cleanPath(path);
 
-				if(!that.Core.Pathes.exists(path, 'file') && confType !== 'global' && !ignorExistingCheck){
-					console.log("PATH NOT FOUND", path)
-					return createPath('global');
+				//if path is a http path skip testing and return path
+				if(__Mold.Core.Pathes.isHttpPath(path)){
+					return path;
 				}
 
+				if(!that.Core.Pathes.exists(path, 'file') && confType !== 'global' && !ignorExistingCheck){
+					return createPath('global');
+				}
+				
 				return path;
 			}
 
@@ -2902,7 +3007,7 @@
 				if(that.Core.Initializer.isCLI()){
 					coreSeeds.push(that.load("Mold.Core.CLI"));
 				}
-				coreSeeds.push(that.load("Mold.Core.Hexler"))
+				//coreSeeds.push(that.load("Mold.Core.Hexler"))
 			});
 			
 

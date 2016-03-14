@@ -20,6 +20,7 @@ Seed({
 				console : console,
 
 			}
+			
 			instanceCount++;
 
 			Mold.copyGlobalProperties(this.sandbox);
@@ -27,7 +28,7 @@ Seed({
 			this.moldPath = conf.moldPath || 'Mold.js',
 			this.confPath = conf.configPath || '',
 			this.confName = conf.configName || 'mold.json'
-			
+
 			this.sandbox.process.argv = [
 				'config-path',  this.confPath, 'config-name', this.confName
 			];

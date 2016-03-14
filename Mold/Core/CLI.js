@@ -11,7 +11,8 @@ Seed({
 		//	'Mold.Tools.CLIForm',
 			{ Promise : 'Mold.Core.Promise' },
 			{ CLIHelper : 'Mold.Core.ClIHelper' },
-			{ Command : 'Mold.Core.Command' }
+			{ Command : 'Mold.Core.Command' },
+			{ Logger : 'Mold.Core.Logger' }
 		]
 	},
 	function(){
@@ -180,7 +181,8 @@ Seed({
 					}
 					return;
 				}else{
-					console.log(CLIHelper.COLOR_RED + e.stack + CLIHelper.COLOR_RESET);
+					CLIHelper.stopAllInstances();
+					Logger.error(e);
 				}
 			})
 

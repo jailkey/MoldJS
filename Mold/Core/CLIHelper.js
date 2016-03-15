@@ -7,11 +7,28 @@ Seed({
 		type : "static",
 		platform : 'node',
 		include : [
-			{ Promise : "Mold.Core.Promise" }
+			{ Promise : "Mold.Core.Promise" },
+			"Mold.Core.CLIForm"
 		]
 	},
 	function(){
 		var _instances = [];
+		var _reader = null;
+		var readline = require('readline');
+
+		var _initReader = function(onclose, completer){
+			if(_reader){
+				_reader.close();
+			}
+			_reader = readline.createInterface({
+				input: process.stdin,
+				output: process.stdout,
+				completer : completer,
+			});
+			
+			return _reader;
+		}
+
 		return {
 
 			getInstance : function(config){
@@ -20,6 +37,7 @@ Seed({
 				instance.silent = config.silent;
 				return instance;
 			},
+
 			silent : false,
 
 			stopAllInstances : function(){
@@ -105,7 +123,7 @@ Seed({
 		 * @method  createForm 
 		 * @description creates a cli form
 		 * @param  {array} fields an array with the field definition
-		 * @return {object}  returns an instace of Mold.Tool.CLIForm
+		 * @return {object}  returns an instace of Mold.Core.CLIForm
 		 * @description 
 		 *
 	     *	[{
@@ -126,7 +144,7 @@ Seed({
 		 *   }]
 		 */
 			createForm : function(fields){
-				return  new Mold.Tools.CLIForm(this, fields);
+				return new Mold.Core.CLIForm(this, fields);
 			},
 
 		/**

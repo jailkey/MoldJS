@@ -32,8 +32,5 @@
 	"files": [
 		"Mold.js",
 		".gitignore"
-	],
-	"npm": {
-		"directory": "../node_modules/"
-	}
+	]
 }

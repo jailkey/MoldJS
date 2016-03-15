@@ -17,10 +17,10 @@
 		if(__Mold && __Mold.getInstanceDescription){
 			message += " "+ __Mold.getInstanceDescription();
 		}
-	    this.name = 'CommandError';
-	    this.message = message;
-	    this.stack = message + "\n" + (new Error()).stack;
-	    this.command = command;
+		this.name = 'CommandError';
+		this.message = message;
+		this.stack = message + "\n" + (new Error()).stack;
+		this.command = command;
 	}
 
 	CommandError.prototype = Object.create(Error.prototype);
@@ -28,17 +28,17 @@
 
 
 	var DNAError = function DNAError (message) {
-	    this.name = 'DNAError';
-	    this.message = message;
-	    this.stack = (new Error()).stack;
+		this.name = 'DNAError';
+		this.message = message;
+		this.stack = (new Error()).stack;
 	}
 
 	DNAError.prototype = new Error;
 
 	var SeedTypeError = function SeedTypeError (message) {
-	    this.name = 'SeedTypeError';
-	    this.message = message;
-	    this.stack = (new Error()).stack;
+		this.name = 'SeedTypeError';
+		this.message = message;
+		this.stack = (new Error()).stack;
 	}
 
 	SeedTypeError.prototype = new Error;

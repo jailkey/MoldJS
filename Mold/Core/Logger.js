@@ -75,7 +75,6 @@ Seed({
 					return (previous.length < current.length) ? current : previous;
 				}).length;
 
-
 				console.log(Helper.COLOR_CYAN + filePath + ":" + lineNumber + ":" + charNumber + Helper.COLOR_RESET);
 
 				for(var i = 0; i < lines.length; i++){
@@ -99,7 +98,6 @@ Seed({
 				Helper.write(Helper.BGCOLOR_RESET).lb();
 			})
 			.catch(function(err){
-
 				console.log("err", err)
 			})
 

@@ -50,7 +50,7 @@ Seed({
 			return  _extractStackLine(currentLine);
 		}
 
-		var _showFilePartNodeJS = function(filePath, lineNumber, charNumber, displayedLines){
+		var _nodeFilePartReporter = function(filePath, lineNumber, charNumber, displayedLines){
 
 			if(!filePath || !lineNumber){
 				return;
@@ -65,30 +65,33 @@ Seed({
 				var lines = data.split('\n');
 				var startAt = lineNumber - (Math.round(displayedLines / 2));
 				startAt = (startAt < 0) ? 0 : startAt;
-				
+
 				var endAt = startAt + displayedLines;
 				endAt = (endAt > lines.length) ? lines.length : endAt;
 				
 				lines = lines.slice(startAt, endAt);
-				
-				var longestLine = lines.reduce(function(previous, current){
-					return (previous.length < current.length) ? current : previous;
-				}).length;
 
 				console.log(Helper.COLOR_CYAN + filePath + ":" + lineNumber + ":" + charNumber + Helper.COLOR_RESET);
 
 				for(var i = 0; i < lines.length; i++){
-					var line = lines[i].replace(/\r/g, '').replace(/\t/g, '  ');
+
+					var hightlightChar = charNumber;
+					var line = lines[i].replace(/\r/g, '').replace(/\t/g, function(){
+						hightlightChar++;
+						return '  ';
+					});
+
 					var isEvent = !(i % 2);
-			
 					var space = " ".repeat(process.stdout.columns - lines[i].length - 8);
 					var lineColor = (!(i % 2)) ? Helper.BGCOLOR_DARKER_GREY : Helper.BGCOLOR_BLACK;
+
 					Helper.write(lineColor);
 					Helper.write(Helper.COLOR_CYAN + (i + startAt + 1) + Helper.COLOR_RESET);
-					if(i + startAt + 1 === +lineNumber){
-						var lineStart = line.substring(0, charNumber - 1);
-						var lineEnd = line.substring(charNumber -1 , line.length);
 
+					if(i + startAt + 1 === +lineNumber){
+
+						var lineStart = line.substring(0, hightlightChar - 1);
+						var lineEnd = line.substring(hightlightChar -1 , line.length);
 						Helper.write(lineStart + Helper.BGCOLOR_RED + lineEnd + Helper.BGCOLOR_RESET + lineColor + space  + Helper.BGCOLOR_RESET + "\n");
 					}else{
 						Helper.write(line + space + Helper.BGCOLOR_RESET + "\n")
@@ -106,7 +109,7 @@ Seed({
 
 		var _showFilePart = function(){
 			if(Mold.isNodeJS){
-				return _showFilePartNodeJS.apply(this, arguments);
+				return _nodeFilePartReporter.apply(this, arguments);
 			}else{
 				throw new Error("_showFilepart for browsers should be implemented!")
 			}

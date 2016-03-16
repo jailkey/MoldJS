@@ -16,8 +16,17 @@ Seed({
 			description : "Creates a new  mold project.",
 			parameter : {},
 			code : function(args){
+				
+				var configName = 'mold.json';
+				var readmeName = 'README.md';
 
 				return new Promise(function(resolve, reject){
+					
+					if(Mold.Core.Pathes.exists(configName, 'file')){
+						reject(new Mold.Errors.CommandError("mold.json allready exists!", "init"));
+						return;
+					}
+
 					var cliform = [
 						{
 							label : "name your application (Mold.Lib.Peter):",
@@ -78,42 +87,68 @@ Seed({
 					]
 
 					var cliForm = Helper.createForm(cliform);
-					var configName = 'mold.json';
+					
 					cliForm.then(function(collected){
 						try {
-							if(Mold.Core.Pathes.exists(configName, 'file')){
-								reject(new Error("mold.json allready exists!"));
-								cliForm.exit();
-							}else{
-								
-								var moldJsonData = {
-									name : collected.name,
-									version : collected.version,
-									dependencies : [],
-									repositories : {}
-								}
+							var pathesToCreate = [];
+							
+							var moldJsonData = {
+								name : collected.name,
+								version : collected.version,
+								dependencies : [],
+								repositories : {}
+							}
 
-								moldJsonData.repositories[collected.reponame] = collected.repopath;
+							moldJsonData.repositories[collected.reponame] = collected.repopath;
 
-								Command
-									.createPath({ '-path' : configName, '-content' : JSON.stringify(moldJsonData, undefined, '\t')})
+							pathesToCreate.push(function(){
+								return Command
+									.createPath({ '-path' : configName, '-content' : JSON.stringify(moldJsonData, undefined, '\t'), '--silent' : true})
 									.then(function(){
 										Helper.ok(configName + " successfully created!").lb();
-										if(!Mold.Core.Pathes.exists('.gitignore', 'file')){
-											Command
-												.createPath({ '-path' : 'gitignore', '-content' : ''})
-												.then(function(){
-													Helper.ok(".gitignore successfully created!").lb();
-													cliForm.exit();
-													resolve(args);
-												})
-										}else{
-											cliForm.exit();
-											resolve(args);
-										}
 									})
-								
+							})
+
+							if(!Mold.Core.Pathes.exists('.gitignore', 'file')){
+								pathesToCreate.push(function(){
+									return Command
+										.createPath({ '-path' : '.gitignore', '-content' : '', '--silent' : true})
+										.then(function(){
+											Helper.ok(".gitignore successfully created!").lb();
+										})
+								})
 							}
+
+							if(!Mold.Core.Pathes.exists(collected.repopath, 'dir')){
+								pathesToCreate.push(function(){
+									return Command
+										.createPath({ '-path' : collected.repopath, '--silent' : true})
+										.then(function(){
+											Helper.ok("repository '" + collected.repopath + "' successfully created!").lb();
+										})
+								})
+							}
+
+							if(!Mold.Core.Pathes.exists(readmeName, 'file')){
+								pathesToCreate.push(function(){
+									return Command
+										.createPath({ '-path' : readmeName, '--silent' : true})
+										.then(function(){
+											Helper.ok("README.md successfully created!").lb();
+										})
+								})
+							}
+						
+							Promise.waterfall(pathesToCreate)
+								.then(function(){
+									cliForm.exit();
+									resolve(args);
+								})
+								.catch(function(err){
+									cliForm.exit();
+									reject(args);
+								})
+							
 						}catch(err){
 							reject(err);
 						}

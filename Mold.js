@@ -3016,7 +3016,7 @@
 			
 			this.ready.then(function(){
 				var mainSeeds = that.Core.Config.get('mainSeeds');
-				if(mainSeeds.length){
+				if(mainSeeds && mainSeeds.length){
 					mainSeeds.forEach(function(seedName){
 						mainSeedPromises.push(that.load(seedName));
 					})

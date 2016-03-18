@@ -5,7 +5,6 @@ Seed({
 			".Validation",
 			".Version",
 			".NPM",
-			".Logger",
 			".VM"
 		]
 	},

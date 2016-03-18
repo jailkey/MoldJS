@@ -1,5 +1,5 @@
 "use strict";
-
+//irgendasein test
 (function(global){
 
 /** ERROR TYPES */
@@ -2555,12 +2555,17 @@
 		 */
 		this.copy = function(target){
 			if(!_isNodeJS){
-				throw new Error("The 'save' method is only available on nodejs [Mold.Core.File]")
+				throw new Error("The 'copx' method is only available on nodejs [Mold.Core.File]")
 			}
 
 			return new __Mold.Core.Promise(function(resolve, reject){
-				var readStream = fs.createReadStream(filename);
-				readStream.on("error", reject);
+				if(!_isHttp){
+					var readStream = fs.createReadStream(filename);
+					readStream.on("error", reject);
+				}else{
+					var readStream = request.get(filename)
+					readStream.on('error', reject)
+				}
 
 				var writeStream = fs.createWriteStream(target);
 				writeStream.on("error", reject);

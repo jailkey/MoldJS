@@ -1,19 +1,15 @@
 {
 	"name": "Mold",
-	"version": "0.2.0",
+	"version": "0.2.3",
 	"repositories": {
 		"Mold": "Mold"
 	},
 	"dependencies": [
 	],
-	"mainSeeds" : [
-		"Mold"
-	],
 	"seeds" : [
 		"Mold.Core.*"
 	], 
-	"files": [
-		"Mold.js",
-		".gitignore"
+	"sources": [
+		"Mold.js"
 	]
 }

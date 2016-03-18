@@ -1810,6 +1810,15 @@
 				return false;
 			},
 
+			camelToHypen : function(camel){
+				var camel = camel.replace(/\./g, '-');
+				var output = "";
+				for(var i = 0; i < camel.length; i++){
+					output += camel[i].toLowerCase();
+				}
+				return output;
+			},
+
 			/**
 			 * @method getMoldPath 
 			 * @description returns the current Mols.js path
@@ -1898,7 +1907,7 @@
 		var _configValue = {
 			local : {
 				'config-path' : __Mold.Core.Pathes.getCurrentPath(),
-				'config-name' : 'mold.json'
+				'config-name' : 'mold.json',
 			},
 			global : {
 				'config-path' : __Mold.Core.Pathes.getMoldPath(),
@@ -2798,7 +2807,6 @@
 					}
 				}
 
-
 				
 				if(!repoPath && confType === "global"){
 					throw new Error("No path for repository found! [" + name + "] " + __Mold.getInstanceDescription())
@@ -2814,6 +2822,10 @@
 
 				for(var i = 0; i < repoPartLength; i++){
 					parts.shift();
+				}
+
+				if(parts[parts.length -1] === "*"){
+					parts[parts.length -1] = "__";
 				}
 
 				path += parts.join('/') + '.js';
@@ -3000,19 +3012,15 @@
 				})
 			)
 
-			//load core seeds
-			var coreSeeds = []
+			//load main seeds
+			var mainSeedPromises = []
 			
 			this.ready.then(function(){
-				if(that.Core.Initializer.isCLI()){
-					coreSeeds.push(that.load("Mold.Core.CLI"));
-				}
-				//coreSeeds.push(that.load("Mold.Core.Hexler"))
+				var mainSeeds = that.Core.Config.get('mainSeeds');
+				mainSeeds.forEach(function(seedName){
+					mainSeedPromises.push(that.load(seedName));
+				})
 			});
-			
-
-
-			//load main seed
 		
 	}
 

@@ -55,7 +55,6 @@
 	if(_isNodeJS){
 		var fs = require('fs');
 		var vm = require('vm');
-		var mmm = require('mmmagic');
 		var request = require('request');
 		var url = require('url');
 	}
@@ -1997,7 +1996,7 @@
 							resolve(data)
 						})
 						.catch(function(err){
-							reject(new Error("Error in configfile [" + path + "] " + err.stack))
+							reject(new Error("Error in config file [" + path + "] "))
 						})
 				})
 				
@@ -3017,9 +3016,11 @@
 			
 			this.ready.then(function(){
 				var mainSeeds = that.Core.Config.get('mainSeeds');
-				mainSeeds.forEach(function(seedName){
-					mainSeedPromises.push(that.load(seedName));
-				})
+				if(mainSeeds.length){
+					mainSeeds.forEach(function(seedName){
+						mainSeedPromises.push(that.load(seedName));
+					})
+				}
 			});
 		
 	}

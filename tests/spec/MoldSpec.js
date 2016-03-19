@@ -305,6 +305,63 @@ describe("Mold Core Lib", function () {
 			expect(result.wasanderes).toBe(true);
 		})
 	})
+
+	describe("Mold.diff", function(){
+		it("Test diffing two data struktures", function(){
+			var objOne =  {
+				test : [
+					"Apfel",
+					"Banane",
+					"Kirsche"
+				],
+
+				testTwo : [
+					{ "eins" : "zwei" },
+					{ "drei" : "vier" },
+					{ "sieben" : {
+						"test" : "peter"
+					}}
+				],
+
+				"hund" : "katze",
+				"schokolade" : "bratwurst"
+			};
+
+			var objTwo =  {
+				test : [
+					"Apfel",
+					"Test",
+					"Kirsche"
+				],
+
+				testTwo : [
+					{ "vier" : "" },
+					{ "drei" : "zwölf" },
+					{ "sieben" : {
+							"testzwei" : "peter"
+						}
+					}	
+				],
+
+				"hanse" : "katze",
+				"schokolade" : "bratwurst"
+			}
+
+			var result = Mold.diff(objOne, objTwo);
+
+			expect(result.hund).toEqual("katze")
+			expect(result.schokolade).toBeUndefined();
+			expect(result.test.indexOf("Apfel")).toBe(-1);
+			expect(result.test.indexOf("Kirsche")).toBe(-1);
+			expect(result.test.indexOf("Banane")).toBe(0);
+
+			expect(result.testTwo[0].eins).toBe("zwei");
+			expect(result.testTwo[1].sieben.test).toBe("peter");
+
+			console.log("result", result)
+		})
+	});
+
 	describe("Array.isArray", function(){
 		it("Test if array is an array", function(){
 			var testArray = ["one", "two", "three"];

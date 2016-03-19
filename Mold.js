@@ -2077,6 +2077,11 @@
 				var that = this;
 				var configPath = __Mold.Core.Initializer.getParam('config-path') || this.get('config-path', _defaultType);
 				var configName = __Mold.Core.Initializer.getParam('config-name') || this.get('config-name', _defaultType);
+
+				if(configPath !== "" && !configPath.endsWith("/")){
+					configPath += "/";
+				}
+
 				this.set('config-path', configPath);
 				this.set('config-name', configName)
 

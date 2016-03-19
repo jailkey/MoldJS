@@ -223,7 +223,13 @@
 			return target;
 		},
 
-
+		/**
+		 * @method diff 
+		 * @description compares two objects and returns a new one that only has the datat from target which not apears in source
+		 * @param  {object} target - the target object
+		 * @param  {object} source - the source object
+		 * @return {object} returns a new diff object
+		 */
 		diff : function(target, source){
 			var output = null;
 			if(Array.isArray(target)){

@@ -38,7 +38,8 @@ Seed({
 			this.context = new this.vm.createContext(this.sandbox);
 
 			//load core
-			var data = this.fs.readFileSync(Mold.Core.Config.search('config-path') + this.moldPath);
+			var moldJsPath = (Mold.Core.Config.search('config-path')) ? Mold.Core.Config.search('config-path') + this.moldPath :  this.moldPath;
+			var data = this.fs.readFileSync(moldJsPath);
 			var moldScript = new this.vm.Script(data);
   			moldScript.runInContext(this.context, { filename : "Mold.Core.VM" });
   			this.Mold = this.sandbox.global.Mold;

@@ -2877,6 +2877,10 @@
 				var packagePath = that.Core.Config.get('config-path', confType);
 				var rootPath = __Mold.Core.Initializer.getParam('root-path') || '';
 
+				if(!packagePath.endsWith("/") && packagePath !== ""){
+					packagePath += "/";
+				}
+
 				if(!conf && confType === "global"){
 					throw new Error("No repositiories in " + confType + " config found! [" + name + "] " + __Mold.getInstanceDescription())
 				}

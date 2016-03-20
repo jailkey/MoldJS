@@ -1844,14 +1844,14 @@
 				return true;
 			},
 
-			isHttpPath : function(path){
+			isHttp : function(path){
 				if(path.startsWith('http:') || path.startsWith('https:')){
 					return true;
 				}
 				return false;
 			},
 
-			isHttpsPath : function(path){
+			isHttps : function(path){
 				if(path.startsWith('https:')){
 					return true;
 				}

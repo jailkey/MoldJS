@@ -2453,8 +2453,8 @@
 
 		var _content = null;
 		var _encoding = encoding || 'utf8';
-		var _isHttp = __Mold.Core.Pathes.isHttpPath(filename);
-		var _isHttps = __Mold.Core.Pathes.isHttpsPath(filename);
+		var _isHttp = __Mold.Core.Pathes.isHttp(filename);
+		var _isHttps = __Mold.Core.Pathes.isHttps(filename);
 
 		var _ajaxLoader = function(){
 
@@ -2924,7 +2924,7 @@
 				path = __Mold.Core.Pathes.cleanPath(path);
 
 				//if path is a http path skip testing and return path
-				if(__Mold.Core.Pathes.isHttpPath(path)){
+				if(__Mold.Core.Pathes.isHttp(path)){
 					return path;
 				}
 

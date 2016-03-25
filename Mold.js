@@ -2539,8 +2539,9 @@
 								if(err){
 									reject(err)
 								}
-								
-								_content = _convertData(data);
+								if(data){
+									_content = _convertData(data);
+								}
 								resolve(_content);
 								
 							})

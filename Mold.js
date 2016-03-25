@@ -2588,7 +2588,7 @@
 				}else if(direction === "output"){
 					switch(format.toLowerCase()){
 						case "json":
-							return JSON.stringify(data);
+							return JSON.stringify(data, false, "\t");
 					}
 				}
 			}

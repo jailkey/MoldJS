@@ -2579,6 +2579,7 @@
 
 		var _convertData = function(data, direction){
 			if(format){
+				var undefined;
 				direction = direction || "input";
 				if(direction === "input"){
 					switch(format.toLowerCase()){
@@ -2588,7 +2589,7 @@
 				}else if(direction === "output"){
 					switch(format.toLowerCase()){
 						case "json":
-							return JSON.stringify(data, false, "\t");
+							return JSON.stringify(data, undefined, '\t')
 					}
 				}
 			}

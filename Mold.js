@@ -1844,6 +1844,12 @@
 				return true;
 			},
 
+			/**
+			 * @method isHttp 
+			 * @description checks if a path is a http or https path
+			 * @param  {string}  path - the path to check
+			 * @return {boolean} returns true if the path is a http path otherwise it returns false
+			 */
 			isHttp : function(path){
 				if(path.startsWith('http:') || path.startsWith('https:')){
 					return true;
@@ -1851,6 +1857,12 @@
 				return false;
 			},
 
+			/**
+			 * @method  isHttps 
+			 * @description checks if a path is a https path
+			 * @param  {string}  path  - the path to check
+			 * @return {boolean}  returns true if the path is a https path otherwise it returns false
+			 */
 			isHttps : function(path){
 				if(path.startsWith('https:')){
 					return true;
@@ -1858,6 +1870,12 @@
 				return false;
 			},
 
+			/**
+			 * @method camelToHypen 
+			 * @description converts a camelcase to a hypen
+			 * @param  {string} camel - the camelcase
+			 * @return {string} returns a path with hypens instade of camelcase
+			 */
 			camelToHypen : function(camel){
 				var camel = camel.replace(/\./g, '-');
 				var output = "";
@@ -2558,11 +2576,19 @@
 		
 		}
 
-		var _convertData = function(data){
+		var _convertData = function(data, direction){
 			if(format){
-				switch(format){
-					case "json":
-						return JSON.parse(data);
+				direction = direction || "input";
+				if(direction === "input"){
+					switch(format.toLowerCase()){
+						case "json":
+							return JSON.parse(data);
+					}
+				}else if(direction === "output"){
+					switch(format.toLowerCase()){
+						case "json":
+							return JSON.stringify(data);
+					}
 				}
 			}
 			return data;
@@ -2608,7 +2634,8 @@
 				throw new Error("The 'save' method is only available on nodejs [Mold.Core.File]")
 			}
 			return new __Mold.Core.Promise(function(resolve, reject){
-				fs.writeFile(filename, _content, function(err) {
+
+				fs.writeFile(filename, _convertData(_content, "output"), function(err) {
 					if(err) {
 						return reject(err);
 					}

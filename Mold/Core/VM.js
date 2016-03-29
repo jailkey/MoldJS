@@ -22,9 +22,10 @@ Seed({
 
 			if(conf.policy){
 				this.sandbox = {};
+
 				if(conf.policy.allowedModuls && conf.policy.allowedModuls.length){
 					this.sandbox.require = function(module){
-						if(!~conf.policy.allowedModules.indexOf(module))
+						if(!~conf.policy.allowedModules.indexOf(module)){
 							throw new Mold.Errors.PolicyError("Modul access for modul '" + module + "' denied! [Mold.Core.VM]");
 						}
 						return require.apply(this, arguments);
@@ -32,10 +33,7 @@ Seed({
 				}
 			}
 
-
-			
 			instanceCount++;
-
 			Mold.copyGlobalProperties(this.sandbox);
 
 			this.moldPath = conf.moldPath || 'Mold.js',
@@ -67,7 +65,6 @@ Seed({
 			setConf : function(conf){
 				this.Mold.Core.Config.overwrite(conf);
 			}
-
 		}
 
 		modul.exports = MoldVM;

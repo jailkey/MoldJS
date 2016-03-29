@@ -1215,6 +1215,7 @@
   						script.runInContext(context, { filename: this.path });
 
 					}catch(e){
+						e.message += " [" + this.path + "]";
 						throw e;
 					}
 					
@@ -1263,9 +1264,10 @@
 							var script = new vm.Script("var output = function() { " + closure + "\n}()", { filename: this.path, lineOffset : this.fileData.split("\n").length - closure.split("\n").length + 1});
 							var test = script.runInContext(sandbox, { filename: this.path });
 							this.code = sandbox.output;
-							
+
 						}catch(e){
-							new SeedError(e.message, this.path);
+							e.message += " [" + this.path + "]";
+							throw e;
 						}
 					}else{
 						this.code = new Function(closure)();

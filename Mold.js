@@ -26,6 +26,18 @@
 	CommandError.prototype = Object.create(Error.prototype);
 	CommandError.prototype.constructor = CommandError;
 
+	var PolicyError = function PolicyError (message) {
+		if(__Mold && __Mold.getInstanceDescription){
+			message += " "+ __Mold.getInstanceDescription();
+		}
+		this.name = 'PolicyError';
+		this.message = message;
+		this.stack = message + "\n" + (new Error()).stack;
+	}
+
+	PolicyError.prototype = Object.create(Error.prototype);
+	PolicyError.prototype.constructor = PolicyError;
+
 
 	var DNAError = function DNAError (message) {
 		this.name = 'DNAError';
@@ -72,7 +84,8 @@
 			SeedError : SeedError,
 			DNAError : DNAError,
 			SeedTypeError : SeedTypeError,
-			CommandError : CommandError
+			CommandError : CommandError,
+			PolicyError : PolicyError
 		}
 
 		this.EXIT = '---exit---';

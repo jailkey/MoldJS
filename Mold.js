@@ -3,10 +3,14 @@
 (function(global){
 
 /** ERROR TYPES */
-	var SeedError = function SeedError (message) {
-	    this.name = 'SeedError';
-	    this.message = message;
-	    this.stack = (new Error()).stack;
+	var SeedError = function SeedError (message, seedName) {
+		if(__Mold && __Mold.getInstanceDescription){
+			message += " [" + seedName + "] " + __Mold.getInstanceDescription();
+		}
+		this.name = 'SeedError';
+		this.message = message;
+		this.seedName = seedName;
+		this.stack = message + "\n" + (new Error()).stack;
 	}
 
 	SeedError.prototype = Object.create(Error.prototype);
@@ -483,14 +487,7 @@
 	//Build-in core modules
 	Mold.prototype.Core = {};
 
-	Mold.prototype.Core.Reporter = function(){
-
-		
-
-	}()
-
-
-/**
+	/**
 	 * @module Mold.Core.Promise 
 	 * @description implements a Promise A+
 	 * @param {function} 
@@ -1237,10 +1234,10 @@
 			execute : function(){
 				var typeHandler = __Mold.Core.SeedTypeManager.get(this.type);
 				if(!typeHandler){
-					throw new Error("SeedType '" + this.type + "' not found! [" + this.name + "]" + __Mold.getInstanceDescription());
+					throw new SeedError("SeedType '" + this.type + "' not found!", this.name);
 				}
 				if(!this.code){
-					throw new Error("Code property is not defined! [" + this.name + "]" + __Mold.getInstanceDescription());
+					throw new SeedError("Code property is not defined!", this.name);
 				}
 
 				if(Object.keys(this.injections).length){
@@ -1263,12 +1260,12 @@
 
 							__Mold.copyGlobalProperties(sandbox);
 							var context = new vm.createContext(sandbox);
-
 							var script = new vm.Script("var output = function() { " + closure + "\n}()", { filename: this.path, lineOffset : this.fileData.split("\n").length - closure.split("\n").length + 1});
 							var test = script.runInContext(sandbox, { filename: this.path });
 							this.code = sandbox.output;
+							
 						}catch(e){
-							throw e;
+							new SeedError(e.message, this.path);
 						}
 					}else{
 						this.code = new Function(closure)();

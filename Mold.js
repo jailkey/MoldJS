@@ -1092,16 +1092,26 @@
 					var promise = file.load();
 					var that = this;
 
-					promise
-						.then(function(data){
-							that.fileData = data;
-							that.mapFileData();
-						})
-						.fail(function(){
-							throw new Error("Can not load seed: '" + that.path + "'! [" + that.name + "]" + __Mold.getInstanceDescription());
-						})
+					return new Promise(function(resolve, reject){
+						promise
+							.then(function(data){
+								that.fileData = data;
+								that.mapFileData();
+								resolve(that);
+							})
+							.catch(function(){
+								if(__Mold.Core.Config.get('disable-dependency-errors')){
+									that.state = __Mold.Core.SeedStates.READY;
+									that.loadingError = true;
+									resolve(that);
+								}else{
+									var error = new Error("Can not load seed: '" + that.path + "'! [" + that.name + "]" + __Mold.getInstanceDescription());
+									reject(error)
+									throw error;
+								}
+							})
 
-					return promise;
+					});
 				}
 			},
 
@@ -1207,6 +1217,9 @@
 			 * @return {promise} returns a promise which will be resolved if the seed is created
 			 */
 			create : function(){
+				if(this.ignorCreate){
+					return this._isCreatedPromise;
+				}
 				if(!this.fileData){
 					throw new Error("Can not created script without file data! [" + this.name + "]");
 				}
@@ -2136,6 +2149,7 @@
 				var configPath = __Mold.Core.Initializer.getParam('config-path') || this.get('config-path', _defaultType);
 				var configName = __Mold.Core.Initializer.getParam('config-name') || this.get('config-name', _defaultType);
 				var onlyOneConfig = __Mold.Core.Initializer.getParam('use-one-config') || false;
+				var disableDependencyErrors = __Mold.Core.Initializer.getParam('disable-dependency-errors') || false;
 
 				if(configPath !== "" && !configPath.endsWith("/")){
 					configPath += "/";
@@ -2143,6 +2157,7 @@
 
 				this.set('config-path', configPath);
 				this.set('config-name', configName)
+				this.set('disable-dependency-errors', disableDependencyErrors);
 
 				var localPath = configPath + configName;
 				var promise = this.loadConfig(localPath);
@@ -2228,7 +2243,7 @@
 	}()
 
 	Mold.prototype.Core.Initializer = function(){
-		var _params = ['config-name', 'config-path', 'global-config-name', 'global-config-path', 'root-path', 'use-one-config'];
+		var _params = ['config-name', 'config-path', 'global-config-name', 'global-config-path', 'root-path', 'use-one-config', 'disable-dependency-errors'];
 		var _availableParams = {};
 		var _cliCommands= [];
 

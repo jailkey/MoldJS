@@ -1101,9 +1101,10 @@
 							.catch(function(err){
 								try{
 									if(__Mold.Core.Config.get('disable-dependency-errors')){
+										
 										//if there is an error and disabling errors is active resolve seed
-										that.state = __Mold.Core.SeedStates.READY;
 										that.loadingError = true;
+										that.state = __Mold.Core.SeedStates.READY;
 										that._isCreatedPromise.resolve(that);
 										resolve(that);
 									
@@ -1289,7 +1290,7 @@
 					this._addedLines++;
 					for(var inject in this.injections){
 						//check if injection has fileData if not somthing went wrong a the source could not be injected
-						if(__Mold.Core.SeedManager.get(this.injections[inject] ).fileData){
+						if(!__Mold.Core.SeedManager.get(this.injections[inject] ).loadingError){
 							closure += "	var " + inject + " = " + this.injections[inject] + "; \n" ;
 							this._addedLines++;
 						}

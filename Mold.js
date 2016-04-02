@@ -1086,28 +1086,34 @@
 			 */
 			load : function(){
 				if(!this.isLoaded){
+					var that = this;
 					this.path = __Mold.Core.Pathes.getPathFromName(this.name);
-
 					var file = new __Mold.Core.File(this.path);
 					var promise = file.load();
 					var that = this;
-
 					return new Promise(function(resolve, reject){
 						promise
 							.then(function(data){
-								that.fileData = data;
+								that.fileData = data
 								that.mapFileData();
 								resolve(that);
 							})
-							.catch(function(){
-								if(__Mold.Core.Config.get('disable-dependency-errors')){
-									that.state = __Mold.Core.SeedStates.READY;
-									that.loadingError = true;
-									resolve(that);
-								}else{
-									var error = new Error("Can not load seed: '" + that.path + "'! [" + that.name + "]" + __Mold.getInstanceDescription());
-									reject(error)
-									throw error;
+							.catch(function(err){
+								try{
+									if(__Mold.Core.Config.get('disable-dependency-errors')){
+										//if there is an error and disabling errors is active resolve seed
+										that.state = __Mold.Core.SeedStates.READY;
+										that.loadingError = true;
+										that._isCreatedPromise.resolve(that);
+										resolve(that);
+									
+									}else{
+										var error = new Error("Can not load seed: '" + that.path + "'! [" + that.name + "]" + __Mold.getInstanceDescription());
+										reject(error)
+										//throw error;
+									}
+								}catch(e){
+									reject(e)
 								}
 							})
 
@@ -1217,7 +1223,7 @@
 			 * @return {promise} returns a promise which will be resolved if the seed is created
 			 */
 			create : function(){
-				if(this.ignorCreate){
+				if(this.loadingError){
 					return this._isCreatedPromise;
 				}
 				if(!this.fileData){
@@ -1267,6 +1273,9 @@
 			 * @return {[type]} [description]
 			 */
 			execute : function(){
+				if(this.loadingError){
+					return;
+				}
 				var typeHandler = __Mold.Core.SeedTypeManager.get(this.type);
 				if(!typeHandler){
 					throw new SeedError("SeedType '" + this.type + "' not found!", this.name);
@@ -1279,12 +1288,15 @@
 					var closure = "//" + this.name + "\n";
 					this._addedLines++;
 					for(var inject in this.injections){
-						closure += "	var " + inject + " = " + this.injections[inject] + "; \n" ;
-						this._addedLines++;
+						//check if injection has fileData if not somthing went wrong a the source could not be injected
+						if(__Mold.Core.SeedManager.get(this.injections[inject] ).fileData){
+							closure += "	var " + inject + " = " + this.injections[inject] + "; \n" ;
+							this._addedLines++;
+						}
 					}
 					closure += " return " + this.code.toString() + "\n";
 					closure += this.buildSourceMap();
-	
+
 					if(_isNodeJS){
 						try{
 							var sandbox = {
@@ -2480,6 +2492,10 @@
 			 */
 			exec : function(seed){
 				return new __Mold.Core.Promise(function(resolve){
+					if(seed.loadingError){
+						resolve(seed);
+						return;
+					}
 					var i = 0;
 					var next = function(){
 						var process = _preprocessors[i] || null;
@@ -3115,7 +3131,7 @@
 				
 			})
 			.on(this.Core.SeedStates.PENDING, function(seed, done){
-				//console.log("do PENDING", seed.name);
+			//	console.log("do PENDING", seed.name);
 				__Mold.Core.DependencyManager.find(seed);
 				seed.checkDependencies().then(function(){
 					done();
@@ -3136,7 +3152,7 @@
 				done();
 			})
 			.on(that.Core.SeedStates.READY, function(seed, done){
-				//console.log("SEED READY", seed.name)
+			//	console.log("SEED READY", seed.name)
 
 				done();
 			})

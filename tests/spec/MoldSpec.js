@@ -280,6 +280,24 @@ describe("Mold Core Lib", function () {
 	})
 
 
+	//SPECIAL CHECKS
+	describe("Check forced loadings with defect dependecies", function(){
+		it("Disable errors via config", function(){
+			Mold.Core.Config.set('disable-dependency-errors', true);
+			expect(Mold.Core.Config.get('disable-dependency-errors')).toBe(true)
+		})
+		it("test loading a seed with no existin dependencies", function(done){
+			Mold.load("App.Dieter").then(function(){
+				console.log("Dieter is loaded")
+				done();
+			})
+			.catch(function(err){
+				console.log("FEHLER", err)
+			})
+		})
+	})
+
+
 
 
 //TEST MOLD BUILD IN AND POLYFILLS

@@ -1224,6 +1224,12 @@
 			 * @return {promise} returns a promise which will be resolved if the seed is created
 			 */
 			create : function(){
+				 if(__Mold.Core.Config.get('stop-seed-creating')){
+				 	this.state = __Mold.Core.SeedStates.READY;
+				 	__Mold.Core.SeedFlow.exec(this);
+				 	return this._isCreatedPromise;
+				 }
+
 				if(this.loadingError){
 					return this._isCreatedPromise;
 				}
@@ -1244,6 +1250,7 @@
 				fileData += this.buildSourceMap();
 				if(_isNodeJS){
 					try{
+						
 						var scriptBox = {
 							Mold : __Mold,
 							console : console
@@ -1274,7 +1281,8 @@
 			 * @return {[type]} [description]
 			 */
 			execute : function(){
-				if(this.loadingError){
+
+				if(this.loadingError || __Mold.Core.Config.get('stop-seed-creating')){
 					return;
 				}
 				var typeHandler = __Mold.Core.SeedTypeManager.get(this.type);
@@ -1289,7 +1297,7 @@
 					var closure = "//" + this.name + "\n";
 					this._addedLines++;
 					for(var inject in this.injections){
-						//check if injection has fileData if not somthing went wrong a the source could not be injected
+						//check if injection has no loadingError
 						if(!__Mold.Core.SeedManager.get(this.injections[inject] ).loadingError){
 							closure += "	var " + inject + " = " + this.injections[inject] + "; \n" ;
 							this._addedLines++;
@@ -2162,7 +2170,7 @@
 				var configPath = __Mold.Core.Initializer.getParam('config-path') || this.get('config-path', _defaultType);
 				var configName = __Mold.Core.Initializer.getParam('config-name') || this.get('config-name', _defaultType);
 				var onlyOneConfig = __Mold.Core.Initializer.getParam('use-one-config') || false;
-				var disableDependencyErrors = __Mold.Core.Initializer.getParam('disable-dependency-errors') || false;
+
 
 				if(configPath !== "" && !configPath.endsWith("/")){
 					configPath += "/";
@@ -2170,7 +2178,8 @@
 
 				this.set('config-path', configPath);
 				this.set('config-name', configName)
-				this.set('disable-dependency-errors', disableDependencyErrors);
+				this.set('disable-dependency-errors', __Mold.Core.Initializer.getParam('disable-dependency-errors') || false);
+				this.set('stop-seed-creating', __Mold.Core.Initializer.getParam('stop-seed-creating') || false);
 
 				var localPath = configPath + configName;
 				var promise = this.loadConfig(localPath);
@@ -2493,7 +2502,7 @@
 			 */
 			exec : function(seed){
 				return new __Mold.Core.Promise(function(resolve){
-					if(seed.loadingError){
+					if(seed.loadingError || seed.stopExecuting){
 						resolve(seed);
 						return;
 					}

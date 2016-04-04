@@ -2265,7 +2265,16 @@
 	}()
 
 	Mold.prototype.Core.Initializer = function(){
-		var _params = ['config-name', 'config-path', 'global-config-name', 'global-config-path', 'root-path', 'use-one-config', 'disable-dependency-errors'];
+		var _params = ['config-name', 
+			'config-path', 
+			'global-config-name', 
+			'global-config-path', 
+			'root-path', 
+			'use-one-config', 
+			'disable-dependency-errors', 
+			'stop-seed-creating'
+		];
+		
 		var _availableParams = {};
 		var _cliCommands= [];
 

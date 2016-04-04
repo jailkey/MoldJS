@@ -46,7 +46,8 @@ Seed({
 				'config-path',  this.confPath,
 				'config-name', this.confName,
 				'use-one-config', true,
-				'disable-dependency-errors', this.disableDependencyErrors
+				'disable-dependency-errors', this.disableDependencyErrors,
+				'stop-seed-creating', stopSeedCreating
 			];
 
 			this.vm = require('vm');

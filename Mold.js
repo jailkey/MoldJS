@@ -1224,12 +1224,7 @@
 			 * @return {promise} returns a promise which will be resolved if the seed is created
 			 */
 			create : function(){
-				 if(__Mold.Core.Config.get('stop-seed-creating')){
-				 	this.state = __Mold.Core.SeedStates.READY;
-				 	__Mold.Core.SeedFlow.exec(this);
-				 	return this._isCreatedPromise;
-				 }
-
+				
 				if(this.loadingError){
 					return this._isCreatedPromise;
 				}
@@ -1282,7 +1277,7 @@
 			 */
 			execute : function(){
 
-				if(this.loadingError || __Mold.Core.Config.get('stop-seed-creating')){
+				if(this.loadingError || __Mold.Core.Config.get('stop-seed-executing')){
 					return;
 				}
 				var typeHandler = __Mold.Core.SeedTypeManager.get(this.type);
@@ -2179,7 +2174,7 @@
 				this.set('config-path', configPath);
 				this.set('config-name', configName)
 				this.set('disable-dependency-errors', __Mold.Core.Initializer.getParam('disable-dependency-errors') || false);
-				this.set('stop-seed-creating', __Mold.Core.Initializer.getParam('stop-seed-creating') || false);
+				this.set('stop-seed-executing', __Mold.Core.Initializer.getParam('stop-seed-executing') || false);
 
 				var localPath = configPath + configName;
 				var promise = this.loadConfig(localPath);
@@ -2272,9 +2267,9 @@
 			'root-path', 
 			'use-one-config', 
 			'disable-dependency-errors', 
-			'stop-seed-creating'
+			'stop-seed-executing'
 		];
-		
+
 		var _availableParams = {};
 		var _cliCommands= [];
 

@@ -301,14 +301,14 @@ describe("Mold Core Lib", function () {
 
 	describe("Check loading with disabled executing", function(){
 		it("activate stop executing", function(){
-			Mold.Core.Config.set('stop-seed-creating', true);
-			expect(Mold.Core.Config.get('stop-seed-creating')).toBe(true)
+			Mold.Core.Config.set('stop-seed-executing', true);
+			expect(Mold.Core.Config.get('stop-seed-executing')).toBe(true)
 		})
 		it("test loading a seed without executing", function(done){
 			Mold.load("App.TestNoExec").then(function(seed){
 				expect(seed.executedValue).toBeUndefined()
-				Mold.Core.Config.set('stop-seed-creating', false);
-				expect(Mold.Core.Config.get('stop-seed-creating')).toBe(false)
+				Mold.Core.Config.set('stop-seed-executing', false);
+				expect(Mold.Core.Config.get('stop-seed-executing')).toBe(false)
 				done();
 			})
 			.catch(function(err){

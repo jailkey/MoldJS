@@ -25,3 +25,11 @@
 /Mold/Lib/MultiLineString.js
 /Mold/Lib/Path.js
 /Mold/Lib/Template.js
+/Mold/Core/Test/Tester.js
+/Mold/Core/Test/CLIReporter.js
+/Mold/CMD/Test.js
+/Mold/Core/EventStore.js
+/Mold/Core/Event.js
+/Mold/Core/CLIForm.js
+/Mold/Core/CLILoadingBar.js
+/Mold/Core/CLI.js

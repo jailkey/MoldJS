@@ -5,10 +5,15 @@
 		"Mold": "Mold"
 	},
 	"dependencies": [
+		{
+			"name": "Mold.Core.Test",
+			"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.Test/master/",
+			"version": "0.0.1"
+		}
 	],
-	"seeds" : [
+	"seeds": [
 		"Mold.Core.*"
-	], 
+	],
 	"sources": [
 		"Mold.js"
 	]

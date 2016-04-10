@@ -1330,8 +1330,8 @@
 					}
 				}
 
-				this.excutedValue = typeHandler.create(this);
-				__Mold.Core.NamespaceManager.addCode(this.name, this.excutedValue);
+				this.executedValue = typeHandler.create(this);
+				__Mold.Core.NamespaceManager.addCode(this.name, this.executedValue);
 			}
 		}
 
@@ -2995,7 +2995,7 @@
 						this._exports = exported;
 					}
 				}
-
+	
 				seed.code.call(seed, module);
 
 				return module.exports;

@@ -102,6 +102,7 @@
 				require : require,
 				__dirname : __dirname,
 				setTimeout : setTimeout,
+				clearTimeout : clearTimeout,
 				process : process,
 				Buffer : Buffer
 			}
@@ -1087,7 +1088,12 @@
 			load : function(){
 				if(!this.isLoaded){
 					var that = this;
-					this.path = __Mold.Core.Pathes.getPathFromName(this.name);
+					try {
+						//try to get the path
+						this.path = __Mold.Core.Pathes.getPathFromName(this.name);
+					}catch(e){
+						throw new Error("Can not resolve path for [" + this.name + "], maybe the seed is not installed!")
+					}
 					var file = new __Mold.Core.File(this.path);
 					var promise = file.load();
 					var that = this;

@@ -210,9 +210,14 @@ describe("Mold Core Lib", function () {
 
 	describe("Mold.Core.Pathes", function(){
 
-		it("checks name path with .getPathFromName", function(){
+		it("checks path with .getPathFromName", function(){
 			expect(Mold.Core.Pathes.getPathFromName("App.Test")).toBe('App/Test.js');
 			expect(Mold.Core.Pathes.getPathFromName("Mold.Test")).toBe('../Mold/Test.js');
+		})
+
+		it("checks name with .getNameFromPath", function(){
+			expect(Mold.Core.Pathes.getNameFromPath("App/Test.js")).toBe('App.Test');
+			expect(Mold.Core.Pathes.getNameFromPath("../Mold/Test.js")).toBe('Mold.Test');
 		})
 
 		it("checks the current Mold.js path .getMoldPath", function(){

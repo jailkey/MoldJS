@@ -9,3 +9,6 @@
 /Mold/Core/CLIForm.js
 /Mold/Core/CLILoadingBar.js
 /Mold/Core/CLI.js
+/Mold/Core/Test/ConsoleReporter.js
+/Mold/Test/Core/Tester.js
+/Mold/Core/CLIHelper.js

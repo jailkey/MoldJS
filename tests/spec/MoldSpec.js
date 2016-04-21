@@ -12,7 +12,7 @@ describe("Mold Core Lib", function () {
 
 				}
 			})
-			expect(seed.state).toEqual(Mold.Core.SeedStates.INITIALISING);
+			expect(seed.state).toEqual(Mold.Core.SeedStates.LOADED);
 			expect(seed.name).toEqual("Mold.Test");
 			expect(seed.hasDependency).toBeDefined();
 			expect(seed.hasDependencies).toBeDefined();
@@ -41,7 +41,7 @@ describe("Mold Core Lib", function () {
 			var oldLength = Mold.Core.SeedManager.count;
 			expect(Mold.Core.SeedManager.count).toBe(oldLength);
 			expect(Mold.Core.SeedManager.get("Mold.Test")).not.toBe(seed);
-			expect(seed.state).toBe(Mold.Core.SeedStates.INITIALISING);
+			expect(seed.state).toBe(Mold.Core.SeedStates.LOADED);
 			Mold.Core.SeedManager.add(seed);
 			expect(Mold.Core.SeedManager.count).toBe(oldLength + 1);
 		});

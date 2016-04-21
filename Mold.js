@@ -979,7 +979,7 @@
 			
 			this.dependencies = [];
 			this.injections = {};
-			this._state = properties.state || __Mold.Core.SeedStates.INITIALISING;
+			this._state = properties.state || __Mold.Core.SeedStates.LOAD;
 			this._addedLines = 0;
 
 			//append propetises
@@ -1077,7 +1077,7 @@
 			 * @return {boolean} 
 			 */
 			get isLoaded(){
-				return (this.state > __Mold.Core.SeedStates.LOADING) ? true : false;
+				return (this.state > __Mold.Core.SeedStates.LOAD) ? true : false;
 			},
 
 			/**
@@ -1401,7 +1401,7 @@
 					if(!seed){
 						seed = __Mold.Core.SeedFactory({
 							name : seedInfo.name,
-							state : __Mold.Core.SeedStates.PENDING,
+							state : __Mold.Core.SeedStates.LOAD_DEPENDENCIES,
 
 						});
 						this.add(seed);
@@ -1766,16 +1766,21 @@
 	 */
 	Mold.prototype.Core.SeedStates = {
 		NEW : 1,
-		LOADING : 2,
+		LOAD : 2,
 		LOADED : 2,
-		PREPARSING : 3,
-		PARSING : 4,
-		INSPECTING : 5,
-		VALIDATING : 6,
-		TRANSPILING : 7,
-		INITIALISING : 8,
-		PENDING : 9,
-		EXECUTING : 10,
+		PREPARSE : 3,
+		
+		PARSE : 4,
+		INSPECT: 5,
+		
+		LOAD_DEPENDENCIES : 6,
+
+		TRANSFORM : 7,
+		VALIDATE : 8,
+		TRANSPILING : 9,
+
+		
+		EXECUTE : 10,
 		READY : 11, 
 		ERROR : 12, 
 	}
@@ -3143,7 +3148,7 @@
 			.on(this.Core.SeedStates.NEW, function(seed, done){
 				that.Core.SeedManager.add(seed);
 				that.Core.Config.isReady.then(function(){
-					seed.state = that.Core.SeedStates.LOADING;
+					seed.state = that.Core.SeedStates.LOAD;
 					seed.load().then(function(){
 						seed.state = that.Core.SeedStates.LOADED;
 						done()
@@ -3157,61 +3162,86 @@
 			})
 			.onAfter(this.Core.SeedStates.LOADED, function(seed, done){
 				//console.log("AFTER LOADING");
-				seed.state = that.Core.SeedStates.PREPARSING;
+				seed.state = that.Core.SeedStates.PREPARSE;
 				done();
 			})
-			.on(this.Core.SeedStates.PREPARSING, function(seed, done){
+			.on(this.Core.SeedStates.PREPARSE, function(seed, done){
 				//console.log("do PREPARSING");
 				that.Core.Preprocessor.exec(seed).then(done);
 			})
-			.onAfter(this.Core.SeedStates.PREPARSING, function(seed, done){
+			.onAfter(this.Core.SeedStates.PREPARSE, function(seed, done){
+
 				//if seed is already transpiled skip transpiling step
 				if(seed.transpiled){
-					seed.state = that.Core.SeedStates.INITIALISING;
+					seed.state = that.Core.SeedStates.INSPECT;
 				}else{
-					seed.state = that.Core.SeedStates.TRANSPILING;
+					seed.state = that.Core.SeedStates.PARSE;
 				}
 				done();
 			})
-			.on(this.Core.SeedStates.TRANSPILING, function(seed, done){
-				//console.log("do TRANSPILING", seed.name);
+			.on(this.Core.SeedStates.PARSE, function(seed, done){
+				//console.log("do PARSE", seed.name);
 				done()
 			})
-			.onAfter(this.Core.SeedStates.TRANSPILING, function(seed, done){
-				seed.state = that.Core.SeedStates.INITIALISING;
+			.onAfter(this.Core.SeedStates.PARSE, function(seed, done){
+				seed.state = that.Core.SeedStates.LOAD_DEPENDENCIES;
 				done();
 			})
-			.on(this.Core.SeedStates.INITIALISING, function(seed, done){
-				//console.log("do INITIALISING");
+			.on(this.Core.SeedStates.INSPECT, function(seed, done){
+			//	console.log("do INITIALISING");
 				seed.create().then(function(){
-				//	console.log("IS CREATED")
+			//		console.log("IS CREATED")
 					done()	
 				})
 				
 			})
-			.onAfter(this.Core.SeedStates.INITIALISING, function(seed, done){
-				seed.state = that.Core.SeedStates.PENDING;
+			.onAfter(this.Core.SeedStates.INSPECT, function(seed, done){
+				seed.state = that.Core.SeedStates.LOAD_DEPENDENCIES;
 				done()
 				
 			})
-			.on(this.Core.SeedStates.PENDING, function(seed, done){
-			//	console.log("do PENDING", seed.name);
+			.on(this.Core.SeedStates.LOAD_DEPENDENCIES, function(seed, done){
+			//	console.log("LOAD_DEPENDENCIES", seed.name);
 				__Mold.Core.DependencyManager.find(seed);
 				seed.checkDependencies().then(function(){
 					done();
 				});
 			
 			})
-			.onAfter(this.Core.SeedStates.PENDING, function(seed, done){
-				seed.state = that.Core.SeedStates.EXECUTING;
+			.onAfter(this.Core.SeedStates.LOAD_DEPENDENCIES, function(seed, done){
+			//	console.log("LOAD DEPENDENCIES", seed.name)
+				if(seed.transpiled){
+			//		console.log("IS TRANSPILED")
+					seed.state = that.Core.SeedStates.EXECUTE;
+				}else{
+					seed.state = that.Core.SeedStates.TRANSFORM;
+				}
+				
 				done();
 			})
-			.on(this.Core.SeedStates.EXECUTING, function(seed, done){
-				//console.log("EXECUTING", seed.name, seed.state)
+			.on(this.Core.SeedStates.TRANSFORM, function(seed, done){
+			//	console.log("TRANSFORM", seed.name, seed.state)
+				done()
+			})
+			.onAfter(this.Core.SeedStates.TRANSFORM, function(seed, done){
+				seed.state = that.Core.SeedStates.TRANSPILE;
+				done();
+			})
+			.on(this.Core.SeedStates.TRANSPILE, function(seed, done){
+			//	console.log("TRANSPILE", seed.name, seed.state)
+			
+				done()
+			})
+			.onAfter(this.Core.SeedStates.TRANSPILE, function(seed, done){
+				seed.state = that.Core.SeedStates.EXECUTE;
+				done();
+			})
+			.on(this.Core.SeedStates.EXECUTE, function(seed, done){
+			//	console.log("EXECUTING", seed.name, seed.state)
 				seed.execute();
 				done()
 			})
-			.onAfter(this.Core.SeedStates.EXECUTING, function(seed, done){
+			.onAfter(this.Core.SeedStates.EXECUTE, function(seed, done){
 				seed.state = that.Core.SeedStates.READY;
 				done();
 			})

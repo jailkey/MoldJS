@@ -2130,6 +2130,42 @@
 			},
 
 			/**
+			 * @method getMerged 
+			 * @description returns the property of both configurations as one merged value 
+			 * @param  {string} name the property name
+			 * @return {mixed} returns the merged value of the property, if nothing was found it returns null
+			 */
+			getMerged : function(name){
+				var output = null;
+				if(_configValue['local'] && _configValue['local'][name]){
+					output = _configValue['local'][name];
+				}
+
+				if(_configValue['global'] && _configValue['global'][name]){
+					if(!output){
+						output = _configValue['global'][name];
+					}else if(Array.isArray(output)){
+						if(Array.isArray(_configValue['global'][name])){
+							output = output.concat(_configValue['global'][name]);
+						}else{
+							output.push(_configValue['global'][name]);
+						}
+					}else if(Mold.isObject(output)){
+						if(Mold.isObject(_configValue['global'][name])){
+							for(var prop in _configValue['global'][name]){
+								if(!output[prop]){
+									output[prop] = _configValue['global'][name][prop];
+								}
+							}
+						}
+					}
+
+				}
+
+				return output;
+			},
+
+			/**
 			 * @method getAll 
 			 * @description returns the hole configuration file
 			 * @param  {string} [type] - optional the type of configuration possible values are 'local' and 'global' 
@@ -3331,7 +3367,8 @@
 			
 			this.ready.then(function(){
 				if(!that.Core.Config.get("stop-loading-main-seeds", "local")){
-					var mainSeeds = that.Core.Config.search('mainSeeds');
+					var mainSeeds = that.Core.Config.getMerged('mainSeeds');
+					console.log("mainSeeds", meinSeeds)
 					if(mainSeeds && mainSeeds.length){
 						mainSeeds.forEach(function(seedName){
 							mainSeedPromises.push(that.load(seedName));

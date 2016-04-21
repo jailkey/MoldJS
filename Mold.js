@@ -3318,6 +3318,13 @@
 					code : this.Core.SeedTypeManager
 				})
 			)
+			.add(
+				this.Core.SeedFactory({
+					name : "Mold.Core.SeedStates",
+					state : this.Core.SeedStates.READY,
+					code : this.Core.SeedStates
+				})
+			)
 
 			//load main seeds
 			var mainSeedPromises = []

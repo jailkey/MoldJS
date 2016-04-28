@@ -284,6 +284,22 @@ describe("Mold Core Lib", function () {
 		//seed.hasDependencies
 	})
 
+	describe("Test loading a es6module and check is methods", function(){
+		var es6TestSeed = null;
+		it("load seed", function(next){
+			Mold.load('App.ES6ModuleTest').then(function(seed){
+				es6TestSeed = seed;
+				expect(seed).toBeDefined();
+				next()
+			})
+		})
+		it("test exports", function(){
+			expect(es6TestSeed.module.getAll().hans()).toBe('hans');
+			expect(es6TestSeed.module.defaultExport).toBe('defaultExport')
+			expect(App.ES6ModuleTest.hans).toBeDefined()
+		})
+	})
+
 
 	//SPECIAL CHECKS
 	describe("Check forced loadings with defect dependecies", function(){

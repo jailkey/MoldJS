@@ -1,0 +1,106 @@
+{
+	"packages": {
+		"Mold.Core.Test": {
+			"sources": [
+				{
+					"path": "Mold/CMD/Test.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Test/CLIReporter.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Test/ConsoleReporter.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Test/Tester.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Test/Core/Tester.js",
+					"type": "file"
+				}
+			],
+			"dependencies": [
+				{
+					"name": "Mold.Core.Event",
+					"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.Event/master/",
+					"version": "0.0.1"
+				},
+				{
+					"name": "Mold",
+					"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
+					"version": "0.2.3"
+				},
+				{
+					"name": "Mold.Core.CLIHelper",
+					"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.CLIHelper/master/",
+					"version": "0.0.1"
+				},
+				{
+					"name": "Mold.Core.Logger",
+					"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.Logger/master/",
+					"version": "0.0.1"
+				}
+			]
+		},
+		"Mold.Core.Event": {
+			"sources": [
+				{
+					"path": "Mold/Core/Event.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/EventStore.js",
+					"type": "file"
+				}
+			],
+			"dependencies": [
+				{
+					"name": "Mold",
+					"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
+					"version": "0.2.3"
+				}
+			]
+		},
+		"Mold.Core.CLIHelper": {
+			"sources": [
+				{
+					"path": "Mold/Core/CLIForm.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/CLIHelper.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/CLILoadingBar.js",
+					"type": "file"
+				}
+			],
+			"dependencies": []
+		},
+		"Mold.Core.Logger": {
+			"sources": [
+				{
+					"path": "Mold/Core/Logger.js",
+					"type": "file"
+				}
+			],
+			"dependencies": [
+				{
+					"name": "Mold.Core.Test",
+					"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.Test/master/",
+					"version": "0.0.1"
+				},
+				{
+					"name": "Mold",
+					"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
+					"version": "0.2.3"
+				}
+			]
+		}
+	}
+}

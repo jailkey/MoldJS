@@ -981,6 +981,8 @@
 			this.injections = {};
 			this._state = properties.state || __Mold.Core.SeedStates.LOAD;
 			this._addedLines = 0;
+			this._callingSeeds = [];
+			this._callingListener = [];
 
 			//append propetises
 			for(var prop in properties){
@@ -1063,12 +1065,38 @@
 				this.dependencies.push(dependency);
 			},
 
+			/**
+			 * @method addInjection 
+			 * @description adds a dependency injection
+			 * @param {object} injection
+			 */
 			addInjection : function(injection){
 				for(var inject in injection){
 					if(!this.injections[inject]){
 						this.injections[inject] = injection[inject];
 					}
 				}
+			},
+
+			/**
+			 * @method callSeed 
+			 * @description will be call from dependend seeds, trigger onCall listener
+			 * @param  {object} seed - the dependend seed
+			 */
+			callSeed : function(seed){
+				this._callingSeeds.push(seed);
+				this._callingListener.forEach(function(listener){
+					listener.call(this, seed, this._callingSeeds);
+				}.bind(this))
+			},
+
+			/**
+			 * @method onCall 
+			 * @description adds a on call listener callback
+			 * @param  {Function} callback - the callback
+			 */
+			onCall : function(callback){
+				this._callingListener.push(callback);
 			},
 
 			/**
@@ -1195,7 +1223,12 @@
 			checkDependencies : function(){
 				var that = this;
 				__Mold.Core.DependencyManager.checkDependencies(this).then(function(){
+					that.dependencies.forEach(function(dep){
+						__Mold.Core.SeedManager.get(dep).callSeed(that);
+					})
+				
 					that.dependenciesLoaded.resolve(that.dependencies);
+
 					that._dependenciesAreLoaded = true;
 				})
 				return this.dependenciesLoaded;
@@ -1286,14 +1319,16 @@
 				if(this.loadingError || __Mold.Core.Config.get('stop-seed-executing')){
 					return;
 				}
+
+				if(!this.code){
+					throw new SeedError("Code property is not defined!\n Maybe the seed is not transpiled, or the 'transpiled' seed annotation is missing", this.name);
+				}
+
 				var typeHandler = __Mold.Core.SeedTypeManager.get(this.type);
 				if(!typeHandler){
 					throw new SeedError("SeedType '" + this.type + "' not found!", this.name);
 				}
-				if(!this.code){
-					throw new SeedError("Code property is not defined!", this.name);
-				}
-
+			
 				if(Object.keys(this.injections).length){
 					var closure = "//" + this.name + "\n";
 					this._addedLines++;
@@ -3042,6 +3077,7 @@
 			create : function(seed){
 				var module = {
 					_exports : null,
+	
 					get exports() {
 						return this._exports;
 					},
@@ -3053,6 +3089,62 @@
 				seed.code.call(seed, module);
 
 				return module.exports;
+			}
+		});
+
+			this.Core.SeedTypeManager.add({
+			name : 'es6module',
+			create : function(seed){
+				var module = {
+					_defaultExport : null,
+					_namedExports : {},
+					set defaultExport(value) {
+						if(this._defaultExport){
+							throw new Error("You can only export one value as default!")
+						}
+						this._defaultExport = value;
+					},
+					get defaultExport(){
+						return this._defaultExport;
+					},
+					addExport : function(name, code){
+						this._namedExports[name] = code;
+					},
+					exportFrom : function(exportList, target){
+						exportList.forEach(function(name){
+							if(!target[name]){
+								throw new Error("Exporting [" + name + "] is not possible, because it is not defined!")
+							}
+							this._namedExports[name] = target[name];
+						})
+					},
+					exportAllFrom : function(target){
+						for(var name in target){
+							this._namedExports[name] = target[name];
+						}
+					},
+					getAll : function(){
+						return this._namedExports;
+					},
+				 	get all() {
+				 		if(Object.keys(this._namedExports).length){
+				 			var output = Object.create(this._namedExports);
+				 			output['__default'] = this._defaultExport;
+				 			return output;
+				 		}else{
+				 			if(this._defaultExport){
+				 				return this._defaultExport;
+				 			}else{
+				 				return null;
+				 			}
+				 		}
+				 	}
+				}
+
+				seed.module = module;
+				seed.code.call(seed, module);
+
+				return module.all;
 			}
 		});
 

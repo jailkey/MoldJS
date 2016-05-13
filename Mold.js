@@ -762,7 +762,11 @@
 				if(_isNodeJS){
 					return Buffer(str).toString('base64');
 				}else{
-					return btoa(str);
+					try {
+						return btoa(encodeURIComponent(str));
+					}catch(e){
+						throw new Error(e.message + " - in: \n" + str)
+					}
 				}
 			}
 		}
@@ -3092,7 +3096,7 @@
 			}
 		});
 
-			this.Core.SeedTypeManager.add({
+		this.Core.SeedTypeManager.add({
 			name : 'es6module',
 			create : function(seed){
 				var module = {
@@ -3116,7 +3120,7 @@
 								throw new Error("Exporting [" + name + "] is not possible, because it is not defined!")
 							}
 							this._namedExports[name] = target[name];
-						})
+						}.bind(this))
 					},
 					exportAllFrom : function(target){
 						for(var name in target){
